@@ -12,5 +12,6 @@ export interface User {
     createdAt: Date;
     updatedAt: Date;
     roles?: string[];
+    adminAccessLevel?: string;
 }
 export declare function mapRowToUser(row: Record<string, any>): User;

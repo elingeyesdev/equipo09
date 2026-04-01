@@ -27,7 +27,7 @@ export class AuthService {
   constructor(
     private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   /**
    * Valida credenciales y genera un access token JWT.
@@ -80,5 +80,15 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido o usuario inactivo');
     }
     return user;
+  }
+
+  /**
+   * TEMPORAL: Crea el usuario superadmin por defecto.
+   */
+  async seedSuperAdmin() {
+    const passwordHash = await bcrypt.hash('Superadmin123', 12);
+    await this.userRepo.seedSuperAdmin(passwordHash);
+
+    return { message: 'SuperAdmin actualizado forzosamente', email: 'superadmin@equipo09.com', password: 'Superadmin123' };
   }
 }

@@ -3,18 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
-/** Payload contenido dentro del token JWT */
+import { User } from '../../users/models';
+import { UserRepository } from '../../users/repositories';
+
 export interface JwtPayload {
   sub: string;    // userId
   email: string;
   iat?: number;
   exp?: number;
-}
-
-/** Objeto que queda en req.user tras validación */
-export interface AuthenticatedUser {
-  id: string;
-  email: string;
 }
 
 /**
@@ -24,7 +20,10 @@ export interface AuthenticatedUser {
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    private readonly userRepo: UserRepository,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -36,10 +35,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Llamado después de validar el token.
    * Lo que retorne este método se asigna a req.user.
    */
-  validate(payload: JwtPayload): AuthenticatedUser {
-    return {
-      id: payload.sub,
-      email: payload.email,
-    };
+  async validate(payload: JwtPayload): Promise<User> {
+    const user = await this.userRepo.findById(payload.sub);
+    if (!user || !user.isActive) {
+      throw new Error('Usuario inválido o inactivo');
+    }
+    return user;
   }
 }

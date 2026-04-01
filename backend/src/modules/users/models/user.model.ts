@@ -17,6 +17,7 @@ export interface User {
   updatedAt: Date;
   /** Roles asignados (join con user_roles + roles) */
   roles?: string[];
+  adminAccessLevel?: string;
 }
 
 /**
@@ -38,5 +39,6 @@ export function mapRowToUser(row: Record<string, any>): User {
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     roles: row.roles ?? undefined,
+    adminAccessLevel: row.admin_access_level ?? undefined,
   };
 }

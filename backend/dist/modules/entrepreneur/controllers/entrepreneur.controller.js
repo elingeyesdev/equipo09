@@ -52,6 +52,16 @@ let EntrepreneurController = class EntrepreneurController {
         const result = await this.entrepreneurService.getMyCampaigns(userId, query);
         return new dto_2.ApiSuccessResponse(result);
     }
+    async submitCampaignForReview(req, campaignId) {
+        const userId = req.user.id;
+        const campaign = await this.entrepreneurService.submitCampaignForReview(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(campaign, 'Campaña enviada a revisión');
+    }
+    async publishCampaign(req, campaignId) {
+        const userId = req.user.id;
+        const campaign = await this.entrepreneurService.publishCampaign(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(campaign, 'Campaña publicada');
+    }
     async getMyCampaignById(req, campaignId) {
         const userId = req.user.id;
         const campaign = await this.entrepreneurService.getMyCampaignById(userId, campaignId);
@@ -132,6 +142,32 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.QueryCampaignsDto]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "getMyCampaigns", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Post)('me/campaigns/:campaignId/submit-for-review'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Enviar campaña en borrador a revisión' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Estado actualizado.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Transición no permitida.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "submitCampaignForReview", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Post)('me/campaigns/:campaignId/publish'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Publicar campaña (borrador o aprobada)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Campaña publicada.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Transición no permitida.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "publishCampaign", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Get)('me/campaigns/:campaignId'),

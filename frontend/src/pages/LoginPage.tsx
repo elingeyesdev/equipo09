@@ -21,6 +21,17 @@ export function LoginPage() {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('userEmail', response.user?.email ?? email);
       
+      const adminAccessLevel = (response as any).user?.adminAccessLevel;
+      if (adminAccessLevel) {
+        localStorage.setItem('adminAccessLevel', adminAccessLevel);
+        if (adminAccessLevel === 'super_admin') {
+            navigate('/superadmin');
+        } else {
+            navigate('/admin');
+        }
+        return;
+      }
+
       const role = localStorage.getItem('userRole');
         if (role === 'entrepreneur') {
           navigate('/entrepreneur-profile');

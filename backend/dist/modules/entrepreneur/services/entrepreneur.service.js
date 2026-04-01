@@ -91,6 +91,22 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return campaign;
     }
+    async submitCampaignForReview(userId, campaignId) {
+        await this.ensureEntrepreneurProfile(userId);
+        const updated = await this.campaignRepo.submitForReview(campaignId, userId);
+        if (!updated) {
+            throw new exceptions_1.BadRequestException('Solo las campañas en borrador pueden enviarse a revisión');
+        }
+        return updated;
+    }
+    async publishCampaign(userId, campaignId) {
+        await this.ensureEntrepreneurProfile(userId);
+        const updated = await this.campaignRepo.publishCampaign(campaignId, userId);
+        if (!updated) {
+            throw new exceptions_1.BadRequestException('No se puede publicar: la campaña debe estar en borrador o aprobada');
+        }
+        return updated;
+    }
     async getCampaignFinancialProgress(userId, campaignId) {
         const progress = await this.campaignRepo.getFinancialProgress(campaignId, userId);
         if (!progress) {

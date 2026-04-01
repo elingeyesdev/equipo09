@@ -5,6 +5,8 @@ import { InvestorProfilePage } from './pages/InvestorProfilePage';
 import { InvestorDashboardPage } from './pages/InvestorDashboardPage';
 import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
 import { MyCampaignsPage } from './pages/MyCampaignsPage';
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
+import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 
 // Guard simple: si no hay token, redirige a login
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -51,12 +53,29 @@ function App() {
           }
         />
         <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/superadmin"
+          element={
+            <PrivateRoute>
+              <SuperAdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/"
           element={
             localStorage.getItem('accessToken')
-              ? (localStorage.getItem('userRole') === 'entrepreneur' 
-                  ? <Navigate to="/entrepreneur-campaigns" replace /> 
-                  : <Navigate to="/dashboard" replace />)
+              ? (localStorage.getItem('adminAccessLevel') === 'super_admin' ? <Navigate to="/superadmin" replace /> 
+                 : localStorage.getItem('adminAccessLevel') === 'admin' ? <Navigate to="/admin" replace /> 
+                 : localStorage.getItem('userRole') === 'entrepreneur' ? <Navigate to="/entrepreneur-campaigns" replace /> 
+                 : <Navigate to="/dashboard" replace />)
               : <Navigate to="/login" replace />
           }
         />

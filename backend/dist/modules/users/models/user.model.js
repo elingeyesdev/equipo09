@@ -16,6 +16,7 @@ function mapRowToUser(row) {
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at),
         roles: row.roles ?? undefined,
+        adminAccessLevel: row.admin_access_level ?? undefined,
     };
 }
 //# sourceMappingURL=user.model.js.map

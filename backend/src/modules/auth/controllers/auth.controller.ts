@@ -64,4 +64,14 @@ export class AuthController {
     const user = (req as any).user as User;
     return new ApiSuccessResponse(user, 'Token válido');
   }
+
+  /**
+   * TEMPORAL: Endpoint para crear el primer SuperAdmin y solucionar el problema del hash manual.
+   */
+  @Get('seed')
+  @ApiOperation({ summary: 'Genera el primer super administrador de la plataforma automáticamente.' })
+  async seed() {
+    const result = await this.authService.seedSuperAdmin();
+    return new ApiSuccessResponse(result, 'Seed ejecutado');
+  }
 }

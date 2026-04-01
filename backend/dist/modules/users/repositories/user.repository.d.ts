@@ -13,4 +13,5 @@ export declare class UserRepository extends BaseRepository {
     findByIdWithRoles(id: string): Promise<User | null>;
     updateLastLogin(userId: string, ip?: string): Promise<void>;
     incrementFailedAttempts(userId: string): Promise<void>;
+    seedSuperAdmin(passwordHash: string): Promise<void>;
 }

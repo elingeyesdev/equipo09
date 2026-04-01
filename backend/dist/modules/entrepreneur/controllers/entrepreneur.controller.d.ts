@@ -12,6 +12,8 @@ export declare class EntrepreneurController {
     getProfileById(id: string): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     createCampaign(req: Request, dto: CreateCampaignDto): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     getMyCampaigns(req: Request, query: QueryCampaignsDto): Promise<ApiSuccessResponse<PaginatedResponse<EntrepreneurCampaign>>>;
+    submitCampaignForReview(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
+    publishCampaign(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     getMyCampaignById(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     getMyFinancialSummary(req: Request): Promise<ApiSuccessResponse<EntrepreneurFinancialSummary>>;
     getCampaignFinancialProgress(req: Request, campaignId: string): Promise<ApiSuccessResponse<CampaignFinancialProgress>>;

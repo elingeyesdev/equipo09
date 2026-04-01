@@ -52,6 +52,11 @@ let AuthService = AuthService_1 = class AuthService {
         }
         return user;
     }
+    async seedSuperAdmin() {
+        const passwordHash = await bcrypt.hash('Superadmin123', 12);
+        await this.userRepo.seedSuperAdmin(passwordHash);
+        return { message: 'SuperAdmin actualizado forzosamente', email: 'superadmin@equipo09.com', password: 'Superadmin123' };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = AuthService_1 = __decorate([

@@ -32,6 +32,10 @@ let AuthController = class AuthController {
         const user = req.user;
         return new dto_2.ApiSuccessResponse(user, 'Token válido');
     }
+    async seed() {
+        const result = await this.authService.seedSuperAdmin();
+        return new dto_2.ApiSuccessResponse(result, 'Seed ejecutado');
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -62,6 +66,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "me", null);
+__decorate([
+    (0, common_1.Get)('seed'),
+    (0, swagger_1.ApiOperation)({ summary: 'Genera el primer super administrador de la plataforma automáticamente.' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "seed", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),

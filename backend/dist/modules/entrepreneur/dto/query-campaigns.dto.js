@@ -23,6 +23,16 @@ class QueryCampaignsDto extends dto_1.PaginationDto {
 exports.QueryCampaignsDto = QueryCampaignsDto;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
+        enum: ['all', 'draft', 'approval', 'published', 'archived'],
+        description: 'Filtro rápido por etapa (si se envía `status` explícito, tiene prioridad)',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsIn)(['all', 'draft', 'approval', 'published', 'archived']),
+    __metadata("design:type", String)
+], QueryCampaignsDto.prototype, "filterPreset", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
         enum: [
             'draft', 'pending_review', 'in_review', 'approved', 'rejected',
             'published', 'funded', 'partially_funded', 'failed',
@@ -77,4 +87,28 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], QueryCampaignsDto.prototype, "search", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Creada desde (fecha ISO, ej. 2025-01-01)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], QueryCampaignsDto.prototype, "createdFrom", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Creada hasta (fecha ISO, inclusive)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], QueryCampaignsDto.prototype, "createdTo", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Fin de campaña desde (fecha ISO)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], QueryCampaignsDto.prototype, "endDateFrom", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Fin de campaña hasta (fecha ISO, inclusive)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], QueryCampaignsDto.prototype, "endDateTo", void 0);
 //# sourceMappingURL=query-campaigns.dto.js.map

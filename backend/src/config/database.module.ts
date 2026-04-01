@@ -15,7 +15,7 @@ export const DATABASE_POOL = 'DATABASE_POOL';
           host: configService.get<string>('DB_HOST', 'localhost'),
           port: configService.get<number>('DB_PORT', 5432),
           user: configService.get<string>('DB_USER', 'postgres'),
-          password: configService.get<string>('DB_PASSWORD', 'postgres'),
+          password: configService.get<string>('DB_PASSWORD', '1234'),
           database: configService.get<string>('DB_NAME', 'crowdfunding'),
           ssl: configService.get<string>('DB_SSL') === 'true'
             ? { rejectUnauthorized: false }
@@ -39,4 +39,4 @@ export const DATABASE_POOL = 'DATABASE_POOL';
   ],
   exports: [DATABASE_POOL],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

@@ -37,7 +37,10 @@ export class UserRepository extends BaseRepository {
    */
   async findById(id: string): Promise<User | null> {
     const row = await this.queryOne(
-      `SELECT * FROM users WHERE id = $1`,
+      `SELECT u.*, a.access_level as admin_access_level
+       FROM users u
+       LEFT JOIN admin_profiles a ON a.user_id = u.id
+       WHERE u.id = $1`,
       [id],
     );
     return row ? mapRowToUser(row) : null;
@@ -62,7 +65,10 @@ export class UserRepository extends BaseRepository {
     email: string,
   ): Promise<{ user: User; passwordHash: string } | null> {
     const row = await this.queryOne(
-      `SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND is_active = true`,
+      `SELECT u.*, a.access_level as admin_access_level 
+       FROM users u 
+       LEFT JOIN admin_profiles a ON a.user_id = u.id 
+       WHERE LOWER(u.email) = LOWER($1) AND u.is_active = true`,
       [email],
     );
     if (!row) return null;
@@ -123,5 +129,43 @@ export class UserRepository extends BaseRepository {
       `UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = $1`,
       [userId],
     );
+  }
+
+  /**
+   * TEMPORAL: Crea o actualiza el usuario superadmin por defecto (acceso directo a db).
+   */
+  async seedSuperAdmin(passwordHash: string) {
+    const email = 'superadmin@equipo09.com';
+    
+    const existing = await this.queryOne(`SELECT id FROM users WHERE email = $1`, [email]);
+    if (existing) {
+       await this.query(`UPDATE users SET password_hash = $1 WHERE email = $2`, [passwordHash, email]);
+       const profile = await this.queryOne(`SELECT id FROM admin_profiles WHERE user_id = $1`, [existing.id]);
+       if (!profile) {
+          await this.queryOne(
+            `INSERT INTO admin_profiles (user_id, first_name, last_name, access_level, can_approve_campaigns, can_manage_users, can_manage_finances, is_active)
+             VALUES ($1, 'Super', 'Admin', 'super_admin', true, true, true, true)
+             RETURNING *`,
+            [existing.id]
+          );
+       }
+       return;
+    }
+
+    const newUser = await this.queryOne(
+      `INSERT INTO users (email, password_hash, email_verified, is_active, preferred_language)
+       VALUES ($1, $2, true, true, 'es')
+       RETURNING *`,
+      [email, passwordHash]
+    );
+
+    if (newUser) {
+      await this.queryOne(
+        `INSERT INTO admin_profiles (user_id, first_name, last_name, access_level, can_approve_campaigns, can_manage_users, can_manage_finances, is_active)
+         VALUES ($1, 'Super', 'Admin', 'super_admin', true, true, true, true)
+         RETURNING *`,
+        [newUser.id]
+      );
+    }
   }
 }

@@ -8,4 +8,9 @@ export declare class AuthController {
     constructor(authService: AuthService);
     login(dto: LoginDto, req: Request): Promise<ApiSuccessResponse<LoginResponse>>;
     me(req: Request): Promise<ApiSuccessResponse<User>>;
+    seed(): Promise<ApiSuccessResponse<{
+        message: string;
+        email: string;
+        password: string;
+    }>>;
 }

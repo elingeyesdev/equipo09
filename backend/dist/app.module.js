@@ -14,6 +14,9 @@ const user_module_1 = require("./modules/users/user.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const entrepreneur_module_1 = require("./modules/entrepreneur/entrepreneur.module");
 const investor_module_1 = require("./modules/investor/investor.module");
+const categories_module_1 = require("./modules/categories/categories.module");
+const campaign_module_1 = require("./modules/campaigns/campaign.module");
+const admin_module_1 = require("./modules/admin/admin.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,6 +32,9 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             entrepreneur_module_1.EntrepreneurModule,
             investor_module_1.InvestorModule,
+            categories_module_1.CategoriesModule,
+            campaign_module_1.CampaignsModule,
+            admin_module_1.AdminModule,
         ],
     })
 ], AppModule);

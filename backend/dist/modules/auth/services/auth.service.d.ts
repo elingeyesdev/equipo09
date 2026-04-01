@@ -15,4 +15,9 @@ export declare class AuthService {
     constructor(userRepo: UserRepository, jwtService: JwtService);
     login(dto: LoginDto, ip?: string): Promise<LoginResponse>;
     validateToken(userId: string): Promise<User>;
+    seedSuperAdmin(): Promise<{
+        message: string;
+        email: string;
+        password: string;
+    }>;
 }
