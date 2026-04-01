@@ -25,6 +25,7 @@ import {
   CreateEntrepreneurProfileDto,
   UpdateEntrepreneurProfileDto,
   QueryCampaignsDto,
+  CreateCampaignDto,
 } from '../dto';
 import { ApiSuccessResponse, PaginatedResponse } from '../../../common/dto';
 import {
@@ -39,11 +40,7 @@ import {
 @UseGuards(AuthGuard('jwt'))
 @Controller('entrepreneurs')
 export class EntrepreneurController {
-  constructor(private readonly entrepreneurService: EntrepreneurService) {}
-
-  // =========================================================================
-  // EDT 1.1 / 1.2 — PERFIL DE EMPRENDEDOR
-  // =========================================================================
+  constructor(private readonly entrepreneurService: EntrepreneurService) { }
 
   @Post('me/profile')
   @ApiOperation({ summary: 'Crear perfil de emprendedor (EDT 1.1)' })
@@ -91,10 +88,19 @@ export class EntrepreneurController {
     const profile = await this.entrepreneurService.getProfileById(id);
     return new ApiSuccessResponse(profile);
   }
-
-  // =========================================================================
-  // EDT 1.3 — CAMPAÑAS DEL EMPRENDEDOR
-  // =========================================================================
+  @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear nueva campaña (EDT 1.3)' })
+  @ApiResponse({ status: 201, description: 'Campaña creada exitosamente.' })
+  async createCampaign(
+    @Req() req: Request,
+    @Body() dto: CreateCampaignDto,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.createCampaign(userId, dto);
+    return new ApiSuccessResponse(campaign, 'Campaña creada exitosamente');
+  }
 
   @ApiTags('entrepreneur-campaigns')
   @Get('me/campaigns')
@@ -123,10 +129,6 @@ export class EntrepreneurController {
     );
     return new ApiSuccessResponse(campaign);
   }
-
-  // =========================================================================
-  // EDT 1.4 — SEGUIMIENTO FINANCIERO
-  // =========================================================================
 
   @ApiTags('entrepreneur-finances')
   @Get('me/finances/summary')

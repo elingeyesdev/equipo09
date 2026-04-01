@@ -1,10 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { EntrepreneurProfileForm } from '../components/EntrepreneurProfileForm';
+import { Navbar } from '../components/Navbar';
 
 export function EntrepreneurProfilePage() {
-  const navigate = useNavigate();
-  const userEmail = localStorage.getItem('userEmail') ?? '';
   const {
     profile,
     loading,
@@ -15,11 +13,7 @@ export function EntrepreneurProfilePage() {
     submitProfile,
   } = useEntrepreneurProfile();
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('userEmail');
-    navigate('/login');
-  };
+  const userEmail = localStorage.getItem('userEmail') ?? '';
 
   // Iniciales del avatar
   const initials = profile
@@ -36,22 +30,7 @@ export function EntrepreneurProfilePage() {
 
   return (
     <div className="app-container">
-      <nav className="navbar">
-        <span className="navbar-brand">
-          🚀 Crowd<span>Funding</span>
-        </span>
-        <div className="navbar-actions">
-          {userEmail && <span className="user-badge">👤 {userEmail}</span>}
-          <button
-            id="btn-logout-entrepreneur"
-            className="btn btn-ghost"
-            onClick={handleLogout}
-            style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <Navbar />
       <main className="page-content">
         <div className="profile-header">
           <div className="profile-avatar">{initials}</div>

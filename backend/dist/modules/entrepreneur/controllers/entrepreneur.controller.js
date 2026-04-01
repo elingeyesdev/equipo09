@@ -42,6 +42,11 @@ let EntrepreneurController = class EntrepreneurController {
         const profile = await this.entrepreneurService.getProfileById(id);
         return new dto_2.ApiSuccessResponse(profile);
     }
+    async createCampaign(req, dto) {
+        const userId = req.user.id;
+        const campaign = await this.entrepreneurService.createCampaign(userId, dto);
+        return new dto_2.ApiSuccessResponse(campaign, 'Campaña creada exitosamente');
+    }
     async getMyCampaigns(req, query) {
         const userId = req.user.id;
         const result = await this.entrepreneurService.getMyCampaigns(userId, query);
@@ -104,6 +109,18 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "getProfileById", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Post)('me/campaigns'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ summary: 'Crear nueva campaña (EDT 1.3)' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Campaña creada exitosamente.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, dto_1.CreateCampaignDto]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "createCampaign", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Get)('me/campaigns'),

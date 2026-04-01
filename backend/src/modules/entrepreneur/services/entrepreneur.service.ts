@@ -13,6 +13,7 @@ import {
   CreateEntrepreneurProfileDto,
   UpdateEntrepreneurProfileDto,
   QueryCampaignsDto,
+  CreateCampaignDto,
 } from '../dto';
 import {
   EntrepreneurProfile,
@@ -162,6 +163,23 @@ export class EntrepreneurService {
     );
 
     return new PaginatedResponse(campaigns, total, query.page, query.limit);
+  }
+
+  /**
+   * Crea una nueva campaña para el emprendedor autenticado.
+   */
+  async createCampaign(
+    userId: string,
+    dto: CreateCampaignDto,
+  ): Promise<EntrepreneurCampaign> {
+    // Verificar que tiene perfil de emprendedor
+    await this.ensureEntrepreneurProfile(userId);
+
+    this.logger.log(`Creando nueva campaña para user ${userId}: ${dto.title}`);
+    const campaign = await this.campaignRepo.create(userId, dto);
+    this.logger.log(`Campaña creada: ${campaign.id}`);
+    
+    return campaign;
   }
 
   /**

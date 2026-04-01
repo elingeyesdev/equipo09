@@ -1,7 +1,8 @@
 import { BaseRepository } from '../../../common/database';
 import { EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary } from '../models';
-import { QueryCampaignsDto } from '../dto';
+import { QueryCampaignsDto, CreateCampaignDto } from '../dto';
 export declare class EntrepreneurCampaignRepository extends BaseRepository {
+    create(creatorId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign>;
     findByCreatorId(creatorId: string, query: QueryCampaignsDto): Promise<{
         campaigns: EntrepreneurCampaign[];
         total: number;

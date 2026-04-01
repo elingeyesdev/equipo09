@@ -77,6 +77,13 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         const { campaigns, total } = await this.campaignRepo.findByCreatorId(userId, query);
         return new dto_1.PaginatedResponse(campaigns, total, query.page, query.limit);
     }
+    async createCampaign(userId, dto) {
+        await this.ensureEntrepreneurProfile(userId);
+        this.logger.log(`Creando nueva campaña para user ${userId}: ${dto.title}`);
+        const campaign = await this.campaignRepo.create(userId, dto);
+        this.logger.log(`Campaña creada: ${campaign.id}`);
+        return campaign;
+    }
     async getMyCampaignById(userId, campaignId) {
         const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
         if (!campaign) {

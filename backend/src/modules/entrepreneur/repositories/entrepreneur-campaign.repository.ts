@@ -7,23 +7,50 @@ import {
   EntrepreneurFinancialSummary,
   mapRowToEntrepreneurCampaign,
 } from '../models';
-import { QueryCampaignsDto } from '../dto';
+import { QueryCampaignsDto, CreateCampaignDto } from '../dto';
 
-/**
- * Repository: Campañas del Emprendedor
- * Queries optimizadas para el dashboard del emprendedor.
- * Solo lectura — la creación de campañas es responsabilidad de otro módulo.
- */
 @Injectable()
 export class EntrepreneurCampaignRepository extends BaseRepository {
-  /**
-   * EDT 1.3 — Lista campañas del emprendedor con filtros y paginación.
-   */
+
+  async create(creatorId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign> {
+    const baseSlug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const slug = `${baseSlug}-${randomSuffix}`;
+
+    let categoryId = dto.categoryId;
+    if (!categoryId) {
+      const cat = await this.queryOne(`SELECT id FROM categories LIMIT 1`);
+      if (!cat) throw new Error('No categories found in database to assign to campaign');
+      categoryId = cat.id;
+    }
+
+    const result = await this.queryOne(
+      `INSERT INTO campaigns (
+        creator_id, category_id, title, slug, short_description, description,
+        campaign_type, goal_amount, end_date, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`,
+      [
+        creatorId,
+        categoryId,
+        dto.title,
+        slug,
+        dto.shortDescription || null,
+        dto.description,
+        dto.campaignType,
+        dto.goalAmount,
+        dto.endDate || null
+      ]
+    );
+
+    const created = await this.findOneByCreatorId(result.id, creatorId);
+    if (!created) throw new Error('Error al recuperar campaña creada');
+    return created;
+  }
+
   async findByCreatorId(
     creatorId: string,
     query: QueryCampaignsDto,
   ): Promise<{ campaigns: EntrepreneurCampaign[]; total: number }> {
-    // Construir WHERE dinámico
     const conditions: string[] = ['c.creator_id = $1'];
     const params: any[] = [creatorId];
     let paramIndex = 2;
@@ -88,9 +115,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     };
   }
 
-  /**
-   * EDT 1.3 — Obtiene una campaña específica verificando que pertenece al emprendedor.
-   */
   async findOneByCreatorId(
     campaignId: string,
     creatorId: string,
@@ -113,15 +137,10 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     return row ? mapRowToEntrepreneurCampaign(row) : null;
   }
 
-  /**
-   * EDT 1.4 — Progreso financiero detallado de una campaña.
-   * Query compleja que agrega datos de inversiones.
-   */
   async getFinancialProgress(
     campaignId: string,
     creatorId: string,
   ): Promise<CampaignFinancialProgress | null> {
-    // 1. Datos base de la campaña + verificar ownership
     const campaign = await this.queryOne(
       `SELECT
         c.id, c.title, c.slug, c.status,
@@ -133,8 +152,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     );
 
     if (!campaign) return null;
-
-    // 2. Agregados de inversiones por estado
     const investmentStats = await this.queryOne(
       `SELECT
         COUNT(*)::int                                                         AS total_investments,
@@ -153,7 +170,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       [campaignId],
     );
 
-    // 3. Últimas 10 inversiones
     const recentRows = await this.queryMany(
       `SELECT
         i.id, i.amount, i.currency, i.status,
@@ -173,7 +189,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     const goalAmount = Number(campaign.goal_amount);
     const currentAmount = Number(campaign.current_amount);
 
-    // Calcular días restantes
     let daysRemaining: number | null = null;
     if (campaign.end_date) {
       const msRemaining = new Date(campaign.end_date).getTime() - Date.now();
@@ -224,9 +239,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     };
   }
 
-  /**
-   * EDT 1.4 — Resumen financiero global del emprendedor.
-   */
   async getFinancialSummary(
     creatorId: string,
   ): Promise<EntrepreneurFinancialSummary> {

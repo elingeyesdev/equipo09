@@ -11,6 +11,36 @@ const common_1 = require("@nestjs/common");
 const database_1 = require("../../../common/database");
 const models_1 = require("../models");
 let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extends database_1.BaseRepository {
+    async create(creatorId, dto) {
+        const baseSlug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const slug = `${baseSlug}-${randomSuffix}`;
+        let categoryId = dto.categoryId;
+        if (!categoryId) {
+            const cat = await this.queryOne(`SELECT id FROM categories LIMIT 1`);
+            if (!cat)
+                throw new Error('No categories found in database to assign to campaign');
+            categoryId = cat.id;
+        }
+        const result = await this.queryOne(`INSERT INTO campaigns (
+        creator_id, category_id, title, slug, short_description, description,
+        campaign_type, goal_amount, end_date, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`, [
+            creatorId,
+            categoryId,
+            dto.title,
+            slug,
+            dto.shortDescription || null,
+            dto.description,
+            dto.campaignType,
+            dto.goalAmount,
+            dto.endDate || null
+        ]);
+        const created = await this.findOneByCreatorId(result.id, creatorId);
+        if (!created)
+            throw new Error('Error al recuperar campaña creada');
+        return created;
+    }
     async findByCreatorId(creatorId, query) {
         const conditions = ['c.creator_id = $1'];
         const params = [creatorId];

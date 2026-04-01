@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';
 import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
+import { MyCampaignsPage } from './pages/MyCampaignsPage';
 
 // Guard simple: si no hay token, redirige a login
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -33,11 +34,19 @@ function App() {
           }
         />
         <Route
+          path="/entrepreneur-campaigns"
+          element={
+            <PrivateRoute>
+              <MyCampaignsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/"
           element={
             localStorage.getItem('accessToken')
               ? (localStorage.getItem('userRole') === 'entrepreneur' 
-                  ? <Navigate to="/entrepreneur-profile" replace /> 
+                  ? <Navigate to="/entrepreneur-campaigns" replace /> 
                   : <Navigate to="/profile" replace />)
               : <Navigate to="/login" replace />
           }
