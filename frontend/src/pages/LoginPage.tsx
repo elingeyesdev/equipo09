@@ -22,12 +22,12 @@ export function LoginPage() {
       localStorage.setItem('userEmail', response.user?.email ?? email);
       
       const role = localStorage.getItem('userRole');
-      if (role === 'entrepreneur') {
-        navigate('/entrepreneur-profile');
-      } else {
-        // Por defecto va al perfil de inversor si no tiene explícitamente configurado entrepreneur
-        navigate('/profile');
-      }
+        if (role === 'entrepreneur') {
+          navigate('/entrepreneur-profile');
+        } else {
+          // Por defecto va al dashboard principal del inversor
+          navigate('/dashboard');
+        }
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Credenciales incorrectas.';
       setError(Array.isArray(msg) ? msg.join(', ') : msg);

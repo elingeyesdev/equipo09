@@ -8,7 +8,7 @@ import {
   CreateInvestorProfileDto,
   UpdateInvestorProfileDto,
 } from '../dto';
-import { InvestorProfile } from '../models';
+import { InvestorProfile, CapitalOverview } from '../models';
 
 /**
  * Service: Inversor
@@ -75,6 +75,21 @@ export class InvestorService {
       throw new NotFoundException('Perfil de inversor', profileId);
     }
     return profile;
+  }
+
+  // =========================================================================
+  // PERFIL DE INVERSOR — Capital y Métricas
+  // =========================================================================
+  
+  /**
+   * Obtiene el resumen de capital y métricas de inversión.
+   */
+  async getCapitalOverview(userId: string): Promise<CapitalOverview> {
+    const overview = await this.profileRepo.getCapitalOverview(userId);
+    if (!overview) {
+      throw new NotFoundException('Perfil de inversor no encontrado');
+    }
+    return overview;
   }
 
   // =========================================================================

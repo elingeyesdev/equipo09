@@ -40,10 +40,16 @@ export function Navbar() {
         ) : (
           <>
             <Link 
+              to="/dashboard" 
+              className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+            >
+              Dashboard Principal
+            </Link>
+            <Link 
               to="/profile" 
               className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
             >
-              Dashboard Inversor
+              Configurar Perfil
             </Link>
           </>
         )}

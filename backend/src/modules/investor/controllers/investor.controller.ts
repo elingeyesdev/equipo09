@@ -25,7 +25,7 @@ import {
   UpdateInvestorProfileDto,
 } from '../dto';
 import { ApiSuccessResponse } from '../../../common/dto';
-import { InvestorProfile } from '../models';
+import { InvestorProfile, CapitalOverview } from '../models';
 
 @ApiTags('investor-profile')
 @ApiBearerAuth()
@@ -76,6 +76,26 @@ export class InvestorController {
     const userId = (req as any).user.id;
     const profile = await this.investorService.getMyProfile(userId);
     return new ApiSuccessResponse(profile);
+  }
+
+  // =========================================================================
+  // CAPITAL Y MÉTRICAS
+  // =========================================================================
+
+  /**
+   * GET /investors/me/capital
+   * Devuelve el resumen de capital disponible e inversiones.
+   */
+  @Get('me/capital')
+  @ApiOperation({ summary: 'Obtener resumen de capital del inversor' })
+  @ApiResponse({ status: 200, description: 'Resumen retornado exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Perfil no encontrado.' })
+  async getCapitalOverview(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<CapitalOverview>> {
+    const userId = (req as any).user.id;
+    const overview = await this.investorService.getCapitalOverview(userId);
+    return new ApiSuccessResponse(overview);
   }
 
   // =========================================================================
