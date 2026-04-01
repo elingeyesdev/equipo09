@@ -30,6 +30,7 @@ async function bootstrap() {
         .addTag('entrepreneur-profile', 'Gestión de perfil de emprendedor')
         .addTag('entrepreneur-campaigns', 'Campañas del emprendedor')
         .addTag('entrepreneur-finances', 'Seguimiento financiero')
+        .addTag('investor-profile', 'Gestión de perfil de inversor')
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api/docs', app, document);

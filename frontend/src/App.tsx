@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';
+import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
 
 // Guard simple: si no hay token, redirige a login
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -13,6 +15,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route
           path="/profile"
           element={
@@ -21,12 +24,21 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* Ruta raíz redirige según si hay sesión */}
+        <Route
+          path="/entrepreneur-profile"
+          element={
+            <PrivateRoute>
+              <EntrepreneurProfilePage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/"
           element={
             localStorage.getItem('accessToken')
-              ? <Navigate to="/profile" replace />
+              ? (localStorage.getItem('userRole') === 'entrepreneur' 
+                  ? <Navigate to="/entrepreneur-profile" replace /> 
+                  : <Navigate to="/profile" replace />)
               : <Navigate to="/login" replace />
           }
         />

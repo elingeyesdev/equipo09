@@ -28,8 +28,8 @@ api.interceptors.request.use((config) => {
 // ============================================================
 
 export async function login(dto: LoginDto): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>('/auth/login', dto);
-  return data;
+  const { data } = await api.post<ApiSuccessResponse<LoginResponse>>('/auth/login', dto);
+  return data.data;
 }
 
 // ============================================================
