@@ -642,6 +642,7 @@ select option {
   color: var(--text-muted);
 }
 
+/* Empty State */
 .campaign-empty-state {
   display: flex;
   flex-direction: column;
@@ -700,6 +701,60 @@ select option {
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.category-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+  user-select: none;
+  font-family: inherit;
+  color: var(--text-secondary);
+}
+
+.category-chip:hover:not(.category-chip--selected) {
+  border-color: var(--text-muted);
+  background: var(--bg-input);
+}
+
+.category-chip--selected {
+  background: rgba(var(--primary-glow), 0.1);
+  border-color: var(--chip-color, var(--primary));
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(var(--primary-glow), 0.1);
+}
+
+.category-chip__emoji {
+  font-size: 1.1rem;
+}
+
+.category-chip__label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.category-chip__check {
+  font-size: 0.75rem;
+  color: var(--chip-color, var(--primary));
+  font-weight: 700;
+}
+
 .fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -720,4 +775,12 @@ select option {
   max-width: 680px;
   margin: 0 auto;
   padding: 32px;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
 }

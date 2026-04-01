@@ -1,8 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { InvestorProfile } from '../types/investor.types';
+import { CategorySelector } from './CategorySelector';
 
 // ── Esquema de validación (alineado con DTOs del backend) ──────────────────
 const schema = z.object({
@@ -28,10 +29,11 @@ interface Props {
   profile: InvestorProfile | null;
   saving: boolean;
   isNew: boolean;
-  onSubmit: (data: FormValues) => void;
+  onSubmit: (data: FormValues & { preferredCategories: string[] }) => void;
 }
 
 export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props) {
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -76,11 +78,13 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
         minInvestment: profile.minInvestment ?? ('' as any),
         maxInvestment: profile.maxInvestment ?? ('' as any),
       });
+      // Cargar categorías seleccionadas previamente
+      setSelectedCategories(profile.preferredCategories ?? []);
     }
   }, [profile, reset]);
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="form" onSubmit={handleSubmit((data) => onSubmit({ ...data, preferredCategories: selectedCategories }))} noValidate>
 
       {/* ── DATOS PERSONALES ─────────────────────────────── */}
       <div className="form-section">
@@ -215,7 +219,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
               min="1"
               {...register('minInvestment')}
             />
-            {errors.minInvestment && <span className="field-error">{errors.minInvestment.message}</span>}
+            {errors.minInvestment && <span className="field-error">{String(errors.minInvestment.message)}</span>}
           </div>
 
           <div className="form-group">
@@ -227,9 +231,18 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
               min="1"
               {...register('maxInvestment')}
             />
-            {errors.maxInvestment && <span className="field-error">{errors.maxInvestment.message}</span>}
+            {errors.maxInvestment && <span className="field-error">{String(errors.maxInvestment.message)}</span>}
           </div>
         </div>
+      </div>
+
+      {/* ── SECTORES DE INTERÉS ──────────────────────────── */}
+      <div className="form-section">
+        <div className="section-title">Sectores de interés</div>
+        <CategorySelector
+          selected={selectedCategories}
+          onChange={setSelectedCategories}
+        />
       </div>
 
       {/* ── ACCIONES ─────────────────────────────────────── */}
