@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type {
   ApiSuccessResponse,
+  CapitalOverview,
   CreateInvestorProfileDto,
   InvestorProfile,
   LoginDto,
@@ -59,6 +60,13 @@ export async function updateInvestorProfile(
   const { data } = await api.put<ApiSuccessResponse<InvestorProfile>>(
     '/investors/me/profile',
     dto,
+  );
+  return data.data;
+}
+
+export async function getCapitalOverview(): Promise<CapitalOverview> {
+  const { data } = await api.get<ApiSuccessResponse<CapitalOverview>>(
+    '/investors/me/capital',
   );
   return data.data;
 }

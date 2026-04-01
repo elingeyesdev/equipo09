@@ -8,6 +8,7 @@ import {
   CreateInvestorProfileDto,
   UpdateInvestorProfileDto,
 } from '../dto';
+import { CapitalOverview } from '../models';
 
 /**
  * Repository: Perfil de Inversor
@@ -159,4 +160,36 @@ export class InvestorProfileRepository extends BaseRepository {
 
     return row ? mapRowToInvestorProfile(row) : null;
   }
+
+  /**
+   * Obtiene el resumen de capital para un inversor.
+   * Calcula saldo disponible y métricas de inversión reales combinando las tablas.
+   */
+  async getCapitalOverview(userId: string): Promise<CapitalOverview | null> {
+    const row = await this.queryOne(`
+      SELECT 
+        ip.total_investments,
+        ip.total_invested,
+        ip.max_investment,
+        (ip.max_investment - ip.total_invested) AS available_capital,
+        COUNT(i.id) FILTER (WHERE i.status = 'completed') AS completed_investments,
+        SUM(i.amount) FILTER (WHERE i.status = 'pending') AS pending_amount
+      FROM investor_profiles ip
+      LEFT JOIN investments i ON i.investor_id = ip.user_id
+      WHERE ip.user_id = $1
+      GROUP BY ip.id
+    `, [userId]);
+
+    if (!row) return null;
+
+    return {
+      totalInvestments: Number(row.total_investments) || 0,
+      totalInvested: Number(row.total_invested) || 0,
+      maxInvestmentLimit: row.max_investment ? Number(row.max_investment) : null,
+      availableCapital: row.available_capital ? Number(row.available_capital) : null,
+      completedInvestments: Number(row.completed_investments) || 0,
+      pendingAmount: Number(row.pending_amount) || 0,
+    };
+  }
 }
+

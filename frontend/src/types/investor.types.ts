@@ -28,6 +28,15 @@ export interface InvestorProfile {
   updatedAt: string;
 }
 
+export interface CapitalOverview {
+  totalInvestments: number;
+  totalInvested: number;
+  maxInvestmentLimit: number | null;
+  availableCapital: number | null;
+  pendingAmount: number;
+  completedInvestments: number;
+}
+
 export interface CreateInvestorProfileDto {
   firstName: string;
   lastName: string;

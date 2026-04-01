@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';
+import { InvestorDashboardPage } from './pages/InvestorDashboardPage';
 import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
 import { MyCampaignsPage } from './pages/MyCampaignsPage';
 
@@ -17,6 +18,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <InvestorDashboardPage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/profile"
           element={
@@ -47,7 +56,7 @@ function App() {
             localStorage.getItem('accessToken')
               ? (localStorage.getItem('userRole') === 'entrepreneur' 
                   ? <Navigate to="/entrepreneur-campaigns" replace /> 
-                  : <Navigate to="/profile" replace />)
+                  : <Navigate to="/dashboard" replace />)
               : <Navigate to="/login" replace />
           }
         />
