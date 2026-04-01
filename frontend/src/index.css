@@ -495,3 +495,68 @@ select option {
   letter-spacing: 0.06em;
   margin-top: 4px;
 }
+
+/* ============================================================
+   CATEGORY SELECTOR CHIPS
+   ============================================================ */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 10px;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-chip:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.category-chip--selected {
+  border-color: var(--chip-color, var(--primary));
+  background: color-mix(in srgb, var(--chip-color, var(--primary)) 12%, var(--bg-input));
+  box-shadow: 0 0 0 1px var(--chip-color, var(--primary)),
+              0 4px 16px color-mix(in srgb, var(--chip-color, var(--primary)) 30%, transparent);
+}
+
+.category-chip__emoji {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.category-chip__label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.2;
+  flex: 1;
+}
+
+.category-chip__check {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--chip-color, var(--primary));
+  flex-shrink: 0;
+  animation: popIn 0.15s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
