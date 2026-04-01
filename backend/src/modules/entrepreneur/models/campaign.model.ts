@@ -1,0 +1,118 @@
+/**
+ * Modelo de dominio: Campaña (vista del emprendedor)
+ * Subconjunto de campos relevantes para el dashboard del emprendedor.
+ */
+export interface EntrepreneurCampaign {
+  id: string;
+  title: string;
+  slug: string;
+  shortDescription: string | null;
+  campaignType: string;
+  status: string;
+  goalAmount: number;
+  currentAmount: number;
+  investorCount: number;
+  currency: string;
+  coverImageUrl: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  fundedAt: Date | null;
+  isFeatured: boolean;
+  viewCount: number;
+  categoryName: string;
+  categorySlug: string;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt: Date | null;
+}
+
+/**
+ * Modelo: Progreso financiero de una campaña.
+ * Datos calculados para el dashboard de seguimiento.
+ */
+export interface CampaignFinancialProgress {
+  campaignId: string;
+  title: string;
+  slug: string;
+  status: string;
+  goalAmount: number;
+  currentAmount: number;
+  remainingAmount: number;
+  fundingPercentage: number;
+  investorCount: number;
+  currency: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  daysRemaining: number | null;
+  fundedAt: Date | null;
+  // Desglose por estado de inversión
+  investments: {
+    total: number;
+    completed: number;
+    pending: number;
+    failed: number;
+    refunded: number;
+  };
+  amounts: {
+    confirmed: number;
+    pending: number;
+    refunded: number;
+  };
+  averageInvestment: number;
+  largestInvestment: number;
+  smallestInvestment: number;
+  // Timeline reciente
+  recentInvestments: RecentInvestment[];
+}
+
+export interface RecentInvestment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  isAnonymous: boolean;
+  investorDisplayName: string | null;
+  createdAt: Date;
+}
+
+/**
+ * Resumen financiero de todas las campañas del emprendedor.
+ */
+export interface EntrepreneurFinancialSummary {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  fundedCampaigns: number;
+  totalRaised: number;
+  totalInvestors: number;
+  averagePerCampaign: number;
+  currency: string;
+}
+
+/**
+ * Mapea un row de PostgreSQL al modelo de campaña del emprendedor.
+ */
+export function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    shortDescription: row.short_description,
+    campaignType: row.campaign_type,
+    status: row.status,
+    goalAmount: Number(row.goal_amount),
+    currentAmount: Number(row.current_amount),
+    investorCount: Number(row.investor_count),
+    currency: row.currency,
+    coverImageUrl: row.cover_image_url,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    fundedAt: row.funded_at,
+    isFeatured: row.is_featured,
+    viewCount: Number(row.view_count),
+    categoryName: row.category_name,
+    categorySlug: row.category_slug,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    publishedAt: row.published_at,
+  };
+}

@@ -1,18 +1,3 @@
--- =============================================================================
--- CROWDFUNDING PLATFORM — MVP SCHEMA (12 TABLES)
--- =============================================================================
--- Engine:      PostgreSQL 15+
--- Version:     2.0 MVP
--- Date:        2026-03-31
--- Description: Minimum Viable Product schema — ready for sprint 1-6
---              Includes: Auth, Profiles, Campaigns, Rewards, Investments,
---                        Transactions, and basic Notifications
--- =============================================================================
--- Use this file if you want to start with a smaller footprint.
--- Migrate to full schema (schema.sql) when ready for messaging, 
--- audit logs, and campaign review workflows.
--- =============================================================================
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 

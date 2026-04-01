@@ -1,0 +1,159 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  Req,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Request } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+
+import { EntrepreneurService } from '../services';
+import {
+  CreateEntrepreneurProfileDto,
+  UpdateEntrepreneurProfileDto,
+  QueryCampaignsDto,
+} from '../dto';
+import { ApiSuccessResponse, PaginatedResponse } from '../../../common/dto';
+import {
+  EntrepreneurProfile,
+  EntrepreneurCampaign,
+  CampaignFinancialProgress,
+  EntrepreneurFinancialSummary,
+} from '../models';
+
+@ApiTags('entrepreneur-profile')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@Controller('entrepreneurs')
+export class EntrepreneurController {
+  constructor(private readonly entrepreneurService: EntrepreneurService) {}
+
+  // =========================================================================
+  // EDT 1.1 / 1.2 — PERFIL DE EMPRENDEDOR
+  // =========================================================================
+
+  @Post('me/profile')
+  @ApiOperation({ summary: 'Crear perfil de emprendedor (EDT 1.1)' })
+  @ApiResponse({ status: 201, description: 'Perfil creado exitosamente.' })
+  @ApiResponse({ status: 409, description: 'El usuario ya tiene un perfil.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  async createProfile(
+    @Req() req: Request,
+    @Body() dto: CreateEntrepreneurProfileDto,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    const profile = await this.entrepreneurService.createProfile(userId, dto);
+    return new ApiSuccessResponse(profile, 'Perfil creado exitosamente');
+  }
+
+  @Get('me/profile')
+  @ApiOperation({ summary: 'Obtener mi perfil de emprendedor' })
+  @ApiResponse({ status: 200, description: 'Perfil retornado exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Perfil no encontrado.' })
+  async getMyProfile(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    const profile = await this.entrepreneurService.getMyProfile(userId);
+    return new ApiSuccessResponse(profile);
+  }
+
+  @Put('me/profile')
+  @ApiOperation({ summary: 'Actualizar mi perfil (EDT 1.2)' })
+  @ApiResponse({ status: 200, description: 'Perfil actualizado exitosamente.' })
+  async updateMyProfile(
+    @Req() req: Request,
+    @Body() dto: UpdateEntrepreneurProfileDto,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    const profile = await this.entrepreneurService.updateMyProfile(userId, dto);
+    return new ApiSuccessResponse(profile, 'Perfil actualizado exitosamente');
+  }
+
+  @Get(':id/profile')
+  @ApiOperation({ summary: 'Obtener perfil público de un emprendedor' })
+  async getProfileById(
+    @Param('id') id: string,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const profile = await this.entrepreneurService.getProfileById(id);
+    return new ApiSuccessResponse(profile);
+  }
+
+  // =========================================================================
+  // EDT 1.3 — CAMPAÑAS DEL EMPRENDEDOR
+  // =========================================================================
+
+  @ApiTags('entrepreneur-campaigns')
+  @Get('me/campaigns')
+  @ApiOperation({ summary: 'Listar mis campañas (EDT 1.3)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de campañas.' })
+  async getMyCampaigns(
+    @Req() req: Request,
+    @Query() query: QueryCampaignsDto,
+  ): Promise<ApiSuccessResponse<PaginatedResponse<EntrepreneurCampaign>>> {
+    const userId = (req as any).user.id;
+    const result = await this.entrepreneurService.getMyCampaigns(userId, query);
+    return new ApiSuccessResponse(result);
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Get('me/campaigns/:campaignId')
+  @ApiOperation({ summary: 'Obtener detalle de una campaña propia' })
+  async getMyCampaignById(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.getMyCampaignById(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(campaign);
+  }
+
+  // =========================================================================
+  // EDT 1.4 — SEGUIMIENTO FINANCIERO
+  // =========================================================================
+
+  @ApiTags('entrepreneur-finances')
+  @Get('me/finances/summary')
+  @ApiOperation({ summary: 'Obtener resumen financiero global' })
+  async getMyFinancialSummary(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<EntrepreneurFinancialSummary>> {
+    const userId = (req as any).user.id;
+    const summary = await this.entrepreneurService.getMyFinancialSummary(
+      userId,
+    );
+    return new ApiSuccessResponse(summary);
+  }
+
+  @ApiTags('entrepreneur-finances')
+  @Get('me/campaigns/:campaignId/financial-progress')
+  @ApiOperation({ summary: 'Progreso financiero de una campaña (EDT 1.4)' })
+  @ApiResponse({ status: 200, description: 'Progreso financiero retornado.' })
+  async getCampaignFinancialProgress(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<CampaignFinancialProgress>> {
+    const userId = (req as any).user.id;
+    const progress = await this.entrepreneurService.getCampaignFinancialProgress(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(progress);
+  }
+}

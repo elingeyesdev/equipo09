@@ -1,0 +1,62 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var AuthService_1;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthService = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
+const bcrypt = require("bcrypt");
+const repositories_1 = require("../../users/repositories");
+const exceptions_1 = require("../../../common/exceptions");
+let AuthService = AuthService_1 = class AuthService {
+    constructor(userRepo, jwtService) {
+        this.userRepo = userRepo;
+        this.jwtService = jwtService;
+        this.logger = new common_1.Logger(AuthService_1.name);
+    }
+    async login(dto, ip) {
+        this.logger.log(`Intento de login: ${dto.email}`);
+        const result = await this.userRepo.findByEmailWithPassword(dto.email);
+        if (!result) {
+            throw new exceptions_1.UnauthorizedException('Credenciales inválidas');
+        }
+        const { user, passwordHash } = result;
+        const isPasswordValid = await bcrypt.compare(dto.password, passwordHash);
+        if (!isPasswordValid) {
+            await this.userRepo.incrementFailedAttempts(user.id);
+            throw new exceptions_1.UnauthorizedException('Credenciales inválidas');
+        }
+        await this.userRepo.updateLastLogin(user.id, ip);
+        const payload = { sub: user.id, email: user.email };
+        const accessToken = this.jwtService.sign(payload);
+        this.logger.log(`Login exitoso: ${user.id}`);
+        return {
+            accessToken,
+            tokenType: 'Bearer',
+            expiresIn: process.env.JWT_EXPIRES_IN ?? '24h',
+            user,
+        };
+    }
+    async validateToken(userId) {
+        const user = await this.userRepo.findById(userId);
+        if (!user || !user.isActive) {
+            throw new exceptions_1.UnauthorizedException('Token inválido o usuario inactivo');
+        }
+        return user;
+    }
+};
+exports.AuthService = AuthService;
+exports.AuthService = AuthService = AuthService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [repositories_1.UserRepository,
+        jwt_1.JwtService])
+], AuthService);
+//# sourceMappingURL=auth.service.js.map
