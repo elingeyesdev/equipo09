@@ -48,14 +48,49 @@ export interface CreateCampaignDto {
   categoryId?: string;
 }
 
+export type CampaignFilterPreset =
+  | 'all'
+  | 'draft'
+  | 'approval'
+  | 'published'
+  | 'archived';
+
 export interface QueryCampaignsDto {
   page?: number;
   limit?: number;
+  /** Tiene prioridad sobre filterPreset si ambos se envían */
   status?: CampaignStatus;
+  filterPreset?: CampaignFilterPreset;
   campaignType?: CampaignType;
   search?: string;
   sortBy?: 'created_at' | 'current_amount' | 'goal_amount' | 'end_date' | 'title';
   sortOrder?: 'ASC' | 'DESC';
+  createdFrom?: string;
+  createdTo?: string;
+  endDateFrom?: string;
+  endDateTo?: string;
+}
+
+export interface RecentInvestment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  isAnonymous: boolean;
+  investorDisplayName: string | null;
+  createdAt: string;
+}
+
+export interface CampaignFinancialProgress {
+  campaignId: string;
+  title: string;
+  currentAmount: number;
+  goalAmount: number;
+  remainingAmount: number;
+  fundingPercentage: number;
+  investorCount: number;
+  currency: string;
+  recentInvestments: RecentInvestment[];
 }
 
 export interface PaginatedResponse<T> {

@@ -4,6 +4,7 @@ import type {
   CreateCampaignDto,
   QueryCampaignsDto,
   PaginatedResponse,
+  CampaignFinancialProgress,
 } from '../types/campaign.types';
 
 interface ApiSuccessResponse<T> {
@@ -27,12 +28,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+function buildCampaignQueryParams(query?: QueryCampaignsDto): Record<string, string | number> | undefined {
+  if (!query) return undefined;
+  const params: Record<string, string | number> = {};
+  (Object.entries(query) as [keyof QueryCampaignsDto, unknown][]).forEach(([key, value]) => {
+    if (value === undefined || value === '' || value === null) return;
+    params[key as string] = value as string | number;
+  });
+  return Object.keys(params).length ? params : undefined;
+}
+
 export async function getMyCampaigns(
   query?: QueryCampaignsDto,
 ): Promise<PaginatedResponse<EntrepreneurCampaign>> {
   const { data } = await api.get<ApiSuccessResponse<PaginatedResponse<EntrepreneurCampaign>>>(
     '/entrepreneurs/me/campaigns',
-    { params: query }
+    { params: buildCampaignQueryParams(query) },
   );
   return data.data;
 }
@@ -43,6 +54,33 @@ export async function createCampaign(
   const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
     '/entrepreneurs/me/campaigns',
     dto,
+  );
+  return data.data;
+}
+
+export async function submitCampaignForReview(
+  campaignId: string,
+): Promise<EntrepreneurCampaign> {
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/submit-for-review`,
+  );
+  return data.data;
+}
+
+export async function publishCampaign(
+  campaignId: string,
+): Promise<EntrepreneurCampaign> {
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/publish`,
+  );
+  return data.data;
+}
+
+export async function getCampaignFinancialProgress(
+  campaignId: string,
+): Promise<CampaignFinancialProgress> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignFinancialProgress>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-progress`,
   );
   return data.data;
 }

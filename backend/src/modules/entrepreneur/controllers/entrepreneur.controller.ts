@@ -116,6 +116,42 @@ export class EntrepreneurController {
   }
 
   @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns/:campaignId/submit-for-review')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Enviar campaña en borrador a revisión' })
+  @ApiResponse({ status: 200, description: 'Estado actualizado.' })
+  @ApiResponse({ status: 400, description: 'Transición no permitida.' })
+  async submitCampaignForReview(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.submitCampaignForReview(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(campaign, 'Campaña enviada a revisión');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns/:campaignId/publish')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Publicar campaña (borrador o aprobada)' })
+  @ApiResponse({ status: 200, description: 'Campaña publicada.' })
+  @ApiResponse({ status: 400, description: 'Transición no permitida.' })
+  async publishCampaign(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.publishCampaign(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(campaign, 'Campaña publicada');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
   @Get('me/campaigns/:campaignId')
   @ApiOperation({ summary: 'Obtener detalle de una campaña propia' })
   async getMyCampaignById(

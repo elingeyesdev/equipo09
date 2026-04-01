@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsIn } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsDateString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto';
 
@@ -7,6 +7,16 @@ import { PaginationDto } from '../../../common/dto';
  * Extiende PaginationDto para reutilizar page/limit/offset.
  */
 export class QueryCampaignsDto extends PaginationDto {
+  @ApiPropertyOptional({
+    enum: ['all', 'draft', 'approval', 'published', 'archived'],
+    description:
+      'Filtro rápido por etapa (si se envía `status` explícito, tiene prioridad)',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['all', 'draft', 'approval', 'published', 'archived'])
+  filterPreset?: string;
+
   @ApiPropertyOptional({
     enum: [
       'draft', 'pending_review', 'in_review', 'approved', 'rejected',
@@ -57,4 +67,24 @@ export class QueryCampaignsDto extends PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ description: 'Creada desde (fecha ISO, ej. 2025-01-01)' })
+  @IsOptional()
+  @IsDateString()
+  createdFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Creada hasta (fecha ISO, inclusive)' })
+  @IsOptional()
+  @IsDateString()
+  createdTo?: string;
+
+  @ApiPropertyOptional({ description: 'Fin de campaña desde (fecha ISO)' })
+  @IsOptional()
+  @IsDateString()
+  endDateFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Fin de campaña hasta (fecha ISO, inclusive)' })
+  @IsOptional()
+  @IsDateString()
+  endDateTo?: string;
 }

@@ -1,59 +1,155 @@
-import { useState, useCallback, useEffect } from 'react';
-import { getMyCampaigns, createCampaign } from '../api/campaign.api';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  getMyCampaigns,
+  createCampaign,
+  submitCampaignForReview,
+  publishCampaign as publishCampaignApi,
+} from '../api/campaign.api';
 import type {
   EntrepreneurCampaign,
   CreateCampaignDto,
-  QueryCampaignsDto
+  QueryCampaignsDto,
 } from '../types/campaign.types';
+import { getApiErrorMessage } from '../utils/apiError';
 
-export function useCampaigns(initialQuery?: QueryCampaignsDto) {
+const DEFAULT_QUERY: QueryCampaignsDto = {
+  page: 1,
+  limit: 12,
+  sortBy: 'created_at',
+  sortOrder: 'DESC',
+  filterPreset: 'all',
+};
+
+export function useCampaigns() {
+  const [query, setQuery] = useState<QueryCampaignsDto>(DEFAULT_QUERY);
   const [campaigns, setCampaigns] = useState<EntrepreneurCampaign[]>([]);
+  const [meta, setMeta] = useState<
+    | {
+        totalItems: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalPages: number;
+        currentPage: number;
+      }
+    | null
+  >(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [actionCampaignId, setActionCampaignId] = useState<string | null>(null);
 
-  const fetchCampaigns = useCallback(async (query?: QueryCampaignsDto) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const paginated = await getMyCampaigns(query ?? initialQuery);
-      setCampaigns(paginated.data);
-    } catch (err: any) {
-      console.error('Error fetching campaigns:', err);
-      setError(err.response?.data?.message || 'Error al obtener campañas');
-    } finally {
-      setLoading(false);
-    }
-  }, [initialQuery]);
+  const queryKey = useMemo(() => JSON.stringify(query), [query]);
+  const queryRef = useRef(query);
+  queryRef.current = query;
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const paginated = await getMyCampaigns(query);
+        if (cancelled) return;
+        setCampaigns(paginated.data);
+        setMeta(paginated.meta);
+      } catch (err: unknown) {
+        if (cancelled) return;
+        console.error('Error fetching campaigns:', err);
+        setError(getApiErrorMessage(err, 'Error al obtener campañas'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [queryKey]);
+
+  const updateQuery = useCallback((patch: Partial<QueryCampaignsDto>) => {
+    setQuery((prev) => {
+      const next: QueryCampaignsDto = { ...prev, ...patch };
+      if (patch.filterPreset !== undefined) {
+        delete next.status;
+      }
+      if (patch.status !== undefined) {
+        delete next.filterPreset;
+      }
+      return next;
+    });
+  }, []);
+
+  const fetchCampaigns = useCallback(() => {
+    setQuery((q) => ({ ...q }));
+  }, []);
 
   const addCampaign = async (dto: CreateCampaignDto): Promise<boolean> => {
     try {
       setAdding(true);
       setAddError(null);
-      const newCampaign = await createCampaign(dto);
-      setCampaigns((prev) => [newCampaign, ...prev]);
+      await createCampaign(dto);
+      setQuery({ ...DEFAULT_QUERY });
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating campaign:', err);
-      setAddError(err.response?.data?.message || 'Error al crear la campaña');
+      setAddError(getApiErrorMessage(err, 'Error al crear la campaña'));
       return false;
     } finally {
       setAdding(false);
     }
   };
 
-  useEffect(() => {
-    fetchCampaigns();
-  }, [fetchCampaigns]);
+  const submitForReview = async (campaignId: string): Promise<boolean> => {
+    try {
+      setError(null);
+      setActionCampaignId(campaignId);
+      await submitCampaignForReview(campaignId);
+      const paginated = await getMyCampaigns(queryRef.current);
+      setCampaigns(paginated.data);
+      setMeta(paginated.meta);
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'No se pudo enviar a revisión'));
+      return false;
+    } finally {
+      setActionCampaignId(null);
+    }
+  };
+
+  const publishCampaign = async (campaignId: string): Promise<boolean> => {
+    try {
+      setError(null);
+      setActionCampaignId(campaignId);
+      await publishCampaignApi(campaignId);
+      const paginated = await getMyCampaigns(queryRef.current);
+      setCampaigns(paginated.data);
+      setMeta(paginated.meta);
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'No se pudo publicar'));
+      return false;
+    } finally {
+      setActionCampaignId(null);
+    }
+  };
 
   return {
     campaigns,
+    meta,
+    query,
+    updateQuery,
     loading,
     error,
+    setError,
     adding,
     addError,
     fetchCampaigns,
-    addCampaign
+    addCampaign,
+    submitForReview,
+    publishCampaign,
+    actionCampaignId,
   };
 }

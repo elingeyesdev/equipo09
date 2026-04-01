@@ -59,6 +59,29 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       conditions.push(`c.status = $${paramIndex}`);
       params.push(query.status);
       paramIndex++;
+    } else if (query.filterPreset && query.filterPreset !== 'all') {
+      switch (query.filterPreset) {
+        case 'draft':
+          conditions.push(`c.status = 'draft'`);
+          break;
+        case 'approval':
+          conditions.push(
+            `c.status IN ('pending_review', 'in_review', 'approved')`,
+          );
+          break;
+        case 'published':
+          conditions.push(
+            `c.status IN ('published', 'funded', 'partially_funded', 'completed')`,
+          );
+          break;
+        case 'archived':
+          conditions.push(
+            `c.status IN ('failed', 'cancelled', 'rejected', 'suspended')`,
+          );
+          break;
+        default:
+          break;
+      }
     }
 
     if (query.campaignType) {
@@ -70,6 +93,31 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     if (query.search) {
       conditions.push(`c.title ILIKE $${paramIndex}`);
       params.push(`%${query.search}%`);
+      paramIndex++;
+    }
+
+    if (query.createdFrom) {
+      conditions.push(`c.created_at >= $${paramIndex}::date`);
+      params.push(query.createdFrom);
+      paramIndex++;
+    }
+    if (query.createdTo) {
+      conditions.push(`c.created_at < ($${paramIndex}::date + interval '1 day')`);
+      params.push(query.createdTo);
+      paramIndex++;
+    }
+    if (query.endDateFrom) {
+      conditions.push(
+        `c.end_date IS NOT NULL AND c.end_date >= $${paramIndex}::date`,
+      );
+      params.push(query.endDateFrom);
+      paramIndex++;
+    }
+    if (query.endDateTo) {
+      conditions.push(
+        `c.end_date IS NOT NULL AND c.end_date < ($${paramIndex}::date + interval '1 day')`,
+      );
+      params.push(query.endDateTo);
       paramIndex++;
     }
 
@@ -135,6 +183,36 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     );
 
     return row ? mapRowToEntrepreneurCampaign(row) : null;
+  }
+
+  async submitForReview(
+    campaignId: string,
+    creatorId: string,
+  ): Promise<EntrepreneurCampaign | null> {
+    const row = await this.queryOne(
+      `UPDATE campaigns
+       SET status = 'pending_review', updated_at = NOW()
+       WHERE id = $1 AND creator_id = $2 AND status = 'draft'
+       RETURNING id`,
+      [campaignId, creatorId],
+    );
+    if (!row) return null;
+    return this.findOneByCreatorId(campaignId, creatorId);
+  }
+
+  async publishCampaign(
+    campaignId: string,
+    creatorId: string,
+  ): Promise<EntrepreneurCampaign | null> {
+    const row = await this.queryOne(
+      `UPDATE campaigns
+       SET status = 'published', published_at = COALESCE(published_at, NOW()), updated_at = NOW()
+       WHERE id = $1 AND creator_id = $2 AND status IN ('draft', 'approved')
+       RETURNING id`,
+      [campaignId, creatorId],
+    );
+    if (!row) return null;
+    return this.findOneByCreatorId(campaignId, creatorId);
   }
 
   async getFinancialProgress(

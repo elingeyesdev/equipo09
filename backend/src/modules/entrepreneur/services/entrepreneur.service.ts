@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
 } from '../../../common/exceptions';
 import { PaginatedResponse } from '../../../common/dto';
 import {
@@ -200,6 +201,40 @@ export class EntrepreneurService {
     }
 
     return campaign;
+  }
+
+  /**
+   * Envía una campaña en borrador a revisión (moderación).
+   */
+  async submitCampaignForReview(
+    userId: string,
+    campaignId: string,
+  ): Promise<EntrepreneurCampaign> {
+    await this.ensureEntrepreneurProfile(userId);
+    const updated = await this.campaignRepo.submitForReview(campaignId, userId);
+    if (!updated) {
+      throw new BadRequestException(
+        'Solo las campañas en borrador pueden enviarse a revisión',
+      );
+    }
+    return updated;
+  }
+
+  /**
+   * Publica la campaña (borrador o aprobada → publicada).
+   */
+  async publishCampaign(
+    userId: string,
+    campaignId: string,
+  ): Promise<EntrepreneurCampaign> {
+    await this.ensureEntrepreneurProfile(userId);
+    const updated = await this.campaignRepo.publishCampaign(campaignId, userId);
+    if (!updated) {
+      throw new BadRequestException(
+        'No se puede publicar: la campaña debe estar en borrador o aprobada',
+      );
+    }
+    return updated;
   }
 
   // =========================================================================
