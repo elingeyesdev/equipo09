@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EntrepreneurModule } from './modules/entrepreneur/entrepreneur.module';
 import { InvestorModule } from './modules/investor/investor.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { CampaignsModule } from './modules/campaigns/campaign.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
     EntrepreneurModule,
     InvestorModule,
     CategoriesModule,
+    CampaignsModule,
   ],
 })
 export class AppModule {}

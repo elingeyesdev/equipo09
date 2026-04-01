@@ -1,0 +1,44 @@
+import { Controller, Post, Get, Body, Query, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { CampaignService } from '../services';
+import { CreateCampaignDto, QueryCampaignsDto } from '../dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+
+@ApiTags('Entrepreneur Campaigns')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('entrepreneurs/me/campaigns')
+export class EntrepreneurCampaignsController {
+  constructor(private readonly campaignService: CampaignService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new campaign as draft' })
+  async createCampaign(@Request() req: any, @Body() dto: CreateCampaignDto) {
+    const userId = req.user.sub || req.user.id;
+    // The service takes the models dto which allows endDate as string or Date
+    const campaign = await this.campaignService.createCampaign(userId, dto as any);
+    return {
+      statusCode: 201,
+      message: 'Campaign created successfully',
+      data: campaign,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get my campaigns with pagination' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'sortBy', required: false })
+  @ApiQuery({ name: 'sortOrder', required: false })
+  async getMyCampaigns(@Request() req: any, @Query() query: QueryCampaignsDto) {
+    const userId = req.user.sub || req.user.id;
+    const result = await this.campaignService.getMyCampaigns(userId, query as any);
+    return {
+      statusCode: 200,
+      message: 'Campaigns retrieved successfully',
+      data: result,
+      timestamp: new Date().toISOString(),
+    };
+  }
+}

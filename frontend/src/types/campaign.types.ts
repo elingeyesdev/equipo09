@@ -45,7 +45,7 @@ export interface CreateCampaignDto {
   goalAmount: number;
   campaignType: CampaignType;
   endDate?: string;
-  categoryId?: string;
+  categoryId: string;
 }
 
 export type CampaignFilterPreset =

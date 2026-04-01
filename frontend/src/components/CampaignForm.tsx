@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CreateCampaignDto, CampaignType } from '../types/campaign.types';
+import type { Category } from '../types/category.types';
+import { getCategories } from '../api/categories.api';
 
 const schema = z.object({
   title: z.string().min(5, 'El título debe tener mínimo 5 caracteres').max(255),
@@ -9,6 +12,7 @@ const schema = z.object({
   shortDescription: z.string().max(500).optional().or(z.literal('')),
   goalAmount: z.number().min(100, 'La meta mínima es $100'),
   campaignType: z.enum(['donation', 'reward', 'equity']),
+  categoryId: z.string().min(1, 'Debes seleccionar una categoría principal'),
   endDate: z.string().optional().or(z.literal('')),
 });
 
@@ -34,15 +38,33 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
       shortDescription: '',
       goalAmount: 1000,
       campaignType: 'reward',
+      categoryId: '',
       endDate: '',
     },
   });
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCats, setLoadingCats] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getCategories()
+      .then((data) => {
+        if (mounted) setCategories(data);
+      })
+      .catch(console.error)
+      .finally(() => {
+        if (mounted) setLoadingCats(false);
+      });
+    return () => { mounted = false; };
+  }, []);
 
   const onSubmit = async (data: FormValues) => {
     const dto: CreateCampaignDto = {
       title: data.title,
       description: data.description,
       shortDescription: data.shortDescription || undefined,
+      categoryId: data.categoryId,
       goalAmount: data.goalAmount,
       campaignType: data.campaignType as CampaignType,
       endDate: data.endDate || undefined,
@@ -91,6 +113,22 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
               <option value="equity">Participación (Equity)</option>
             </select>
             {errors.campaignType && <span className="field-error">{errors.campaignType.message}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="categoryId">Categoría del Proyecto <span className="required">*</span></label>
+            <select
+              id="categoryId"
+              className={errors.categoryId ? 'error-field' : ''}
+              disabled={loadingCats}
+              {...register('categoryId')}
+            >
+              <option value="">Selecciona una categoría...</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+              ))}
+            </select>
+            {errors.categoryId && <span className="field-error">{errors.categoryId.message}</span>}
           </div>
 
           <div className="form-group">
