@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsUUID, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsAfterDate } from '../../../common/decorators/is-after-date.decorator';
 
 export class CreateCampaignDto {
   @ApiProperty({ example: 'Eco-friendly Water Bottles' })
@@ -23,15 +24,22 @@ export class CreateCampaignDto {
   categoryId: string;
 
   @ApiProperty({ example: 10000 })
-  @IsNumber()
-  @Min(100)
+  @IsNumber({}, { message: 'El monto objetivo (goalAmount) debe ser numérico' })
+  @Min(100, { message: 'El monto mínimo de recaudación es de 100' })
   goalAmount: number;
 
   @ApiProperty({ enum: ['donation', 'reward', 'equity'] })
   @IsEnum(['donation', 'reward', 'equity'])
   campaignType: 'donation' | 'reward' | 'equity';
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '2024-12-01T00:00:00.000Z' })
+  @IsDateString({}, { message: 'startDate debe tener un formato de fecha válido (ISO 8601)' })
+  @IsOptional()
+  startDate?: string;
+
+  @ApiPropertyOptional({ example: '2025-01-01T00:00:00.000Z' })
+  @IsDateString({}, { message: 'endDate debe tener un formato de fecha válido (ISO 8601)' })
+  @IsAfterDate('startDate', { message: 'La fecha de cierre debe ser estrictamente posterior a la fecha de inicio' })
   @IsOptional()
   endDate?: string;
 }

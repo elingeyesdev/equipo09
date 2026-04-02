@@ -5,6 +5,7 @@ export declare class CreateCampaignDto {
     categoryId: string;
     goalAmount: number;
     campaignType: 'donation' | 'reward' | 'equity';
+    startDate?: string;
     endDate?: string;
 }
 export declare class QueryCampaignsDto {

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QueryCampaignsDto = exports.CreateCampaignDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const is_after_date_decorator_1 = require("../../../common/decorators/is-after-date.decorator");
 class CreateCampaignDto {
 }
 exports.CreateCampaignDto = CreateCampaignDto;
@@ -41,8 +42,8 @@ __decorate([
 ], CreateCampaignDto.prototype, "categoryId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 10000 }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(100),
+    (0, class_validator_1.IsNumber)({}, { message: 'El monto objetivo (goalAmount) debe ser numérico' }),
+    (0, class_validator_1.Min)(100, { message: 'El monto mínimo de recaudación es de 100' }),
     __metadata("design:type", Number)
 ], CreateCampaignDto.prototype, "goalAmount", void 0);
 __decorate([
@@ -51,7 +52,15 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "campaignType", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)(),
+    (0, swagger_1.ApiPropertyOptional)({ example: '2024-12-01T00:00:00.000Z' }),
+    (0, class_validator_1.IsDateString)({}, { message: 'startDate debe tener un formato de fecha válido (ISO 8601)' }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '2025-01-01T00:00:00.000Z' }),
+    (0, class_validator_1.IsDateString)({}, { message: 'endDate debe tener un formato de fecha válido (ISO 8601)' }),
+    (0, is_after_date_decorator_1.IsAfterDate)('startDate', { message: 'La fecha de cierre debe ser estrictamente posterior a la fecha de inicio' }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "endDate", void 0);

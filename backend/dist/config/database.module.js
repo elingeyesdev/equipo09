@@ -26,7 +26,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                         host: configService.get('DB_HOST', 'localhost'),
                         port: configService.get('DB_PORT', 5432),
                         user: configService.get('DB_USER', 'postgres'),
-                        password: configService.get('DB_PASSWORD', '1234'),
+                        password: configService.get('DB_PASSWORD', 'postgres'),
                         database: configService.get('DB_NAME', 'crowdfunding'),
                         ssl: configService.get('DB_SSL') === 'true'
                             ? { rejectUnauthorized: false }
