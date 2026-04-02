@@ -33,6 +33,40 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Asigna un rol por nombre (entrepreneur | investor | admin). Idempotente.
+   */
+  async assignRoleByName(userId: string, roleName: string): Promise<void> {
+    const role = await this.queryOne<{ id: string }>(
+      `SELECT id FROM roles WHERE name = $1`,
+      [roleName],
+    );
+    if (!role) {
+      throw new Error(`Rol no encontrado en catálogo: ${roleName}`);
+    }
+    await this.query(
+      `INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, role_id) DO NOTHING`,
+      [userId, role.id],
+    );
+  }
+
+  async hasEntrepreneurProfile(userId: string): Promise<boolean> {
+    const row = await this.queryOne(
+      `SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`,
+      [userId],
+    );
+    return row !== null;
+  }
+
+  async hasInvestorProfile(userId: string): Promise<boolean> {
+    const row = await this.queryOne(
+      `SELECT 1 FROM investor_profiles WHERE user_id = $1`,
+      [userId],
+    );
+    return row !== null;
+  }
+
+  /**
    * Busca un usuario por ID.
    */
   async findById(id: string): Promise<User | null> {

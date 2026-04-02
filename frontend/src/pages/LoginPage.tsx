@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
+import { persistUserRoleFromServer } from '../utils/authRole';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -21,24 +22,23 @@ export function LoginPage() {
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('userEmail', response.user?.email ?? email);
       
-      const adminAccessLevel = (response as any).user?.adminAccessLevel;
+      const adminAccessLevel = response.user?.adminAccessLevel;
       if (adminAccessLevel) {
         localStorage.setItem('adminAccessLevel', adminAccessLevel);
         if (adminAccessLevel === 'super_admin') {
-            navigate('/superadmin');
+          navigate('/superadmin');
         } else {
-            navigate('/admin');
+          navigate('/admin');
         }
         return;
       }
 
-      const role = localStorage.getItem('userRole');
-        if (role === 'entrepreneur') {
-          navigate('/entrepreneur-profile');
-        } else {
-          // Por defecto va al dashboard principal del inversor
-          navigate('/dashboard');
-        }
+      const appRole = persistUserRoleFromServer(response.user?.roles);
+      if (appRole === 'entrepreneur') {
+        navigate('/entrepreneur-profile');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Credenciales incorrectas.';
       setError(Array.isArray(msg) ? msg.join(', ') : msg);

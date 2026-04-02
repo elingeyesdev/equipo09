@@ -6,3 +6,4 @@ export {
   EntrepreneurFinancialSummary,
   mapRowToEntrepreneurCampaign,
 } from './campaign.model';
+export type { CampaignCreationReadiness } from './campaign-readiness.model';

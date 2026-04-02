@@ -68,8 +68,12 @@ export interface LoginDto {
 
 export interface LoginResponse {
   accessToken: string;
+  tokenType?: string;
+  expiresIn?: string;
   user: {
     id: string;
     email: string;
+    roles?: string[];
+    adminAccessLevel?: string;
   };
 }

@@ -48,3 +48,9 @@ export interface ApiSuccessResponse<T> {
   data: T;
   message?: string;
 }
+
+/** Requisitos para crear campañas (API GET .../campaign-readiness). */
+export interface CampaignCreationReadiness {
+  canCreateCampaigns: boolean;
+  missingRequirements: string[];
+}

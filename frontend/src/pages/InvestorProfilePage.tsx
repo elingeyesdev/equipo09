@@ -18,6 +18,7 @@ export function InvestorProfilePage() {
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 

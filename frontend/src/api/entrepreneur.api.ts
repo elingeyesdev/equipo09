@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type {
   ApiSuccessResponse,
+  CampaignCreationReadiness,
   CreateEntrepreneurProfileDto,
   EntrepreneurProfile,
   UpdateEntrepreneurProfileDto,
@@ -22,6 +23,13 @@ api.interceptors.request.use((config) => {
 export async function getMyEntrepreneurProfile(): Promise<EntrepreneurProfile> {
   const { data } = await api.get<ApiSuccessResponse<EntrepreneurProfile>>(
     '/entrepreneurs/me/profile',
+  );
+  return data.data;
+}
+
+export async function getCampaignCreationReadiness(): Promise<CampaignCreationReadiness> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignCreationReadiness>>(
+    '/entrepreneurs/me/profile/campaign-readiness',
   );
   return data.data;
 }

@@ -49,4 +49,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsIn(['es', 'en'])
   preferredLanguage?: string;
+
+  @ApiPropertyOptional({
+    enum: ['investor', 'entrepreneur'],
+    description: 'Rol principal al registrarse (se guarda en user_roles)',
+  })
+  @IsOptional()
+  @IsIn(['investor', 'entrepreneur'])
+  signupRole?: 'investor' | 'entrepreneur';
 }

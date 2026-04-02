@@ -5,8 +5,10 @@ import {
   EntrepreneurProfileRepository,
   EntrepreneurCampaignRepository,
 } from './repositories';
+import { UsersModule } from '../users/user.module';
 
 @Module({
+  imports: [UsersModule],
   controllers: [EntrepreneurController],
   providers: [
     EntrepreneurService,

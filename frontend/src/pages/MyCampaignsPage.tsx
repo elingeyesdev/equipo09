@@ -1,15 +1,22 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { CampaignList } from '../components/CampaignList';
 import { CampaignForm } from '../components/CampaignForm';
 import { CampaignFilters } from '../components/CampaignFilters';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { Navbar } from '../components/Navbar';
+import { getCampaignCreationReadiness } from '../api/entrepreneur.api';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
+import type { CampaignCreationReadiness } from '../types/entrepreneur.types';
+import { getApiErrorMessage } from '../utils/apiError';
 
 export function MyCampaignsPage() {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [previewCampaign, setPreviewCampaign] = useState<EntrepreneurCampaign | null>(null);
+  const [readiness, setReadiness] = useState<CampaignCreationReadiness | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(true);
 
   const {
     campaigns,
@@ -27,6 +34,32 @@ export function MyCampaignsPage() {
     publishCampaign,
     actionCampaignId,
   } = useCampaigns();
+
+  const loadReadiness = useCallback(async () => {
+    setReadinessLoading(true);
+    try {
+      const r = await getCampaignCreationReadiness();
+      setReadiness(r);
+    } catch (e: unknown) {
+      setReadiness({
+        canCreateCampaigns: false,
+        missingRequirements: [
+          getApiErrorMessage(e, 'No se pudo comprobar si tu perfil permite crear campañas'),
+        ],
+      });
+    } finally {
+      setReadinessLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showForm) return;
+    loadReadiness();
+  }, [showForm, loadReadiness]);
+
+  const canCreateCampaigns = readiness?.canCreateCampaigns ?? false;
+  const showProfileGate =
+    !readinessLoading && readiness !== null && !canCreateCampaigns;
 
   const hasFilterApplied = useMemo(() => {
     const preset = query.filterPreset ?? 'all';
@@ -72,11 +105,42 @@ export function MyCampaignsPage() {
             </p>
           </div>
           {!showForm && (
-            <button className="btn btn-primary" type="button" onClick={() => setShowForm(true)}>
-              Nueva campaña
+            <button
+              className="btn btn-primary"
+              type="button"
+              disabled={readinessLoading || !canCreateCampaigns}
+              onClick={() => {
+                if (!readinessLoading && canCreateCampaigns) setShowForm(true);
+              }}
+            >
+              {readinessLoading ? 'Comprobando perfil…' : 'Nueva campaña'}
             </button>
           )}
         </header>
+
+        {showProfileGate && (
+          <div
+            className="alert"
+            role="alert"
+            style={{
+              marginBottom: '1.25rem',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              gap: 12,
+              background: 'rgba(59, 130, 246, 0.08)',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              color: 'var(--text-primary, #e5e7eb)',
+            }}
+          >
+            <p style={{ margin: 0 }}>
+              <strong>Perfil incompleto.</strong> Para crear campañas necesitas completar tu perfil de
+              emprendedor. Falta: {readiness!.missingRequirements.join('; ')}.
+            </p>
+            <Link className="btn btn-primary" to="/entrepreneur-profile" style={{ alignSelf: 'flex-start' }}>
+              Ir a mi perfil
+            </Link>
+          </div>
+        )}
 
         {showForm ? (
           <div className="fade-in">
@@ -97,6 +161,8 @@ export function MyCampaignsPage() {
               error={error}
               onRetry={fetchCampaigns}
               onOpenForm={() => setShowForm(true)}
+              canCreateCampaign={!readinessLoading && canCreateCampaigns}
+              onGoToProfile={() => navigate('/entrepreneur-profile')}
               meta={meta}
               onPageChange={(page) => updateQuery({ page })}
               hasFilterApplied={hasFilterApplied}

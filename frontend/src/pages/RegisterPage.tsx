@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { login } from '../api/investor.api';
+import { persistUserRoleFromServer } from '../utils/authRole';
 
 // Usamos el proxy para el de registro
 const registerApi = axios.create({
@@ -25,15 +26,20 @@ export function RegisterPage() {
 
     try {
       // 1. Crear el usuario en el backend
-      await registerApi.post('/users/register', { email, password, preferredLanguage: 'es' });
-      
-      // 2. Hacer login automático
+      await registerApi.post('/users/register', {
+        email,
+        password,
+        preferredLanguage: 'es',
+        signupRole: role,
+      });
+
+      // 2. Hacer login automático (el backend devuelve roles en user)
       const response = await login({ email, password });
-      
-      // 3. Guardar autenticación y rol
+
+      // 3. Guardar autenticación; el rol sale del servidor (user_roles)
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('userEmail', response.user?.email ?? email);
-      localStorage.setItem('userRole', role);
+      persistUserRoleFromServer(response.user?.roles, role);
 
       // 4. Redirigir según el perfil seleccionado
       if (role === 'entrepreneur') {

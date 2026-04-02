@@ -17,14 +17,17 @@ const schema = z.object({
   firstName: z.string().min(2, 'Mínimo 2 caracteres').max(100, 'Máximo 100 caracteres'),
   lastName: z.string().min(2, 'Mínimo 2 caracteres').max(100, 'Máximo 100 caracteres'),
   displayName: z.string().max(150, 'Máximo 150 caracteres').optional().or(z.literal('')),
-  bio: z.string().max(2000, 'Máximo 2000 caracteres').optional().or(z.literal('')),
+  bio: z
+    .string()
+    .min(30, 'La biografía debe tener al menos 30 caracteres')
+    .max(2000, 'Máximo 2000 caracteres'),
   companyName: z.string().min(2, 'Mínimo 2 caracteres').max(200, 'Máximo 200 caracteres'),
   website: requiredUrl,
   linkedinUrl: requiredUrl,
   addressLine: z.string().max(255, 'Máximo 255 caracteres').optional().or(z.literal('')),
   city: z.string().max(100, 'Máximo 100 caracteres').optional().or(z.literal('')),
   state: z.string().max(100, 'Máximo 100 caracteres').optional().or(z.literal('')),
-  country: z.string().max(100, 'Máximo 100 caracteres').optional().or(z.literal('')),
+  country: z.string().min(1, 'El país es requerido').max(100, 'Máximo 100 caracteres'),
   postalCode: z.string().max(20, 'Máximo 20 caracteres').optional().or(z.literal('')),
   bankAccountNumber: z.string().max(100, 'Máximo 100 caracteres').optional().or(z.literal('')),
   bankName: z.string().max(200, 'Máximo 200 caracteres').optional().or(z.literal('')),

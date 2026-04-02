@@ -56,17 +56,35 @@ export class AuthService {
     // 3. Actualizar último login
     await this.userRepo.updateLastLogin(user.id, ip);
 
-    // 4. Generar JWT
-    const payload = { sub: user.id, email: user.email };
+    // 4. Usuario con roles + autocorrección si hay perfil pero faltaba fila en user_roles
+    let fullUser = await this.userRepo.findByIdWithRoles(user.id);
+    if (!fullUser) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (!fullUser.roles?.length) {
+      if (await this.userRepo.hasEntrepreneurProfile(user.id)) {
+        await this.userRepo.assignRoleByName(user.id, 'entrepreneur');
+        fullUser = (await this.userRepo.findByIdWithRoles(user.id))!;
+        this.logger.log(`Rol entrepreneur restaurado desde perfil: ${user.id}`);
+      } else if (await this.userRepo.hasInvestorProfile(user.id)) {
+        await this.userRepo.assignRoleByName(user.id, 'investor');
+        fullUser = (await this.userRepo.findByIdWithRoles(user.id))!;
+        this.logger.log(`Rol investor restaurado desde perfil: ${user.id}`);
+      }
+    }
+
+    // 5. Generar JWT
+    const payload = { sub: fullUser.id, email: fullUser.email };
     const accessToken = this.jwtService.sign(payload);
 
-    this.logger.log(`Login exitoso: ${user.id}`);
+    this.logger.log(`Login exitoso: ${fullUser.id}`);
 
     return {
       accessToken,
       tokenType: 'Bearer',
       expiresIn: process.env.JWT_EXPIRES_IN ?? '24h',
-      user,
+      user: fullUser,
     };
   }
 
@@ -75,7 +93,7 @@ export class AuthService {
    * Usado internamente por la estrategia Passport.
    */
   async validateToken(userId: string): Promise<User> {
-    const user = await this.userRepo.findById(userId);
+    const user = await this.userRepo.findByIdWithRoles(userId);
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Token inválido o usuario inactivo');
     }

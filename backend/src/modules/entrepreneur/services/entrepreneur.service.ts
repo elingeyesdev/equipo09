@@ -10,6 +10,7 @@ import {
   EntrepreneurProfileRepository,
   EntrepreneurCampaignRepository,
 } from '../repositories';
+import { UserRepository } from '../../users/repositories';
 import {
   CreateEntrepreneurProfileDto,
   UpdateEntrepreneurProfileDto,
@@ -21,7 +22,9 @@ import {
   EntrepreneurCampaign,
   CampaignFinancialProgress,
   EntrepreneurFinancialSummary,
+  CampaignCreationReadiness,
 } from '../models';
+import { getCampaignCreationBlockers } from '../utils/campaign-profile-eligibility';
 
 /**
  * Service: Emprendedor
@@ -35,6 +38,7 @@ export class EntrepreneurService {
   constructor(
     private readonly profileRepo: EntrepreneurProfileRepository,
     private readonly campaignRepo: EntrepreneurCampaignRepository,
+    private readonly userRepo: UserRepository,
   ) {}
 
   // =========================================================================
@@ -63,6 +67,16 @@ export class EntrepreneurService {
 
     const profile = await this.profileRepo.create(userId, dto);
     this.logger.log(`Perfil creado: ${profile.id} para user ${userId}`);
+
+    try {
+      await this.userRepo.assignRoleByName(userId, 'entrepreneur');
+      this.logger.log(`Rol entrepreneur sincronizado en user_roles: ${userId}`);
+    } catch (err) {
+      this.logger.warn(
+        `No se pudo asignar rol entrepreneur (¿seed de roles?): ${err}`,
+      );
+    }
+
     return profile;
   }
 
@@ -173,8 +187,7 @@ export class EntrepreneurService {
     userId: string,
     dto: CreateCampaignDto,
   ): Promise<EntrepreneurCampaign> {
-    // Verificar que tiene perfil de emprendedor
-    await this.ensureEntrepreneurProfile(userId);
+    await this.ensureProfileCompleteForNewCampaign(userId);
 
     this.logger.log(`Creando nueva campaña para user ${userId}: ${dto.title}`);
     const campaign = await this.campaignRepo.create(userId, dto);
@@ -237,6 +250,28 @@ export class EntrepreneurService {
     return updated;
   }
 
+  /**
+   * Indica si el perfil cumple los requisitos para crear campañas (sin lanzar).
+   */
+  async getCampaignCreationReadiness(
+    userId: string,
+  ): Promise<CampaignCreationReadiness> {
+    const profile = await this.profileRepo.findByUserId(userId);
+    if (!profile) {
+      return {
+        canCreateCampaigns: false,
+        missingRequirements: [
+          'crear tu perfil de emprendedor y completar los datos obligatorios',
+        ],
+      };
+    }
+    const missing = getCampaignCreationBlockers(profile);
+    return {
+      canCreateCampaigns: missing.length === 0,
+      missingRequirements: missing,
+    };
+  }
+
   // =========================================================================
   // EDT 1.4 — SEGUIMIENTO FINANCIERO
   // =========================================================================
@@ -287,6 +322,26 @@ export class EntrepreneurService {
     if (!exists) {
       throw new NotFoundException(
         'Perfil de emprendedor. Debes crear tu perfil antes de gestionar campañas',
+      );
+    }
+  }
+
+  /**
+   * Perfil existente y completo según reglas de negocio para nuevas campañas.
+   */
+  private async ensureProfileCompleteForNewCampaign(
+    userId: string,
+  ): Promise<void> {
+    const profile = await this.profileRepo.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException(
+        'Perfil de emprendedor. Debes crear tu perfil antes de crear campañas',
+      );
+    }
+    const missing = getCampaignCreationBlockers(profile);
+    if (missing.length > 0) {
+      throw new BadRequestException(
+        `Completa tu perfil para crear campañas. Falta: ${missing.join(', ')}.`,
       );
     }
   }

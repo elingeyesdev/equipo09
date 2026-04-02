@@ -32,7 +32,14 @@ export class UserService {
 
     const user = await this.userRepo.create(dto);
     this.logger.log(`Usuario creado: ${user.id}`);
-    return user;
+
+    if (dto.signupRole === 'entrepreneur' || dto.signupRole === 'investor') {
+      await this.userRepo.assignRoleByName(user.id, dto.signupRole);
+      this.logger.log(`Rol asignado: ${dto.signupRole} → ${user.id}`);
+    }
+
+    const withRoles = await this.userRepo.findByIdWithRoles(user.id);
+    return withRoles ?? user;
   }
 
   /**

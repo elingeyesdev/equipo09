@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Lo que retorne este método se asigna a req.user.
    */
   async validate(payload: JwtPayload): Promise<User> {
-    const user = await this.userRepo.findById(payload.sub);
+    const user = await this.userRepo.findByIdWithRoles(payload.sub);
     if (!user || !user.isActive) {
       throw new Error('Usuario inválido o inactivo');
     }

@@ -15,6 +15,9 @@ interface Props {
   error: string | null;
   onRetry: () => void;
   onOpenForm: () => void;
+  /** Si false, el CTA vacío enlaza a completar perfil en lugar de abrir el formulario. */
+  canCreateCampaign?: boolean;
+  onGoToProfile?: () => void;
   meta: Meta | null;
   onPageChange: (page: number) => void;
   hasFilterApplied: boolean;
@@ -30,6 +33,8 @@ export function CampaignList({
   error,
   onRetry,
   onOpenForm,
+  canCreateCampaign = true,
+  onGoToProfile,
   meta,
   onPageChange,
   hasFilterApplied,
@@ -71,8 +76,13 @@ export function CampaignList({
             : 'Comienza creando tu primera campaña y atrayendo inversiones.'}
         </p>
         {!hasFilterApplied && (
-          <button className="btn btn-primary" onClick={onOpenForm} style={{ marginTop: '1.5rem' }}>
-            Crear mi primera campaña
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={canCreateCampaign ? onOpenForm : onGoToProfile}
+            style={{ marginTop: '1.5rem' }}
+          >
+            {canCreateCampaign ? 'Crear mi primera campaña' : 'Completar mi perfil'}
           </button>
         )}
       </div>

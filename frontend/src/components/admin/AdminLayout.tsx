@@ -14,6 +14,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('adminAccessLevel');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 

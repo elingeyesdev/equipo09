@@ -33,6 +33,7 @@ import {
   EntrepreneurCampaign,
   CampaignFinancialProgress,
   EntrepreneurFinancialSummary,
+  CampaignCreationReadiness,
 } from '../models';
 
 @ApiTags('entrepreneur-profile')
@@ -68,6 +69,20 @@ export class EntrepreneurController {
     return new ApiSuccessResponse(profile);
   }
 
+  @Get('me/profile/campaign-readiness')
+  @ApiOperation({
+    summary: 'Comprobar si el perfil permite crear campañas',
+  })
+  @ApiResponse({ status: 200, description: 'Estado de requisitos para nuevas campañas.' })
+  async getCampaignReadiness(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<CampaignCreationReadiness>> {
+    const userId = (req as any).user.id;
+    const readiness =
+      await this.entrepreneurService.getCampaignCreationReadiness(userId);
+    return new ApiSuccessResponse(readiness);
+  }
+
   @Put('me/profile')
   @ApiOperation({ summary: 'Actualizar mi perfil (EDT 1.2)' })
   @ApiResponse({ status: 200, description: 'Perfil actualizado exitosamente.' })
@@ -93,6 +108,11 @@ export class EntrepreneurController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear nueva campaña (EDT 1.3)' })
   @ApiResponse({ status: 201, description: 'Campaña creada exitosamente.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Perfil incompleto u otros datos inválidos.',
+  })
+  @ApiResponse({ status: 404, description: 'Sin perfil de emprendedor.' })
   async createCampaign(
     @Req() req: Request,
     @Body() dto: CreateCampaignDto,
