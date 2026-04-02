@@ -125,7 +125,7 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
             >
               <option value="">Selecciona una categoría...</option>
               {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                <option key={c.id} value={c.id}>{c.displayName}</option>
               ))}
             </select>
             {errors.categoryId && <span className="field-error">{errors.categoryId.message}</span>}

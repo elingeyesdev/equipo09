@@ -22,4 +22,12 @@ export class CampaignService {
 
     return await this.campaignRepo.findByCreatorId(creatorId, page, limit, sortBy, sortOrder);
   }
+
+  async getCampaignById(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign> {
+    const campaign = await this.campaignRepo.findByIdAndCreator(campaignId, creatorId);
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with ID ${campaignId} not found`);
+    }
+    return campaign;
+  }
 }

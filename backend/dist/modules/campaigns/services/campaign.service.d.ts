@@ -5,4 +5,5 @@ export declare class CampaignService {
     constructor(campaignRepo: CampaignRepository);
     createCampaign(creatorId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign>;
     getMyCampaigns(creatorId: string, query: QueryCampaignsDto): Promise<PaginatedCampaigns>;
+    getCampaignById(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign>;
 }

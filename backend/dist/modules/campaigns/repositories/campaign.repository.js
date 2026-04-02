@@ -52,7 +52,7 @@ let CampaignRepository = class CampaignRepository {
         creator_id, category_id, title, slug, description, short_description, 
         campaign_type, status, goal_amount, end_date
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'draft', $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending_review', $8, $9)
       RETURNING *;
     `;
         const endDateStr = dto.endDate ? new Date(dto.endDate).toISOString() : null;

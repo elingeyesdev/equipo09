@@ -29,6 +29,13 @@ let CampaignService = class CampaignService {
         const sortOrder = query.sortOrder || 'DESC';
         return await this.campaignRepo.findByCreatorId(creatorId, page, limit, sortBy, sortOrder);
     }
+    async getCampaignById(campaignId, creatorId) {
+        const campaign = await this.campaignRepo.findByIdAndCreator(campaignId, creatorId);
+        if (!campaign) {
+            throw new common_1.NotFoundException(`Campaign with ID ${campaignId} not found`);
+        }
+        return campaign;
+    }
 };
 exports.CampaignService = CampaignService;
 exports.CampaignService = CampaignService = __decorate([

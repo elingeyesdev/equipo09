@@ -15,4 +15,10 @@ export declare class EntrepreneurCampaignsController {
         data: import("../repositories").PaginatedCampaigns;
         timestamp: string;
     }>;
+    getCampaignById(req: any, id: string): Promise<{
+        statusCode: number;
+        message: string;
+        data: import("../models").EntrepreneurCampaign;
+        timestamp: string;
+    }>;
 }

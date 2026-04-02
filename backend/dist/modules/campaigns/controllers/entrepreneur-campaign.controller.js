@@ -42,6 +42,16 @@ let EntrepreneurCampaignsController = class EntrepreneurCampaignsController {
             timestamp: new Date().toISOString(),
         };
     }
+    async getCampaignById(req, id) {
+        const userId = req.user.sub || req.user.id;
+        const campaign = await this.campaignService.getCampaignById(id, userId);
+        return {
+            statusCode: 200,
+            message: 'Campaign details retrieved successfully',
+            data: campaign,
+            timestamp: new Date().toISOString(),
+        };
+    }
 };
 exports.EntrepreneurCampaignsController = EntrepreneurCampaignsController;
 __decorate([
@@ -66,6 +76,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.QueryCampaignsDto]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurCampaignsController.prototype, "getMyCampaigns", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get campaign details by ID' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Campaign ID' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurCampaignsController.prototype, "getCampaignById", null);
 exports.EntrepreneurCampaignsController = EntrepreneurCampaignsController = __decorate([
     (0, swagger_1.ApiTags)('Entrepreneur Campaigns'),
     (0, swagger_1.ApiBearerAuth)(),

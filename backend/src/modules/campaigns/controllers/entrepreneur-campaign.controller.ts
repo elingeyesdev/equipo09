@@ -1,5 +1,5 @@
-import { Controller, Post, Get, Body, Query, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Query, UseGuards, Request, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { CampaignService } from '../services';
 import { CreateCampaignDto, QueryCampaignsDto } from '../dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -38,6 +38,20 @@ export class EntrepreneurCampaignsController {
       statusCode: 200,
       message: 'Campaigns retrieved successfully',
       data: result,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get campaign details by ID' })
+  @ApiParam({ name: 'id', description: 'Campaign ID' })
+  async getCampaignById(@Request() req: any, @Param('id') id: string) {
+    const userId = req.user.sub || req.user.id;
+    const campaign = await this.campaignService.getCampaignById(id, userId);
+    return {
+      statusCode: 200,
+      message: 'Campaign details retrieved successfully',
+      data: campaign,
       timestamp: new Date().toISOString(),
     };
   }
