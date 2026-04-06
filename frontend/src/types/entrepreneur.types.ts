@@ -21,6 +21,8 @@ export interface EntrepreneurProfile {
   totalCampaigns: number;
   totalRaised: number;
   rating: number | null;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }

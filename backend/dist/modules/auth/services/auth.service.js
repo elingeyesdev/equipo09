@@ -35,18 +35,34 @@ let AuthService = AuthService_1 = class AuthService {
             throw new exceptions_1.UnauthorizedException('Credenciales inválidas');
         }
         await this.userRepo.updateLastLogin(user.id, ip);
-        const payload = { sub: user.id, email: user.email };
+        let fullUser = await this.userRepo.findByIdWithRoles(user.id);
+        if (!fullUser) {
+            throw new exceptions_1.UnauthorizedException('Credenciales inválidas');
+        }
+        if (!fullUser.roles?.length) {
+            if (await this.userRepo.hasEntrepreneurProfile(user.id)) {
+                await this.userRepo.assignRoleByName(user.id, 'entrepreneur');
+                fullUser = (await this.userRepo.findByIdWithRoles(user.id));
+                this.logger.log(`Rol entrepreneur restaurado desde perfil: ${user.id}`);
+            }
+            else if (await this.userRepo.hasInvestorProfile(user.id)) {
+                await this.userRepo.assignRoleByName(user.id, 'investor');
+                fullUser = (await this.userRepo.findByIdWithRoles(user.id));
+                this.logger.log(`Rol investor restaurado desde perfil: ${user.id}`);
+            }
+        }
+        const payload = { sub: fullUser.id, email: fullUser.email };
         const accessToken = this.jwtService.sign(payload);
-        this.logger.log(`Login exitoso: ${user.id}`);
+        this.logger.log(`Login exitoso: ${fullUser.id}`);
         return {
             accessToken,
             tokenType: 'Bearer',
             expiresIn: process.env.JWT_EXPIRES_IN ?? '24h',
-            user,
+            user: fullUser,
         };
     }
     async validateToken(userId) {
-        const user = await this.userRepo.findById(userId);
+        const user = await this.userRepo.findByIdWithRoles(userId);
         if (!user || !user.isActive) {
             throw new exceptions_1.UnauthorizedException('Token inválido o usuario inactivo');
         }

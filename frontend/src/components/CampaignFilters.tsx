@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import type { QueryCampaignsDto, CampaignFilterPreset } from '../types/campaign.types';
+import { 
+  Search, 
+  SlidersHorizontal, 
+  ChevronDown, 
+  ChevronUp, 
+  Zap, 
+  MoveRight 
+} from 'lucide-react';
 
 const PRESETS: {
   id: CampaignFilterPreset;
@@ -23,7 +31,7 @@ const SORT_OPTIONS: {
   { key: 'created_at__ASC', sortBy: 'created_at', sortOrder: 'ASC', label: 'Más antiguas primero' },
   { key: 'end_date__ASC', sortBy: 'end_date', sortOrder: 'ASC', label: 'Cierran pronto' },
   { key: 'end_date__DESC', sortBy: 'end_date', sortOrder: 'DESC', label: 'Cierre más lejano' },
-  { key: 'title__ASC', sortBy: 'title', sortOrder: 'ASC', label: 'Título A → Z' },
+  { key: 'title__ASC', sortBy: 'title', sortOrder: 'ASC', label: 'Título A a Z' },
   { key: 'current_amount__DESC', sortBy: 'current_amount', sortOrder: 'DESC', label: 'Más recaudación' },
   { key: 'goal_amount__DESC', sortBy: 'goal_amount', sortOrder: 'DESC', label: 'Mayor meta' },
 ];
@@ -38,32 +46,6 @@ function sortKeyFromQuery(q: QueryCampaignsDto): string {
 interface Props {
   query: QueryCampaignsDto;
   onChange: (patch: Partial<QueryCampaignsDto>) => void;
-}
-
-function SearchIcon() {
-  return (
-    <svg className="campaign-filters-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15zM20 20l-4.35-4.35"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function FilterPanelIcon() {
-  return (
-    <svg className="campaign-filters-panel-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 6h16M7 12h10M10 18h4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 export function CampaignFilters({ query, onChange }: Props) {
@@ -131,216 +113,202 @@ export function CampaignFilters({ query, onChange }: Props) {
   const presetLabel = PRESETS.find((p) => p.id === presetActive)?.label ?? 'Todas';
   const sortLabel = SORT_OPTIONS.find((o) => o.key === sortSelectValue)?.label ?? '';
 
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[14px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+
   return (
     <section
-      className={`campaign-filters ${filtersOpen ? 'campaign-filters--expanded' : 'campaign-filters--collapsed'}`}
+      className="mb-8 font-['Sora',sans-serif] animate-in fade-in duration-500"
       aria-label="Filtros de campañas"
     >
       {!filtersOpen ? (
         <button
           type="button"
-          className="campaign-filters-trigger"
+          className="w-full bg-white border border-emerald-100/50 rounded-[24px] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-900/5 transition-all text-left shadow-sm group active:scale-[0.99] cursor-pointer"
           onClick={() => setFiltersOpen(true)}
           aria-expanded="false"
         >
-          <FilterPanelIcon />
-          <span className="campaign-filters-trigger-text">
-            <span className="campaign-filters-trigger-title">Filtros de listado</span>
-            <span className="campaign-filters-trigger-hint">Opcional · búsqueda, estado, orden y fechas</span>
-          </span>
-          {showClear ? (
-            <span className="campaign-filters-trigger-badge" title="Hay filtros aplicados">
-              Activo
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-all">
+             <SlidersHorizontal className="text-[#2e7d32]" size={22} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <span className="block text-[15px] font-black text-[#1c2b1e] tracking-tight">Panel de Control de Listado</span>
+            <span className="block text-[12px] font-medium text-slate-400">Búsqueda avanzada, filtrado por estado y ordenamiento</span>
+          </div>
+          {showClear && (
+            <span className="bg-emerald-100 text-[#2e7d32] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest mr-2 animate-pulse">
+              Filtros Activos
             </span>
-          ) : null}
-          <span className="campaign-filters-trigger-chevron" aria-hidden>
-            ▾
-          </span>
+          )}
+          <ChevronDown className="text-slate-300 group-hover:text-slate-500 transition-colors mr-2" size={20} />
         </button>
-      ) : null}
+      ) : (
+        <div className="bg-white border border-emerald-100 rounded-[32px] p-8 shadow-xl shadow-emerald-900/5 relative overflow-hidden animate-in zoom-in-95 duration-300">
+           {/* Decorative background element */}
+           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
-      {filtersOpen ? (
-        <>
-          <div className="campaign-filters-head">
-            <div>
-              <h2 className="campaign-filters-title">Filtrar campañas</h2>
-              <p className="campaign-filters-subtitle">
-                Busca por título y elige cómo quieres ver el listado.
-              </p>
-            </div>
-            <div className="campaign-filters-head-actions">
-              {showClear && (
-                <button type="button" className="btn btn-ghost campaign-filters-clear" onClick={clearAll}>
-                  Limpiar
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-emerald-50 pb-8">
+              <div>
+                <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-3 leading-none">
+                   <Zap className="text-[#2e7d32]" size={24} strokeWidth={2.5} /> 
+                   Criterios de Visualización
+                </h2>
+                <p className="text-[13px] font-medium text-slate-400 leading-relaxed max-w-sm mt-2">
+                   Personaliza el feed de campañas para encontrar exactamente lo que buscas.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {showClear && (
+                  <button type="button" className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black px-5 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none cursor-pointer" onClick={clearAll}>
+                    Limpiar Todo
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-6 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center gap-2"
+                  onClick={() => setFiltersOpen(false)}
+                >
+                  Confirmar & Cerrar
                 </button>
-              )}
-              <button
-                type="button"
-                className="btn btn-ghost campaign-filters-hide"
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* Columna Izquierda: Búsqueda y Estados */}
+              <div className="flex flex-col gap-8">
+                 <div className="flex flex-col gap-3">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1" htmlFor="campaign-search">
+                       Búsqueda de Título
+                    </label>
+                    <div className="relative group">
+                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <Search size={18} strokeWidth={2.5} />
+                       </div>
+                       <input
+                          id="campaign-search"
+                          type="search"
+                          className={`${inputClass} pl-12`}
+                          placeholder="Escribe el nombre de la campaña..."
+                          value={searchDraft}
+                          onChange={(e) => setSearchDraft(e.target.value)}
+                          autoComplete="off"
+                       />
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col gap-3">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                       Segmentación por Estado
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                       {PRESETS.map(({ id, label, hint }) => (
+                          <button
+                            key={id}
+                            type="button"
+                            className={`
+                               px-4 py-2.5 rounded-xl text-[12px] font-black transition-all border-[1.5px] cursor-pointer
+                               ${presetActive === id 
+                                 ? 'bg-[#2e7d32] text-white border-[#2e7d32] shadow-md shadow-emerald-500/20' 
+                                 : 'bg-white text-slate-500 border-gray-100 hover:border-emerald-200'
+                               }
+                            `}
+                            onClick={() => onChange({ filterPreset: id, page: 1 })}
+                            title={hint}
+                            aria-pressed={presetActive === id}
+                          >
+                             {label}
+                          </button>
+                       ))}
+                    </div>
+                 </div>
+              </div>
+
+              {/* Columna Derecha: Orden y Fechas */}
+              <div className="flex flex-col gap-8 bg-emerald-50/10 p-6 rounded-3xl border border-emerald-50/50">
+                 <div className="flex flex-col gap-3">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                       Prioridad de Visualización
+                    </label>
+                    <select
+                      className={inputClass}
+                      value={sortSelectValue}
+                      onChange={(e) => onSortChange(e.target.value)}
+                    >
+                      {SORT_OPTIONS.map((o) => (
+                        <option key={o.key} value={o.key}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                 </div>
+
+                 <div className="flex flex-col gap-4">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                       Filtrado por Rango Temporal
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div className="flex flex-col gap-2">
+                          <span className="text-[10px] font-bold text-slate-400 ml-1 flex items-center gap-2">
+                             Publicación desde 
+                             <MoveRight size={12} strokeWidth={2} /> 
+                             hasta
+                          </span>
+                          <div className="flex items-center gap-2">
+                             <input
+                                type="date"
+                                className={`${inputClass} !py-2 !px-3 text-[12px]`}
+                                value={query.createdFrom ?? ''}
+                                onChange={(e) => onChange({ createdFrom: e.target.value || undefined, page: 1 })}
+                             />
+                             <input
+                                type="date"
+                                className={`${inputClass} !py-2 !px-3 text-[12px]`}
+                                value={query.createdTo ?? ''}
+                                onChange={(e) => onChange({ createdTo: e.target.value || undefined, page: 1 })}
+                             />
+                          </div>
+                       </div>
+                       <div className="flex flex-col gap-2">
+                          <span className="text-[10px] font-bold text-slate-400 ml-1 flex items-center gap-2">
+                             Cierre desde 
+                             <MoveRight size={12} strokeWidth={2} /> 
+                             hasta
+                          </span>
+                          <div className="flex items-center gap-2">
+                             <input
+                                type="date"
+                                className={`${inputClass} !py-2 !px-3 text-[12px]`}
+                                value={query.endDateFrom ?? ''}
+                                onChange={(e) => onChange({ endDateFrom: e.target.value || undefined, page: 1 })}
+                             />
+                             <input
+                                type="date"
+                                className={`${inputClass} !py-2 !px-3 text-[12px]`}
+                                value={query.endDateTo ?? ''}
+                                onChange={(e) => onChange({ endDateTo: e.target.value || undefined, page: 1 })}
+                             />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           <div className="mt-8 pt-6 border-t border-emerald-50 flex items-center justify-between">
+              <div className="text-[12px] font-medium text-slate-400">
+                 Modo: <strong className="text-slate-900">{presetLabel}</strong> · 
+                 Orden: <strong className="text-slate-900">{sortLabel}</strong>
+                 {query.search?.trim() && <> · Búsqueda: <strong className="text-slate-900">"{query.search}"</strong></>}
+              </div>
+              <button 
+                className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 underline-offset-4 cursor-pointer border-none bg-transparent flex items-center gap-2"
                 onClick={() => setFiltersOpen(false)}
               >
-                Ocultar filtros
+                <ChevronUp size={16} strokeWidth={2.5} />
+                Colapsar panel
               </button>
-            </div>
-          </div>
-
-          <div className="campaign-filters-search-wrap">
-        <label className="campaign-filters-search-label" htmlFor="campaign-search">
-          <SearchIcon />
-          <span className="sr-only">Buscar por título</span>
-        </label>
-        <input
-          id="campaign-search"
-          type="search"
-          className="campaign-filters-search-input"
-          placeholder="Buscar por nombre de campaña…"
-          value={searchDraft}
-          onChange={(e) => setSearchDraft(e.target.value)}
-          autoComplete="off"
-        />
-      </div>
-
-      <div className="campaign-filters-block">
-        <p className="campaign-filters-block-label" id="filter-preset-label">
-          Estado
-        </p>
-        <div className="campaign-filter-chips-scroll" role="group" aria-labelledby="filter-preset-label">
-          {PRESETS.map(({ id, label, hint }) => (
-            <button
-              key={id}
-              type="button"
-              className={`campaign-filter-chip ${presetActive === id ? 'is-active' : ''}`}
-              onClick={() => onChange({ filterPreset: id, page: 1 })}
-              title={hint}
-              aria-pressed={presetActive === id}
-            >
-              {label}
-            </button>
-          ))}
+           </div>
         </div>
-      </div>
-
-      <div className="campaign-filters-toolbar">
-        <label className="campaign-filters-sort-field">
-          <span className="campaign-filters-sort-label">Ordenar por</span>
-          <select
-            className="campaign-filters-sort-select"
-            value={sortSelectValue}
-            onChange={(e) => onSortChange(e.target.value)}
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.key} value={o.key}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <details className={`campaign-filters-details ${hasExtraFilters ? 'has-value' : ''}`}>
-        <summary className="campaign-filters-details-summary">
-          <div className="campaign-filters-details-text">
-            <span className="campaign-filters-details-title">Filtros por fecha</span>
-            <span className="campaign-filters-details-hint">Opcional · por creación o cierre de campaña</span>
-          </div>
-          <span className="campaign-filters-details-chevron" aria-hidden>
-            ›
-          </span>
-        </summary>
-        <div className="campaign-filters-details-body">
-          <div className="campaign-filters-date-block">
-            <span className="campaign-filters-date-heading">Fecha de creación</span>
-            <div className="campaign-filter-date-group">
-              <input
-                type="date"
-                className="campaign-filter-date-input"
-                aria-label="Creada desde"
-                value={query.createdFrom ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    createdFrom: e.target.value || undefined,
-                    page: 1,
-                  })
-                }
-              />
-              <span className="campaign-filter-date-sep">hasta</span>
-              <input
-                type="date"
-                className="campaign-filter-date-input"
-                aria-label="Creada hasta"
-                value={query.createdTo ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    createdTo: e.target.value || undefined,
-                    page: 1,
-                  })
-                }
-              />
-            </div>
-          </div>
-          <div className="campaign-filters-date-block">
-            <span className="campaign-filters-date-heading">Fecha de cierre</span>
-            <div className="campaign-filter-date-group">
-              <input
-                type="date"
-                className="campaign-filter-date-input"
-                aria-label="Cierra desde"
-                value={query.endDateFrom ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    endDateFrom: e.target.value || undefined,
-                    page: 1,
-                  })
-                }
-              />
-              <span className="campaign-filter-date-sep">hasta</span>
-              <input
-                type="date"
-                className="campaign-filter-date-input"
-                aria-label="Cierra hasta"
-                value={query.endDateTo ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    endDateTo: e.target.value || undefined,
-                    page: 1,
-                  })
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </details>
-
-          <div className="campaign-filters-footer">
-            <p className="campaign-filters-footer-summary">
-              Vista: <strong>{presetLabel}</strong>
-              {sortLabel ? (
-                <>
-                  {' '}
-                  · orden: <strong>{sortLabel}</strong>
-                </>
-              ) : null}
-              {query.search?.trim() ? (
-                <>
-                  {' '}
-                  · búsqueda: «{query.search.trim().length > 32
-                    ? `${query.search.trim().slice(0, 32)}…`
-                    : query.search.trim()}
-                  »
-                </>
-              ) : null}
-              {hasExtraFilters ? <> · <strong>fechas</strong> aplicadas</> : null}
-            </p>
-            <button
-              type="button"
-              className="btn btn-ghost campaign-filters-footer-hide"
-              onClick={() => setFiltersOpen(false)}
-            >
-              Ocultar filtros
-            </button>
-          </div>
-        </>
-      ) : null}
+      )}
     </section>
   );
 }

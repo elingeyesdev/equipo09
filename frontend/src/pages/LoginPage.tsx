@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
+import { Gem, AlertCircle, ArrowRight } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -47,38 +48,38 @@ export function LoginPage() {
     }
   };
 
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const labelClass = "text-[12px] font-black text-[#1c2b1e]/60 mb-2 block uppercase tracking-wider ml-1";
+
   return (
-    <div className="page-center">
-      <div className="card card-sm">
-        {/* Logo / Brand */}
-        <div style={{ textAlign: 'center', margin: '0 0 32px' }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-            display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center',
-            fontSize: '1.4rem', margin: '0 auto 16px',
-          }}>
-            💎
+    <div className="min-h-screen bg-[#f4f7f4] flex items-center justify-center p-6 relative overflow-hidden font-['Sora',sans-serif]">
+      {/* Decorative background elements - Green Financial Palette */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-100/40 blur-[120px]"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-lime-100/30 blur-[120px]"></div>
+      
+      <div className="bg-white rounded-[32px] w-[440px] max-w-full shadow-[0_32px_64px_-16px_rgba(28,43,30,0.1)] p-8 md:p-12 animate-in fade-in zoom-in-95 duration-500 relative z-10 border border-white/40">
+        
+        {/* Brand/Logo Section */}
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-gradient-to-tr from-[#2e7d32] to-[#00897b] rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-emerald-500/20 animate-bounce cursor-default">
+            <Gem size={32} strokeWidth={2.5} />
           </div>
-          <h1 className="page-title" style={{ fontSize: '1.4rem', textAlign: 'center', margin: '0 0 4px' }}>
-            CrowdFunding
-          </h1>
-          <p className="page-subtitle" style={{ textAlign: 'center', margin: 0 }}>
-            Inicia sesión para gestionar tu perfil
-          </p>
+          <h1 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-2">CrowdFunding</h1>
+          <p className="text-[14px] font-medium text-slate-400">Impulsando tus mejores ideas con capital inteligente</p>
         </div>
 
-        {/* Error */}
+        {/* Error Alert */}
         {error && (
-          <div className="alert alert-error" style={{ marginBottom: 20 }}>
-            <span>⚠</span> {error}
+          <div className="bg-red-50 border border-red-100 text-[#c62828] p-4 rounded-xl text-sm font-bold mb-8 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
+            <AlertCircle size={20} strokeWidth={2.5} />
+            {error}
           </div>
         )}
 
-        {/* Form */}
-        <form className="form" onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label htmlFor="email">Correo electrónico</label>
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+          <div className="flex flex-col">
+            <label htmlFor="email" className={labelClass}>Correo electrónico</label>
             <input
               id="email"
               type="email"
@@ -86,12 +87,13 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className={inputClass}
               autoComplete="email"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+          <div className="flex flex-col">
+            <label htmlFor="password" className={labelClass}>Contraseña</label>
             <input
               id="password"
               type="password"
@@ -99,6 +101,7 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className={inputClass}
               autoComplete="current-password"
             />
           </div>
@@ -106,25 +109,28 @@ export function LoginPage() {
           <button
             id="btn-login"
             type="submit"
-            className="btn btn-primary btn-full"
+            className="mt-4 bg-[#2e7d32] hover:bg-[#1c2b1e] text-white border-none rounded-xl py-4 text-[15px] font-black cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3"
             disabled={loading}
           >
             {loading ? (
               <>
-                <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                Ingresando...
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Validando Acceso...
               </>
             ) : (
-              'Iniciar sesión →'
+              <>
+                Ingresar a mi cuenta
+                <ArrowRight size={20} strokeWidth={2.5} />
+              </>
             )}
           </button>
         </form>
 
-        {/* Link al registro */}
-        <div style={{ textAlign: 'center', marginTop: 24, fontSize: '0.85rem' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>¿No tienes una cuenta? </span>
-          <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
-            Regístrate aquí
+        {/* Registration Link */}
+        <div className="text-center mt-10">
+          <span className="text-[14px] font-medium text-slate-400">¿Aún no tienes cuenta? </span>
+          <Link to="/register" className="text-[14px] font-black text-[#2e7d32] no-underline hover:underline decoration-2 underline-offset-4">
+            Empezar ahora
           </Link>
         </div>
       </div>

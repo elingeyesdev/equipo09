@@ -20,15 +20,15 @@ export function CircularFundingRing({ currentAmount, goalAmount }: Props) {
 
   return (
     <div
-      className="circular-funding-ring"
+      className="relative flex items-center justify-center w-36 h-36 font-['Sora',sans-serif]"
       role="img"
       aria-label={`Financiación al ${labelPct} por ciento de la meta`}
     >
-      <svg className="circular-funding-ring-svg" viewBox="0 0 140 140" aria-hidden>
+      <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 140 140" aria-hidden>
         <defs>
           <linearGradient id="previewRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--primary)" />
-            <stop offset="100%" stopColor="#6366f1" />
+            <stop offset="0%" stopColor="#2e7d32" />
+            <stop offset="100%" stopColor="#aed581" />
           </linearGradient>
         </defs>
         <circle
@@ -36,7 +36,7 @@ export function CircularFundingRing({ currentAmount, goalAmount }: Props) {
           cy="70"
           r={R}
           fill="none"
-          stroke="var(--bg-input)"
+          stroke="#f1f5f9"
           strokeWidth={STROKE}
         />
         <circle
@@ -49,13 +49,12 @@ export function CircularFundingRing({ currentAmount, goalAmount }: Props) {
           strokeLinecap="round"
           strokeDasharray={C}
           strokeDashoffset={dashOffset}
-          transform="rotate(-90 70 70)"
-          className="circular-funding-ring-arc"
+          className="transition-all duration-1000 ease-out"
         />
       </svg>
-      <div className="circular-funding-ring-center">
-        <span className="circular-funding-ring-pct">{labelPct}%</span>
-        <span className="circular-funding-ring-sub">de la meta</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="text-2xl font-black text-slate-900 leading-none">{labelPct}%</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Meta</span>
       </div>
     </div>
   );

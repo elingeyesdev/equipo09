@@ -17,11 +17,11 @@ export function CampaignProgress({ currentAmount, goalAmount, investorCount }: P
   const labelPercent = formatFundingPercent(currentAmount, goalAmount);
 
   return (
-    <div className="campaign-progress-container">
+    <div className="flex flex-col gap-3 font-['Sora',sans-serif]">
       <ProgressBar value={barWidth} />
-      <div className="progress-labels">
-        <span className="progress-percentage">{labelPercent}%</span>
-        <span className="progress-investors">
+      <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest leading-none">
+        <span className="text-[#2e7d32]">{labelPercent}% Recaudado</span>
+        <span className="text-slate-400">
           {investorCount} {investorCount === 1 ? 'inversor' : 'inversores'}
         </span>
       </div>

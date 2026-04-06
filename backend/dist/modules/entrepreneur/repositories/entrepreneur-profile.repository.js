@@ -19,18 +19,22 @@ let EntrepreneurProfileRepository = class EntrepreneurProfileRepository extends 
         const row = await this.queryOne(`SELECT * FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
         return row ? (0, models_1.mapRowToEntrepreneurProfile)(row) : null;
     }
+    async findByDisplayName(displayName) {
+        const row = await this.queryOne(`SELECT * FROM entrepreneur_profiles WHERE LOWER(display_name) = LOWER($1)`, [displayName]);
+        return row ? (0, models_1.mapRowToEntrepreneurProfile)(row) : null;
+    }
     async create(userId, dto) {
         return this.transaction(async (client) => {
             const result = await client.query(`INSERT INTO entrepreneur_profiles (
           user_id, first_name, last_name, display_name, bio,
           company_name, website, linkedin_url,
           address_line, city, state, country, postal_code,
-          bank_account_number, bank_name
+          bank_account_number, bank_name, avatar_url, cover_url
         ) VALUES (
           $1, $2, $3, $4, $5,
           $6, $7, $8,
           $9, $10, $11, $12, $13,
-          $14, $15
+          $14, $15, $16, $17
         )
         RETURNING *`, [
                 userId,
@@ -48,6 +52,8 @@ let EntrepreneurProfileRepository = class EntrepreneurProfileRepository extends 
                 dto.postalCode ?? null,
                 dto.bankAccountNumber ?? null,
                 dto.bankName ?? null,
+                dto.avatarUrl ?? null,
+                dto.coverUrl ?? null,
             ]);
             await client.query(`INSERT INTO user_roles (user_id, role_id)
          SELECT $1, r.id FROM roles r WHERE r.name = 'entrepreneur'
@@ -71,6 +77,8 @@ let EntrepreneurProfileRepository = class EntrepreneurProfileRepository extends 
             postal_code: dto.postalCode,
             bank_account_number: dto.bankAccountNumber,
             bank_name: dto.bankName,
+            avatar_url: dto.avatarUrl,
+            cover_url: dto.coverUrl,
         };
         const entries = Object.entries(fieldMap).filter(([, value]) => value !== undefined);
         if (entries.length === 0) {

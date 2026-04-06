@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import type { InvestorProfile } from '../types/investor.types';
 import { CategorySelector } from './CategorySelector';
+import { User, Scale, Home, CircleDollarSign, Target, Sparkles, Save } from 'lucide-react';
 
 // ── Esquema de validación (alineado con DTOs del backend) ──────────────────
 const schema = z.object({
@@ -83,61 +84,74 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
     }
   }, [profile, reset]);
 
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const labelClass = "text-[12px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
+  const sectionTitle = "text-[14px] font-black text-[#1c2b1e] border-b border-emerald-50 pb-3 mb-6 uppercase tracking-widest flex items-center gap-2";
+  const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
+
   return (
-    <form className="form" onSubmit={handleSubmit((data) => onSubmit({ ...data, preferredCategories: selectedCategories }))} noValidate>
+    <form className="flex flex-col gap-12 font-['Sora',sans-serif]" onSubmit={handleSubmit((data) => onSubmit({ ...data, preferredCategories: selectedCategories }))} noValidate>
 
       {/* ── DATOS PERSONALES ─────────────────────────────── */}
-      <div className="form-section">
-        <div className="section-title">Datos personales</div>
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="firstName">Nombre <span className="required">*</span></label>
+      <div className="flex flex-col">
+        <div className={sectionTitle}>
+           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#2e7d32] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+             <User size={16} strokeWidth={2.5} />
+           </span>
+           Identidad & Trayectoria
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <label htmlFor="firstName" className={labelClass}>Nombre <span className="text-[#c62828]">*</span></label>
             <input
               id="firstName"
               type="text"
               placeholder="Laura"
-              className={errors.firstName ? 'error-field' : ''}
+              className={`${inputClass} ${errors.firstName ? errorClass : ''}`}
               {...register('firstName')}
             />
-            {errors.firstName && <span className="field-error">{errors.firstName.message}</span>}
+            {errors.firstName && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.firstName.message}</span>}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="lastName">Apellido <span className="required">*</span></label>
+          <div className="flex flex-col">
+            <label htmlFor="lastName" className={labelClass}>Apellido <span className="text-[#c62828]">*</span></label>
             <input
               id="lastName"
               type="text"
               placeholder="Gómez"
-              className={errors.lastName ? 'error-field' : ''}
+              className={`${inputClass} ${errors.lastName ? errorClass : ''}`}
               {...register('lastName')}
             />
-            {errors.lastName && <span className="field-error">{errors.lastName.message}</span>}
+            {errors.lastName && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.lastName.message}</span>}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="displayName">Nombre público</label>
+          <div className="flex flex-col">
+            <label htmlFor="displayName" className={labelClass}>Nombre público (Avatar)</label>
             <input
               id="displayName"
               type="text"
               placeholder="Laura G."
+              className={inputClass}
               {...register('displayName')}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="investorType">Tipo de inversor</label>
-            <select id="investorType" {...register('investorType')}>
+          <div className="flex flex-col relative">
+            <label htmlFor="investorType" className={labelClass}>Tipo de perfil inversor</label>
+            <select id="investorType" {...register('investorType')} className={`${inputClass} cursor-pointer appearance-none bg-[url('https://www.svgrepo.com/show/511116/dropdown.svg')] bg-[length:16px] bg-[right_1rem_center] bg-no-repeat`}>
               <option value="individual">Individual</option>
               <option value="institutional">Institucional</option>
-              <option value="angel">Ángel</option>
+              <option value="angel">Ángel Inversionista</option>
             </select>
           </div>
 
-          <div className="form-group full-width">
-            <label htmlFor="bio">Biografía</label>
+          <div className="flex flex-col md:col-span-2">
+            <label htmlFor="bio" className={labelClass}>Resumen de Trayectoria</label>
             <textarea
               id="bio"
+              rows={4}
               placeholder="Inversora con experiencia en startups de tecnología y sostenibilidad..."
+              className={`${inputClass} resize-none`}
               {...register('bio')}
             />
           </div>
@@ -145,15 +159,21 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       </div>
 
       {/* ── INFORMACIÓN FISCAL ───────────────────────────── */}
-      <div className="form-section">
-        <div className="section-title">Información fiscal</div>
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="taxId">NIT / Cédula fiscal</label>
+      <div className="flex flex-col">
+        <div className={sectionTitle}>
+           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+             <Scale size={16} strokeWidth={2.5} />
+           </span>
+           Documentación de Capital
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <label htmlFor="taxId" className={labelClass}>CI / NIT / Tax ID</label>
             <input
               id="taxId"
               type="text"
               placeholder="123456789"
+              className={inputClass}
               {...register('taxId')}
             />
           </div>
@@ -161,84 +181,103 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       </div>
 
       {/* ── DIRECCIÓN ────────────────────────────────────── */}
-      <div className="form-section">
-        <div className="section-title">Dirección</div>
-        <div className="form-grid">
-          <div className="form-group full-width">
-            <label htmlFor="addressLine1">Dirección línea 1</label>
+      <div className="flex flex-col">
+        <div className={sectionTitle}>
+           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#1c2b1e] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+             <Home size={16} strokeWidth={2.5} />
+           </span>
+           Residencia Operativa
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col md:col-span-2">
+            <label htmlFor="addressLine1" className={labelClass}>Dirección Principal</label>
             <input
               id="addressLine1"
               type="text"
               placeholder="Calle 72 #10-34"
+              className={inputClass}
               {...register('addressLine1')}
             />
           </div>
 
-          <div className="form-group full-width">
-            <label htmlFor="addressLine2">Dirección línea 2</label>
+          <div className="flex flex-col md:col-span-2">
+            <label htmlFor="addressLine2" className={labelClass}>Complemento (Apto, Bloque, Oficina)</label>
             <input
               id="addressLine2"
               type="text"
-              placeholder="Apto 501"
+              placeholder="Torre 2, AP 501"
+              className={inputClass}
               {...register('addressLine2')}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="city">Ciudad</label>
-            <input id="city" type="text" placeholder="Medellín" {...register('city')} />
+          <div className="flex flex-col">
+            <label htmlFor="city" className={labelClass}>Ciudad</label>
+            <input id="city" type="text" placeholder="Medellín" className={inputClass} {...register('city')} />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="state">Departamento / Estado</label>
-            <input id="state" type="text" placeholder="Antioquia" {...register('state')} />
+          <div className="flex flex-col">
+            <label htmlFor="state" className={labelClass}>Estado / Departamento</label>
+            <input id="state" type="text" placeholder="Antioquia" className={inputClass} {...register('state')} />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="country">País</label>
-            <input id="country" type="text" placeholder="Colombia" {...register('country')} />
+          <div className="flex flex-col">
+            <label htmlFor="country" className={labelClass}>País de Residencia</label>
+            <input id="country" type="text" placeholder="Colombia" className={inputClass} {...register('country')} />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="postalCode">Código postal</label>
-            <input id="postalCode" type="text" placeholder="050001" {...register('postalCode')} />
+          <div className="flex flex-col">
+            <label htmlFor="postalCode" className={labelClass}>Código Postal</label>
+            <input id="postalCode" type="text" placeholder="050001" className={inputClass} {...register('postalCode')} />
           </div>
         </div>
       </div>
 
       {/* ── PREFERENCIAS DE INVERSIÓN ────────────────────── */}
-      <div className="form-section">
-        <div className="section-title">Preferencias de inversión</div>
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="minInvestment">Inversión mínima (USD)</label>
+      <div className="flex flex-col">
+        <div className={sectionTitle}>
+           <span className="w-8 h-8 rounded-lg bg-[#aed581]/20 text-[#2e7d32] flex items-center justify-center text-sm shadow-sm border border-[#aed581]/50">
+             <CircleDollarSign size={16} strokeWidth={2.5} />
+           </span>
+           Límites de Capital
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <label htmlFor="minInvestment" className={labelClass}>Inversión Mínima (USD)</label>
             <input
               id="minInvestment"
               type="number"
               placeholder="500"
               min="1"
+              className={`${inputClass} ${errors.minInvestment ? errorClass : ''}`}
               {...register('minInvestment')}
             />
-            {errors.minInvestment && <span className="field-error">{String(errors.minInvestment.message)}</span>}
+            {errors.minInvestment && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.minInvestment.message)}</span>}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="maxInvestment">Inversión máxima (USD)</label>
+          <div className="flex flex-col">
+            <label htmlFor="maxInvestment" className={labelClass}>Capacidad Máxima (USD)</label>
             <input
               id="maxInvestment"
               type="number"
               placeholder="50000"
               min="1"
+              className={`${inputClass} ${errors.maxInvestment ? errorClass : ''}`}
               {...register('maxInvestment')}
             />
-            {errors.maxInvestment && <span className="field-error">{String(errors.maxInvestment.message)}</span>}
+            {errors.maxInvestment && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.maxInvestment.message)}</span>}
           </div>
         </div>
       </div>
 
       {/* ── SECTORES DE INTERÉS ──────────────────────────── */}
-      <div className="form-section">
-        <div className="section-title">Sectores de interés</div>
+      <div className="flex flex-col">
+        <div className={sectionTitle}>
+           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+             <Target size={16} strokeWidth={2.5} />
+           </span>
+           Sectores de Interés Técnico
+        </div>
         <CategorySelector
           selected={selectedCategories}
           onChange={setSelectedCategories}
@@ -246,20 +285,32 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       </div>
 
       {/* ── ACCIONES ─────────────────────────────────────── */}
-      <div className="form-actions">
+      <div className="mt-4 pt-8 border-t border-emerald-50 flex justify-end">
         <button
           type="submit"
           id="btn-save-profile"
-          className="btn btn-primary"
+          className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50"
           disabled={saving}
         >
           {saving ? (
             <>
-              <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-              Guardando...
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Sincronizando Cambios...
             </>
           ) : (
-            isNew ? '✦ Crear perfil' : '✦ Guardar cambios'
+            <>
+              {isNew ? (
+                <>
+                  <Sparkles size={20} strokeWidth={2.5} />
+                  Crear mi Expediente
+                </>
+              ) : (
+                <>
+                  <Save size={20} strokeWidth={2.5} />
+                  Actualizar Dossier
+                </>
+              )}
+            </>
           )}
         </button>
       </div>

@@ -84,3 +84,17 @@ export async function getCampaignFinancialProgress(
   );
   return data.data;
 }
+
+export async function uploadCampaignImage(
+  campaignId: string,
+  file: File,
+): Promise<EntrepreneurCampaign> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/cover`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}

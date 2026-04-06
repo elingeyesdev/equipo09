@@ -10,7 +10,12 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import {
   ApiTags,
   ApiOperation,
@@ -103,6 +108,61 @@ export class EntrepreneurController {
     const profile = await this.entrepreneurService.getProfileById(id);
     return new ApiSuccessResponse(profile);
   }
+  @Post('me/profile/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profiles',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir avatar del emprendedor' })
+  async uploadAvatar(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    const url = `/uploads/profiles/${file.filename}`;
+    const profile = await this.entrepreneurService.updateMyProfile(userId, {
+      avatarUrl: url,
+    } as any);
+    return new ApiSuccessResponse(profile, 'Avatar actualizado');
+  }
+
+  @Post('me/profile/cover')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profiles',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir portada del emprendedor' })
+  async uploadCover(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    const url = `/uploads/profiles/${file.filename}`;
+    const profile = await this.entrepreneurService.updateMyProfile(userId, {
+      coverUrl: url,
+    } as any);
+    return new ApiSuccessResponse(profile, 'Portada actualizada');
+  }
   @ApiTags('entrepreneur-campaigns')
   @Post('me/campaigns')
   @HttpCode(HttpStatus.CREATED)
@@ -169,6 +229,38 @@ export class EntrepreneurController {
       campaignId,
     );
     return new ApiSuccessResponse(campaign, 'Campaña publicada');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns/:campaignId/cover')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/campaigns',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir portada de una campaña' })
+  async uploadCampaignCover(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const url = `/uploads/campaigns/${file.filename}`;
+    const campaign = await this.entrepreneurService.updateCampaignCover(
+      userId,
+      campaignId,
+      url,
+    );
+    return new ApiSuccessResponse(campaign, 'Portada de campaña actualizada');
   }
 
   @ApiTags('entrepreneur-campaigns')

@@ -10,6 +10,7 @@ export declare class EntrepreneurCampaignRepository extends BaseRepository {
     findOneByCreatorId(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
     submitForReview(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
     publishCampaign(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
+    updateCoverImageUrl(campaignId: string, creatorId: string, coverImageUrl: string): Promise<EntrepreneurCampaign | null>;
     getFinancialProgress(campaignId: string, creatorId: string): Promise<CampaignFinancialProgress | null>;
     getFinancialSummary(creatorId: string): Promise<EntrepreneurFinancialSummary>;
 }

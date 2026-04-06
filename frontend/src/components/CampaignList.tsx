@@ -1,5 +1,14 @@
 import { CampaignCard } from './CampaignCard';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
+import { 
+  FolderOpen, 
+  Search, 
+  PlusCircle, 
+  UserCheck, 
+  AlertTriangle, 
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react';
 
 interface Meta {
   totalItems: number;
@@ -45,21 +54,20 @@ export function CampaignList({
 }: Props) {
   if (loading && campaigns.length === 0) {
     return (
-      <div className="campaign-empty-state">
-        <span className="spinner" style={{ width: 32, height: 32, borderWidth: 3 }} />
-        <p>Cargando tus campañas...</p>
+      <div className="py-40 flex flex-col items-center justify-center gap-6">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
+        <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Campañas...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="alert-error" style={{ margin: '2rem 0' }}>
-        <p>
-          <strong>Error:</strong> {error}
-        </p>
-        <button className="btn btn-ghost" onClick={onRetry} style={{ marginTop: '1rem' }}>
-          Reintentar
+      <div className="bg-red-50 border border-red-100 text-[#c62828] p-8 rounded-[32px] text-center flex flex-col items-center gap-4 animate-in fade-in duration-500">
+        <AlertTriangle size={48} strokeWidth={2.5} />
+        <p className="text-[15px] font-bold">Error: {error}</p>
+        <button className="mt-2 bg-[#c62828] hover:bg-red-800 text-white font-black px-8 py-3 rounded-xl transition-all active:scale-95 border-none cursor-pointer" onClick={onRetry}>
+          Reintentar Carga
         </button>
       </div>
     );
@@ -67,22 +75,35 @@ export function CampaignList({
 
   if (!loading && campaigns.length === 0) {
     return (
-      <div className="campaign-empty-state">
-        <div className="empty-icon empty-icon--neutral" aria-hidden />
-        <h2>{hasFilterApplied ? 'Sin resultados' : 'Aún no tienes campañas'}</h2>
-        <p className="text-muted">
+      <div className="bg-white rounded-[32px] border border-dashed border-emerald-200 p-16 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="text-emerald-200 mb-6 flex justify-center" aria-hidden>
+           {hasFilterApplied ? <Search size={64} strokeWidth={1.5} /> : <FolderOpen size={64} strokeWidth={1.5} />}
+        </div>
+        <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-3">
+           {hasFilterApplied ? 'Sin coincidencias' : 'Tu catálogo está vacío'}
+        </h2>
+        <p className="text-[14px] text-slate-400 font-medium max-w-xs mx-auto mb-10 leading-relaxed">
           {hasFilterApplied
-            ? 'Prueba ajustar filtros, fechas o la búsqueda por título.'
-            : 'Comienza creando tu primera campaña y atrayendo inversiones.'}
+            ? 'Prueba ajustar los criterios de búsqueda o limpiar los filtros activos.'
+            : 'Comienza hoy mismo creando tu primera campaña y atrae capital para tu visión.'}
         </p>
         {!hasFilterApplied && (
           <button
-            className="btn btn-primary"
+            className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-3 mx-auto"
             type="button"
             onClick={canCreateCampaign ? onOpenForm : onGoToProfile}
-            style={{ marginTop: '1.5rem' }}
           >
-            {canCreateCampaign ? 'Crear mi primera campaña' : 'Completar mi perfil'}
+            {canCreateCampaign ? (
+              <>
+                <PlusCircle size={20} strokeWidth={2.5} />
+                Lanzar mi Primera Campaña
+              </>
+            ) : (
+              <>
+                <UserCheck size={20} strokeWidth={2.5} />
+                Completar mi Perfil
+              </>
+            )}
           </button>
         )}
       </div>
@@ -90,8 +111,8 @@ export function CampaignList({
   }
 
   return (
-    <>
-      <div className="campaign-grid">
+    <div className="flex flex-col gap-12 font-['Sora',sans-serif]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {campaigns.map((c) => (
           <CampaignCard
             key={c.id}
@@ -105,29 +126,31 @@ export function CampaignList({
       </div>
 
       {meta && meta.totalPages > 1 && (
-        <nav className="campaign-pagination" aria-label="Paginación">
+        <nav className="flex items-center justify-between bg-white border border-emerald-50 px-6 py-4 rounded-2xl shadow-sm" aria-label="Paginación">
           <button
             type="button"
-            className="btn btn-ghost btn-sm"
+            className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
             disabled={meta.currentPage <= 1 || loading}
             onClick={() => onPageChange(meta.currentPage - 1)}
           >
+            <ChevronLeft size={16} strokeWidth={2.5} />
             Anterior
           </button>
-          <span className="campaign-pagination-info">
-            Página {meta.currentPage} de {meta.totalPages}
-            <span className="campaign-pagination-total">({meta.totalItems} campañas)</span>
-          </span>
+          <div className="flex flex-col items-center">
+             <span className="text-[13px] font-black text-[#1c2b1e] leading-none">Página {meta.currentPage} de {meta.totalPages}</span>
+             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">({meta.totalItems} campañas totales)</span>
+          </div>
           <button
             type="button"
-            className="btn btn-ghost btn-sm"
+            className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
             disabled={meta.currentPage >= meta.totalPages || loading}
             onClick={() => onPageChange(meta.currentPage + 1)}
           >
             Siguiente
+            <ChevronRight size={16} strokeWidth={2.5} />
           </button>
         </nav>
       )}
-    </>
+    </div>
   );
 }

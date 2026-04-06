@@ -3,6 +3,8 @@ import {
   getMyEntrepreneurProfile,
   createEntrepreneurProfile,
   updateEntrepreneurProfile,
+  uploadAvatar,
+  uploadCover,
 } from '../api/entrepreneur.api';
 import type {
   EntrepreneurProfile,
@@ -18,6 +20,8 @@ interface UseEntrepreneurProfileReturn {
   isNewProfile: boolean;
   fetchProfile: () => Promise<void>;
   submitProfile: (dto: CreateEntrepreneurProfileDto) => Promise<void>;
+  uploadAvatarPhoto: (file: File) => Promise<void>;
+  uploadCoverPhoto: (file: File) => Promise<void>;
 }
 
 export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
@@ -54,7 +58,10 @@ export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
       setSuccessMessage(null);
       try {
         let saved: EntrepreneurProfile;
-        if (isNewProfile) {
+        // Determinamos si es creación o edición basado en la existencia real del perfil
+        const shouldCreate = !profile;
+
+        if (shouldCreate) {
           saved = await createEntrepreneurProfile(dto);
           setSuccessMessage('¡Perfil creado exitosamente! Bienvenido a la plataforma.');
         } else {
@@ -64,17 +71,57 @@ export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
         setProfile(saved);
         setIsNewProfile(false);
       } catch (err: any) {
+        if (err?.response?.status === 409) {
+          setError('El nombre público ya está en uso por otro emprendedor. Prueba con uno diferente.');
+          return;
+        }
+
         const msg =
           err?.response?.data?.message ||
           'Error al guardar el perfil. Intenta de nuevo.';
-        setError(Array.isArray(msg) ? msg.join(', ') : msg);
+        
+        if (Array.isArray(msg)) {
+          setError(`Errores de validación: ${msg.join(', ')}`);
+        } else {
+          setError(msg);
+        }
       } finally {
         setSaving(false);
         setTimeout(() => setSuccessMessage(null), 4000);
       }
     },
-    [isNewProfile],
+    [profile],
   );
+
+  const uploadAvatarPhoto = useCallback(async (file: File) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await uploadAvatar(file);
+      setProfile(updated);
+      setSuccessMessage('Foto de perfil actualizada exitosamente.');
+    } catch (err: any) {
+      setError('Error al subir la foto de perfil.');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+  }, []);
+
+  const uploadCoverPhoto = useCallback(async (file: File) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await uploadCover(file);
+      setProfile(updated);
+      setSuccessMessage('Foto de portada actualizada exitosamente.');
+    } catch (err: any) {
+      setError('Error al subir la foto de portada.');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+  }, []);
 
   useEffect(() => {
     fetchProfile();
@@ -89,5 +136,7 @@ export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
     isNewProfile,
     fetchProfile,
     submitProfile,
+    uploadAvatarPhoto,
+    uploadCoverPhoto,
   };
 }

@@ -1,24 +1,44 @@
 import { useEffect, useState } from 'react';
 import { getCategories } from '../api/categories.api';
 import type { Category } from '../types/category.types';
+import { 
+  Cpu, 
+  Stethoscope, 
+  GraduationCap, 
+  Leaf, 
+  Palette, 
+  Handshake, 
+  Utensils, 
+  Shirt, 
+  Gamepad2, 
+  Building2, 
+  Coins, 
+  Sprout, 
+  Car, 
+  Radio, 
+  Users, 
+  Pin,
+  Check,
+  AlertCircle
+} from 'lucide-react';
 
-// Mapa de emojis por nombre de categoría (fallback si no hay ícono)
-const CATEGORY_EMOJIS: Record<string, string> = {
-  technology:   '💻',
-  health:       '🏥',
-  education:    '🎓',
-  environment:  '🌱',
-  art:          '🎨',
-  social_impact:'🤝',
-  food:         '🍽️',
-  fashion:      '👗',
-  gaming:       '🎮',
-  real_estate:  '🏢',
-  fintech:      '💰',
-  agriculture:  '🌾',
-  mobility:     '🚗',
-  media:        '📻',
-  community:    '🏘️',
+// Mapa de íconos por nombre de categoría
+const CATEGORY_ICONS: Record<string, any> = {
+  technology:   Cpu,
+  health:       Stethoscope,
+  education:    GraduationCap,
+  environment:  Leaf,
+  art:          Palette,
+  social_impact:Handshake,
+  food:         Utensils,
+  fashion:      Shirt,
+  gaming:       Gamepad2,
+  real_estate:  Building2,
+  fintech:      Coins,
+  agriculture:  Sprout,
+  mobility:     Car,
+  media:        Radio,
+  community:    Users,
 };
 
 interface Props {
@@ -48,48 +68,64 @@ export function CategorySelector({ selected, onChange }: Props) {
 
   if (loading) {
     return (
-      <div className="spinner-wrap" style={{ padding: '24px 0' }}>
-        <div className="spinner" style={{ width: 24, height: 24, borderWidth: 2 }} />
-        <span style={{ fontSize: '0.8rem' }}>Cargando categorías...</span>
+      <div className="py-10 flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
+        <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest leading-none">Cargando sectores...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="alert alert-error" style={{ fontSize: '0.8rem' }}>
-        ⚠ {error}
+      <div className="bg-red-50 border border-red-100 text-[#c62828] p-4 rounded-xl text-[13px] font-bold flex items-center gap-2">
+        <AlertCircle size={16} strokeWidth={2.5} /> {error}
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-4 font-['Sora',sans-serif]">
       {/* Contador de seleccionados */}
-      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 14 }}>
+      <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight ml-1">
         {selected.length === 0
           ? 'Selecciona los sectores de tu interés'
           : `${selected.length} sector${selected.length > 1 ? 'es' : ''} seleccionado${selected.length > 1 ? 's' : ''}`}
       </p>
 
       {/* Grid de chips */}
-      <div className="category-grid">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {categories.map((cat) => {
           const isSelected = selected.includes(cat.id);
-          const emoji = CATEGORY_EMOJIS[cat.name] ?? '📌';
+          const IconComponent = CATEGORY_ICONS[cat.name] ?? Pin;
+          const chipColor = cat.color ?? '#2e7d32';
+          
           return (
             <button
               key={cat.id}
               type="button"
               id={`cat-${cat.name}`}
-              className={`category-chip ${isSelected ? 'category-chip--selected' : ''}`}
-              style={isSelected ? { '--chip-color': cat.color ?? '#3b82f6' } as React.CSSProperties : {}}
+              className={`
+                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer border-[1.5px] shadow-sm active:scale-95 text-left group
+                ${isSelected 
+                  ? 'bg-white font-black text-[#1c2b1e] border-[#2e7d32] shadow-md translate-y-[-2px]' 
+                  : 'bg-gray-50/50 border-gray-100 text-slate-500 hover:bg-white hover:border-[#2e7d32]'
+                }
+              `}
               onClick={() => toggle(cat.id)}
               aria-pressed={isSelected}
             >
-              <span className="category-chip__emoji">{emoji}</span>
-              <span className="category-chip__label">{cat.displayName}</span>
-              {isSelected && <span className="category-chip__check">✓</span>}
+              <span className={`transition-transform group-hover:scale-110 ${isSelected ? 'text-[#2e7d32]' : 'text-slate-400'}`}>
+                 <IconComponent size={18} strokeWidth={isSelected ? 2.5 : 2} />
+              </span>
+              <span className="text-[11px] uppercase tracking-wider flex-1 truncate font-bold">{cat.displayName}</span>
+              {isSelected && (
+                <div 
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
+                  style={{ backgroundColor: chipColor }}
+                >
+                  <Check size={10} strokeWidth={4} />
+                </div>
+              )}
             </button>
           );
         })}

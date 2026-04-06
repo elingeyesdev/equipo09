@@ -15,6 +15,8 @@ export interface EntrepreneurProfile {
     postalCode: string | null;
     bankAccountNumber: string | null;
     bankName: string | null;
+    avatarUrl: string | null;
+    coverUrl: string | null;
     identityVerified: boolean;
     identityVerifiedAt: Date | null;
     verificationDocuments: any[];

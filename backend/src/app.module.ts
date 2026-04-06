@@ -8,6 +8,8 @@ import { InvestorModule } from './modules/investor/investor.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { CampaignsModule } from './modules/campaigns/campaign.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -23,6 +25,10 @@ import { AdminModule } from './modules/admin/admin.module';
     CategoriesModule,
     CampaignsModule,
     AdminModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
 })
 export class AppModule {}

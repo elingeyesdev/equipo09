@@ -15,10 +15,13 @@ const common_1 = require("@nestjs/common");
 const exceptions_1 = require("../../../common/exceptions");
 const dto_1 = require("../../../common/dto");
 const repositories_1 = require("../repositories");
+const repositories_2 = require("../../users/repositories");
+const campaign_profile_eligibility_1 = require("../utils/campaign-profile-eligibility");
 let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
-    constructor(profileRepo, campaignRepo) {
+    constructor(profileRepo, campaignRepo, userRepo) {
         this.profileRepo = profileRepo;
         this.campaignRepo = campaignRepo;
+        this.userRepo = userRepo;
         this.logger = new common_1.Logger(EntrepreneurService_1.name);
     }
     async createProfile(userId, dto) {
@@ -27,8 +30,21 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         if (exists) {
             throw new exceptions_1.ConflictException('Este usuario ya tiene un perfil de emprendedor');
         }
+        if (dto.displayName) {
+            const existing = await this.profileRepo.findByDisplayName(dto.displayName);
+            if (existing) {
+                throw new exceptions_1.ConflictException(`El nombre público "${dto.displayName}" ya está en uso por otro emprendedor`);
+            }
+        }
         const profile = await this.profileRepo.create(userId, dto);
         this.logger.log(`Perfil creado: ${profile.id} para user ${userId}`);
+        try {
+            await this.userRepo.assignRoleByName(userId, 'entrepreneur');
+            this.logger.log(`Rol entrepreneur sincronizado en user_roles: ${userId}`);
+        }
+        catch (err) {
+            this.logger.warn(`No se pudo asignar rol entrepreneur (¿seed de roles?): ${err}`);
+        }
         return profile;
     }
     async getMyProfile(userId) {
@@ -47,9 +63,15 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
     }
     async updateMyProfile(userId, dto) {
         this.logger.log(`Actualizando perfil de emprendedor para user ${userId}`);
-        const exists = await this.profileRepo.existsByUserId(userId);
-        if (!exists) {
+        const profile = await this.profileRepo.findByUserId(userId);
+        if (!profile) {
             throw new exceptions_1.NotFoundException('Perfil de emprendedor');
+        }
+        if (dto.displayName) {
+            const existing = await this.profileRepo.findByDisplayName(dto.displayName);
+            if (existing && existing.userId !== userId) {
+                throw new exceptions_1.ConflictException(`El nombre público "${dto.displayName}" ya está en uso por otro emprendedor`);
+            }
         }
         const updated = await this.profileRepo.update(userId, dto);
         if (!updated) {
@@ -78,7 +100,7 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         return new dto_1.PaginatedResponse(campaigns, total, query.page, query.limit);
     }
     async createCampaign(userId, dto) {
-        await this.ensureEntrepreneurProfile(userId);
+        await this.ensureProfileCompleteForNewCampaign(userId);
         this.logger.log(`Creando nueva campaña para user ${userId}: ${dto.title}`);
         const campaign = await this.campaignRepo.create(userId, dto);
         this.logger.log(`Campaña creada: ${campaign.id}`);
@@ -107,6 +129,30 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return updated;
     }
+    async updateCampaignCover(userId, campaignId, coverUrl) {
+        await this.ensureEntrepreneurProfile(userId);
+        const updated = await this.campaignRepo.updateCoverImageUrl(campaignId, userId, coverUrl);
+        if (!updated) {
+            throw new exceptions_1.NotFoundException('Campaña', campaignId);
+        }
+        return updated;
+    }
+    async getCampaignCreationReadiness(userId) {
+        const profile = await this.profileRepo.findByUserId(userId);
+        if (!profile) {
+            return {
+                canCreateCampaigns: false,
+                missingRequirements: [
+                    'crear tu perfil de emprendedor y completar los datos obligatorios',
+                ],
+            };
+        }
+        const missing = (0, campaign_profile_eligibility_1.getCampaignCreationBlockers)(profile);
+        return {
+            canCreateCampaigns: missing.length === 0,
+            missingRequirements: missing,
+        };
+    }
     async getCampaignFinancialProgress(userId, campaignId) {
         const progress = await this.campaignRepo.getFinancialProgress(campaignId, userId);
         if (!progress) {
@@ -124,11 +170,22 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
             throw new exceptions_1.NotFoundException('Perfil de emprendedor. Debes crear tu perfil antes de gestionar campañas');
         }
     }
+    async ensureProfileCompleteForNewCampaign(userId) {
+        const profile = await this.profileRepo.findByUserId(userId);
+        if (!profile) {
+            throw new exceptions_1.NotFoundException('Perfil de emprendedor. Debes crear tu perfil antes de crear campañas');
+        }
+        const missing = (0, campaign_profile_eligibility_1.getCampaignCreationBlockers)(profile);
+        if (missing.length > 0) {
+            throw new exceptions_1.BadRequestException(`Completa tu perfil para crear campañas. Falta: ${missing.join(', ')}.`);
+        }
+    }
 };
 exports.EntrepreneurService = EntrepreneurService;
 exports.EntrepreneurService = EntrepreneurService = EntrepreneurService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [repositories_1.EntrepreneurProfileRepository,
-        repositories_1.EntrepreneurCampaignRepository])
+        repositories_1.EntrepreneurCampaignRepository,
+        repositories_2.UserRepository])
 ], EntrepreneurService);
 //# sourceMappingURL=entrepreneur.service.js.map

@@ -158,6 +158,15 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             return null;
         return this.findOneByCreatorId(campaignId, creatorId);
     }
+    async updateCoverImageUrl(campaignId, creatorId, coverImageUrl) {
+        const row = await this.queryOne(`UPDATE campaigns
+       SET cover_image_url = $1, updated_at = NOW()
+       WHERE id = $2 AND creator_id = $3
+       RETURNING id`, [coverImageUrl, campaignId, creatorId]);
+        if (!row)
+            return null;
+        return this.findOneByCreatorId(campaignId, creatorId);
+    }
     async getFinancialProgress(campaignId, creatorId) {
         const campaign = await this.queryOne(`SELECT
         c.id, c.title, c.slug, c.status,

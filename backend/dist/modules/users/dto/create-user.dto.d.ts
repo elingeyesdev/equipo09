@@ -3,4 +3,5 @@ export declare class CreateUserDto {
     password: string;
     phone?: string;
     preferredLanguage?: string;
+    signupRole?: 'investor' | 'entrepreneur';
 }

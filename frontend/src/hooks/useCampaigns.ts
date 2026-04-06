@@ -4,6 +4,7 @@ import {
   createCampaign,
   submitCampaignForReview,
   publishCampaign as publishCampaignApi,
+  uploadCampaignImage as uploadCampaignImageApi,
 } from '../api/campaign.api';
 import type {
   EntrepreneurCampaign,
@@ -136,6 +137,25 @@ export function useCampaigns() {
     }
   };
 
+  const uploadCampaignImage = async (campaignId: string, file: File): Promise<boolean> => {
+    try {
+      setError(null);
+      setActionCampaignId(campaignId);
+      await uploadCampaignImageApi(campaignId, file);
+      // Actualizar la lista local
+      const paginated = await getMyCampaigns(queryRef.current);
+      setCampaigns(paginated.data);
+      setMeta(paginated.meta);
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'Error al subir la imagen'));
+      return false;
+    } finally {
+      setActionCampaignId(null);
+    }
+  };
+
   return {
     campaigns,
     meta,
@@ -150,6 +170,7 @@ export function useCampaigns() {
     addCampaign,
     submitForReview,
     publishCampaign,
+    uploadCampaignImage,
     actionCampaignId,
   };
 }

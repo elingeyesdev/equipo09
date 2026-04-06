@@ -19,6 +19,8 @@ function mapRowToEntrepreneurProfile(row) {
         postalCode: row.postal_code,
         bankAccountNumber: row.bank_account_number,
         bankName: row.bank_name,
+        avatarUrl: row.avatar_url,
+        coverUrl: row.cover_url,
         identityVerified: row.identity_verified,
         identityVerifiedAt: row.identity_verified_at,
         verificationDocuments: row.verification_documents ?? [],

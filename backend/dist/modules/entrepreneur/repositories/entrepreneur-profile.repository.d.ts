@@ -4,6 +4,7 @@ import { CreateEntrepreneurProfileDto, UpdateEntrepreneurProfileDto } from '../d
 export declare class EntrepreneurProfileRepository extends BaseRepository {
     findById(id: string): Promise<EntrepreneurProfile | null>;
     findByUserId(userId: string): Promise<EntrepreneurProfile | null>;
+    findByDisplayName(displayName: string): Promise<EntrepreneurProfile | null>;
     create(userId: string, dto: CreateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
     update(userId: string, dto: UpdateEntrepreneurProfileDto): Promise<EntrepreneurProfile | null>;
     existsByUserId(userId: string): Promise<boolean>;

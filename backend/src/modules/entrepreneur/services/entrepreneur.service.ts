@@ -65,6 +65,16 @@ export class EntrepreneurService {
       );
     }
 
+    // Verificar unicidad de displayName
+    if (dto.displayName) {
+      const existing = await this.profileRepo.findByDisplayName(dto.displayName);
+      if (existing) {
+        throw new ConflictException(
+          `El nombre público "${dto.displayName}" ya está en uso por otro emprendedor`,
+        );
+      }
+    }
+
     const profile = await this.profileRepo.create(userId, dto);
     this.logger.log(`Perfil creado: ${profile.id} para user ${userId}`);
 
@@ -113,9 +123,19 @@ export class EntrepreneurService {
     this.logger.log(`Actualizando perfil de emprendedor para user ${userId}`);
 
     // Verificar que el perfil exista
-    const exists = await this.profileRepo.existsByUserId(userId);
-    if (!exists) {
+    const profile = await this.profileRepo.findByUserId(userId);
+    if (!profile) {
       throw new NotFoundException('Perfil de emprendedor');
+    }
+
+    // Verificar unicidad de displayName si cambió
+    if (dto.displayName) {
+      const existing = await this.profileRepo.findByDisplayName(dto.displayName);
+      if (existing && existing.userId !== userId) {
+        throw new ConflictException(
+          `El nombre público "${dto.displayName}" ya está en uso por otro emprendedor`,
+        );
+      }
     }
 
     const updated = await this.profileRepo.update(userId, dto);
@@ -246,6 +266,26 @@ export class EntrepreneurService {
       throw new BadRequestException(
         'No se puede publicar: la campaña debe estar en borrador o aprobada',
       );
+    }
+    return updated;
+  }
+
+  /**
+   * Actualiza la imagen de portada de una campaña.
+   */
+  async updateCampaignCover(
+    userId: string,
+    campaignId: string,
+    coverUrl: string,
+  ): Promise<EntrepreneurCampaign> {
+    await this.ensureEntrepreneurProfile(userId);
+    const updated = await this.campaignRepo.updateCoverImageUrl(
+      campaignId,
+      userId,
+      coverUrl,
+    );
+    if (!updated) {
+      throw new NotFoundException('Campaña', campaignId);
     }
     return updated;
   }

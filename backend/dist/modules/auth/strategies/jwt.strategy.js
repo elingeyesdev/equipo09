@@ -25,7 +25,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.userRepo = userRepo;
     }
     async validate(payload) {
-        const user = await this.userRepo.findById(payload.sub);
+        const user = await this.userRepo.findByIdWithRoles(payload.sub);
         if (!user || !user.isActive) {
             throw new Error('Usuario inválido o inactivo');
         }

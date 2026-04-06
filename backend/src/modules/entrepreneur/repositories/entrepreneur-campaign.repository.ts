@@ -215,6 +215,22 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     return this.findOneByCreatorId(campaignId, creatorId);
   }
 
+  async updateCoverImageUrl(
+    campaignId: string,
+    creatorId: string,
+    coverImageUrl: string,
+  ): Promise<EntrepreneurCampaign | null> {
+    const row = await this.queryOne(
+      `UPDATE campaigns
+       SET cover_image_url = $1, updated_at = NOW()
+       WHERE id = $2 AND creator_id = $3
+       RETURNING id`,
+      [coverImageUrl, campaignId, creatorId],
+    );
+    if (!row) return null;
+    return this.findOneByCreatorId(campaignId, creatorId);
+  }
+
   async getFinancialProgress(
     campaignId: string,
     creatorId: string,

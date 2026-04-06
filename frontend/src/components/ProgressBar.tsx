@@ -20,9 +20,16 @@ export function ProgressBar({ value, tone = 'auto', className, trackClassName }:
   const resolvedTone: ProgressBarTone =
     tone === 'auto' ? progressToneFromPercent(safe) : tone;
 
+  const toneClasses = {
+    low: 'bg-gradient-to-r from-slate-300 to-slate-400',
+    mid: 'bg-gradient-to-r from-[#aed581] to-[#2e7d32]', // Lima a Verde
+    high: 'bg-gradient-to-r from-[#2e7d32] to-[#00897b]', // Verde a Esmeralda
+    complete: 'bg-gradient-to-r from-[#2e7d32] to-[#00897b] shadow-[0_0_12px_rgba(46,125,50,0.3)]',
+  };
+
   return (
     <div
-      className={`progress-bar-bg ${trackClassName ?? ''}`.trim()}
+      className={`h-2.5 w-full bg-slate-100/80 rounded-full overflow-hidden ${trackClassName ?? ''}`.trim()}
       role="progressbar"
       aria-valuenow={Math.round(safe)}
       aria-valuemin={0}
@@ -30,7 +37,7 @@ export function ProgressBar({ value, tone = 'auto', className, trackClassName }:
       aria-label={`Progreso ${Math.round(safe)} por ciento`}
     >
       <div
-        className={`progress-bar-fill progress-bar-fill--${resolvedTone} ${className ?? ''}`.trim()}
+        className={`h-full rounded-full transition-all duration-1000 ease-out ${toneClasses[resolvedTone]} ${className ?? ''}`.trim()}
         style={{ width: `${safe}%` }}
       />
     </div>

@@ -24,6 +24,22 @@ let UserRepository = class UserRepository extends database_1.BaseRepository {
         ]);
         return (0, models_1.mapRowToUser)(row);
     }
+    async assignRoleByName(userId, roleName) {
+        const role = await this.queryOne(`SELECT id FROM roles WHERE name = $1`, [roleName]);
+        if (!role) {
+            throw new Error(`Rol no encontrado en catálogo: ${roleName}`);
+        }
+        await this.query(`INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, role_id) DO NOTHING`, [userId, role.id]);
+    }
+    async hasEntrepreneurProfile(userId) {
+        const row = await this.queryOne(`SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
+        return row !== null;
+    }
+    async hasInvestorProfile(userId) {
+        const row = await this.queryOne(`SELECT 1 FROM investor_profiles WHERE user_id = $1`, [userId]);
+        return row !== null;
+    }
     async findById(id) {
         const row = await this.queryOne(`SELECT u.*, a.access_level as admin_access_level
        FROM users u

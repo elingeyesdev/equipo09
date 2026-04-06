@@ -59,4 +59,13 @@ __decorate([
     (0, class_validator_1.IsIn)(['es', 'en']),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "preferredLanguage", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: ['investor', 'entrepreneur'],
+        description: 'Rol principal al registrarse (se guarda en user_roles)',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['investor', 'entrepreneur']),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "signupRole", void 0);
 //# sourceMappingURL=create-user.dto.js.map

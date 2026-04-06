@@ -52,3 +52,25 @@ export async function updateEntrepreneurProfile(
   );
   return data.data;
 }
+
+export async function uploadAvatar(file: File): Promise<EntrepreneurProfile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurProfile>>(
+    '/entrepreneurs/me/profile/avatar',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}
+
+export async function uploadCover(file: File): Promise<EntrepreneurProfile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurProfile>>(
+    '/entrepreneurs/me/profile/cover',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}

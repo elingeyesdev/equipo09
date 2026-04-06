@@ -3,6 +3,9 @@ import { User } from '../models';
 import { CreateUserDto } from '../dto';
 export declare class UserRepository extends BaseRepository {
     create(dto: CreateUserDto): Promise<User>;
+    assignRoleByName(userId: string, roleName: string): Promise<void>;
+    hasEntrepreneurProfile(userId: string): Promise<boolean>;
+    hasInvestorProfile(userId: string): Promise<boolean>;
     findById(id: string): Promise<User | null>;
     findByEmail(email: string): Promise<User | null>;
     findByEmailWithPassword(email: string): Promise<{
