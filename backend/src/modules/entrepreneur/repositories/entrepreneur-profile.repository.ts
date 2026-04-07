@@ -168,6 +168,26 @@ export class EntrepreneurProfileRepository extends BaseRepository {
     return result !== null;
   }
 
+  /** Campañas donde el usuario es creador (bloquea borrar perfil si > 0). */
+  async countCampaignsAsCreator(userId: string): Promise<number> {
+    const row = await this.queryOne<{ c: string }>(
+      `SELECT COUNT(*)::text AS c FROM campaigns WHERE creator_id = $1`,
+      [userId],
+    );
+    return row ? parseInt(row.c, 10) : 0;
+  }
+
+  /**
+   * Elimina la fila de perfil de emprendedor. No elimina el usuario ni campañas.
+   */
+  async deleteByUserId(userId: string): Promise<boolean> {
+    const result = await this.query(
+      `DELETE FROM entrepreneur_profiles WHERE user_id = $1`,
+      [userId],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   /**
    * Incrementa el contador de campañas del emprendedor.
    */

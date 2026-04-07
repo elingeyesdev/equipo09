@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { Pool } from 'pg';
 import { EntrepreneurCampaign, CreateCampaignDto } from '../models';
 
@@ -46,7 +46,18 @@ export class CampaignRepository {
 
   async create(userId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign> {
     const slug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    
+
+    let categoryId = dto.categoryId;
+    if (!categoryId) {
+      const cat = await this.pool.query(`SELECT id FROM categories LIMIT 1`);
+      if (!cat.rows[0]) {
+        throw new BadRequestException(
+          'No hay categorías en la base de datos. Ejecuta el seed de categorías.',
+        );
+      }
+      categoryId = cat.rows[0].id;
+    }
+
     const query = `
       INSERT INTO campaigns (
         creator_id, category_id, title, slug, description, short_description, 
@@ -55,13 +66,13 @@ export class CampaignRepository {
       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending_review', $8, $9)
       RETURNING *;
     `;
-    
+
     // El frontend enviaba endDate como string con fecha, convertimos si existe.
     const endDateStr = dto.endDate ? new Date(dto.endDate).toISOString() : null;
 
     const values = [
       userId,
-      dto.categoryId,
+      categoryId,
       dto.title,
       slug,
       dto.description,

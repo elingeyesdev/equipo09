@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -98,6 +99,23 @@ export class EntrepreneurController {
     const userId = (req as any).user.id;
     const profile = await this.entrepreneurService.updateMyProfile(userId, dto);
     return new ApiSuccessResponse(profile, 'Perfil actualizado exitosamente');
+  }
+
+  @Delete('me/profile')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar mi perfil de emprendedor' })
+  @ApiResponse({ status: 200, description: 'Perfil eliminado.' })
+  @ApiResponse({
+    status: 400,
+    description: 'No se puede eliminar si hay campañas asociadas.',
+  })
+  @ApiResponse({ status: 404, description: 'Sin perfil de emprendedor.' })
+  async deleteMyProfile(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<null>> {
+    const userId = (req as any).user.id;
+    await this.entrepreneurService.deleteMyProfile(userId);
+    return new ApiSuccessResponse(null, 'Perfil de emprendedor eliminado');
   }
 
   @Get(':id/profile')

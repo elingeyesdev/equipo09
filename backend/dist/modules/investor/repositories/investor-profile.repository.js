@@ -23,6 +23,14 @@ let InvestorProfileRepository = class InvestorProfileRepository extends database
         const result = await this.queryOne(`SELECT 1 FROM investor_profiles WHERE user_id = $1`, [userId]);
         return result !== null;
     }
+    async countInvestmentsByInvestor(userId) {
+        const row = await this.queryOne(`SELECT COUNT(*)::text AS c FROM investments WHERE investor_id = $1`, [userId]);
+        return row ? parseInt(row.c, 10) : 0;
+    }
+    async deleteByUserId(userId) {
+        const result = await this.query(`DELETE FROM investor_profiles WHERE user_id = $1`, [userId]);
+        return (result.rowCount ?? 0) > 0;
+    }
     async create(userId, dto) {
         return this.transaction(async (client) => {
             const result = await client.query(`INSERT INTO investor_profiles (

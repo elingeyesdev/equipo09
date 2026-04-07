@@ -14,9 +14,11 @@ exports.InvestorService = void 0;
 const common_1 = require("@nestjs/common");
 const exceptions_1 = require("../../../common/exceptions");
 const repositories_1 = require("../repositories");
+const repositories_2 = require("../../users/repositories");
 let InvestorService = InvestorService_1 = class InvestorService {
-    constructor(profileRepo) {
+    constructor(profileRepo, userRepo) {
         this.profileRepo = profileRepo;
+        this.userRepo = userRepo;
         this.logger = new common_1.Logger(InvestorService_1.name);
     }
     async createProfile(userId, dto) {
@@ -63,10 +65,29 @@ let InvestorService = InvestorService_1 = class InvestorService {
         this.logger.log(`Perfil de inversor actualizado: ${updated.id}`);
         return updated;
     }
+    async deleteMyProfile(userId) {
+        const n = await this.profileRepo.countInvestmentsByInvestor(userId);
+        if (n > 0) {
+            throw new exceptions_1.BadRequestException(`No puedes eliminar tu perfil de inversor mientras tengas ${n} inversión(es) registrada(s).`);
+        }
+        const existed = await this.profileRepo.existsByUserId(userId);
+        if (!existed) {
+            throw new exceptions_1.NotFoundException('Perfil de inversor');
+        }
+        await this.profileRepo.deleteByUserId(userId);
+        try {
+            await this.userRepo.removeRoleByName(userId, 'investor');
+        }
+        catch (err) {
+            this.logger.warn(`No se pudo quitar rol investor: ${err}`);
+        }
+        this.logger.log(`Perfil de inversor eliminado para user ${userId}`);
+    }
 };
 exports.InvestorService = InvestorService;
 exports.InvestorService = InvestorService = InvestorService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [repositories_1.InvestorProfileRepository])
+    __metadata("design:paramtypes", [repositories_1.InvestorProfileRepository,
+        repositories_2.UserRepository])
 ], InvestorService);
 //# sourceMappingURL=investor.service.js.map

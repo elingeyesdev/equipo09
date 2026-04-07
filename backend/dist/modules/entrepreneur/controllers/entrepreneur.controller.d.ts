@@ -10,6 +10,7 @@ export declare class EntrepreneurController {
     getMyProfile(req: Request): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     getCampaignReadiness(req: Request): Promise<ApiSuccessResponse<CampaignCreationReadiness>>;
     updateMyProfile(req: Request, dto: UpdateEntrepreneurProfileDto): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
+    deleteMyProfile(req: Request): Promise<ApiSuccessResponse<null>>;
     getProfileById(id: string): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     uploadAvatar(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     uploadCover(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;

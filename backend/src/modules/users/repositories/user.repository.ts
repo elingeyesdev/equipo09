@@ -50,6 +50,18 @@ export class UserRepository extends BaseRepository {
     );
   }
 
+  /**
+   * Quita un rol por nombre (p. ej. al eliminar solo el perfil emprendedor/inversor).
+   */
+  async removeRoleByName(userId: string, roleName: string): Promise<void> {
+    await this.query(
+      `DELETE FROM user_roles ur
+       USING roles r
+       WHERE ur.user_id = $1 AND ur.role_id = r.id AND r.name = $2`,
+      [userId, roleName],
+    );
+  }
+
   async hasEntrepreneurProfile(userId: string): Promise<boolean> {
     const row = await this.queryOne(
       `SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`,

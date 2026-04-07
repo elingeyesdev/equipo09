@@ -53,6 +53,10 @@ export async function updateEntrepreneurProfile(
   return data.data;
 }
 
+export async function deleteEntrepreneurProfile(): Promise<void> {
+  await api.delete<ApiSuccessResponse<null>>('/entrepreneurs/me/profile');
+}
+
 export async function uploadAvatar(file: File): Promise<EntrepreneurProfile> {
   const formData = new FormData();
   formData.append('file', file);

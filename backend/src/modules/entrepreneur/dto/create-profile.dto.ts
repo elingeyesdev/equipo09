@@ -4,10 +4,15 @@ import {
   IsUrl,
   MaxLength,
   MinLength,
-  IsBoolean,
-  Matches,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+/** El front envía "" en campos opcionales; sin esto @IsUrl() falla con cadena vacía. */
+function emptyToUndefined({ value }: { value: unknown }): unknown {
+  if (value === '' || value === null) return undefined;
+  return value;
+}
 
 /**
  * DTO para crear un perfil de emprendedor (EDT 1.1 / 1.2).
@@ -46,12 +51,14 @@ export class CreateEntrepreneurProfileDto {
 
   @ApiPropertyOptional({ example: 'https://techventures.com', description: 'Sitio web' })
   @IsOptional()
+  @Transform(emptyToUndefined)
   @IsUrl()
   @MaxLength(512)
   website?: string;
 
   @ApiPropertyOptional({ example: 'https://linkedin.com/in/carlosmendoza', description: 'LinkedIn' })
   @IsOptional()
+  @Transform(emptyToUndefined)
   @IsUrl()
   @MaxLength(512)
   linkedinUrl?: string;

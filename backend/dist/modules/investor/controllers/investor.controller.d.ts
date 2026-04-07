@@ -10,5 +10,6 @@ export declare class InvestorController {
     getMyProfile(req: Request): Promise<ApiSuccessResponse<InvestorProfile>>;
     getCapitalOverview(req: Request): Promise<ApiSuccessResponse<CapitalOverview>>;
     updateMyProfile(req: Request, dto: UpdateInvestorProfileDto): Promise<ApiSuccessResponse<InvestorProfile>>;
+    deleteMyProfile(req: Request): Promise<ApiSuccessResponse<null>>;
     getProfileById(id: string): Promise<ApiSuccessResponse<InvestorProfile>>;
 }

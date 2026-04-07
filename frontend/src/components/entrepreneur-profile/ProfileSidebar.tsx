@@ -10,7 +10,8 @@ import {
   Pencil, 
   ChevronRight,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | null;
@@ -19,9 +20,11 @@ interface Props {
   profile: EntrepreneurProfile | null;
   openModal: (type: ModalType) => void;
   userEmail?: string;
+  /** Eliminar solo datos de emprendedor (no la cuenta). */
+  onDeleteProfile?: () => void | Promise<void>;
 }
 
-export function ProfileSidebar({ profile, openModal, userEmail }: Props) {
+export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile }: Props) {
   // Calculate completion percentage based on key fields
   const fields = [
     { label: 'Información básica', value: profile?.firstName && profile?.lastName && profile?.bio, modal: 'profile' },
@@ -216,6 +219,23 @@ export function ProfileSidebar({ profile, openModal, userEmail }: Props) {
           </div>
         )}
       </div>
+
+      {profile && onDeleteProfile && (
+        <div className="rounded-[28px] p-6 border border-red-100 bg-red-50/40 shadow-sm">
+          <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
+          <p className="text-[13px] text-red-900/80 font-medium leading-snug mb-4">
+            Elimina solo tu perfil de emprendedor. Tu usuario y sesión siguen activos. No disponible si tienes campañas.
+          </p>
+          <button
+            type="button"
+            onClick={() => void onDeleteProfile()}
+            className="w-full py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Trash2 size={16} strokeWidth={2.5} />
+            Eliminar perfil emprendedor
+          </button>
+        </div>
+      )}
 
       {userEmail && (
         <div className="px-6 py-4 bg-white border border-emerald-50 rounded-[20px] shadow-sm flex items-center gap-3">

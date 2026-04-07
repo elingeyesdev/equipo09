@@ -50,6 +50,23 @@ export class InvestorProfileRepository extends BaseRepository {
     return result !== null;
   }
 
+  /** Inversiones registradas (bloquea borrar perfil si > 0). */
+  async countInvestmentsByInvestor(userId: string): Promise<number> {
+    const row = await this.queryOne<{ c: string }>(
+      `SELECT COUNT(*)::text AS c FROM investments WHERE investor_id = $1`,
+      [userId],
+    );
+    return row ? parseInt(row.c, 10) : 0;
+  }
+
+  async deleteByUserId(userId: string): Promise<boolean> {
+    const result = await this.query(
+      `DELETE FROM investor_profiles WHERE user_id = $1`,
+      [userId],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   /**
    * Crea un nuevo perfil de inversor.
    * También asigna el rol 'investor' al usuario si no lo tiene.

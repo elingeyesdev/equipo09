@@ -45,7 +45,8 @@ export interface CreateCampaignDto {
   goalAmount: number;
   campaignType: CampaignType;
   endDate?: string;
-  categoryId: string;
+  /** Si se omite, el backend asigna una categoría por defecto. Debe ser UUID. */
+  categoryId?: string;
 }
 
 export type CampaignFilterPreset =

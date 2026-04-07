@@ -32,6 +32,11 @@ let UserRepository = class UserRepository extends database_1.BaseRepository {
         await this.query(`INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)
        ON CONFLICT (user_id, role_id) DO NOTHING`, [userId, role.id]);
     }
+    async removeRoleByName(userId, roleName) {
+        await this.query(`DELETE FROM user_roles ur
+       USING roles r
+       WHERE ur.user_id = $1 AND ur.role_id = r.id AND r.name = $2`, [userId, roleName]);
+    }
     async hasEntrepreneurProfile(userId) {
         const row = await this.queryOne(`SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
         return row !== null;

@@ -38,7 +38,16 @@ export function EntrepreneurProfilePage() {
     submitProfile,
     uploadAvatarPhoto,
     uploadCoverPhoto,
+    deleteProfile,
   } = useEntrepreneurProfile();
+
+  const handleDeleteEntrepreneurProfile = async () => {
+    const ok = window.confirm(
+      '¿Eliminar tu perfil de emprendedor? Tu cuenta seguirá activa. No es posible si ya tienes campañas registradas en la plataforma.',
+    );
+    if (!ok) return;
+    await deleteProfile();
+  };
 
   const {
     campaigns,
@@ -69,12 +78,15 @@ export function EntrepreneurProfilePage() {
 
   const handleSave = async (type: string, data: any) => {
     if (type === 'new-campaign') {
+      // El módulo `campaigns` valida goalAmount con @Min(100) y categoryId es opcional (fallback en BD).
+      const goal = Number(data.goalAmount);
+      const minGoal = 100;
       await addCampaign({
-        title: data.title || 'Nueva Campaña',
-        description: data.description || '',
-        goalAmount: Number(data.goalAmount) || 0,
-        campaignType: 'donation', 
-        categoryId: 'misc', 
+        title: (data.title || 'Nueva Campaña').trim(),
+        description: (data.description || '').trim() || 'Descripción pendiente.',
+        goalAmount:
+          Number.isFinite(goal) && goal >= minGoal ? goal : minGoal,
+        campaignType: 'donation',
       });
     } else {
       // Filtrar el payload para enviar solo campos permitidos por el DTO
@@ -143,6 +155,7 @@ export function EntrepreneurProfilePage() {
                  profile={profile} 
                  openModal={(type: ModalType) => setModalType(type)} 
                  userEmail={userEmail}
+                 onDeleteProfile={profile ? handleDeleteEntrepreneurProfile : undefined}
                />
                
                <div className="flex-1 min-w-0 flex flex-col gap-10 w-full">

@@ -47,6 +47,14 @@ let CampaignRepository = class CampaignRepository {
     }
     async create(userId, dto) {
         const slug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        let categoryId = dto.categoryId;
+        if (!categoryId) {
+            const cat = await this.pool.query(`SELECT id FROM categories LIMIT 1`);
+            if (!cat.rows[0]) {
+                throw new common_1.BadRequestException('No hay categorías en la base de datos. Ejecuta el seed de categorías.');
+            }
+            categoryId = cat.rows[0].id;
+        }
         const query = `
       INSERT INTO campaigns (
         creator_id, category_id, title, slug, description, short_description, 
@@ -58,7 +66,7 @@ let CampaignRepository = class CampaignRepository {
         const endDateStr = dto.endDate ? new Date(dto.endDate).toISOString() : null;
         const values = [
             userId,
-            dto.categoryId,
+            categoryId,
             dto.title,
             slug,
             dto.description,

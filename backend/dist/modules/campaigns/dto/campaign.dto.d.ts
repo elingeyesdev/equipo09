@@ -2,7 +2,7 @@ export declare class CreateCampaignDto {
     title: string;
     description: string;
     shortDescription?: string;
-    categoryId: string;
+    categoryId?: string;
     goalAmount: number;
     campaignType: 'donation' | 'reward' | 'equity';
     startDate?: string;

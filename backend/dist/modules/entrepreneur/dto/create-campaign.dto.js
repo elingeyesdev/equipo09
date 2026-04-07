@@ -11,7 +11,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCampaignDto = exports.CampaignType = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
+function emptyToUndefined({ value }) {
+    if (value === '' || value === null)
+        return undefined;
+    return value;
+}
 var CampaignType;
 (function (CampaignType) {
     CampaignType["DONATION"] = "donation";
@@ -61,6 +67,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'uuid-string' }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "categoryId", void 0);

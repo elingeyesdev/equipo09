@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '../../../common/exceptions';
 import { InvestorProfileRepository } from '../repositories';
+import { UserRepository } from '../../users/repositories';
 import {
   CreateInvestorProfileDto,
   UpdateInvestorProfileDto,
@@ -21,6 +23,7 @@ export class InvestorService {
 
   constructor(
     private readonly profileRepo: InvestorProfileRepository,
+    private readonly userRepo: UserRepository,
   ) {}
 
   // =========================================================================
@@ -119,5 +122,29 @@ export class InvestorService {
 
     this.logger.log(`Perfil de inversor actualizado: ${updated.id}`);
     return updated;
+  }
+
+  /**
+   * Elimina el perfil de inversor y el rol asociado.
+   * Bloqueado si el usuario tiene inversiones registradas.
+   */
+  async deleteMyProfile(userId: string): Promise<void> {
+    const n = await this.profileRepo.countInvestmentsByInvestor(userId);
+    if (n > 0) {
+      throw new BadRequestException(
+        `No puedes eliminar tu perfil de inversor mientras tengas ${n} inversión(es) registrada(s).`,
+      );
+    }
+    const existed = await this.profileRepo.existsByUserId(userId);
+    if (!existed) {
+      throw new NotFoundException('Perfil de inversor');
+    }
+    await this.profileRepo.deleteByUserId(userId);
+    try {
+      await this.userRepo.removeRoleByName(userId, 'investor');
+    } catch (err) {
+      this.logger.warn(`No se pudo quitar rol investor: ${err}`);
+    }
+    this.logger.log(`Perfil de inversor eliminado para user ${userId}`);
   }
 }

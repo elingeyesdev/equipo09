@@ -3,6 +3,7 @@ import {
   getMyInvestorProfile,
   createInvestorProfile,
   updateInvestorProfile,
+  deleteInvestorProfile,
 } from '../api/investor.api';
 import type {
   InvestorProfile,
@@ -18,6 +19,7 @@ interface UseInvestorProfileReturn {
   isNewProfile: boolean;
   fetchProfile: () => Promise<void>;
   submitProfile: (dto: CreateInvestorProfileDto) => Promise<void>;
+  deleteProfile: () => Promise<void>;
 }
 
 export function useInvestorProfile(): UseInvestorProfileReturn {
@@ -78,6 +80,28 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     [isNewProfile],
   );
 
+  const deleteProfile = useCallback(async () => {
+    setSaving(true);
+    setError(null);
+    setSuccessMessage(null);
+    try {
+      await deleteInvestorProfile();
+      setProfile(null);
+      setIsNewProfile(true);
+      setSuccessMessage(
+        'Perfil de inversor eliminado. Tu cuenta sigue activa; puedes registrar un perfil nuevo cuando quieras.',
+      );
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        'No se pudo eliminar el perfil. ¿Tienes inversiones registradas?';
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 6000);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
@@ -91,5 +115,6 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     isNewProfile,
     fetchProfile,
     submitProfile,
+    deleteProfile,
   };
 }

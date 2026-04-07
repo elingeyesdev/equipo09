@@ -10,6 +10,7 @@ export declare class EntrepreneurService {
     private readonly logger;
     constructor(profileRepo: EntrepreneurProfileRepository, campaignRepo: EntrepreneurCampaignRepository, userRepo: UserRepository);
     createProfile(userId: string, dto: CreateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
+    deleteMyProfile(userId: string): Promise<void>;
     getMyProfile(userId: string): Promise<EntrepreneurProfile>;
     getProfileById(profileId: string): Promise<EntrepreneurProfile>;
     updateMyProfile(userId: string, dto: UpdateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;

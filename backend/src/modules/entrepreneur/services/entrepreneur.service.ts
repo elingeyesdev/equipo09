@@ -91,6 +91,30 @@ export class EntrepreneurService {
   }
 
   /**
+   * Elimina el perfil de emprendedor y el rol asociado.
+   * No elimina la cuenta de usuario ni campañas existentes (bloqueado si hay campañas).
+   */
+  async deleteMyProfile(userId: string): Promise<void> {
+    const n = await this.profileRepo.countCampaignsAsCreator(userId);
+    if (n > 0) {
+      throw new BadRequestException(
+        `No puedes eliminar tu perfil de emprendedor mientras tengas ${n} campaña(s) registrada(s).`,
+      );
+    }
+    const existed = await this.profileRepo.existsByUserId(userId);
+    if (!existed) {
+      throw new NotFoundException('Perfil de emprendedor');
+    }
+    await this.profileRepo.deleteByUserId(userId);
+    try {
+      await this.userRepo.removeRoleByName(userId, 'entrepreneur');
+    } catch (err) {
+      this.logger.warn(`No se pudo quitar rol entrepreneur: ${err}`);
+    }
+    this.logger.log(`Perfil de emprendedor eliminado para user ${userId}`);
+  }
+
+  /**
    * Obtiene el perfil del emprendedor autenticado.
    */
   async getMyProfile(userId: string): Promise<EntrepreneurProfile> {

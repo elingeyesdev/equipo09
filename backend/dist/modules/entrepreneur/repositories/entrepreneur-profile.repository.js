@@ -97,6 +97,14 @@ let EntrepreneurProfileRepository = class EntrepreneurProfileRepository extends 
         const result = await this.queryOne(`SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
         return result !== null;
     }
+    async countCampaignsAsCreator(userId) {
+        const row = await this.queryOne(`SELECT COUNT(*)::text AS c FROM campaigns WHERE creator_id = $1`, [userId]);
+        return row ? parseInt(row.c, 10) : 0;
+    }
+    async deleteByUserId(userId) {
+        const result = await this.query(`DELETE FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
+        return (result.rowCount ?? 0) > 0;
+    }
     async incrementCampaignCount(userId) {
         await this.query(`UPDATE entrepreneur_profiles
        SET total_campaigns = total_campaigns + 1

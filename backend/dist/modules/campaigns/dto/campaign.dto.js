@@ -11,8 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QueryCampaignsDto = exports.CreateCampaignDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 const is_after_date_decorator_1 = require("../../../common/decorators/is-after-date.decorator");
+function emptyToUndefined({ value }) {
+    if (value === '' || value === null)
+        return undefined;
+    return value;
+}
 class CreateCampaignDto {
 }
 exports.CreateCampaignDto = CreateCampaignDto;
@@ -30,18 +36,23 @@ __decorate([
 ], CreateCampaignDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Sustainable bottles' }),
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "shortDescription", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'uuid-of-category' }),
+    (0, swagger_1.ApiPropertyOptional)({
+        example: 'uuid-of-category',
+        description: 'Si se omite, se asigna la primera categoría disponible en BD.',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "categoryId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 10000 }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)({}, { message: 'El monto objetivo (goalAmount) debe ser numérico' }),
     (0, class_validator_1.Min)(100, { message: 'El monto mínimo de recaudación es de 100' }),
     __metadata("design:type", Number)
@@ -53,15 +64,15 @@ __decorate([
 ], CreateCampaignDto.prototype, "campaignType", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '2024-12-01T00:00:00.000Z' }),
-    (0, class_validator_1.IsDateString)({}, { message: 'startDate debe tener un formato de fecha válido (ISO 8601)' }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)({}, { message: 'startDate debe tener un formato de fecha válido (ISO 8601)' }),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '2025-01-01T00:00:00.000Z' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)({}, { message: 'endDate debe tener un formato de fecha válido (ISO 8601)' }),
     (0, is_after_date_decorator_1.IsAfterDate)('startDate', { message: 'La fecha de cierre debe ser estrictamente posterior a la fecha de inicio' }),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "endDate", void 0);
 class QueryCampaignsDto {

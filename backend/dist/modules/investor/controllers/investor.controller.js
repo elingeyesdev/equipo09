@@ -43,6 +43,11 @@ let InvestorController = class InvestorController {
         const profile = await this.investorService.updateMyProfile(userId, dto);
         return new dto_2.ApiSuccessResponse(profile, 'Perfil actualizado exitosamente');
     }
+    async deleteMyProfile(req) {
+        const userId = req.user.id;
+        await this.investorService.deleteMyProfile(userId);
+        return new dto_2.ApiSuccessResponse(null, 'Perfil de inversor eliminado');
+    }
     async getProfileById(id) {
         const profile = await this.investorService.getProfileById(id);
         return new dto_2.ApiSuccessResponse(profile);
@@ -94,6 +99,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.UpdateInvestorProfileDto]),
     __metadata("design:returntype", Promise)
 ], InvestorController.prototype, "updateMyProfile", null);
+__decorate([
+    (0, common_1.Delete)('me/profile'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Eliminar mi perfil de inversor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Perfil eliminado.' }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'No se puede eliminar si hay inversiones registradas.',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Sin perfil de inversor.' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], InvestorController.prototype, "deleteMyProfile", null);
 __decorate([
     (0, common_1.Get)(':id/profile'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener perfil público de un inversor' }),

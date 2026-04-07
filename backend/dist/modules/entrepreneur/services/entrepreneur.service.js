@@ -47,6 +47,24 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return profile;
     }
+    async deleteMyProfile(userId) {
+        const n = await this.profileRepo.countCampaignsAsCreator(userId);
+        if (n > 0) {
+            throw new exceptions_1.BadRequestException(`No puedes eliminar tu perfil de emprendedor mientras tengas ${n} campaña(s) registrada(s).`);
+        }
+        const existed = await this.profileRepo.existsByUserId(userId);
+        if (!existed) {
+            throw new exceptions_1.NotFoundException('Perfil de emprendedor');
+        }
+        await this.profileRepo.deleteByUserId(userId);
+        try {
+            await this.userRepo.removeRoleByName(userId, 'entrepreneur');
+        }
+        catch (err) {
+            this.logger.warn(`No se pudo quitar rol entrepreneur: ${err}`);
+        }
+        this.logger.log(`Perfil de emprendedor eliminado para user ${userId}`);
+    }
     async getMyProfile(userId) {
         const profile = await this.profileRepo.findByUserId(userId);
         if (!profile) {

@@ -85,8 +85,9 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       if (!formData.title || formData.title.trim().length < 5) {
         newErrors.title = 'El título es obligatorio (min. 5 caracteres)';
       }
-      if (!formData.goalAmount || Number(formData.goalAmount) <= 0) {
-        newErrors.goalAmount = 'Define una meta de fondos válida';
+      const g = Number(formData.goalAmount);
+      if (!Number.isFinite(g) || g < 100) {
+        newErrors.goalAmount = 'La meta mínima es 100 (Bs. u moneda de la plataforma)';
       }
     }
 

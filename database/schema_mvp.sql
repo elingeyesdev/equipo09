@@ -86,6 +86,8 @@ CREATE TABLE entrepreneur_profiles (
     postal_code                     VARCHAR(20),
     bank_account_number             VARCHAR(100),
     bank_name                       VARCHAR(200),
+    avatar_url                      VARCHAR(512),
+    cover_url                       VARCHAR(512),
     identity_verified               BOOLEAN        NOT NULL DEFAULT false,
     identity_verified_at            TIMESTAMPTZ,
     verification_documents          JSONB          DEFAULT '[]',

@@ -3,6 +3,7 @@ import {
   getMyEntrepreneurProfile,
   createEntrepreneurProfile,
   updateEntrepreneurProfile,
+  deleteEntrepreneurProfile,
   uploadAvatar,
   uploadCover,
 } from '../api/entrepreneur.api';
@@ -22,6 +23,7 @@ interface UseEntrepreneurProfileReturn {
   submitProfile: (dto: CreateEntrepreneurProfileDto) => Promise<void>;
   uploadAvatarPhoto: (file: File) => Promise<void>;
   uploadCoverPhoto: (file: File) => Promise<void>;
+  deleteProfile: () => Promise<void>;
 }
 
 export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
@@ -123,6 +125,28 @@ export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
     }
   }, []);
 
+  const deleteProfile = useCallback(async () => {
+    setSaving(true);
+    setError(null);
+    setSuccessMessage(null);
+    try {
+      await deleteEntrepreneurProfile();
+      setProfile(null);
+      setIsNewProfile(true);
+      setSuccessMessage(
+        'Perfil de emprendedor eliminado. Tu cuenta sigue activa; puedes crear un perfil nuevo cuando quieras.',
+      );
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        'No se pudo eliminar el perfil. ¿Tienes campañas registradas?';
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 6000);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
@@ -138,5 +162,6 @@ export function useEntrepreneurProfile(): UseEntrepreneurProfileReturn {
     submitProfile,
     uploadAvatarPhoto,
     uploadCoverPhoto,
+    deleteProfile,
   };
 }

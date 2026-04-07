@@ -1,7 +1,7 @@
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
 import { InvestorProfileForm } from '../components/InvestorProfileForm';
 import { Navbar } from '../components/Navbar';
-import { User, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { User, AlertTriangle, CheckCircle2, Trash2 } from 'lucide-react';
 
 export function InvestorProfilePage() {
   const userEmail = localStorage.getItem('userEmail') ?? '';
@@ -13,7 +13,16 @@ export function InvestorProfilePage() {
     successMessage,
     isNewProfile,
     submitProfile,
+    deleteProfile,
   } = useInvestorProfile();
+
+  const handleDeleteInvestorProfile = async () => {
+    const ok = window.confirm(
+      '¿Eliminar tu perfil de inversor? Tu cuenta seguirá activa. No es posible si ya tienes inversiones registradas.',
+    );
+    if (!ok) return;
+    await deleteProfile();
+  };
 
   // Iniciales del avatar
   const initials = profile
@@ -98,6 +107,24 @@ export function InvestorProfilePage() {
             />
           )}
         </div>
+
+        {!loading && profile && (
+          <div className="mt-8 rounded-[28px] p-6 md:p-8 border border-red-100 bg-red-50/40 shadow-sm">
+            <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
+            <p className="text-[14px] text-red-900/80 font-medium leading-relaxed mb-4">
+              Elimina solo tu perfil de inversor. Tu usuario y sesión siguen activos. No está permitido si ya registraste inversiones en la plataforma.
+            </p>
+            <button
+              type="button"
+              onClick={() => void handleDeleteInvestorProfile()}
+              disabled={saving}
+              className="px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 size={16} strokeWidth={2.5} />
+              Eliminar perfil inversor
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

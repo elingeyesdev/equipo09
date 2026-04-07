@@ -64,6 +64,10 @@ export async function updateInvestorProfile(
   return data.data;
 }
 
+export async function deleteInvestorProfile(): Promise<void> {
+  await api.delete<ApiSuccessResponse<null>>('/investors/me/profile');
+}
+
 export async function getCapitalOverview(): Promise<CapitalOverview> {
   const { data } = await api.get<ApiSuccessResponse<CapitalOverview>>(
     '/investors/me/capital',

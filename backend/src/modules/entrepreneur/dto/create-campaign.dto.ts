@@ -9,7 +9,13 @@ import {
   MaxLength,
   IsDateString,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+function emptyToUndefined({ value }: { value: unknown }): unknown {
+  if (value === '' || value === null) return undefined;
+  return value;
+}
 
 export enum CampaignType {
   DONATION = 'donation',
@@ -51,6 +57,7 @@ export class CreateCampaignDto {
 
   @ApiPropertyOptional({ example: 'uuid-string' })
   @IsOptional()
+  @Transform(emptyToUndefined)
   @IsUUID()
   categoryId?: string;
 }
