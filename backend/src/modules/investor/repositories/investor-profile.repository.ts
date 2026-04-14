@@ -149,6 +149,8 @@ export class InvestorProfileRepository extends BaseRepository {
         : undefined,
       min_investment: dto.minInvestment,
       max_investment: dto.maxInvestment,
+      avatar_url: (dto as any).avatarUrl,
+      cover_url: (dto as any).coverUrl,
     };
 
     // Filtrar campos undefined

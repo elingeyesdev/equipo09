@@ -14,6 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvestorController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 const swagger_1 = require("@nestjs/swagger");
 const passport_1 = require("@nestjs/passport");
 const services_1 = require("../services");
@@ -51,6 +54,22 @@ let InvestorController = class InvestorController {
     async getProfileById(id) {
         const profile = await this.investorService.getProfileById(id);
         return new dto_2.ApiSuccessResponse(profile);
+    }
+    async uploadAvatar(req, file) {
+        const userId = req.user.id;
+        const url = `/uploads/profiles/${file.filename}`;
+        const profile = await this.investorService.updateMyProfile(userId, {
+            avatarUrl: url,
+        });
+        return new dto_2.ApiSuccessResponse(profile, 'Avatar actualizado');
+    }
+    async uploadCover(req, file) {
+        const userId = req.user.id;
+        const url = `/uploads/profiles/${file.filename}`;
+        const profile = await this.investorService.updateMyProfile(userId, {
+            coverUrl: url,
+        });
+        return new dto_2.ApiSuccessResponse(profile, 'Portada actualizada');
     }
 };
 exports.InvestorController = InvestorController;
@@ -124,6 +143,48 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], InvestorController.prototype, "getProfileById", null);
+__decorate([
+    (0, common_1.Post)('me/profile/avatar'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/profiles',
+            filename: (req, file, cb) => {
+                const randomName = Array(32)
+                    .fill(null)
+                    .map(() => Math.round(Math.random() * 16).toString(16))
+                    .join('');
+                return cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
+    (0, swagger_1.ApiOperation)({ summary: 'Subir avatar del inversor' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], InvestorController.prototype, "uploadAvatar", null);
+__decorate([
+    (0, common_1.Post)('me/profile/cover'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/profiles',
+            filename: (req, file, cb) => {
+                const randomName = Array(32)
+                    .fill(null)
+                    .map(() => Math.round(Math.random() * 16).toString(16))
+                    .join('');
+                return cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
+    (0, swagger_1.ApiOperation)({ summary: 'Subir portada del inversor' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], InvestorController.prototype, "uploadCover", null);
 exports.InvestorController = InvestorController = __decorate([
     (0, swagger_1.ApiTags)('investor-profile'),
     (0, swagger_1.ApiBearerAuth)(),

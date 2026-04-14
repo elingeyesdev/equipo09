@@ -17,6 +17,8 @@ export interface InvestorProfile {
     preferredCategories: string[];
     minInvestment: number | null;
     maxInvestment: number | null;
+    avatarUrl: string | null;
+    coverUrl: string | null;
     identityVerified: boolean;
     identityVerifiedAt: Date | null;
     verificationDocuments: any[];

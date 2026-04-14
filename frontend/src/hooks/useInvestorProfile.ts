@@ -4,6 +4,8 @@ import {
   createInvestorProfile,
   updateInvestorProfile,
   deleteInvestorProfile,
+  uploadInvestorAvatar,
+  uploadInvestorCover,
 } from '../api/investor.api';
 import type {
   InvestorProfile,
@@ -19,6 +21,8 @@ interface UseInvestorProfileReturn {
   isNewProfile: boolean;
   fetchProfile: () => Promise<void>;
   submitProfile: (dto: CreateInvestorProfileDto) => Promise<void>;
+  uploadAvatarPhoto: (file: File) => Promise<void>;
+  uploadCoverPhoto: (file: File) => Promise<void>;
   deleteProfile: () => Promise<void>;
 }
 
@@ -57,7 +61,9 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
       setSuccessMessage(null);
       try {
         let saved: InvestorProfile;
-        if (isNewProfile) {
+        const shouldCreate = !profile;
+
+        if (shouldCreate) {
           saved = await createInvestorProfile(dto);
           setSuccessMessage('¡Perfil creado exitosamente!');
         } else {
@@ -67,6 +73,10 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
         setProfile(saved);
         setIsNewProfile(false);
       } catch (err: any) {
+        if (err?.response?.status === 409) {
+          setError('El nombre público ya está en uso por otro inversor. Prueba con uno diferente.');
+          return;
+        }
         const msg =
           err?.response?.data?.message ||
           'Error al guardar el perfil. Intenta de nuevo.';
@@ -77,8 +87,38 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
         setTimeout(() => setSuccessMessage(null), 4000);
       }
     },
-    [isNewProfile],
+    [profile],
   );
+
+  const uploadAvatarPhoto = useCallback(async (file: File) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await uploadInvestorAvatar(file);
+      setProfile(updated);
+      setSuccessMessage('Foto de perfil actualizada exitosamente.');
+    } catch (err: any) {
+      setError('Error al subir la foto de perfil.');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+  }, []);
+
+  const uploadCoverPhoto = useCallback(async (file: File) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await uploadInvestorCover(file);
+      setProfile(updated);
+      setSuccessMessage('Foto de portada actualizada exitosamente.');
+    } catch (err: any) {
+      setError('Error al subir la foto de portada.');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+  }, []);
 
   const deleteProfile = useCallback(async () => {
     setSaving(true);
@@ -115,6 +155,8 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     isNewProfile,
     fetchProfile,
     submitProfile,
+    uploadAvatarPhoto,
+    uploadCoverPhoto,
     deleteProfile,
   };
 }

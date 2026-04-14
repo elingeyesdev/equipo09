@@ -12,4 +12,6 @@ export declare class InvestorController {
     updateMyProfile(req: Request, dto: UpdateInvestorProfileDto): Promise<ApiSuccessResponse<InvestorProfile>>;
     deleteMyProfile(req: Request): Promise<ApiSuccessResponse<null>>;
     getProfileById(id: string): Promise<ApiSuccessResponse<InvestorProfile>>;
+    uploadAvatar(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<InvestorProfile>>;
+    uploadCover(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<InvestorProfile>>;
 }

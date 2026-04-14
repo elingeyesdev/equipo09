@@ -24,6 +24,8 @@ export interface InvestorProfile {
   identityVerified: boolean;
   totalInvestments: number;
   totalInvested: number;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }

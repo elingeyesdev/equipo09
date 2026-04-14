@@ -1,20 +1,51 @@
+import { useState, useEffect } from 'react';
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
-import { InvestorProfileForm } from '../components/InvestorProfileForm';
+import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Navbar } from '../components/Navbar';
-import { User, AlertTriangle, CheckCircle2, Trash2 } from 'lucide-react';
+
+import { ProfileHeader } from '../components/investor-profile/ProfileHeader';
+import { ProfileTabs } from '../components/investor-profile/ProfileTabs';
+import { ProfileSidebar } from '../components/investor-profile/ProfileSidebar';
+import { InvestmentsFeed } from '../components/investor-profile/InvestmentsFeed';
+import { EditProfileModal } from '../components/investor-profile/EditProfileModal';
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  Loader2, 
+  MessageSquare, 
+  User, 
+  MapPin, 
+  Shield,
+  FolderOpen,
+  Rocket,
+  Target,
+} from 'lucide-react';
+
+type ModalType = 'profile' | 'fiscal' | 'address' | 'investment' | 'avatar' | null;
+
+const INVESTOR_TYPE_LABELS: Record<string, string> = {
+  individual: 'Inversor Individual',
+  institutional: 'Inversor Institucional',
+  angel: 'Ángel Inversionista',
+};
 
 export function InvestorProfilePage() {
-  const userEmail = localStorage.getItem('userEmail') ?? '';
   const {
     profile,
-    loading,
+    loading: profileLoading,
     saving,
-    error,
+    error: profileError,
     successMessage,
-    isNewProfile,
     submitProfile,
+    uploadAvatarPhoto,
+    uploadCoverPhoto,
     deleteProfile,
   } = useInvestorProfile();
+
+  const {
+    data: capitalData,
+    loading: capitalLoading,
+  } = useInvestorDashboard();
 
   const handleDeleteInvestorProfile = async () => {
     const ok = window.confirm(
@@ -24,108 +55,195 @@ export function InvestorProfilePage() {
     await deleteProfile();
   };
 
-  // Iniciales del avatar
-  const initials = profile
-    ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
-    : userEmail[0]?.toUpperCase() ?? '?';
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [activeTab, setActiveTab] = useState('portfolio');
+  const [onboardingTriggered, setOnboardingTriggered] = useState(false);
+
+  const userEmail = localStorage.getItem('userEmail') ?? '';
+
+  useEffect(() => {
+    if (!profileLoading && !profile && !onboardingTriggered) {
+      const timer = setTimeout(() => {
+        setModalType('profile');
+        setOnboardingTriggered(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [profileLoading, profile, onboardingTriggered]);
+
+  const handleSave = async (type: string, data: any) => {
+    const baseData = { ...profile, ...data };
+    if (!profile) {
+      if (!baseData.firstName) baseData.firstName = 'Usuario';
+      if (!baseData.lastName) baseData.lastName = 'Sin Registrar';
+    }
+    const {
+      id, userId, avatarUrl, coverUrl, identityVerified, identityVerifiedAt,
+      verificationDocuments, totalInvestments, totalInvested, accredited,
+      metadata, createdAt, updatedAt, ...sanitizedData
+    } = baseData;
+    await submitProfile(sanitizedData);
+    setModalType(null);
+  };
+
+  const error = profileError;
 
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="min-h-screen font-sans bg-[#f4f7f4] flex flex-col font-['Sora',sans-serif]">
       <Navbar />
 
-      <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-12">
+      <main className="flex-1 w-full relative z-0 pb-20">
+        
+        {profileLoading ? (
+           <div className="max-w-[1100px] mx-auto p-40 flex flex-col items-center justify-center gap-6">
+             <Loader2 className="w-14 h-14 text-[#2e7d32] animate-spin" strokeWidth={2.5} />
+             <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando Expediente Financiero...</p>
+           </div>
+        ) : (
+           <>
+             <div className="bg-white shadow-sm">
+               <ProfileHeader 
+                 profile={profile} 
+                 onEdit={(type: any) => setModalType(type as ModalType)} 
+                 uploadAvatar={uploadAvatarPhoto}
+                 uploadCover={uploadCoverPhoto}
+               />
+               <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+             </div>
 
-        {/* Profile header - Green Financial Theme */}
-        <div className="flex flex-col md:flex-row items-center gap-8 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-24 h-24 rounded-[32px] bg-gradient-to-tr from-[#2e7d32] to-[#00897b] flex items-center justify-center text-4xl font-black text-white shadow-xl shadow-emerald-500/20 shrink-0">
-             {initials}
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-black text-[#1c2b1e] tracking-tight mb-2 leading-none">
-              {profile
-                ? `${profile.firstName} ${profile.lastName}`
-                : 'Expediente de Inversor'}
-            </h1>
-            <p className="text-[15px] font-medium text-slate-500 italic">
-              {profile?.displayName ?? 'Gestiona tu identidad y límites de capital con solidez financiera.'}
-            </p>
-          </div>
-          <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border shrink-0 flex items-center gap-2
-            ${isNewProfile 
-              ? 'bg-amber-50 text-[#f9a825] border-amber-200' 
-              : 'bg-emerald-50 text-[#2e7d32] border-emerald-200'
-            }
-          `}>
-            {isNewProfile ? (
-              <>
-                <User size={12} strokeWidth={3} />
-                Perfil Pendiente
-              </>
-            ) : (
-              <>
-                <CheckCircle2 size={12} strokeWidth={3} />
-                Inversor Activo
-              </>
-            )}
-          </div>
-        </div>
+             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 mt-10 flex flex-col lg:flex-row gap-10 items-start">
+               
+               <ProfileSidebar 
+                 profile={profile} 
+                 openModal={(type: ModalType) => setModalType(type)} 
+                 userEmail={userEmail}
+                 onDeleteProfile={profile ? handleDeleteInvestorProfile : undefined}
+               />
+               
+               <div className="flex-1 min-w-0 flex flex-col gap-10 w-full">
+                 <div className="w-full mb-2 flex flex-col gap-4">
+                      {!profileLoading && !profile && (
+                        <div className="bg-gradient-to-r from-[#2e7d32] to-[#1c2b1e] text-white p-6 rounded-[32px] shadow-xl shadow-emerald-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
+                          <div className="flex items-center gap-5">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30">
+                              <Rocket size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                              <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-1">¡Casi listo para invertir!</h4>
+                              <p className="text-emerald-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder realizar tu primera inversión.</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => setModalType('profile')}
+                            className="bg-white text-[#2e7d32] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
+                          >
+                            Completar Ahora
+                          </button>
+                        </div>
+                      )}
 
-        {/* Alerts */}
-        {(error || successMessage) && (
-          <div className="mb-8 animate-in slide-in-from-top-4 duration-300">
-            {error && (
-              <div className="bg-red-50 border border-red-100 text-[#c62828] p-5 rounded-2xl text-[14px] font-bold flex items-center gap-3 shadow-sm shadow-red-900/5">
-                <AlertTriangle size={20} strokeWidth={2.5} />
-                {error}
-              </div>
-            )}
-            {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-100 text-[#2e7d32] p-5 rounded-2xl text-[14px] font-bold flex items-center gap-3 shadow-sm shadow-emerald-900/5">
-                <CheckCircle2 size={20} strokeWidth={2.5} />
-                {successMessage}
-              </div>
-            )}
-          </div>
-        )}
+                      {error && (
+                        <div className="bg-red-50 text-[#c62828] p-5 rounded-[24px] text-[14px] font-bold border border-red-100 shadow-sm flex items-center gap-3">
+                          <AlertCircle size={20} strokeWidth={2.5} /> {error}
+                        </div>
+                      )}
+                      {successMessage && (
+                        <div className="bg-emerald-50 text-[#2e7d32] p-5 rounded-[24px] text-[14px] font-bold border border-emerald-100 shadow-sm flex items-center gap-3">
+                          <CheckCircle2 size={20} strokeWidth={2.5} /> {successMessage}
+                        </div>
+                      )}
+                 </div>
 
-        {/* Form Container */}
-        <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-emerald-900/5 border border-emerald-50 relative overflow-hidden">
-          {/* Subtle background pattern */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-          
-          {loading ? (
-            <div className="py-40 flex flex-col items-center justify-center gap-6">
-              <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
-              <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Dossier...</span>
-            </div>
-          ) : (
-            <InvestorProfileForm
-              profile={profile}
-              saving={saving}
-              isNew={isNewProfile}
-              onSubmit={submitProfile}
-            />
-          )}
-        </div>
+                 {activeTab === 'portfolio' ? (
+                   <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
+                 ) : activeTab === 'info' ? (
+                   <div className="flex flex-col gap-8">
+                      <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><User size={20} strokeWidth={2.5} /></div>
+                            <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Personales</h3>
+                          </div>
+                          <button onClick={() => setModalType('profile')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Completo</p><p className="font-bold text-[#1c2b1e]">{profile?.firstName} {profile?.lastName}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#2e7d32]">@{profile?.displayName || 'No definido'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tipo de Inversor</p><p className="font-bold text-[#2e7d32] flex items-center gap-2"><Shield size={14} /> {profile?.investorType ? INVESTOR_TYPE_LABELS[profile.investorType] : '-'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tax ID</p><p className="font-bold text-[#1c2b1e]">{profile?.taxId || '-'}</p></div>
+                          <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Biografía</p><p className="text-slate-600 leading-relaxed">{profile?.bio || 'Sin biografía.'}</p></div>
+                        </div>
+                      </section>
 
-        {!loading && profile && (
-          <div className="mt-8 rounded-[28px] p-6 md:p-8 border border-red-100 bg-red-50/40 shadow-sm">
-            <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
-            <p className="text-[14px] text-red-900/80 font-medium leading-relaxed mb-4">
-              Elimina solo tu perfil de inversor. Tu usuario y sesión siguen activos. No está permitido si ya registraste inversiones en la plataforma.
-            </p>
-            <button
-              type="button"
-              onClick={() => void handleDeleteInvestorProfile()}
-              disabled={saving}
-              className="px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <Trash2 size={16} strokeWidth={2.5} />
-              Eliminar perfil inversor
-            </button>
-          </div>
+                      <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><MapPin size={20} strokeWidth={2.5} /></div>
+                            <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación</h3>
+                          </div>
+                          <button onClick={() => setModalType('address')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">País</p><p className="font-bold text-[#1c2b1e]">{profile?.country || '-'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Estado / Ciudad</p><p className="font-bold text-[#1c2b1e]">{profile?.state || '-'}, {profile?.city || '-'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Dirección Principal</p><p className="font-bold text-[#1c2b1e]">{profile?.addressLine1 || '-'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Complemento</p><p className="font-bold text-[#1c2b1e]">{profile?.addressLine2 || '-'}</p></div>
+                        </div>
+                      </section>
+
+                      <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><Target size={20} strokeWidth={2.5} /></div>
+                            <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Preferencias de Inversión</h3>
+                          </div>
+                          <button onClick={() => setModalType('investment')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Inversión Mínima</p><p className="font-bold text-[#1c2b1e]">{profile?.minInvestment ? `$${profile.minInvestment.toLocaleString()}` : '-'}</p></div>
+                          <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Capacidad Máxima</p><p className="font-bold text-[#1c2b1e]">{profile?.maxInvestment ? `$${profile.maxInvestment.toLocaleString()}` : '-'}</p></div>
+                          {profile?.preferredCategories && profile.preferredCategories.length > 0 && (
+                            <div className="md:col-span-2">
+                              <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-3">Sectores de Interés</p>
+                              <div className="flex flex-wrap gap-2">
+                                {profile.preferredCategories.map((cat, i) => (
+                                  <span key={i} className="bg-emerald-50 text-[#2e7d32] border border-emerald-100 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider">{cat}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </section>
+                   </div>
+                  ) : activeTab === 'capital' ? (
+                    <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
+                  ) : (
+                    <div className="bg-white rounded-[50px] shadow-sm border border-emerald-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
+                       <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
+                       <div className="text-emerald-100 mb-6 flex justify-center">
+                          {activeTab === 'conversations' ? <MessageSquare size={80} strokeWidth={1} /> : <FolderOpen size={80} strokeWidth={1} />}
+                       </div>
+                       <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">
+                         {activeTab === 'conversations' ? 'Centro de Conversaciones' : 'Módulo en Desarrollo'}
+                       </h3>
+                       <p className="max-w-md mx-auto text-[15px] font-medium leading-relaxed text-slate-500">
+                         {activeTab === 'conversations' 
+                           ? 'Módulo de comunicación directa con emprendedores encriptado. Se activará tras tu primera inversión.'
+                           : 'Este módulo estará disponible próximamente para fortalecer la transparencia de tu dossier.'
+                         }
+                       </p>
+                    </div>
+                  )}
+               </div>
+             </div>
+           </>
         )}
       </main>
+
+      <EditProfileModal 
+        type={modalType} profile={profile} saving={saving}
+        onClose={() => setModalType(null)} onSave={handleSave}
+      />
     </div>
   );
 }

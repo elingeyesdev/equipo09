@@ -74,3 +74,25 @@ export async function getCapitalOverview(): Promise<CapitalOverview> {
   );
   return data.data;
 }
+
+export async function uploadInvestorAvatar(file: File): Promise<InvestorProfile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post<ApiSuccessResponse<InvestorProfile>>(
+    '/investors/me/profile/avatar',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}
+
+export async function uploadInvestorCover(file: File): Promise<InvestorProfile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post<ApiSuccessResponse<InvestorProfile>>(
+    '/investors/me/profile/cover',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}

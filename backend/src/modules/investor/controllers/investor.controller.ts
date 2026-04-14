@@ -10,7 +10,12 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import {
   ApiTags,
   ApiOperation,
@@ -160,5 +165,65 @@ export class InvestorController {
   ): Promise<ApiSuccessResponse<InvestorProfile>> {
     const profile = await this.investorService.getProfileById(id);
     return new ApiSuccessResponse(profile);
+  }
+
+  // =========================================================================
+  // AVATAR & COVER
+  // =========================================================================
+
+  @Post('me/profile/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profiles',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir avatar del inversor' })
+  async uploadAvatar(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ApiSuccessResponse<InvestorProfile>> {
+    const userId = (req as any).user.id;
+    const url = `/uploads/profiles/${file.filename}`;
+    const profile = await this.investorService.updateMyProfile(userId, {
+      avatarUrl: url,
+    } as any);
+    return new ApiSuccessResponse(profile, 'Avatar actualizado');
+  }
+
+  @Post('me/profile/cover')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profiles',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir portada del inversor' })
+  async uploadCover(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ApiSuccessResponse<InvestorProfile>> {
+    const userId = (req as any).user.id;
+    const url = `/uploads/profiles/${file.filename}`;
+    const profile = await this.investorService.updateMyProfile(userId, {
+      coverUrl: url,
+    } as any);
+    return new ApiSuccessResponse(profile, 'Portada actualizada');
   }
 }

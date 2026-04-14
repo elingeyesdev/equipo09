@@ -87,6 +87,8 @@ let InvestorProfileRepository = class InvestorProfileRepository extends database
                 : undefined,
             min_investment: dto.minInvestment,
             max_investment: dto.maxInvestment,
+            avatar_url: dto.avatarUrl,
+            cover_url: dto.coverUrl,
         };
         const entries = Object.entries(fieldMap).filter(([, value]) => value !== undefined);
         if (entries.length === 0) {

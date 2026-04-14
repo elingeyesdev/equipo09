@@ -21,6 +21,8 @@ export interface InvestorProfile {
   preferredCategories: string[];
   minInvestment: number | null;
   maxInvestment: number | null;
+  avatarUrl: string | null;
+  coverUrl: string | null;
   identityVerified: boolean;
   identityVerifiedAt: Date | null;
   verificationDocuments: any[];
@@ -55,6 +57,8 @@ export function mapRowToInvestorProfile(row: any): InvestorProfile {
     preferredCategories: row.preferred_categories ?? [],
     minInvestment: row.min_investment ? Number(row.min_investment) : null,
     maxInvestment: row.max_investment ? Number(row.max_investment) : null,
+    avatarUrl: row.avatar_url ?? null,
+    coverUrl: row.cover_url ?? null,
     identityVerified: row.identity_verified,
     identityVerifiedAt: row.identity_verified_at,
     verificationDocuments: row.verification_documents ?? [],
