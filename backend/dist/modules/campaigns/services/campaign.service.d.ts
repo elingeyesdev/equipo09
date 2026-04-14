@@ -6,4 +6,14 @@ export declare class CampaignService {
     createCampaign(creatorId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign>;
     getMyCampaigns(creatorId: string, query: QueryCampaignsDto): Promise<PaginatedCampaigns>;
     getCampaignById(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign>;
+    getPublicCampaigns(query: {
+        page?: any;
+        limit?: any;
+        sortBy?: string;
+        sortOrder?: string;
+        categoryId?: string;
+        campaignType?: string;
+        q?: string;
+    }): Promise<PaginatedCampaigns>;
+    getPublicCampaignById(campaignId: string): Promise<any>;
 }

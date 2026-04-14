@@ -30,4 +30,41 @@ export class CampaignService {
     }
     return campaign;
   }
+
+  // =========================================================================
+  // CAMPAÑAS PÚBLICAS — Sin autenticación
+  // =========================================================================
+
+  async getPublicCampaigns(query: {
+    page?: any;
+    limit?: any;
+    sortBy?: string;
+    sortOrder?: string;
+    categoryId?: string;
+    campaignType?: string;
+    q?: string;
+  }): Promise<PaginatedCampaigns> {
+    const page = parseInt(query.page) || 1;
+    const limit = Math.min(parseInt(query.limit) || 12, 50); // max 50 por página
+    const sortBy = query.sortBy || 'created_at';
+    const sortOrder = query.sortOrder || 'DESC';
+
+    return await this.campaignRepo.findPublicCampaigns(
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      query.categoryId,
+      query.campaignType,
+      query.q,
+    );
+  }
+
+  async getPublicCampaignById(campaignId: string): Promise<any> {
+    const campaign = await this.campaignRepo.findPublicById(campaignId);
+    if (!campaign) {
+      throw new NotFoundException(`Campaña con ID ${campaignId} no encontrada o no está publicada`);
+    }
+    return campaign;
+  }
 }

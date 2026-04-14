@@ -15,4 +15,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./entrepreneur-campaign.controller"), exports);
+__exportStar(require("./public-campaign.controller"), exports);
 //# sourceMappingURL=index.js.map

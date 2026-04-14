@@ -18,6 +18,22 @@ const pg_1 = require("pg");
 let CampaignRepository = class CampaignRepository {
     constructor(pool) {
         this.pool = pool;
+        this.PUBLIC_STATUSES = ['published', 'funded', 'partially_funded'];
+        this.PUBLIC_SELECT = `
+    SELECT
+      c.id, c.title, c.slug, c.short_description,
+      c.campaign_type, c.status,
+      c.goal_amount, c.current_amount, c.investor_count,
+      c.cover_image_url, c.end_date, c.created_at,
+      ep.first_name || ' ' || ep.last_name AS entrepreneur_name,
+      ep.display_name AS entrepreneur_display_name,
+      ep.avatar_url AS entrepreneur_avatar,
+      cat.display_name AS category_name,
+      cat.slug AS category_slug
+    FROM campaigns c
+    JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+    JOIN categories cat ON c.category_id = cat.id
+  `;
     }
     mapRowToCampaign(row) {
         return {
@@ -110,6 +126,108 @@ let CampaignRepository = class CampaignRepository {
         const query = `SELECT * FROM campaigns WHERE id = $1 AND creator_id = $2;`;
         const { rows } = await this.pool.query(query, [id, creatorId]);
         return rows.length > 0 ? this.mapRowToCampaign(rows[0]) : null;
+    }
+    mapRowToPublicCampaign(row) {
+        return {
+            id: row.id,
+            title: row.title,
+            slug: row.slug,
+            shortDescription: row.short_description,
+            campaignType: row.campaign_type,
+            status: row.status,
+            goalAmount: parseFloat(row.goal_amount),
+            currentAmount: parseFloat(row.current_amount),
+            investorCount: parseInt(row.investor_count || '0', 10),
+            coverImageUrl: row.cover_image_url,
+            endDate: row.end_date,
+            createdAt: row.created_at,
+            entrepreneurName: row.entrepreneur_name,
+            entrepreneurDisplayName: row.entrepreneur_display_name,
+            entrepreneurAvatar: row.entrepreneur_avatar,
+            categoryName: row.category_name,
+            categorySlug: row.category_slug,
+        };
+    }
+    async findPublicCampaigns(page = 1, limit = 12, sortBy = 'created_at', sortOrder = 'DESC', categoryId, campaignType, search) {
+        const offset = (page - 1) * limit;
+        const conditions = [`c.status IN ('published', 'funded', 'partially_funded')`];
+        const params = [];
+        let paramIndex = 1;
+        if (categoryId) {
+            conditions.push(`c.category_id = $${paramIndex}`);
+            params.push(categoryId);
+            paramIndex++;
+        }
+        if (campaignType) {
+            conditions.push(`c.campaign_type = $${paramIndex}`);
+            params.push(campaignType);
+            paramIndex++;
+        }
+        if (search) {
+            conditions.push(`(c.title ILIKE $${paramIndex} OR c.short_description ILIKE $${paramIndex})`);
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+        const whereClause = conditions.join(' AND ');
+        const allowedSorts = ['created_at', 'current_amount', 'goal_amount', 'end_date'];
+        const safeSortBy = allowedSorts.includes(sortBy) ? sortBy : 'created_at';
+        const safeSortOrder = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+        const countQuery = `SELECT COUNT(*) FROM campaigns c WHERE ${whereClause}`;
+        const countResult = await this.pool.query(countQuery, params);
+        const totalItems = parseInt(countResult.rows[0].count, 10);
+        const dataQuery = `
+      ${this.PUBLIC_SELECT}
+      WHERE ${whereClause}
+      ORDER BY c.${safeSortBy} ${safeSortOrder}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
+    `;
+        const dataResult = await this.pool.query(dataQuery, [...params, limit, offset]);
+        const totalPages = Math.ceil(totalItems / limit);
+        return {
+            data: dataResult.rows.map(row => this.mapRowToPublicCampaign(row)),
+            meta: {
+                totalItems,
+                itemCount: dataResult.rows.length,
+                itemsPerPage: limit,
+                totalPages,
+                currentPage: page,
+            },
+        };
+    }
+    async findPublicById(id) {
+        const query = `
+      SELECT
+        c.id, c.title, c.slug, c.subtitle, c.short_description,
+        c.description, c.campaign_type, c.status,
+        c.goal_amount, c.current_amount, c.investor_count,
+        c.cover_image_url, c.currency,
+        c.min_investment, c.max_investment,
+        c.start_date, c.end_date, c.created_at,
+        ep.first_name || ' ' || ep.last_name AS entrepreneur_name,
+        ep.display_name AS entrepreneur_display_name,
+        ep.avatar_url AS entrepreneur_avatar,
+        ep.bio AS entrepreneur_bio,
+        cat.display_name AS category_name,
+        cat.slug AS category_slug
+      FROM campaigns c
+      JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      JOIN categories cat ON c.category_id = cat.id
+      WHERE c.id = $1 AND c.status IN ('published', 'funded', 'partially_funded');
+    `;
+        const { rows } = await this.pool.query(query, [id]);
+        if (rows.length === 0)
+            return null;
+        const row = rows[0];
+        return {
+            ...this.mapRowToPublicCampaign(row),
+            description: row.description,
+            subtitle: row.subtitle,
+            currency: row.currency,
+            startDate: row.start_date,
+            minInvestment: parseFloat(row.min_investment || '0'),
+            maxInvestment: row.max_investment ? parseFloat(row.max_investment) : null,
+            entrepreneurBio: row.entrepreneur_bio,
+        };
     }
 };
 exports.CampaignRepository = CampaignRepository;

@@ -36,6 +36,20 @@ let CampaignService = class CampaignService {
         }
         return campaign;
     }
+    async getPublicCampaigns(query) {
+        const page = parseInt(query.page) || 1;
+        const limit = Math.min(parseInt(query.limit) || 12, 50);
+        const sortBy = query.sortBy || 'created_at';
+        const sortOrder = query.sortOrder || 'DESC';
+        return await this.campaignRepo.findPublicCampaigns(page, limit, sortBy, sortOrder, query.categoryId, query.campaignType, query.q);
+    }
+    async getPublicCampaignById(campaignId) {
+        const campaign = await this.campaignRepo.findPublicById(campaignId);
+        if (!campaign) {
+            throw new common_1.NotFoundException(`Campaña con ID ${campaignId} no encontrada o no está publicada`);
+        }
+        return campaign;
+    }
 };
 exports.CampaignService = CampaignService;
 exports.CampaignService = CampaignService = __decorate([

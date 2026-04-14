@@ -47,3 +47,40 @@ export interface CampaignFinancialProgress {
     investorsCount: number;
     daysRemaining: number | null;
 }
+export interface PublicCampaign {
+    id: string;
+    title: string;
+    slug: string;
+    shortDescription: string | null;
+    campaignType: 'donation' | 'reward' | 'equity';
+    status: string;
+    goalAmount: number;
+    currentAmount: number;
+    investorCount: number;
+    coverImageUrl: string | null;
+    endDate: Date | null;
+    createdAt: Date;
+    entrepreneurName: string;
+    entrepreneurDisplayName: string | null;
+    entrepreneurAvatar: string | null;
+    categoryName: string;
+    categorySlug: string;
+}
+export interface PublicCampaignDetail extends PublicCampaign {
+    description: string;
+    subtitle: string | null;
+    currency: string;
+    startDate: Date | null;
+    minInvestment: number;
+    maxInvestment: number | null;
+    entrepreneurBio: string | null;
+}
+export interface QueryPublicCampaignsDto {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    campaignType?: string;
+    q?: string;
+    sortBy?: 'created_at' | 'current_amount' | 'goal_amount' | 'end_date';
+    sortOrder?: 'ASC' | 'DESC';
+}

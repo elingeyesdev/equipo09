@@ -33,6 +33,12 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-2">
+          <Link 
+            to="/explore" 
+            className={navLinkClass('/explore')}
+          >
+            Explorar
+          </Link>
           {userRole === 'entrepreneur' ? (
             <>
               <Link 
