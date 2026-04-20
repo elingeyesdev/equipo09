@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
 import type { PublicCampaign } from '../api/public-campaigns.api';
@@ -25,7 +26,7 @@ const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: st
   equity: { label: 'Equity', icon: TrendingUp, color: '#2e7d32' },
 };
 
-function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
+function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick?: () => void }) {
   const progress = campaign.goalAmount > 0
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
     : 0;
@@ -40,7 +41,10 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
   const TypeIcon = typeInfo.icon;
 
   return (
-    <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div
+      onClick={onClick}
+      className="bg-white rounded-[28px] shadow-sm border border-emerald-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer">
+
       {/* Cover Image */}
       <div className="relative h-48 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
         {campaign.coverImageUrl ? (
@@ -158,6 +162,14 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
 export function ExploreCampaignsPage() {
   const { campaigns, meta, loading, error, filters, updateFilters, goToPage } = usePublicCampaigns();
   const [searchInput, setSearchInput] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleCardClick = (campaignId: string) => {
+    navigate(`/campaign/${campaignId}`, {
+      state: { from: location.pathname + location.search },
+    });
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,7 +367,7 @@ export function ExploreCampaignsPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {campaigns.map(campaign => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
+                <CampaignCard key={campaign.id} campaign={campaign} onClick={() => handleCardClick(campaign.id)} />
               ))}
             </div>
 

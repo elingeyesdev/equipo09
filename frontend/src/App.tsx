@@ -6,6 +6,7 @@ import { InvestorDashboardPage } from './pages/InvestorDashboardPage';
 import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
 import { MyCampaignsPage } from './pages/MyCampaignsPage';
 import { ExploreCampaignsPage } from './pages/ExploreCampaignsPage';
+import { CampaignDetailPage } from './pages/CampaignDetailPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/explore" element={<ExploreCampaignsPage />} />
+        <Route path="/campaign/:id" element={<CampaignDetailPage />} />
         <Route
           path="/dashboard"
           element={
