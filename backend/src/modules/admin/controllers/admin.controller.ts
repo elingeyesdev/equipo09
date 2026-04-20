@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards, Delete, Query, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from '../services/admin.service';
 import { JwtAuthGuard } from '../../auth/guards';
@@ -54,15 +54,25 @@ export class AdminController {
     return new ApiSuccessResponse(campaign, 'Detalle de campaña obtenido');
   }
 
+  @Get('campaigns/:id/history')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener historial de cambios de una campaña' })
+  async getCampaignHistory(@Param('id') id: string) {
+    const history = await this.adminService.getCampaignHistory(id);
+    return new ApiSuccessResponse(history, 'Historial de campaña obtenido');
+  }
+
   @Patch('campaigns/:id/status')
   @Roles('admin', 'super_admin')
   @ApiOperation({ summary: 'Aprobar o rechazar campañas con feedback' })
   async updateCampaignStatus(
     @Param('id') id: string,
     @Body('status') status: string,
-    @Body('feedback') feedback?: string,
+    @Body('feedback') feedback: string | undefined,
+    @Req() req: any,
   ) {
-    const updated = await this.adminService.updateCampaignStatus(id, status, feedback);
+    const reviewerId = req.user.id;
+    const updated = await this.adminService.updateCampaignStatus(id, status, reviewerId, feedback);
     return new ApiSuccessResponse(updated, 'Estado de campaña actualizado con éxito');
   }
 
@@ -77,8 +87,9 @@ export class AdminController {
   @Delete('campaigns/:id')
   @Roles('admin', 'super_admin')
   @ApiOperation({ summary: 'Borra físicamente una campaña, si aplica' })
-  async deleteCampaign(@Param('id') id: string) {
-    const deleted = await this.adminService.hardDeleteCampaign(id);
+  async deleteCampaign(@Param('id') id: string, @Req() req: any) {
+    const reviewerId = req.user.id;
+    const deleted = await this.adminService.hardDeleteCampaign(id, reviewerId);
     return new ApiSuccessResponse(deleted, 'Campaña eliminada o cancelada con éxito');
   }
 }

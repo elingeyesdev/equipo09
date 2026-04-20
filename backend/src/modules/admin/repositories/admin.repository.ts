@@ -39,24 +39,79 @@ export class AdminRepository extends BaseRepository {
     `);
   }
 
-  async updateCampaignStatus(campaignId: string, status: string, feedback?: string) {
-    if (feedback) {
-      return this.queryOne(`
-        UPDATE campaigns 
-        SET status = $2, 
-            metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{review_feedback}', to_jsonb($3::text)),
-            updated_at = NOW() 
-        WHERE id = $1 
-        RETURNING *
-      `, [campaignId, status, JSON.stringify(feedback)]);
-    }
+  async updateCampaignStatus(campaignId: string, status: string, reviewerId: string, feedback?: string) {
+    return this.transaction(async (client) => {
+      // 1. Get current status for history
+      const currentCampaign = await client.query(
+        'SELECT status FROM campaigns WHERE id = $1',
+        [campaignId]
+      );
+      
+      if (currentCampaign.rows.length === 0) return null;
+      const oldStatus = currentCampaign.rows[0].status;
 
-    return this.queryOne(`
-      UPDATE campaigns 
-      SET status = $2, updated_at = NOW() 
-      WHERE id = $1 
-      RETURNING *
-    `, [campaignId, status]);
+      // 2. Update campaign status
+      let updatedCampaign;
+      if (feedback) {
+        updatedCampaign = await client.query(`
+          UPDATE campaigns 
+          SET status = $2, 
+              metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{review_feedback}', to_jsonb($3::text)),
+              updated_at = NOW() 
+          WHERE id = $1 
+          RETURNING *
+        `, [campaignId, status, feedback]);
+      } else {
+        updatedCampaign = await client.query(`
+          UPDATE campaigns 
+          SET status = $2, updated_at = NOW() 
+          WHERE id = $1 
+          RETURNING *
+        `, [campaignId, status]);
+      }
+
+      // 3. Record status history
+      await client.query(`
+        INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
+        VALUES ($1, $2, $3, $4, $5)
+      `, [campaignId, oldStatus, status, reviewerId, feedback || 'Cambio de estado administrativo']);
+
+      // 4. Record review if it's a review action (approved, rejected, etc)
+      const reviewDecisions = ['approved', 'rejected', 'published', 'changes_requested'];
+      if (reviewDecisions.includes(status) || feedback) {
+        const decisionMap: Record<string, string> = {
+          'published': 'approved',
+          'approved': 'approved',
+          'rejected': 'rejected',
+          'changes_requested': 'changes_requested'
+        };
+        
+        await client.query(`
+          INSERT INTO campaign_reviews (campaign_id, reviewer_id, decision, feedback)
+          VALUES ($1, $2, $3, $4)
+        `, [campaignId, reviewerId, decisionMap[status] || 'approved', feedback]);
+      }
+
+      return updatedCampaign.rows[0];
+    });
+  }
+
+  async getCampaignHistory(campaignId: string) {
+    return this.queryMany(`
+      SELECT 
+        h.id,
+        h.from_status,
+        h.to_status,
+        h.reason as feedback,
+        h.created_at,
+        u.email as changed_by_email,
+        COALESCE(ap.first_name || ' ' || ap.last_name, u.email) as changed_by_name
+      FROM campaign_status_history h
+      LEFT JOIN users u ON h.changed_by = u.id
+      LEFT JOIN admin_profiles ap ON u.id = ap.user_id
+      WHERE h.campaign_id = $1
+      ORDER BY h.created_at DESC
+    `, [campaignId]);
   }
 
   async createAdminProfile(userId: string, accessLevel: string) {

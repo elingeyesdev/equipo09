@@ -34,12 +34,16 @@ export class AdminService {
     return campaign;
   }
 
-  async updateCampaignStatus(campaignId: string, status: string, feedback?: string) {
-    const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, feedback);
+  async updateCampaignStatus(campaignId: string, status: string, reviewerId: string, feedback?: string) {
+    const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, reviewerId, feedback);
     if (!updated) {
       throw new NotFoundException('Campaña no encontrada');
     }
     return updated;
+  }
+
+  async getCampaignHistory(campaignId: string) {
+    return this.adminRepo.getCampaignHistory(campaignId);
   }
 
   async createAdmin(email: string, passwordString: string) {
@@ -80,7 +84,7 @@ export class AdminService {
     return deleted;
   }
 
-  async hardDeleteCampaign(campaignId: string) {
+  async hardDeleteCampaign(campaignId: string, reviewerId: string) {
     try {
       const deleted = await this.adminRepo.hardDeleteCampaign(campaignId);
       if (!deleted) throw new NotFoundException('Campaña no encontrada');
@@ -88,7 +92,7 @@ export class AdminService {
     } catch(err: any) {
       if (err.code === '23503') { // Foreign key constraint violation
         // Fallback: Si no se puede borrar porque tiene inversores/fondos, se cambia el status a "cancelled"
-        return this.adminRepo.updateCampaignStatus(campaignId, 'cancelled');
+        return this.adminRepo.updateCampaignStatus(campaignId, 'cancelled', reviewerId);
       }
       throw err;
     }

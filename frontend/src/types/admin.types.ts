@@ -75,3 +75,13 @@ export interface PendingCampaignDetail {
   entrepreneur_website?: string;
   media?: any[];
 }
+
+export interface CampaignHistoryItem {
+  id: string;
+  from_status: string | null;
+  to_status: string;
+  feedback: string | null;
+  created_at: string;
+  changed_by_email: string;
+  changed_by_name: string;
+}

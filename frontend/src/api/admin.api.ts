@@ -7,6 +7,7 @@ import type {
   PendingCampaign,
   PendingCampaignDetail,
   RewardTier,
+  CampaignHistoryItem,
 } from '../types/admin.types';
 
 interface ApiSuccessResponse<T> {
@@ -161,4 +162,8 @@ export async function getPendingCampaignById(id: string): Promise<PendingCampaig
     console.error('Error in getPendingCampaignById:', error);
     throw error;
   }
+}
+export async function getCampaignHistory(id: string): Promise<CampaignHistoryItem[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignHistoryItem[]>>(`/admin/campaigns/${id}/history`);
+  return data.data;
 }

@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
 import { getCampaignFinancialProgress } from '../api/campaign.api';
+import { getCampaignHistory } from '../api/admin.api';
+import type { CampaignHistoryItem } from '../types/admin.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { 
   FileText, 
@@ -126,6 +128,8 @@ export function CampaignPreviewModal({
   const [financeLoading, setFinanceLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
+  const [history, setHistory] = useState<CampaignHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     if (!open || !campaign) {
@@ -148,6 +152,20 @@ export function CampaignPreviewModal({
         if (!cancelled) setFinanceLoading(false);
       }
     })();
+
+    if (isAdmin) {
+      setHistoryLoading(true);
+      (async () => {
+        try {
+          const data = await getCampaignHistory(campaign.id);
+          if (!cancelled) setHistory(data);
+        } catch (err) {
+          console.error('Error fetching campaign history:', err);
+        } finally {
+          if (!cancelled) setHistoryLoading(false);
+        }
+      })();
+    }
 
     return () => {
       cancelled = true;
@@ -455,6 +473,55 @@ export function CampaignPreviewModal({
                   )}
                 </div>
               </section>
+
+              {isAdmin && (
+                <section className="flex flex-col gap-4">
+                  <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
+                     <Clock size={18} className="text-indigo-500" />
+                     Historial de Auditoría
+                  </h3>
+                  <div className="flex flex-col gap-3 min-h-[100px]">
+                    {historyLoading ? (
+                      <div className="py-6 flex flex-col items-center justify-center gap-2">
+                         <Loader2 className="animate-spin text-indigo-200" size={24} />
+                      </div>
+                    ) : history.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                         <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Sin historial previo</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {history.map((item) => (
+                          <div key={item.id} className="relative pl-6 border-l-2 border-indigo-50 pb-1">
+                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-indigo-400"></div>
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[12px] font-black text-slate-800">
+                                  {statusLabel(item.from_status || 'draft')} → <span className="text-indigo-600">{statusLabel(item.to_status)}</span>
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400">
+                                  {formatShortDate(item.created_at)}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                {item.feedback || 'Sin comentarios registrados.'}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                                  <User size={10} className="text-slate-400" />
+                                </div>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">
+                                  {item.changed_by_name}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>
