@@ -1,10 +1,11 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Delete } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Patch, Param, Body, UseGuards, Delete, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from '../services/admin.service';
 import { JwtAuthGuard } from '../../auth/guards';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { ApiSuccessResponse } from '../../../common/dto';
+import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -31,21 +32,38 @@ export class AdminController {
 
   @Get('campaigns')
   @Roles('admin', 'super_admin')
-  @ApiOperation({ summary: 'Listar todas las campañas para revisión' })
+  @ApiOperation({ summary: 'Listar todas las campañas para revisión (Legado)' })
   async getAllCampaigns() {
     const campaigns = await this.adminService.getAllCampaigns();
     return new ApiSuccessResponse(campaigns, 'Campañas listadas');
   }
 
+  @Get('campaigns/pending')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Listar campañas pendientes con filtros y paginación' })
+  async getPendingCampaigns(@Query() query: QueryAdminCampaignsDto) {
+    const result = await this.adminService.getPendingCampaigns(query);
+    return new ApiSuccessResponse(result, 'Listado de campañas obtenido con éxito');
+  }
+
+  @Get('campaigns/:id')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener detalle completo de una campaña para revisión' })
+  async getCampaignDetail(@Param('id') id: string) {
+    const campaign = await this.adminService.getCampaignDetail(id);
+    return new ApiSuccessResponse(campaign, 'Detalle de campaña obtenido');
+  }
+
   @Patch('campaigns/:id/status')
   @Roles('admin', 'super_admin')
-  @ApiOperation({ summary: 'Aprobar o rechazar campañas' })
+  @ApiOperation({ summary: 'Aprobar o rechazar campañas con feedback' })
   async updateCampaignStatus(
     @Param('id') id: string,
     @Body('status') status: string,
+    @Body('feedback') feedback?: string,
   ) {
-    const updated = await this.adminService.updateCampaignStatus(id, status);
-    return new ApiSuccessResponse(updated, 'Estado de campaña actualizado');
+    const updated = await this.adminService.updateCampaignStatus(id, status, feedback);
+    return new ApiSuccessResponse(updated, 'Estado de campaña actualizado con éxito');
   }
 
   @Delete('users/:id')

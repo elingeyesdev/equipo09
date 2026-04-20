@@ -9,6 +9,7 @@ import { ExploreCampaignsPage } from './pages/ExploreCampaignsPage';
 import { CampaignDetailPage } from './pages/CampaignDetailPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
+import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
 
 // Guard simple: si no hay token, redirige a login
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -61,6 +62,14 @@ function App() {
           element={
             <PrivateRoute>
               <AdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/campaigns/review"
+          element={
+            <PrivateRoute>
+              <CampaignReviewPage />
             </PrivateRoute>
           }
         />

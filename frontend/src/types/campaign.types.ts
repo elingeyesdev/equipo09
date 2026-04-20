@@ -19,6 +19,8 @@ export interface EntrepreneurCampaign {
   title: string;
   slug: string;
   shortDescription: string | null;
+  description: string | null;
+  location: string | null;
   campaignType: CampaignType;
   status: CampaignStatus;
   goalAmount: number;

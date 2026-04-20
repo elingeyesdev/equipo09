@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
+import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 
 @Injectable()
 export class AdminRepository extends BaseRepository {
@@ -38,7 +39,18 @@ export class AdminRepository extends BaseRepository {
     `);
   }
 
-  async updateCampaignStatus(campaignId: string, status: string) {
+  async updateCampaignStatus(campaignId: string, status: string, feedback?: string) {
+    if (feedback) {
+      return this.queryOne(`
+        UPDATE campaigns 
+        SET status = $2, 
+            metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{review_feedback}', to_jsonb($3::text)),
+            updated_at = NOW() 
+        WHERE id = $1 
+        RETURNING *
+      `, [campaignId, status, JSON.stringify(feedback)]);
+    }
+
     return this.queryOne(`
       UPDATE campaigns 
       SET status = $2, updated_at = NOW() 
@@ -81,5 +93,130 @@ export class AdminRepository extends BaseRepository {
   async hardDeleteCampaign(campaignId: string) {
     // If it fails due to foreign key constraints, pg driver will throw an exception
     return this.queryOne(`DELETE FROM campaigns WHERE id = $1 RETURNING *`, [campaignId]);
+  }
+
+  async findPendingCampaigns(queryDto: QueryAdminCampaignsDto) {
+    const { page = 1, limit = 10, campaignType, status, sortBy = 'created_at', sortOrder = 'DESC', q } = queryDto;
+    const offset = (page - 1) * limit;
+
+    const conditions: string[] = [];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    // Default search for pending if no status provided
+    const targetStatus = status || 'pending_review';
+    conditions.push(`c.status = $${paramIndex}`);
+    params.push(targetStatus);
+    paramIndex++;
+
+    if (campaignType) {
+      conditions.push(`c.campaign_type = $${paramIndex}`);
+      params.push(campaignType);
+      paramIndex++;
+    }
+
+    if (q) {
+      conditions.push(`(c.title ILIKE $${paramIndex} OR ep.first_name ILIKE $${paramIndex} OR ep.last_name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`);
+      params.push(`%${q}%`);
+      paramIndex++;
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // Whitelist sortBy to prevent SQL Injection (simple version)
+    const allowedSortFields = ['created_at', 'goal_amount', 'title', 'status'];
+    const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
+    const safeSortOrder = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    const dataQuery = `
+      SELECT c.id, c.title, c.status, c.goal_amount, c.current_amount, c.created_at, c.campaign_type,
+             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as entrepreneur_name,
+             u.email as creator_email
+      FROM campaigns c
+      JOIN users u ON c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      ${whereClause}
+      ORDER BY c.${safeSortBy} ${safeSortOrder}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) as count
+      FROM campaigns c
+      JOIN users u ON c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      ${whereClause}
+    `;
+
+    const [dataRows, countRow] = await Promise.all([
+      this.queryMany(dataQuery, [...params, limit, offset]),
+      this.queryOne(countQuery, params),
+    ]);
+
+    const totalItems = parseInt(countRow!.count, 10);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      data: dataRows.map(row => ({
+        ...row,
+        goal_amount: parseFloat(row.goal_amount),
+        current_amount: parseFloat(row.current_amount),
+      })),
+      meta: {
+        totalItems,
+        itemCount: dataRows.length,
+        itemsPerPage: limit,
+        totalPages,
+        currentPage: page,
+      },
+    };
+  }
+
+  async getCampaignDetailAdmin(id: string) {
+    const query = `
+      SELECT c.*, 
+             u.email as entrepreneur_email,
+             ep.first_name as entrepreneur_first_name,
+             ep.last_name as entrepreneur_last_name,
+             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as entrepreneur_name,
+             ep.avatar_url as entrepreneur_avatar,
+             ep.bio as entrepreneur_bio,
+             ep.linkedin_url as entrepreneur_linkedin,
+             ep.website as entrepreneur_website,
+             cat.display_name as category_name
+      FROM campaigns c
+      JOIN users u ON c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      LEFT JOIN categories cat ON c.category_id = cat.id
+      WHERE c.id = $1
+    `;
+    
+    const campaign = await this.queryOne(query, [id]);
+    if (!campaign) return null;
+
+    // Fetch reward tiers safely
+    let rewardTiers = [];
+    try {
+      rewardTiers = await this.queryMany(
+        `SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY amount ASC`,
+        [id]
+      );
+    } catch (e) {
+      console.warn('Could not fetch reward tiers or table missing:', e);
+    }
+    
+    return {
+      ...campaign,
+      goal_amount: campaign.goal_amount?.toString() || '0',
+      current_amount: parseFloat(campaign.current_amount || 0),
+      investor_count: parseInt(campaign.investor_count || 0, 10),
+      min_investment: parseFloat(campaign.min_investment || 0),
+      max_investment: campaign.max_investment ? parseFloat(campaign.max_investment) : null,
+      media: [],
+      reward_tiers: rewardTiers.map(t => ({
+        ...t,
+        amount: parseFloat(t.amount || 0),
+      })),
+    };
   }
 }

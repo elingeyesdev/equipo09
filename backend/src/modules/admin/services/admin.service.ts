@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { AdminRepository } from '../repositories/admin.repository';
 import { UserRepository } from '../../users/repositories';
+import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 
 @Injectable()
 export class AdminService {
@@ -21,8 +22,20 @@ export class AdminService {
     return this.adminRepo.getAllCampaigns();
   }
 
-  async updateCampaignStatus(campaignId: string, status: string) {
-    const updated = await this.adminRepo.updateCampaignStatus(campaignId, status);
+  async getPendingCampaigns(queryDto: QueryAdminCampaignsDto) {
+    return this.adminRepo.findPendingCampaigns(queryDto);
+  }
+
+  async getCampaignDetail(id: string) {
+    const campaign = await this.adminRepo.getCampaignDetailAdmin(id);
+    if (!campaign) {
+      throw new NotFoundException('Campaña no encontrada');
+    }
+    return campaign;
+  }
+
+  async updateCampaignStatus(campaignId: string, status: string, feedback?: string) {
+    const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, feedback);
     if (!updated) {
       throw new NotFoundException('Campaña no encontrada');
     }

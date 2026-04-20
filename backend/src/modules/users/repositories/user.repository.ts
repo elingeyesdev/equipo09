@@ -140,7 +140,8 @@ export class UserRepository extends BaseRepository {
    */
   async findByIdWithRoles(id: string): Promise<User | null> {
     const row = await this.queryOne(
-      `SELECT u.*,
+      `SELECT u.*, 
+              a.access_level as admin_access_level,
               COALESCE(
                 ARRAY_AGG(r.name) FILTER (WHERE r.name IS NOT NULL),
                 ARRAY[]::VARCHAR[]
@@ -148,8 +149,9 @@ export class UserRepository extends BaseRepository {
        FROM users u
        LEFT JOIN user_roles ur ON ur.user_id = u.id
        LEFT JOIN roles r       ON r.id = ur.role_id
+       LEFT JOIN admin_profiles a ON a.user_id = u.id
        WHERE u.id = $1
-       GROUP BY u.id`,
+       GROUP BY u.id, a.access_level`,
       [id],
     );
     return row ? mapRowToUser(row) : null;

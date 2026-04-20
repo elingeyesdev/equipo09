@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, 
   LayoutDashboard, 
@@ -48,23 +48,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         <nav className="flex flex-col gap-2 flex-1">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Principal</div>
           <NavLink to="/admin" className={navItemClass} end>
             <LayoutDashboard size={18} strokeWidth={2.5} />
-            Dashboard
+            Estadísticas
           </NavLink>
-          {role === 'super_admin' && (
-            <NavLink to="/superadmin" className={navItemClass}>
-              <Users size={18} strokeWidth={2.5} />
-              SuperAdmin
-            </NavLink>
-          )}
           
-          <div className="h-px bg-emerald-50 my-4"></div>
-          
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-[#2e7d32] font-bold text-[14px] transition-all no-underline">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Gestión de Contenido</div>
+          <NavLink to="/admin/campaigns/review" className={navItemClass}>
              <Rocket size={18} strokeWidth={2.5} />
-             Vista Pública
-          </Link>
+             Revisión de Campañas
+          </NavLink>
+
+          {role === 'super_admin' && (
+            <>
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Sistema</div>
+              <NavLink to="/superadmin" className={navItemClass}>
+                <Users size={18} strokeWidth={2.5} />
+                Gestión de Admins
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className="mt-auto pt-6 border-t border-emerald-50">
@@ -82,7 +86,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-emerald-50 px-8 flex items-center justify-between sticky top-0 z-40">
            <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest">
-              SISTEMA CENTRAL DE AUDITORÍA
+              PANEL DE CONTROL ADMINISTRATIVO
            </div>
            
            <div className="flex items-center gap-4">

@@ -13,16 +13,23 @@ import {
 export function SuperAdminDashboardPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [creds, setCreds] = useState({ email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getAllAdmins();
       setAdmins(data);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e.response?.status === 401) {
+        setError('Acceso denegado. Se requieren permisos de Super Administrador.');
+      } else {
+        console.error('Error loading admin list:', e);
+        setError('Error al cargar la lista de administradores.');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,6 +69,26 @@ export function SuperAdminDashboardPage() {
         <div className="h-full flex flex-col items-center justify-center gap-6 py-40">
             <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
             <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Privilegios...</span>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="h-full flex flex-col items-center justify-center gap-6 py-40">
+            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2">
+              <ShieldAlert size={32} />
+            </div>
+            <h2 className="text-xl font-black text-slate-800">{error}</h2>
+            <p className="text-slate-400 font-medium">Esta sección es de acceso restringido.</p>
+            <button 
+              onClick={() => window.location.href = '/login'}
+              className="mt-4 px-6 py-2 bg-[#1c2b1e] text-white font-bold rounded-xl hover:bg-emerald-800 transition-all cursor-pointer"
+            >
+              Ir al Login
+            </button>
         </div>
       </AdminLayout>
     );

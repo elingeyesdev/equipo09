@@ -71,7 +71,7 @@ export function InvestorProfilePage() {
     }
   }, [profileLoading, profile, onboardingTriggered]);
 
-  const handleSave = async (type: string, data: any) => {
+  const handleSave = async (_type: string, data: any) => {
     const baseData = { ...profile, ...data };
     if (!profile) {
       if (!baseData.firstName) baseData.firstName = 'Usuario';

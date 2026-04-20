@@ -16,7 +16,6 @@ import {
   DollarSign,
   ArrowUpRight,
   User,
-  MapPin,
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
