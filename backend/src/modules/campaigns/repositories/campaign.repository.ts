@@ -262,6 +262,32 @@ export class CampaignRepository {
     const { rows } = await this.pool.query(query, [id]);
     if (rows.length === 0) return null;
 
+    // Fetch reward tiers for this campaign
+    let rewardTiers: any[] = [];
+    try {
+      const tiersResult = await this.pool.query(
+        `SELECT id, title, description, amount, currency, max_claims,
+                current_claims, estimated_delivery, image_url, sort_order
+         FROM reward_tiers
+         WHERE campaign_id = $1 AND is_active = true
+         ORDER BY amount ASC`,
+        [id],
+      );
+      rewardTiers = tiersResult.rows.map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        amount: parseFloat(t.amount),
+        currency: t.currency,
+        maxClaims: t.max_claims,
+        currentClaims: parseInt(t.current_claims || '0', 10),
+        estimatedDelivery: t.estimated_delivery,
+        imageUrl: t.image_url,
+      }));
+    } catch (e) {
+      console.warn('Could not fetch reward tiers:', e);
+    }
+
     const row = rows[0];
     return {
       ...this.mapRowToPublicCampaign(row),
@@ -272,6 +298,7 @@ export class CampaignRepository {
       minInvestment: parseFloat(row.min_investment || '0'),
       maxInvestment: row.max_investment ? parseFloat(row.max_investment) : null,
       entrepreneurBio: row.entrepreneur_bio,
+      rewardTiers,
     };
   }
 }

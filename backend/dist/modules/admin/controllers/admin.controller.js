@@ -20,6 +20,7 @@ const guards_1 = require("../../auth/guards");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 const dto_1 = require("../../../common/dto");
+const admin_campaigns_dto_1 = require("../dto/admin-campaigns.dto");
 let AdminController = class AdminController {
     constructor(adminService) {
         this.adminService = adminService;
@@ -36,16 +37,30 @@ let AdminController = class AdminController {
         const campaigns = await this.adminService.getAllCampaigns();
         return new dto_1.ApiSuccessResponse(campaigns, 'Campañas listadas');
     }
-    async updateCampaignStatus(id, status) {
-        const updated = await this.adminService.updateCampaignStatus(id, status);
-        return new dto_1.ApiSuccessResponse(updated, 'Estado de campaña actualizado');
+    async getPendingCampaigns(query) {
+        const result = await this.adminService.getPendingCampaigns(query);
+        return new dto_1.ApiSuccessResponse(result, 'Listado de campañas obtenido con éxito');
+    }
+    async getCampaignDetail(id) {
+        const campaign = await this.adminService.getCampaignDetail(id);
+        return new dto_1.ApiSuccessResponse(campaign, 'Detalle de campaña obtenido');
+    }
+    async getCampaignHistory(id) {
+        const history = await this.adminService.getCampaignHistory(id);
+        return new dto_1.ApiSuccessResponse(history, 'Historial de campaña obtenido');
+    }
+    async updateCampaignStatus(id, status, feedback, req) {
+        const reviewerId = req.user.id;
+        const updated = await this.adminService.updateCampaignStatus(id, status, reviewerId, feedback);
+        return new dto_1.ApiSuccessResponse(updated, 'Estado de campaña actualizado con éxito');
     }
     async softDeleteUser(id) {
         const deleted = await this.adminService.softDeleteUser(id);
         return new dto_1.ApiSuccessResponse(deleted, 'Usuario inhabilitado con éxito');
     }
-    async deleteCampaign(id) {
-        const deleted = await this.adminService.hardDeleteCampaign(id);
+    async deleteCampaign(id, req) {
+        const reviewerId = req.user.id;
+        const deleted = await this.adminService.hardDeleteCampaign(id, reviewerId);
         return new dto_1.ApiSuccessResponse(deleted, 'Campaña eliminada o cancelada con éxito');
     }
 };
@@ -69,19 +84,48 @@ __decorate([
 __decorate([
     (0, common_1.Get)('campaigns'),
     (0, roles_decorator_1.Roles)('admin', 'super_admin'),
-    (0, swagger_1.ApiOperation)({ summary: 'Listar todas las campañas para revisión' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Listar todas las campañas para revisión (Legado)' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getAllCampaigns", null);
 __decorate([
+    (0, common_1.Get)('campaigns/pending'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Listar campañas pendientes con filtros y paginación' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [admin_campaigns_dto_1.QueryAdminCampaignsDto]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getPendingCampaigns", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener detalle completo de una campaña para revisión' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCampaignDetail", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id/history'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener historial de cambios de una campaña' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCampaignHistory", null);
+__decorate([
     (0, common_1.Patch)('campaigns/:id/status'),
     (0, roles_decorator_1.Roles)('admin', 'super_admin'),
-    (0, swagger_1.ApiOperation)({ summary: 'Aprobar o rechazar campañas' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Aprobar o rechazar campañas con feedback' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('status')),
+    __param(2, (0, common_1.Body)('feedback')),
+    __param(3, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateCampaignStatus", null);
 __decorate([
@@ -98,8 +142,9 @@ __decorate([
     (0, roles_decorator_1.Roles)('admin', 'super_admin'),
     (0, swagger_1.ApiOperation)({ summary: 'Borra físicamente una campaña, si aplica' }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "deleteCampaign", null);
 exports.AdminController = AdminController = __decorate([

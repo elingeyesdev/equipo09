@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
 import { Navbar } from '../components/Navbar';
+import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
+import { createInvestment } from '../api/investor.api';
 import {
   ArrowLeft,
   TrendingUp,
@@ -16,6 +19,9 @@ import {
   DollarSign,
   ArrowUpRight,
   User,
+  Loader2,
+  CheckCircle2,
+  LogIn,
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -103,6 +109,13 @@ export function CampaignDetailPage() {
   const location = useLocation();
 
   const { campaign, loading, error, retry } = useCampaignDetail(id);
+
+  // ── Investment state ──
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const [investmentLoading, setInvestmentLoading] = useState(false);
+  const [investmentError, setInvestmentError] = useState<string | null>(null);
+  const [investmentSuccess, setInvestmentSuccess] = useState(false);
 
   // Determine where to go back — preserve filter state
   const backUrl = (location.state as any)?.from || '/explore';
@@ -273,6 +286,62 @@ export function CampaignDetailPage() {
               </div>
             </div>
 
+            {/* ── Reward Tiers (only for reward campaigns) ── */}
+            {campaign.campaignType === 'reward' && campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
+              <RewardTierCards
+                tiers={campaign.rewardTiers}
+                selectedTierId={selectedTierId}
+                onSelect={(tierId) => {
+                  setInvestmentError(null);
+                  setInvestmentSuccess(false);
+                  if (selectedTierId === tierId) {
+                    setSelectedTierId(null);
+                    setCustomAmount('');
+                  } else {
+                    setSelectedTierId(tierId);
+                    const tier = campaign.rewardTiers.find((t) => t.id === tierId);
+                    if (tier) setCustomAmount(String(tier.amount));
+                  }
+                }}
+                disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
+              />
+            )}
+
+            {/* ── Donation: free amount input ── */}
+            {campaign.campaignType === 'donation' && (
+              <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+                <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
+                    <Heart size={20} strokeWidth={2.5} className="text-pink-500" />
+                  </div>
+                  Realiza tu Donación
+                </h2>
+                <p className="text-[13px] text-slate-400 font-medium mb-6 ml-[52px]">
+                  Ingresa el monto que deseas aportar a esta campaña
+                </p>
+                <div className="ml-[52px] max-w-[320px]">
+                  <div className="relative">
+                    <DollarSign size={18} strokeWidth={2.5} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="number"
+                      min={campaign.minInvestment || 1}
+                      max={campaign.maxInvestment || undefined}
+                      step="0.01"
+                      value={customAmount}
+                      onChange={(e) => {
+                        setCustomAmount(e.target.value);
+                        setInvestmentError(null);
+                        setInvestmentSuccess(false);
+                      }}
+                      placeholder={`Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
+                      disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
+                      className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 text-[18px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Entrepreneur Bio Section */}
             <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10">
               <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
@@ -423,30 +492,205 @@ export function CampaignDetailPage() {
                   )}
                 </div>
 
-                {/* CTA Button */}
-                <button
-                  className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest transition-all active:scale-[0.97] cursor-pointer border-none shadow-lg"
-                  style={{
-                    background: daysRemaining !== null && daysRemaining <= 0
-                      ? '#94a3b8'
-                      : 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
-                    color: '#fff',
-                    boxShadow: daysRemaining !== null && daysRemaining <= 0
-                      ? 'none'
-                      : '0 8px 24px rgba(46,125,50,0.3)',
-                  }}
-                  disabled={daysRemaining !== null && daysRemaining <= 0}
-                >
-                  {daysRemaining !== null && daysRemaining <= 0
-                    ? 'Campaña Finalizada'
-                    : 'Invertir en este Proyecto'}
-                </button>
-
-                {daysRemaining !== null && daysRemaining <= 0 ? null : (
-                  <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
-                    Serás redirigido al formulario de inversión
-                  </p>
+                {/* ── Investment Amount Input (in sidebar) ── */}
+                {!(daysRemaining !== null && daysRemaining <= 0) && !investmentSuccess && (
+                  <div className="mb-4">
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                      Monto a invertir
+                    </label>
+                    <div className="relative">
+                      <DollarSign size={16} strokeWidth={2.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="number"
+                        min={campaign.minInvestment || 1}
+                        max={campaign.maxInvestment || undefined}
+                        step="0.01"
+                        value={customAmount}
+                        onChange={(e) => {
+                          setCustomAmount(e.target.value);
+                          setInvestmentError(null);
+                        }}
+                        placeholder={`Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
+                        disabled={investmentLoading}
+                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50"
+                      />
+                    </div>
+                    {selectedTierId && (
+                      <p className="text-[11px] text-[#2e7d32] font-bold mt-2 flex items-center gap-1">
+                        <Gem size={11} strokeWidth={2.5} />
+                        Recompensa: {campaign.rewardTiers?.find(t => t.id === selectedTierId)?.title}
+                      </p>
+                    )}
+                  </div>
                 )}
+
+                {/* ── Validation / Error Messages ── */}
+                {investmentError && (
+                  <div className="bg-red-50 text-[#c62828] p-3 rounded-xl text-[12px] font-bold border border-red-100 mb-4 flex items-start gap-2">
+                    <AlertCircle size={14} strokeWidth={2.5} className="shrink-0 mt-0.5" />
+                    {investmentError}
+                  </div>
+                )}
+
+                {/* ── Success Message ── */}
+                {investmentSuccess && (
+                  <div className="bg-emerald-50 text-[#2e7d32] p-4 rounded-xl text-[13px] font-bold border border-emerald-100 mb-4 flex items-center gap-2">
+                    <CheckCircle2 size={18} strokeWidth={2.5} />
+                    ¡Inversión realizada exitosamente!
+                  </div>
+                )}
+
+                {/* CTA Button */}
+                {(() => {
+                  const isExpired = daysRemaining !== null && daysRemaining <= 0;
+                  const token = localStorage.getItem('accessToken');
+                  const parsedAmount = parseFloat(customAmount);
+                  const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+
+                  // Validate amount limits
+                  const amountTooLow = hasValidAmount && campaign.minInvestment && parsedAmount < campaign.minInvestment;
+                  const amountTooHigh = hasValidAmount && campaign.maxInvestment && parsedAmount > campaign.maxInvestment;
+
+                  // Validate tier minimum
+                  const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
+                  const amountBelowTier = selectedTier && hasValidAmount && parsedAmount < selectedTier.amount;
+
+                  const canInvest = !isExpired && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
+
+                  const handleInvest = async () => {
+                    if (!token) {
+                      navigate('/login', { state: { from: location.pathname } });
+                      return;
+                    }
+                    if (!hasValidAmount) {
+                      setInvestmentError('Ingresa un monto válido para invertir.');
+                      return;
+                    }
+                    if (amountTooLow) {
+                      setInvestmentError(`El monto mínimo de inversión es $${campaign.minInvestment?.toLocaleString()}.`);
+                      return;
+                    }
+                    if (amountTooHigh) {
+                      setInvestmentError(`El monto máximo de inversión es $${campaign.maxInvestment?.toLocaleString()}.`);
+                      return;
+                    }
+                    if (amountBelowTier && selectedTier) {
+                      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es $${selectedTier.amount.toLocaleString()}.`);
+                      return;
+                    }
+
+                    setInvestmentLoading(true);
+                    setInvestmentError(null);
+                    try {
+                      await createInvestment({
+                        campaignId: campaign.id,
+                        amount: parsedAmount,
+                        rewardTierId: selectedTierId || undefined,
+                      });
+                      setInvestmentSuccess(true);
+                    } catch (err: any) {
+                      const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
+                      setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
+                    } finally {
+                      setInvestmentLoading(false);
+                    }
+                  };
+
+                  if (isExpired) {
+                    return (
+                      <button
+                        className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-not-allowed"
+                        style={{ background: '#94a3b8', color: '#fff' }}
+                        disabled
+                      >
+                        Campaña Finalizada
+                      </button>
+                    );
+                  }
+
+                  if (investmentSuccess) {
+                    return (
+                      <button
+                        onClick={() => navigate('/dashboard')}
+                        className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97]"
+                        style={{
+                          background: 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
+                          color: '#fff',
+                          boxShadow: '0 8px 24px rgba(46,125,50,0.3)',
+                        }}
+                      >
+                        Ver Mi Dashboard
+                      </button>
+                    );
+                  }
+
+                  if (!token) {
+                    return (
+                      <>
+                        <button
+                          onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                          className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] flex items-center justify-center gap-2"
+                          style={{
+                            background: 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
+                            color: '#fff',
+                            boxShadow: '0 8px 24px rgba(46,125,50,0.3)',
+                          }}
+                        >
+                          <LogIn size={16} strokeWidth={2.5} />
+                          Iniciar Sesión para Invertir
+                        </button>
+                        <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
+                          Necesitas una cuenta para realizar inversiones
+                        </p>
+                      </>
+                    );
+                  }
+
+                  return (
+                    <>
+                      <button
+                        onClick={handleInvest}
+                        disabled={!canInvest}
+                        className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        style={{
+                          background: canInvest
+                            ? 'linear-gradient(135deg, #2e7d32, #1c2b1e)'
+                            : '#94a3b8',
+                          color: '#fff',
+                          boxShadow: canInvest
+                            ? '0 8px 24px rgba(46,125,50,0.3)'
+                            : 'none',
+                        }}
+                      >
+                        {investmentLoading ? (
+                          <>
+                            <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          `Invertir $${hasValidAmount ? parsedAmount.toLocaleString() : '0'}`
+                        )}
+                      </button>
+                      {!hasValidAmount && (
+                        <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
+                          {campaign.campaignType === 'reward' && campaign.rewardTiers?.length
+                            ? 'Selecciona una recompensa o ingresa un monto'
+                            : 'Ingresa el monto que deseas invertir'}
+                        </p>
+                      )}
+                      {amountBelowTier && selectedTier && (
+                        <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
+                          Mínimo ${selectedTier.amount.toLocaleString()} para esta recompensa
+                        </p>
+                      )}
+                      {amountTooLow && (
+                        <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
+                          Inversión mínima: ${campaign.minInvestment?.toLocaleString()}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Campaign status card */}

@@ -22,6 +22,18 @@ export interface PublicCampaign {
   categorySlug: string;
 }
 
+export interface RewardTier {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  currency: string;
+  maxClaims: number | null;
+  currentClaims: number;
+  estimatedDelivery: string | null;
+  imageUrl: string | null;
+}
+
 export interface PublicCampaignDetail extends PublicCampaign {
   description: string;
   subtitle: string | null;
@@ -30,6 +42,7 @@ export interface PublicCampaignDetail extends PublicCampaign {
   minInvestment: number;
   maxInvestment: number | null;
   entrepreneurBio: string | null;
+  rewardTiers: RewardTier[];
 }
 
 export interface PaginatedPublicCampaigns {

@@ -24,16 +24,20 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    // Role check logic based on our adminAccessLevel schema
-    if (!user.adminAccessLevel) {
-      throw new ForbiddenException('Aceso no autorizado. No eres administrador.');
-    }
+    // Check user.roles array (investor, entrepreneur, etc.)
+    const userRoles = user.roles ?? [];
+    const hasUserRole = requiredRoles.some((role) => userRoles.includes(role));
 
-    const hasRole = requiredRoles.includes(user.adminAccessLevel);
-    if (!hasRole) {
+    // Check adminAccessLevel (admin, super_admin)
+    const hasAdminRole = user.adminAccessLevel
+      ? requiredRoles.includes(user.adminAccessLevel)
+      : false;
+
+    if (!hasUserRole && !hasAdminRole) {
       throw new ForbiddenException('No tienes permisos suficientes para realizar esta acción.');
     }
 
     return true;
   }
 }
+

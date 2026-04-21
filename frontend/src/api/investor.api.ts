@@ -96,3 +96,22 @@ export async function uploadInvestorCover(file: File): Promise<InvestorProfile> 
   );
   return data.data;
 }
+
+// ============================================================
+// INVESTMENTS
+// ============================================================
+
+export interface CreateInvestmentDto {
+  campaignId: string;
+  amount: number;
+  rewardTierId?: string;
+}
+
+export async function createInvestment(dto: CreateInvestmentDto): Promise<any> {
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    '/investments',
+    dto,
+  );
+  return data.data;
+}
+

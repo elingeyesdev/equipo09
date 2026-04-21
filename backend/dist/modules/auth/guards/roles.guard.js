@@ -30,11 +30,12 @@ let RolesGuard = class RolesGuard {
         if (!user) {
             return false;
         }
-        if (!user.adminAccessLevel) {
-            throw new common_1.ForbiddenException('Aceso no autorizado. No eres administrador.');
-        }
-        const hasRole = requiredRoles.includes(user.adminAccessLevel);
-        if (!hasRole) {
+        const userRoles = user.roles ?? [];
+        const hasUserRole = requiredRoles.some((role) => userRoles.includes(role));
+        const hasAdminRole = user.adminAccessLevel
+            ? requiredRoles.includes(user.adminAccessLevel)
+            : false;
+        if (!hasUserRole && !hasAdminRole) {
             throw new common_1.ForbiddenException('No tienes permisos suficientes para realizar esta acción.');
         }
         return true;

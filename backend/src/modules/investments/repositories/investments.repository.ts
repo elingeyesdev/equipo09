@@ -51,7 +51,48 @@ export class InvestmentsRepository extends BaseRepository {
          throw new BadRequestException('La fecha límite de la campaña ya ha expirado.');
       }
 
-      // 4. Descontar el saldo del inversor (Aumentar lo invertido)
+      // 4. Validar reward tier si fue seleccionado
+      let rewardTierId: string | null = null;
+      if (dto.rewardTierId) {
+        const tierResult = await client.query(
+          `SELECT id, amount, max_claims, current_claims
+           FROM reward_tiers
+           WHERE id = $1 AND campaign_id = $2 AND is_active = true
+           FOR UPDATE`,
+          [dto.rewardTierId, dto.campaignId]
+        );
+
+        if (tierResult.rows.length === 0) {
+          throw new BadRequestException('El nivel de recompensa seleccionado no existe o no pertenece a esta campaña.');
+        }
+
+        const tier = tierResult.rows[0];
+        const tierAmount = Number(tier.amount);
+        const tierMaxClaims = tier.max_claims ? Number(tier.max_claims) : null;
+        const tierCurrentClaims = Number(tier.current_claims) || 0;
+
+        // Validar monto mínimo del tier
+        if (dto.amount < tierAmount) {
+          throw new BadRequestException(
+            `El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la recompensa ($${tierAmount}).`
+          );
+        }
+
+        // Validar disponibilidad de claims
+        if (tierMaxClaims !== null && tierCurrentClaims >= tierMaxClaims) {
+          throw new BadRequestException('Esta recompensa ha alcanzado su límite máximo de reclamaciones.');
+        }
+
+        // Incrementar current_claims
+        await client.query(
+          `UPDATE reward_tiers SET current_claims = current_claims + 1 WHERE id = $1`,
+          [dto.rewardTierId]
+        );
+
+        rewardTierId = dto.rewardTierId;
+      }
+
+      // 5. Descontar el saldo del inversor (Aumentar lo invertido)
       await client.query(
         `UPDATE investor_profiles 
          SET total_investments = total_investments + 1, 
@@ -60,7 +101,7 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.amount]
       );
 
-      // 5. Actualizar los totales de la campaña
+      // 6. Actualizar los totales de la campaña
       await client.query(
         `UPDATE campaigns 
          SET current_amount = current_amount + $2, 
@@ -69,17 +110,18 @@ export class InvestmentsRepository extends BaseRepository {
         [dto.campaignId, dto.amount]
       );
 
-      // 6. Insertar el registro final de la inversión marcado como completado
+      // 7. Insertar el registro final de la inversión marcado como completado
       const insertResult = await client.query(
         `INSERT INTO investments (
-          campaign_id, investor_id, amount, status
+          campaign_id, investor_id, amount, reward_tier_id, status
         ) VALUES (
-          $1, $2, $3, 'completed'
+          $1, $2, $3, $4, 'completed'
         ) RETURNING *`,
-        [dto.campaignId, userId, dto.amount]
+        [dto.campaignId, userId, dto.amount, rewardTierId]
       );
 
       return mapRowToInvestment(insertResult.rows[0]);
     });
   }
 }
+

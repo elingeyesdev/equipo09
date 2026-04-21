@@ -73,7 +73,8 @@ let UserRepository = class UserRepository extends database_1.BaseRepository {
         return row !== null;
     }
     async findByIdWithRoles(id) {
-        const row = await this.queryOne(`SELECT u.*,
+        const row = await this.queryOne(`SELECT u.*, 
+              a.access_level as admin_access_level,
               COALESCE(
                 ARRAY_AGG(r.name) FILTER (WHERE r.name IS NOT NULL),
                 ARRAY[]::VARCHAR[]
@@ -81,8 +82,9 @@ let UserRepository = class UserRepository extends database_1.BaseRepository {
        FROM users u
        LEFT JOIN user_roles ur ON ur.user_id = u.id
        LEFT JOIN roles r       ON r.id = ur.role_id
+       LEFT JOIN admin_profiles a ON a.user_id = u.id
        WHERE u.id = $1
-       GROUP BY u.id`, [id]);
+       GROUP BY u.id, a.access_level`, [id]);
         return row ? (0, models_1.mapRowToUser)(row) : null;
     }
     async updateLastLogin(userId, ip) {

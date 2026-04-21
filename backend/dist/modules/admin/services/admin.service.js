@@ -27,12 +27,25 @@ let AdminService = class AdminService {
     async getAllCampaigns() {
         return this.adminRepo.getAllCampaigns();
     }
-    async updateCampaignStatus(campaignId, status) {
-        const updated = await this.adminRepo.updateCampaignStatus(campaignId, status);
+    async getPendingCampaigns(queryDto) {
+        return this.adminRepo.findPendingCampaigns(queryDto);
+    }
+    async getCampaignDetail(id) {
+        const campaign = await this.adminRepo.getCampaignDetailAdmin(id);
+        if (!campaign) {
+            throw new common_1.NotFoundException('Campaña no encontrada');
+        }
+        return campaign;
+    }
+    async updateCampaignStatus(campaignId, status, reviewerId, feedback) {
+        const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, reviewerId, feedback);
         if (!updated) {
             throw new common_1.NotFoundException('Campaña no encontrada');
         }
         return updated;
+    }
+    async getCampaignHistory(campaignId) {
+        return this.adminRepo.getCampaignHistory(campaignId);
     }
     async createAdmin(email, passwordString) {
         const userExists = await this.userRepo.findByEmail(email);
@@ -67,7 +80,7 @@ let AdminService = class AdminService {
             throw new common_1.NotFoundException('Usuario no encontrado');
         return deleted;
     }
-    async hardDeleteCampaign(campaignId) {
+    async hardDeleteCampaign(campaignId, reviewerId) {
         try {
             const deleted = await this.adminRepo.hardDeleteCampaign(campaignId);
             if (!deleted)
@@ -76,7 +89,7 @@ let AdminService = class AdminService {
         }
         catch (err) {
             if (err.code === '23503') {
-                return this.adminRepo.updateCampaignStatus(campaignId, 'cancelled');
+                return this.adminRepo.updateCampaignStatus(campaignId, 'cancelled', reviewerId);
             }
             throw err;
         }
