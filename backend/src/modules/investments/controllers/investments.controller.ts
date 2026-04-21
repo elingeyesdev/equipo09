@@ -1,7 +1,10 @@
 import { Controller, Post, Body, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
-import { AuthGuard } from '@nestjs/passport';
+
+import { JwtAuthGuard } from '../../auth/guards';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 
 import { InvestmentsService } from '../services/investments.service';
 import { InvestmentDto } from '../dto/investment.dto';
@@ -10,7 +13,7 @@ import { Investment } from '../models/investment.model';
 
 @ApiTags('investments')
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('investments')
 export class InvestmentsController {
   constructor(private readonly investmentsService: InvestmentsService) {}
@@ -20,6 +23,7 @@ export class InvestmentsController {
    * Endpoint para registrar intención de inversión y descontar saldos.
    */
   @Post()
+  @Roles('investor')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Realizar aporte e inversión a un proyecto' })
   @ApiResponse({ status: 201, description: 'Inversión procesada exitosamente.' })

@@ -9,5 +9,5 @@ import { InvestmentsRepository } from './repositories/investments.repository';
   providers: [InvestmentsService, InvestmentsRepository],
   exports: [InvestmentsService],
 })
-export class InvestmentsModule {}
+export class InvestmentsModule { }
 
