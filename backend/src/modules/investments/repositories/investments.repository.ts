@@ -8,7 +8,7 @@ export class InvestmentsRepository extends BaseRepository {
   /**
    * Motor transaccional SQL: Descuenta saldo simulado, actualiza la campaña
    * y registra la inversión utilizando bloqueos pesimistas (FOR UPDATE)
-   * para asegurar integridad ACID en condiciones de concurrencia.
+   * 
    */
   async createInvestmentTransaction(userId: string, dto: InvestmentDto): Promise<Investment> {
     return this.transaction(async (client) => {
@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       // 3. Validar estado de la campaña y aplicar bloqueo concurrente
       const campaignResult = await client.query(
-        `SELECT id, status, end_date FROM campaigns WHERE id = $1 FOR UPDATE`,
+        `SELECT id, status, end_date, min_investment FROM campaigns WHERE id = $1 FOR UPDATE`,
         [dto.campaignId]
       );
 
@@ -44,11 +44,16 @@ export class InvestmentsRepository extends BaseRepository {
 
       const campaign = campaignResult.rows[0];
       if (campaign.status !== 'published' && campaign.status !== 'funded') {
-         throw new BadRequestException('La campaña no está activa o no acepta inversiones actualmente.');
+        throw new BadRequestException('La campaña no está activa o no acepta inversiones actualmente.');
       }
-      
+
       if (campaign.end_date && new Date(campaign.end_date) < new Date()) {
-         throw new BadRequestException('La fecha límite de la campaña ya ha expirado.');
+        throw new BadRequestException('La fecha límite de la campaña ya ha expirado.');
+      }
+
+      const minInvestment = Number(campaign.min_investment) || 0;
+      if (dto.amount < minInvestment) {
+        throw new BadRequestException(`El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la campaña ($${minInvestment}).`);
       }
 
       // 4. Validar reward tier si fue seleccionado
@@ -120,7 +125,29 @@ export class InvestmentsRepository extends BaseRepository {
         [dto.campaignId, userId, dto.amount, rewardTierId]
       );
 
-      return mapRowToInvestment(insertResult.rows[0]);
+      const investment = insertResult.rows[0];
+
+      // 8. Insertar registro en el Ledger Financiero (transactions)
+      await client.query(
+        `INSERT INTO transactions (
+          investment_id, transaction_type, amount, status
+        ) VALUES (
+          $1, 'payment', $2, 'completed'
+        )`,
+        [investment.id, dto.amount]
+      );
+
+      // 9. Registrar Auditoría inmutable (audit_logs)
+      await client.query(
+        `INSERT INTO audit_logs (
+          user_id, action, entity_type, entity_id, new_values
+        ) VALUES (
+          $1, 'investment_created', 'campaign', $2, $3
+        )`,
+        [userId, dto.campaignId, JSON.stringify({ amount: dto.amount, investment_id: investment.id })]
+      );
+
+      return mapRowToInvestment(investment);
     });
   }
 }
