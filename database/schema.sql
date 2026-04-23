@@ -245,9 +245,6 @@ CREATE TABLE admin_profiles (
     access_level            VARCHAR(20)   NOT NULL DEFAULT 'moderator'
                             CHECK (access_level IN ('super_admin', 'admin', 'moderator', 'support')),
     permissions             JSONB         NOT NULL DEFAULT '[]',
-    can_approve_campaigns   BOOLEAN       NOT NULL DEFAULT false,
-    can_manage_users        BOOLEAN       NOT NULL DEFAULT false,
-    can_manage_finances     BOOLEAN       NOT NULL DEFAULT false,
     is_active               BOOLEAN       NOT NULL DEFAULT true,
     last_action_at          TIMESTAMPTZ,
     metadata                JSONB         DEFAULT '{}',
@@ -606,7 +603,8 @@ CREATE TABLE reward_tiers (
     sort_order          INTEGER        NOT NULL DEFAULT 0,
     is_active           BOOLEAN        NOT NULL DEFAULT true,
     created_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    UNIQUE (id, campaign_id)
 );
 
 CREATE INDEX idx_reward_tiers_campaign_id ON reward_tiers (campaign_id);
@@ -632,7 +630,7 @@ CREATE TABLE investments (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id         UUID           NOT NULL REFERENCES campaigns(id) ON DELETE RESTRICT,
     investor_id         UUID           NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    reward_tier_id      UUID           REFERENCES reward_tiers(id) ON DELETE SET NULL,
+    reward_tier_id      UUID,
     amount              NUMERIC(12,2)  NOT NULL CHECK (amount > 0),
     currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
     status              VARCHAR(20)    NOT NULL DEFAULT 'pending'
@@ -651,7 +649,8 @@ CREATE TABLE investments (
     user_agent          TEXT,
     metadata            JSONB          DEFAULT '{}',
     created_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (reward_tier_id, campaign_id) REFERENCES reward_tiers(id, campaign_id) ON DELETE SET NULL
 );
 
 -- Standard indexes
@@ -721,8 +720,14 @@ CREATE TABLE transactions (
                             )),
     amount                  NUMERIC(12,2)  NOT NULL,
     currency                VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    base_amount             NUMERIC(12,2),
+    base_currency           VARCHAR(3),
+    exchange_rate           NUMERIC(10,6),
     fee_amount              NUMERIC(10,2)  DEFAULT 0,
+    platform_fee            NUMERIC(12,2)  DEFAULT 0,
+    provider_fee            NUMERIC(12,2)  DEFAULT 0,
     net_amount              NUMERIC(12,2),
+    payout_id               UUID, -- FK to be added after payouts table
     status                  VARCHAR(20)    NOT NULL DEFAULT 'pending'
                             CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'reversed')),
     payment_gateway         VARCHAR(50),
@@ -759,7 +764,6 @@ COMMENT ON TABLE transactions IS 'Registro contable de cada movimiento financier
 CREATE TABLE reward_claims (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     investment_id       UUID         NOT NULL REFERENCES investments(id) ON DELETE CASCADE,
-    reward_tier_id      UUID         NOT NULL REFERENCES reward_tiers(id) ON DELETE RESTRICT,
     status              VARCHAR(20)  NOT NULL DEFAULT 'pending'
                         CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'issue_reported')),
     shipping_address    JSONB,
@@ -773,7 +777,6 @@ CREATE TABLE reward_claims (
 );
 
 CREATE INDEX idx_reward_claims_investment_id ON reward_claims (investment_id);
-CREATE INDEX idx_reward_claims_reward_tier_id ON reward_claims (reward_tier_id);
 CREATE INDEX idx_reward_claims_status ON reward_claims (status);
 
 CREATE TRIGGER trg_reward_claims_updated_at
@@ -821,8 +824,7 @@ SELECT
     END AS days_remaining
 FROM campaigns c
 JOIN categories cat ON c.category_id = cat.id
-WHERE c.status = 'published'
-ORDER BY c.is_featured DESC, c.published_at DESC;
+WHERE c.status = 'published';
 
 COMMENT ON VIEW v_published_campaigns IS 'Vista de campañas publicadas con información de categoría y progreso.';
 
@@ -846,3 +848,193 @@ LEFT JOIN investments i ON c.id = i.campaign_id
 GROUP BY c.id, c.title, c.slug, c.goal_amount, c.current_amount, c.investor_count;
 
 COMMENT ON VIEW v_campaign_investment_summary IS 'Resumen de inversiones por campaña para dashboards.';
+
+-- =============================================================================
+-- NEW FINTECH TABLES
+-- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- Table: payouts
+-- Description: Desembolsos de fondos a creadores de campañas
+-- -----------------------------------------------------------------------------
+CREATE TABLE payouts (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id         UUID           NOT NULL REFERENCES campaigns(id) ON DELETE RESTRICT,
+    amount              NUMERIC(12,2)  NOT NULL CHECK (amount > 0),
+    currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    status              VARCHAR(20)    NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
+    processed_at        TIMESTAMPTZ,
+    metadata            JSONB          DEFAULT '{}',
+    created_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_payouts_campaign_id ON payouts (campaign_id);
+CREATE INDEX idx_payouts_status ON payouts (status);
+
+CREATE TRIGGER trg_payouts_updated_at
+    BEFORE UPDATE ON payouts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+COMMENT ON TABLE payouts IS 'Desembolsos financieros hacia los creadores de campañas.';
+
+-- Add FK from transactions to payouts
+ALTER TABLE transactions
+    ADD CONSTRAINT fk_transactions_payout_id
+    FOREIGN KEY (payout_id) REFERENCES payouts(id) ON DELETE SET NULL;
+
+-- =============================================================================
+-- FUNCTIONS AND TRIGGERS (FINTECH LEVEL)
+-- =============================================================================
+
+-- 1. Permisos Admin JSONB
+CREATE OR REPLACE FUNCTION admin_has_permission(p_admin_id UUID, p_permission VARCHAR)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_has_permission BOOLEAN;
+BEGIN
+    SELECT (permissions ? p_permission) INTO v_has_permission
+    FROM admin_profiles
+    WHERE id = p_admin_id AND is_active = true;
+    
+    RETURN COALESCE(v_has_permission, false);
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- 2. Consistencia estricta investments <-> reward_tiers
+CREATE OR REPLACE FUNCTION validate_investment_reward_tier()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_reward_campaign_id UUID;
+BEGIN
+    IF NEW.reward_tier_id IS NOT NULL THEN
+        SELECT campaign_id INTO v_reward_campaign_id 
+        FROM reward_tiers 
+        WHERE id = NEW.reward_tier_id;
+        
+        IF v_reward_campaign_id != NEW.campaign_id THEN
+            RAISE EXCEPTION 'Data Integrity Error: reward_tier_id % does not belong to campaign_id %', NEW.reward_tier_id, NEW.campaign_id;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_investment_reward
+    BEFORE INSERT OR UPDATE ON investments
+    FOR EACH ROW
+    EXECUTE FUNCTION validate_investment_reward_tier();
+
+-- 3. Inmutabilidad de audit_logs
+CREATE OR REPLACE FUNCTION prevent_audit_log_modification()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Audit logs are immutable. UPDATE and DELETE operations are forbidden.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_audit_log_modification
+    BEFORE UPDATE OR DELETE ON audit_logs
+    FOR EACH ROW
+    EXECUTE FUNCTION prevent_audit_log_modification();
+
+-- Revoke permissions for extra safety
+REVOKE UPDATE, DELETE ON audit_logs FROM PUBLIC;
+
+-- 4. Sincronización automática de campañas (current_amount, investor_count)
+CREATE OR REPLACE FUNCTION sync_campaign_totals()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Handle INSERT or UPDATE where status becomes 'completed'
+    IF (TG_OP = 'INSERT' AND NEW.status = 'completed') OR
+       (TG_OP = 'UPDATE' AND NEW.status = 'completed' AND OLD.status != 'completed') THEN
+        
+        UPDATE campaigns 
+        SET current_amount = current_amount + NEW.amount,
+            investor_count = (SELECT COUNT(DISTINCT investor_id) FROM investments WHERE campaign_id = NEW.campaign_id AND status = 'completed')
+        WHERE id = NEW.campaign_id;
+        
+    -- Handle UPDATE where status changes FROM 'completed'
+    ELSIF (TG_OP = 'UPDATE' AND OLD.status = 'completed' AND NEW.status != 'completed') THEN
+        
+        UPDATE campaigns 
+        SET current_amount = current_amount - OLD.amount,
+            investor_count = (SELECT COUNT(DISTINCT investor_id) FROM investments WHERE campaign_id = OLD.campaign_id AND status = 'completed')
+        WHERE id = OLD.campaign_id;
+
+    -- Handle DELETE of a completed investment
+    ELSIF (TG_OP = 'DELETE' AND OLD.status = 'completed') THEN
+        
+        UPDATE campaigns 
+        SET current_amount = current_amount - OLD.amount,
+            investor_count = (SELECT COUNT(DISTINCT investor_id) FROM investments WHERE campaign_id = OLD.campaign_id AND status = 'completed')
+        WHERE id = OLD.campaign_id;
+    END IF;
+
+    RETURN NULL; -- AFTER trigger
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_campaign_totals
+    AFTER INSERT OR UPDATE OR DELETE ON investments
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_campaign_totals();
+
+-- 5. Sincronización automática de reward_tiers (current_claims)
+CREATE OR REPLACE FUNCTION sync_reward_tier_claims()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Handle INSERT or UPDATE into 'completed'
+    IF (TG_OP = 'INSERT' AND NEW.status = 'completed' AND NEW.reward_tier_id IS NOT NULL) OR
+       (TG_OP = 'UPDATE' AND NEW.status = 'completed' AND OLD.status != 'completed' AND NEW.reward_tier_id IS NOT NULL) THEN
+        
+        UPDATE reward_tiers 
+        SET current_claims = current_claims + 1 
+        WHERE id = NEW.reward_tier_id;
+        
+    -- Handle UPDATE away from 'completed'
+    ELSIF (TG_OP = 'UPDATE' AND OLD.status = 'completed' AND NEW.status != 'completed' AND OLD.reward_tier_id IS NOT NULL) THEN
+        
+        UPDATE reward_tiers 
+        SET current_claims = current_claims - 1 
+        WHERE id = OLD.reward_tier_id;
+
+    -- Handle DELETE
+    ELSIF (TG_OP = 'DELETE' AND OLD.status = 'completed' AND OLD.reward_tier_id IS NOT NULL) THEN
+        
+        UPDATE reward_tiers 
+        SET current_claims = current_claims - 1 
+        WHERE id = OLD.reward_tier_id;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_reward_tier_claims
+    AFTER INSERT OR UPDATE OR DELETE ON investments
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_reward_tier_claims();
+
+-- 6. Sincronización automática de categories (campaign_count)
+CREATE OR REPLACE FUNCTION sync_category_campaigns()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE categories SET campaign_count = campaign_count + 1 WHERE id = NEW.category_id;
+    ELSIF TG_OP = 'UPDATE' AND OLD.category_id != NEW.category_id THEN
+        UPDATE categories SET campaign_count = campaign_count - 1 WHERE id = OLD.category_id;
+        UPDATE categories SET campaign_count = campaign_count + 1 WHERE id = NEW.category_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE categories SET campaign_count = campaign_count - 1 WHERE id = OLD.category_id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_category_campaigns
+    AFTER INSERT OR UPDATE OR DELETE ON campaigns
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_category_campaigns();
