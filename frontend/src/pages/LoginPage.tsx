@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
 import { Gem, AlertCircle, ArrowRight } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = (location.state as any)?.from || null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,13 @@ export function LoginPage() {
       }
 
       const appRole = persistUserRoleFromServer(response.user?.roles);
+
+      // If redirected from another page (e.g. campaign detail), go back there
+      if (redirectTo) {
+        navigate(redirectTo);
+        return;
+      }
+
       if (appRole === 'entrepreneur') {
         navigate('/entrepreneur-profile');
       } else {

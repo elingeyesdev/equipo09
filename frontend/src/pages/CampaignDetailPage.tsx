@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
+import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
 import { createInvestment } from '../api/investor.api';
 import {
   ArrowLeft,
@@ -116,6 +117,7 @@ export function CampaignDetailPage() {
   const [investmentLoading, setInvestmentLoading] = useState(false);
   const [investmentError, setInvestmentError] = useState<string | null>(null);
   const [investmentSuccess, setInvestmentSuccess] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Determine where to go back — preserve filter state
   const backUrl = (location.state as any)?.from || '/explore';
@@ -557,7 +559,8 @@ export function CampaignDetailPage() {
 
                   const canInvest = !isExpired && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
 
-                  const handleInvest = async () => {
+                  // Opens the confirmation modal instead of calling the API directly
+                  const handleInvest = () => {
                     if (!token) {
                       navigate('/login', { state: { from: location.pathname } });
                       return;
@@ -578,7 +581,13 @@ export function CampaignDetailPage() {
                       setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es $${selectedTier.amount.toLocaleString()}.`);
                       return;
                     }
+                    // All validations passed → show confirmation modal
+                    setInvestmentError(null);
+                    setShowConfirmModal(true);
+                  };
 
+                  // Called only when user confirms inside the modal
+                  const handleConfirmInvest = async () => {
                     setInvestmentLoading(true);
                     setInvestmentError(null);
                     try {
@@ -587,10 +596,12 @@ export function CampaignDetailPage() {
                         amount: parsedAmount,
                         rewardTierId: selectedTierId || undefined,
                       });
+                      setShowConfirmModal(false);
                       setInvestmentSuccess(true);
                     } catch (err: any) {
                       const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
                       setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
+                      setShowConfirmModal(false);
                     } finally {
                       setInvestmentLoading(false);
                     }
@@ -717,6 +728,48 @@ export function CampaignDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Contribution Confirmation Modal ── */}
+      {showConfirmModal && (
+        <ContributionConfirmModal
+          campaign={{
+            title: campaign.title,
+            campaignType: campaign.campaignType,
+            entrepreneurName: campaign.entrepreneurName,
+            coverImageUrl: campaign.coverImageUrl,
+            currency: campaign.currency,
+          }}
+          amount={parseFloat(customAmount)}
+          selectedTier={
+            selectedTierId
+              ? campaign.rewardTiers?.find((t) => t.id === selectedTierId) || null
+              : null
+          }
+          loading={investmentLoading}
+          onConfirm={async () => {
+            // handleConfirmInvest is defined inside the IIFE above,
+            // so we replicate the logic here for the modal callback
+            setInvestmentLoading(true);
+            setInvestmentError(null);
+            try {
+              await createInvestment({
+                campaignId: campaign.id,
+                amount: parseFloat(customAmount),
+                rewardTierId: selectedTierId || undefined,
+              });
+              setShowConfirmModal(false);
+              setInvestmentSuccess(true);
+            } catch (err: any) {
+              const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
+              setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
+              setShowConfirmModal(false);
+            } finally {
+              setInvestmentLoading(false);
+            }
+          }}
+          onCancel={() => setShowConfirmModal(false)}
+        />
+      )}
     </div>
   );
 }
