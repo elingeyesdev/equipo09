@@ -85,11 +85,22 @@ export function useCampaigns() {
     setQuery((q) => ({ ...q }));
   }, []);
 
-  const addCampaign = async (dto: CreateCampaignDto): Promise<boolean> => {
+  const addCampaign = async (dto: CreateCampaignDto, coverFile?: File): Promise<boolean> => {
     try {
       setAdding(true);
       setAddError(null);
-      await createCampaign(dto);
+      const campaign = await createCampaign(dto);
+      
+      if (coverFile) {
+        try {
+          await uploadCampaignImageApi(campaign.id, coverFile);
+        } catch (uploadErr) {
+          console.error('Error uploading campaign cover after creation:', uploadErr);
+          // Opcional: podrías decidir si esto invalida la creación o no. 
+          // Por ahora, la campaña ya se creó, así que retornamos true pero logueamos el error.
+        }
+      }
+
       setQuery({ ...DEFAULT_QUERY });
       return true;
     } catch (err: unknown) {

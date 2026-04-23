@@ -76,7 +76,7 @@ export function EntrepreneurProfilePage() {
     }
   }, [profileLoading, profile, onboardingTriggered]);
 
-  const handleSave = async (type: string, data: any) => {
+  const handleSave = async (type: string, data: any, file?: File) => {
     if (type === 'new-campaign') {
       // El módulo `campaigns` valida goalAmount con @Min(100) y categoryId es opcional (fallback en BD).
       const goal = Number(data.goalAmount);
@@ -87,7 +87,7 @@ export function EntrepreneurProfilePage() {
         goalAmount:
           Number.isFinite(goal) && goal >= minGoal ? goal : minGoal,
         campaignType: 'donation',
-      });
+      }, file);
     } else {
       // Filtrar el payload para enviar solo campos permitidos por el DTO
       const baseData = { ...profile, ...data };

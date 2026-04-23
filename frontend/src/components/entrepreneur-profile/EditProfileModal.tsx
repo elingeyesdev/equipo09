@@ -17,7 +17,7 @@ interface Props {
   type: ModalType;
   profile: EntrepreneurProfile | null;
   onClose: () => void;
-  onSave: (section: string, data: any) => Promise<void>;
+  onSave: (section: string, data: any, file?: File) => Promise<void>;
   saving: boolean;
 }
 
@@ -45,8 +45,13 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
   const [formData, setFormData] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
   useEffect(() => {
     setErrors({});
+    setCoverFile(null);
+    setCoverPreview(null);
     if (profile && type) {
       setFormData({ ...profile });
     } else {
@@ -65,6 +70,18 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       setFormData({ ...formData, [name]: value, city: '' });
     } else {
       setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -107,7 +124,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
     if (dataToSave.website) dataToSave.website = formatUrl(dataToSave.website);
     if (dataToSave.linkedinUrl) dataToSave.linkedinUrl = formatUrl(dataToSave.linkedinUrl);
     
-    await onSave(type, dataToSave);
+    await onSave(type, dataToSave, coverFile || undefined);
   };
 
   const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium appearance-none disabled:opacity-30 disabled:cursor-not-allowed";
@@ -282,11 +299,35 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
             </div>
             <div><label className={labelClass}>Tiempo Estimado (Días)</label><input name="duration" value={formData.duration || ''} onChange={handleChange} className={inputClass} placeholder="45" type="number" /></div>
           </div>
-          <div className="text-center py-6 border-[1.5px] border-dashed border-emerald-200 rounded-2xl hover:bg-emerald-50/50 cursor-pointer transition-all group">
-             <div className="text-emerald-300 mb-2 flex justify-center group-hover:scale-110 transition-transform">
-                <ImageIcon size={32} strokeWidth={1.5} />
-             </div>
-             <p className="text-sm font-black text-slate-500">Subir Portada de Campaña</p>
+          <div>
+            <label className={labelClass}>Imagen de Portada</label>
+            <div 
+              className={`relative h-[160px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${coverPreview ? 'border-[#2e7d32] bg-emerald-50/10' : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30'}`}
+              onClick={() => document.getElementById('cover-upload-modal')?.click()}
+            >
+              {coverPreview ? (
+                <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <div className="flex flex-col items-center text-slate-400">
+                  <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-2">
+                    <ImageIcon size={20} className="text-slate-300" />
+                  </div>
+                  <p className="text-[12px] font-bold">Seleccionar imagen</p>
+                </div>
+              )}
+              <input 
+                id="cover-upload-modal" 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleFileChange} 
+              />
+              {coverPreview && (
+                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                   <span className="bg-white text-[#1c2b1e] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest">Cambiar</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       );

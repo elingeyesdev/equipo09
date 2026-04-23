@@ -206,6 +206,7 @@ export function MyCampaignsPage() {
               ? handleModalPublish
               : undefined
           }
+          onUploadImage={uploadCampaignImage}
           actionLoading={!!actionCampaignId}
         />
       </main>

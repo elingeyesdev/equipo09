@@ -20,7 +20,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
-  onSuccess: (dto: CreateCampaignDto) => Promise<boolean>;
+  onSuccess: (dto: CreateCampaignDto, coverFile?: File) => Promise<boolean>;
   onCancel: () => void;
   saving: boolean;
   saveError: string | null;
@@ -46,6 +46,8 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -60,6 +62,18 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
     return () => { mounted = false; };
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
     const dto: CreateCampaignDto = {
       title: data.title,
@@ -71,7 +85,7 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
       endDate: data.endDate || undefined,
     };
 
-    const success = await onSuccess(dto);
+    const success = await onSuccess(dto, coverFile || undefined);
     if (success) {
       onCancel();
     }
@@ -176,6 +190,38 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
               className={inputClass}
               {...register('endDate')}
             />
+          </div>
+
+          <div className="flex flex-col md:col-span-3">
+            <label className={labelClass}>Imagen de Portada</label>
+            <div 
+              className={`relative h-[200px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${coverPreview ? 'border-[#2e7d32] bg-emerald-50/10' : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30'}`}
+              onClick={() => document.getElementById('cover-upload')?.click()}
+            >
+              {coverPreview ? (
+                <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <div className="flex flex-col items-center text-slate-400">
+                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-2">
+                    <Save size={24} className="text-slate-300" />
+                  </div>
+                  <p className="text-[13px] font-bold">Seleccionar imagen de portada</p>
+                  <p className="text-[11px]">Recomendado: 1200x600px (JPG, PNG)</p>
+                </div>
+              )}
+              <input 
+                id="cover-upload" 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleFileChange} 
+              />
+              {coverPreview && (
+                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                   <span className="bg-white text-[#1c2b1e] px-4 py-2 rounded-lg text-[12px] font-black uppercase tracking-widest">Cambiar Imagen</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col md:col-span-3">
