@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       // 3. Validar estado de la campaña y aplicar bloqueo concurrente
       const campaignResult = await client.query(
-        `SELECT id, status, end_date, min_investment FROM campaigns WHERE id = $1 FOR UPDATE`,
+        `SELECT id, status, end_date, min_investment, goal_amount, current_amount FROM campaigns WHERE id = $1 FOR UPDATE`,
         [dto.campaignId]
       );
 
@@ -55,6 +55,13 @@ export class InvestmentsRepository extends BaseRepository {
       if (dto.amount < minInvestment) {
         throw new BadRequestException(`El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la campaña ($${minInvestment}).`);
       }
+
+      const goalAmount = Number(campaign.goal_amount) || 0;
+      const currentAmount = Number(campaign.current_amount) || 0;
+      
+      const newCurrentAmount = currentAmount + dto.amount;
+      const isFunded = newCurrentAmount >= goalAmount;
+      const newStatus = isFunded && campaign.status === 'published' ? 'funded' : campaign.status;
 
       // 4. Validar reward tier si fue seleccionado
       let rewardTierId: string | null = null;
@@ -106,14 +113,37 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.amount]
       );
 
-      // 6. Actualizar los totales de la campaña
-      await client.query(
-        `UPDATE campaigns 
-         SET current_amount = current_amount + $2, 
-             investor_count = investor_count + 1 
-         WHERE id = $1`,
-        [dto.campaignId, dto.amount]
-      );
+      // 6. Actualizar los totales de la campaña (y estado si se alcanzó la meta)
+      let campaignUpdateQuery = `
+        UPDATE campaigns 
+        SET current_amount = current_amount + $2, 
+            investor_count = investor_count + 1 
+        WHERE id = $1
+      `;
+
+      if (newStatus === 'funded' && campaign.status !== 'funded') {
+        campaignUpdateQuery = `
+          UPDATE campaigns 
+          SET current_amount = current_amount + $2, 
+              investor_count = investor_count + 1,
+              status = 'funded'
+          WHERE id = $1
+        `;
+      }
+
+      await client.query(campaignUpdateQuery, [dto.campaignId, dto.amount]);
+
+      // Registrar en el historial si cambió de estado a funded
+      if (newStatus === 'funded' && campaign.status !== 'funded') {
+        await client.query(
+          `INSERT INTO campaign_status_history (
+            campaign_id, from_status, to_status, changed_by
+          ) VALUES (
+            $1, $2, $3, $4
+          )`,
+          [dto.campaignId, campaign.status, newStatus, userId]
+        );
+      }
 
       // 7. Insertar el registro final de la inversión marcado como completado
       const insertResult = await client.query(
