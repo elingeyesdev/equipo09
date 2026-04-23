@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
+import { CampaignInvestorsTab } from './CampaignInvestorsTab';
 import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory } from '../api/campaign.api';
 import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
@@ -144,6 +145,7 @@ export function CampaignPreviewModal({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
+  const [activeTab, setActiveTab] = useState<'details' | 'investors'>('details');
 
   const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
@@ -159,6 +161,7 @@ export function CampaignPreviewModal({
       setFinance(null);
       setHistory([]);
       setAdminFeedback('');
+      setActiveTab('details');
     }
   }, [open, campaign]);
 
@@ -279,348 +282,374 @@ export function CampaignPreviewModal({
           </div>
         </header>
 
+        {/* Tab Navigation */}
+        <div className="bg-white px-10 border-b border-slate-100 flex items-center gap-8 z-30">
+          <button
+            onClick={() => setActiveTab('details')}
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
+              activeTab === 'details' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Detalles de Proyecto
+          </button>
+          <button
+            onClick={() => setActiveTab('investors')}
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
+              activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Inversores Activos ({investorsTotal})
+          </button>
+        </div>
+
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row">
+        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row bg-[#f8fafc]">
+          {activeTab === 'details' ? (
+            <>
+              {/* Left Column: Detailed Content */}
+              <main className="flex-1 p-10 lg:p-12 space-y-12">
 
-          {/* Left Column: Detailed Content */}
-          <main className="flex-1 p-10 lg:p-12 space-y-12">
-
-            {/* Visual Assets Section */}
-            <section className="space-y-6">
-              <div className="relative group h-[400px] rounded-[32px] overflow-hidden bg-slate-900 border border-slate-200 shadow-2xl">
-                {campaign.coverImageUrl ? (
-                  <img
-                    src={campaign.coverImageUrl}
-                    alt="Cover"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center text-slate-600">
-                    <ImageIcon size={80} strokeWidth={1} className="mb-4 opacity-20" />
-                    <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-40">Digital Asset Missing</span>
-                  </div>
-                )}
-
-                {/* Type & Category Overlays */}
-                <div className="absolute top-6 left-6 flex flex-wrap gap-3">
-                  <span className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2">
-                    <Gem size={14} className="text-amber-400" />
-                    {campaign.categoryName || 'General'}
-                  </span>
-                  <span
-                    className="px-4 py-2 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2 backdrop-blur-md border border-white/20"
-                    style={{ backgroundColor: `${(CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation).color}CC` }}
-                  >
-                    {(() => {
-                      const info = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
-                      const Icon = info.icon;
-                      return <><Icon size={14} strokeWidth={3} /> {info.label}</>;
-                    })()}
-                  </span>
-                </div>
-
-                {videoUrl && (
-                  <div className="absolute top-6 right-6">
-                    <a href={videoUrl} target="_blank" rel="noreferrer" className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-2xl flex items-center justify-center shadow-xl transition-all active:scale-95">
-                      <Play size={20} fill="currentColor" />
-                    </a>
-                  </div>
-                )}
-
-                {onUploadImage && !isAdmin && (
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
-                    <button
-                      onClick={handleImageClick}
-                      disabled={uploading}
-                      className="bg-white text-[#1c2b1e] px-8 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest shadow-2xl flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50 border-none cursor-pointer"
-                    >
-                      {uploading ? <Loader2 className="animate-spin" /> : <Camera size={18} />}
-                      Actualizar Portada
-                    </button>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Project Specifications */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
-                <FileText size={20} strokeWidth={2.5} />
-                <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Especificaciones Técnicas</h3>
-              </div>
-
-              <div className="space-y-8">
-                {subtitle && (
-                  <p className="text-xl font-black text-slate-400 tracking-tight leading-relaxed italic border-l-4 border-indigo-100 pl-6">
-                    {subtitle}
-                  </p>
-                )}
-
-                <div className="prose prose-slate max-w-none">
-                  <p className="text-[16px] text-slate-600 leading-[1.8] font-medium whitespace-pre-wrap">
-                    {campaign.description || 'La documentación descriptiva aún no ha sido finalizada por el emprendedor.'}
-                  </p>
-                </div>
-
-                {tags && tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-4">
-                    {tags.map((tag, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {risksAndChallenges && (
-                <div className="bg-amber-50/50 border border-amber-100 p-8 rounded-[32px] space-y-4 shadow-sm">
-                  <div className="flex items-center gap-3 text-amber-700">
-                    <AlertTriangle size={20} strokeWidth={2.5} />
-                    <h4 className="text-[11px] font-black uppercase tracking-widest">Riesgos y Mitigación de Pérdida</h4>
-                  </div>
-                  <p className="text-[14px] text-amber-900/70 font-medium italic leading-relaxed">
-                    "{risksAndChallenges}"
-                  </p>
-                </div>
-              )}
-            </section>
-
-            {/* Financial Product Structure (Tiers) */}
-            <section className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                <div className="flex items-center gap-3 text-[#2e7d32]">
-                  <TrendingUp size={20} strokeWidth={2.5} />
-                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Estructura de Captación</h3>
-                </div>
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                  {rewardTiers?.length || 0} Niveles Disponibles
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {rewardTiers?.map((tier, idx) => (
-                  <div key={idx} className="p-6 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
-                    <div className="flex justify-between items-start">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center group-hover:bg-[#2e7d32] group-hover:text-white transition-colors">
-                        <Rocket size={20} />
+                {/* Visual Assets Section */}
+                <section className="space-y-6">
+                  <div className="relative group h-[400px] rounded-[32px] overflow-hidden bg-slate-900 border border-slate-200 shadow-2xl">
+                    {campaign.coverImageUrl ? (
+                      <img
+                        src={campaign.coverImageUrl}
+                        alt="Cover"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center text-slate-600">
+                        <ImageIcon size={80} strokeWidth={1} className="mb-4 opacity-20" />
+                        <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-40">Digital Asset Missing</span>
                       </div>
-                      <span className="text-lg font-black text-[#1c2b1e]">
-                        {formatCampaignCurrency(tier.amount, currency)}
+                    )}
+
+                    {/* Type & Category Overlays */}
+                    <div className="absolute top-6 left-6 flex flex-wrap gap-3">
+                      <span className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2">
+                        <Gem size={14} className="text-amber-400" />
+                        {campaign.categoryName || 'General'}
+                      </span>
+                      <span
+                        className="px-4 py-2 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2 backdrop-blur-md border border-white/20"
+                        style={{ backgroundColor: `${(CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation).color}CC` }}
+                      >
+                        {(() => {
+                          const info = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
+                          const Icon = info.icon;
+                          return <><Icon size={14} strokeWidth={3} /> {info.label}</>;
+                        })()}
                       </span>
                     </div>
-                    <div>
-                      <h4 className="font-black text-[15px] text-slate-900 mb-1">{tier.title}</h4>
-                      <p className="text-[12px] text-slate-500 font-medium leading-relaxed">{tier.description}</p>
-                    </div>
+
+                    {videoUrl && (
+                      <div className="absolute top-6 right-6">
+                        <a href={videoUrl} target="_blank" rel="noreferrer" className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-2xl flex items-center justify-center shadow-xl transition-all active:scale-95">
+                          <Play size={20} fill="currentColor" />
+                        </a>
+                      </div>
+                    )}
+
+                    {onUploadImage && !isAdmin && (
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
+                        <button
+                          onClick={handleImageClick}
+                          disabled={uploading}
+                          className="bg-white text-[#1c2b1e] px-8 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest shadow-2xl flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50 border-none cursor-pointer"
+                        >
+                          {uploading ? <Loader2 className="animate-spin" /> : <Camera size={18} />}
+                          Actualizar Portada
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </section>
+                </section>
 
-            {/* Social & Web Presence */}
-            {socialLinks && Object.keys(socialLinks).length > 0 && (
-              <section className="space-y-6">
-                <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
-                  <Globe size={20} strokeWidth={2.5} />
-                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Presencia Digital</h3>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                  {Object.entries(socialLinks).map(([platform, url]) => (
-                    <a
-                      key={platform}
-                      href={url as string}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[12px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm flex items-center gap-3 no-underline"
-                    >
-                      <span className="opacity-50">{platform}</span>
-                      <ExternalLink size={14} />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )}
-          </main>
-
-          {/* Right Column: Expert Analysis & Actions */}
-          <aside className="w-full lg:w-[420px] bg-white border-l border-slate-200 flex flex-col z-20 overflow-y-auto">
-
-            {/* Funding Radar Section */}
-            <section className="p-10 border-b border-slate-100 space-y-8 bg-slate-50/50">
-              <div className="flex justify-between items-center bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm">
-                <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Estado de Campaña</span>
-                <span className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
-                    ? 'bg-amber-50 text-amber-600 border-amber-100'
-                    : campaign.status === 'approved' || campaign.status === 'published'
-                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                      : campaign.status === 'rejected'
-                        ? 'bg-red-50 text-red-600 border-red-100'
-                        : 'bg-slate-50 text-slate-500 border-slate-100'
-                  }`}>
-                  {statusLabel(campaign.status)}
-                </span>
-              </div>
-              <div className="flex flex-col items-center">
-                <CircularFundingRing currentAmount={cur} goalAmount={goal} size={180} strokeWidth={12} />
-                <div className="mt-6 text-center">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block mb-1">Recaudado</span>
-                  <span className="text-4xl font-black text-[#1c2b1e] tracking-tight">
-                    {formatCampaignCurrency(cur, currency)}
-                  </span>
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-[13px] font-black text-emerald-600">
-                      {Math.round((cur / goal) * 100)}% Completado
-                    </span>
+                {/* Project Specifications */}
+                <section className="space-y-8">
+                  <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
+                    <FileText size={20} strokeWidth={2.5} />
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Especificaciones Técnicas</h3>
                   </div>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200/60">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Mínima</span>
-                  <p className="text-[16px] font-black text-slate-800">{formatCampaignCurrency(minInvestment || 1, currency)}</p>
-                </div>
-                <div className="space-y-1 text-right">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Máxima</span>
-                  <p className="text-[16px] font-black text-slate-800">{maxInvestment ? formatCampaignCurrency(maxInvestment, currency) : 'Sin límite'}</p>
-                </div>
-              </div>
+                  <div className="space-y-8">
+                    {subtitle && (
+                      <p className="text-xl font-black text-slate-400 tracking-tight leading-relaxed italic border-l-4 border-indigo-100 pl-6">
+                        {subtitle}
+                      </p>
+                    )}
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="font-bold text-slate-500 flex items-center gap-2"><MapPin size={14} /> Ubicación</span>
-                  <span className="font-black text-slate-900">{campaign.location || 'Global'}</span>
-                </div>
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="font-bold text-slate-500 flex items-center gap-2"><Calendar size={14} /> Fecha Inicio</span>
-                  <span className="font-black text-slate-900">{campaign.startDate ? formatShortDate(campaign.startDate) : 'No definida'}</span>
-                </div>
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="font-bold text-slate-500 flex items-center gap-2"><Clock size={14} /> Fecha Límite</span>
-                  <span className="font-black text-slate-900">{campaign.endDate ? formatShortDate(campaign.endDate) : 'Indefinida'}</span>
-                </div>
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="font-bold text-slate-500 flex items-center gap-2"><Users size={14} /> Inversores Activos</span>
-                  <span className="font-black text-slate-900">{investorsTotal} Participantes</span>
-                </div>
-              </div>
-            </section>
-
-            {/* Entrepreneur Intelligence Section */}
-            <section className="p-10 border-b border-slate-100 space-y-6">
-              <div className="flex items-center gap-3 text-slate-900">
-                <User size={18} strokeWidth={2.5} />
-                <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1c2b1e]">Auditoría del Emprendedor</h3>
-              </div>
-
-              {entrepreneur ? (
-                <>
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
-                      {entrepreneur.avatar ? (
-                        <img src={entrepreneur.avatar} className="w-full h-full object-cover" alt="Proponent" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={24} /></div>
-                      )}
-                    </div>
-                    <div className="overflow-hidden">
-                      <p className="text-[15px] font-black text-slate-900 truncate leading-none mb-1">{entrepreneur.firstName} {entrepreneur.lastName}</p>
-                      <p className="text-[11px] font-bold text-indigo-600 truncate flex items-center gap-1">
-                        <Mail size={10} /> {entrepreneur.email}
+                    <div className="prose prose-slate max-w-none">
+                      <p className="text-[16px] text-slate-600 leading-[1.8] font-medium whitespace-pre-wrap">
+                        {campaign.description || 'La documentación descriptiva aún no ha sido finalizada por el emprendedor.'}
                       </p>
                     </div>
+
+                    {tags && tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-4">
+                        {tags.map((tag, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {entrepreneur.bio && (
-                    <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic border-l-2 border-slate-100 pl-4 py-1">
-                      "{entrepreneur.bio}"
-                    </p>
+
+                  {risksAndChallenges && (
+                    <div className="bg-amber-50/50 border border-amber-100 p-8 rounded-[32px] space-y-4 shadow-sm">
+                      <div className="flex items-center gap-3 text-amber-700">
+                        <AlertTriangle size={20} strokeWidth={2.5} />
+                        <h4 className="text-[11px] font-black uppercase tracking-widest">Riesgos y Mitigación de Pérdida</h4>
+                      </div>
+                      <p className="text-[14px] text-amber-900/70 font-medium italic leading-relaxed">
+                        "{risksAndChallenges}"
+                      </p>
+                    </div>
                   )}
-                </>
-              ) : (
-                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
-                  <AlertTriangle className="text-red-500" size={18} />
-                  <p className="text-[11px] font-bold text-red-700 leading-tight">Error de integridad: Emprendedor no identificado en el sistema.</p>
-                </div>
-              )}
+                </section>
 
-              <div className="flex flex-col gap-3">
-                {entrepreneur?.website && (
-                  <a href={entrepreneur.website} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group">
-                    <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">Portal Corporativo</span>
-                    <Globe size={16} className="text-slate-300 group-hover:text-indigo-500" />
-                  </a>
-                )}
-                {socialLinks && Object.entries(socialLinks).map(([platform, url]) => (
-                  <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group capitalize">
-                    <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">{platform}</span>
-                    <Share2 size={16} className="text-slate-300 group-hover:text-indigo-500" />
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            {/* Audit Logs Section (Visible para ambos) */}
-            {(history.length > 0 || historyLoading) && (
-              <section className="p-10 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-[#2e7d32]">
-                    <Clock size={18} strokeWidth={2.5} />
-                    <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Auditoría</h3>
+                {/* Financial Product Structure (Tiers) */}
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                    <div className="flex items-center gap-3 text-[#2e7d32]">
+                      <TrendingUp size={20} strokeWidth={2.5} />
+                      <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Estructura de Captación</h3>
+                    </div>
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                      {rewardTiers?.length || 0} Niveles Disponibles
+                    </span>
                   </div>
-                </div>
 
-                <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-                  {historyLoading ? (
-                    <div className="flex justify-center py-4"><Loader2 className="animate-spin text-slate-200" /></div>
-                  ) : history.length > 0 ? (
-                    history.map((item, idx) => (
-                      <div key={idx} className="relative pl-8">
-                        <div className="absolute left-[3px] top-1 w-2.5 h-2.5 rounded-full bg-white border-2 border-indigo-400 shadow-sm"></div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[11px] font-black text-slate-900">
-                              {statusLabel(item.to_status)}
-                            </span>
-                            <span className="text-[9px] font-bold text-slate-400">{formatShortDate(item.created_at)}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rewardTiers?.map((tier, idx) => (
+                      <div key={idx} className="p-6 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                        <div className="flex justify-between items-start">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center group-hover:bg-[#2e7d32] group-hover:text-white transition-colors">
+                            <Rocket size={20} />
                           </div>
-                          <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic line-clamp-2">
-                            "{item.feedback || 'Sin notas.'}"
+                          <span className="text-lg font-black text-[#1c2b1e]">
+                            {formatCampaignCurrency(tier.amount, currency)}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-black text-[15px] text-slate-900 mb-1">{tier.title}</h4>
+                          <p className="text-[12px] text-slate-500 font-medium leading-relaxed">{tier.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Social & Web Presence */}
+                {socialLinks && Object.keys(socialLinks).length > 0 && (
+                  <section className="space-y-6">
+                    <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
+                      <Globe size={20} strokeWidth={2.5} />
+                      <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Presencia Digital</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                      {Object.entries(socialLinks).map(([platform, url]) => (
+                        <a
+                          key={platform}
+                          href={url as string}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[12px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm flex items-center gap-3 no-underline"
+                        >
+                          <span className="opacity-50">{platform}</span>
+                          <ExternalLink size={14} />
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </main>
+
+              {/* Right Column: Expert Analysis & Actions */}
+              <aside className="w-full lg:w-[420px] bg-white border-l border-slate-200 flex flex-col z-20 overflow-y-auto">
+
+                {/* Funding Radar Section */}
+                <section className="p-10 border-b border-slate-100 space-y-8 bg-slate-50/50">
+                  <div className="flex justify-between items-center bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Estado de Campaña</span>
+                    <span className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
+                        ? 'bg-amber-50 text-amber-600 border-amber-100'
+                        : campaign.status === 'approved' || campaign.status === 'published'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                          : campaign.status === 'rejected'
+                            ? 'bg-red-50 text-red-600 border-red-100'
+                            : 'bg-slate-50 text-slate-500 border-slate-100'
+                      }`}>
+                      {statusLabel(campaign.status)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <CircularFundingRing currentAmount={cur} goalAmount={goal} size={180} strokeWidth={12} />
+                    <div className="mt-6 text-center">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block mb-1">Recaudado</span>
+                      <span className="text-4xl font-black text-[#1c2b1e] tracking-tight">
+                        {formatCampaignCurrency(cur, currency)}
+                      </span>
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-[13px] font-black text-emerald-600">
+                          {Math.round((cur / goal) * 100)}% Completado
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200/60">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Mínima</span>
+                      <p className="text-[16px] font-black text-slate-800">{formatCampaignCurrency(minInvestment || 1, currency)}</p>
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Máxima</span>
+                      <p className="text-[16px] font-black text-slate-800">{maxInvestment ? formatCampaignCurrency(maxInvestment, currency) : 'Sin límite'}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="font-bold text-slate-500 flex items-center gap-2"><MapPin size={14} /> Ubicación</span>
+                      <span className="font-black text-slate-900">{campaign.location || 'Global'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="font-bold text-slate-500 flex items-center gap-2"><Calendar size={14} /> Fecha Inicio</span>
+                      <span className="font-black text-slate-900">{campaign.startDate ? formatShortDate(campaign.startDate) : 'No definida'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="font-bold text-slate-500 flex items-center gap-2"><Clock size={14} /> Fecha Límite</span>
+                      <span className="font-black text-slate-900">{campaign.endDate ? formatShortDate(campaign.endDate) : 'Indefinida'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="font-bold text-slate-500 flex items-center gap-2"><Users size={14} /> Inversores Activos</span>
+                      <span className="font-black text-slate-900">{investorsTotal} Participantes</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Entrepreneur Intelligence Section */}
+                <section className="p-10 border-b border-slate-100 space-y-6">
+                  <div className="flex items-center gap-3 text-slate-900">
+                    <User size={18} strokeWidth={2.5} />
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1c2b1e]">Auditoría del Emprendedor</h3>
+                  </div>
+
+                  {entrepreneur ? (
+                    <>
+                      <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
+                        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
+                          {entrepreneur.avatar ? (
+                            <img src={entrepreneur.avatar} className="w-full h-full object-cover" alt="Proponent" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={24} /></div>
+                          )}
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="text-[15px] font-black text-slate-900 truncate leading-none mb-1">{entrepreneur.firstName} {entrepreneur.lastName}</p>
+                          <p className="text-[11px] font-bold text-indigo-600 truncate flex items-center gap-1">
+                            <Mail size={10} /> {entrepreneur.email}
                           </p>
                         </div>
                       </div>
-                    ))
+                      {entrepreneur.bio && (
+                        <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic border-l-2 border-slate-100 pl-4 py-1">
+                          "{entrepreneur.bio}"
+                        </p>
+                      )}
+                    </>
                   ) : (
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center pl-4">Nueva Propuesta Técnica</p>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Recent Capital Inflow (Inversores) */}
-            {recent && recent.length > 0 && (
-              <section className="p-10 border-b border-slate-100 space-y-6">
-                <div className="flex items-center gap-3 text-[#1c2b1e]">
-                  <TrendingUp size={18} strokeWidth={2.5} />
-                  <h3 className="text-[11px] font-black uppercase tracking-widest">Flujo de Capital Reciente</h3>
-                </div>
-                <div className="space-y-4">
-                  {recent.map((inv, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px]">
-                          {inv.investor_name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-[12px] font-bold text-slate-700">{inv.investor_name}</span>
-                      </div>
-                      <span className="text-[12px] font-black text-emerald-600">+{formatCampaignCurrency(inv.amount, currency)}</span>
+                    <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
+                      <AlertTriangle className="text-red-500" size={18} />
+                      <p className="text-[11px] font-bold text-red-700 leading-tight">Error de integridad: Emprendedor no identificado en el sistema.</p>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </aside>
+                  )}
+
+                  <div className="flex flex-col gap-3">
+                    {entrepreneur?.website && (
+                      <a href={entrepreneur.website} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group">
+                        <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">Portal Corporativo</span>
+                        <Globe size={16} className="text-slate-300 group-hover:text-indigo-500" />
+                      </a>
+                    )}
+                    {socialLinks && Object.entries(socialLinks).map(([platform, url]) => (
+                      <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group capitalize">
+                        <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">{platform}</span>
+                        <Share2 size={16} className="text-slate-300 group-hover:text-indigo-500" />
+                      </a>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Audit Logs Section (Visible para ambos) */}
+                {(history.length > 0 || historyLoading) && (
+                  <section className="p-10 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-[#2e7d32]">
+                        <Clock size={18} strokeWidth={2.5} />
+                        <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Auditoría</h3>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                      {historyLoading ? (
+                        <div className="flex justify-center py-4"><Loader2 className="animate-spin text-slate-200" /></div>
+                      ) : history.length > 0 ? (
+                        history.map((item, idx) => (
+                          <div key={idx} className="relative pl-8">
+                            <div className="absolute left-[3px] top-1 w-2.5 h-2.5 rounded-full bg-white border-2 border-indigo-400 shadow-sm"></div>
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] font-black text-slate-900">
+                                  {statusLabel(item.to_status)}
+                                </span>
+                                <span className="text-[9px] font-bold text-slate-400">{formatShortDate(item.created_at)}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic line-clamp-2">
+                                "{item.feedback || 'Sin notas.'}"
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center pl-4">Nueva Propuesta Técnica</p>
+                      )}
+                    </div>
+                  </section>
+                )}
+                {/* Recent Capital Inflow (Inversores) */}
+                {recent && recent.length > 0 && (
+                  <section className="p-10 border-b border-slate-100 space-y-6">
+                    <div className="flex items-center gap-3 text-[#1c2b1e]">
+                      <TrendingUp size={18} strokeWidth={2.5} />
+                      <h3 className="text-[11px] font-black uppercase tracking-widest">Flujo de Capital Reciente</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {recent.map((inv, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px]">
+                              {inv.investor_name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="text-[12px] font-bold text-slate-700">{inv.investor_name}</span>
+                          </div>
+                          <span className="text-[12px] font-black text-emerald-600">+{formatCampaignCurrency(inv.amount, currency)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </aside>
+            </>
+          ) : (
+            <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
+               <CampaignInvestorsTab campaignId={campaign.id} currency={currency} />
+            </div>
+          )}
         </div>
 
         {/* Action Panel: Compact Sticky Footer */}

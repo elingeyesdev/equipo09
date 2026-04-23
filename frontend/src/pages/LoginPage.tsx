@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
@@ -10,8 +10,18 @@ export function LoginPage() {
   const redirectTo = (location.state as any)?.from || null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Cargar email guardado si existe
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +34,13 @@ export function LoginPage() {
       // Guardar token y redirigir
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('userEmail', response.user?.email ?? email);
+
+      // Funcionalidad Recordar Usuario
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
       
       const adminAccessLevel = response.user?.adminAccessLevel;
       if (adminAccessLevel) {
@@ -59,6 +76,7 @@ export function LoginPage() {
 
   const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
   const labelClass = "text-[12px] font-black text-[#1c2b1e]/60 mb-2 block uppercase tracking-wider ml-1";
+  const checkboxClass = "w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer accent-[#2e7d32]";
 
   return (
     <div className="min-h-screen bg-[#f4f7f4] flex items-center justify-center p-6 relative overflow-hidden font-['Sora',sans-serif]">
@@ -113,6 +131,19 @@ export function LoginPage() {
               className={inputClass}
               autoComplete="current-password"
             />
+          </div>
+
+          <div className="flex items-center gap-2 ml-1">
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className={checkboxClass}
+            />
+            <label htmlFor="rememberMe" className="text-[13px] font-medium text-slate-500 cursor-pointer select-none">
+              Recordar mi correo
+            </label>
           </div>
 
           <button

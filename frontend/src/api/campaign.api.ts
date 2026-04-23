@@ -5,6 +5,7 @@ import type {
   QueryCampaignsDto,
   PaginatedResponse,
   CampaignFinancialProgress,
+  CampaignInvestor,
 } from '../types/campaign.types';
 import type { CampaignHistoryItem } from '../types/admin.types';
 
@@ -116,6 +117,18 @@ export async function getCampaignHistory(
 ): Promise<CampaignHistoryItem[]> {
   const { data } = await api.get<ApiSuccessResponse<CampaignHistoryItem[]>>(
     `/entrepreneurs/me/campaigns/${campaignId}/history`,
+  );
+  return data.data;
+}
+
+export async function getCampaignInvestors(
+  campaignId: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<PaginatedResponse<CampaignInvestor>> {
+  const { data } = await api.get<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/investors`,
+    { params: { page, limit } },
   );
   return data.data;
 }

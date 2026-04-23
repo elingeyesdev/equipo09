@@ -21,6 +21,8 @@ export interface EntrepreneurCampaign {
   viewCount: number;
   categoryName: string;
   categorySlug: string;
+  categoryId: string;
+  description: string;
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
@@ -88,6 +90,20 @@ export interface EntrepreneurFinancialSummary {
   currency: string;
 }
 
+export interface CampaignInvestor {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  location: string | null;
+  bio: string | null;
+  email: string;
+  totalInvested: number;
+  investmentCount: number;
+  lastInvestmentAt: Date;
+}
+
 /**
  * Mapea un row de PostgreSQL al modelo de campaña del emprendedor.
  */
@@ -111,6 +127,8 @@ export function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign {
     viewCount: Number(row.view_count),
     categoryName: row.category_name,
     categorySlug: row.category_slug,
+    categoryId: row.category_id,
+    description: row.description,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     publishedAt: row.published_at,

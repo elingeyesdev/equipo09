@@ -23,6 +23,7 @@ import {
   CampaignFinancialProgress,
   EntrepreneurFinancialSummary,
   CampaignCreationReadiness,
+  CampaignInvestor,
 } from '../models';
 import { getCampaignCreationBlockers } from '../utils/campaign-profile-eligibility';
 
@@ -401,6 +402,30 @@ export class EntrepreneurService {
     }
 
     return progress;
+  }
+
+  /**
+   * Obtiene la lista de inversores para una campaña específica.
+   * Regla: Solo el creador de la campaña puede ver sus inversores.
+   */
+  async getCampaignInvestors(
+    userId: string,
+    campaignId: string,
+    query: { page?: number; limit?: number }
+  ): Promise<PaginatedResponse<CampaignInvestor>> {
+    await this.ensureEntrepreneurProfile(userId);
+    const { investors, total } = await this.campaignRepo.getCampaignInvestors(
+      campaignId,
+      userId,
+      query,
+    );
+
+    return new PaginatedResponse(
+      investors,
+      total,
+      query.page || 1,
+      query.limit || 20,
+    );
   }
 
   /**

@@ -6,6 +6,7 @@ import {
   RecentInvestment,
   EntrepreneurFinancialSummary,
   mapRowToEntrepreneurCampaign,
+  CampaignInvestor,
 } from '../models';
 import { QueryCampaignsDto, CreateCampaignDto } from '../dto';
 
@@ -148,7 +149,9 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
         cat.display_name AS category_name,
-        cat.slug AS category_slug
+        cat.slug AS category_slug,
+        c.category_id,
+        c.description
        FROM campaigns c
        JOIN categories cat ON c.category_id = cat.id
        WHERE ${whereClause}
@@ -175,7 +178,9 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
         cat.display_name AS category_name,
-        cat.slug AS category_slug
+        cat.slug AS category_slug,
+        c.category_id,
+        c.description
        FROM campaigns c
        JOIN categories cat ON c.category_id = cat.id
        WHERE c.id = $1 AND c.creator_id = $2`,
@@ -491,5 +496,75 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       WHERE h.campaign_id = $1
       ORDER BY h.created_at DESC
     `, [campaignId]);
+  }
+
+  async getCampaignInvestors(
+    campaignId: string,
+    creatorId: string,
+    query: { page?: number; limit?: number } = {}
+  ): Promise<{ investors: CampaignInvestor[]; total: number }> {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const offset = (page - 1) * limit;
+
+    // Verificar que la campaña existe y pertenece al emprendedor
+    const campaign = await this.queryOne(
+      `SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2`,
+      [campaignId, creatorId]
+    );
+    if (!campaign) return { investors: [], total: 0 };
+
+    const totalRes = await this.queryOne(
+      `SELECT COUNT(DISTINCT investor_id) as total FROM investments WHERE campaign_id = $1 AND status = 'completed'`,
+      [campaignId]
+    );
+    const total = parseInt(totalRes.total, 10);
+
+    const rows = await this.queryMany(
+      `SELECT 
+        stats.investor_id,
+        ip.first_name,
+        ip.last_name,
+        ip.display_name,
+        ip.avatar_url,
+        CONCAT(ip.city, ', ', ip.country) as location,
+        ip.bio,
+        u.email,
+        stats.total_invested,
+        stats.investment_count,
+        stats.last_investment_at
+      FROM (
+        SELECT 
+          investor_id,
+          SUM(amount) as total_invested,
+          COUNT(id) as investment_count,
+          MAX(created_at) as last_investment_at
+        FROM investments
+        WHERE campaign_id = $1 AND status = 'completed'
+        GROUP BY investor_id
+      ) stats
+      JOIN investor_profiles ip ON stats.investor_id = ip.user_id
+      JOIN users u ON stats.investor_id = u.id
+      ORDER BY stats.last_investment_at DESC
+      LIMIT $2 OFFSET $3`,
+      [campaignId, limit, offset]
+    );
+
+    return {
+      investors: rows.map(row => ({
+        userId: row.investor_id,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        displayName: row.display_name,
+        avatarUrl: row.avatar_url,
+        location: row.location,
+        bio: row.bio,
+        email: row.email,
+        totalInvested: Number(row.total_invested),
+        investmentCount: Number(row.investment_count),
+        lastInvestmentAt: row.last_investment_at,
+      })),
+      total,
+    };
   }
 }

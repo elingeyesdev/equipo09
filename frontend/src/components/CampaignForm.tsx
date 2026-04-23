@@ -31,6 +31,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -62,6 +63,21 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       });
     return () => { mounted = false; };
   }, []);
+
+  // Sincronizar valores cuando se cargan las categorías o cambia initialData
+  useEffect(() => {
+    if (!loadingCats && initialData) {
+      reset({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        shortDescription: initialData.shortDescription || '',
+        goalAmount: initialData.goalAmount || 1000,
+        campaignType: initialData.campaignType || 'reward',
+        categoryId: initialData.categoryId || '',
+        endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
+      });
+    }
+  }, [loadingCats, initialData, reset]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

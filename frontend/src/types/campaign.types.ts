@@ -21,6 +21,7 @@ export interface EntrepreneurCampaign {
   shortDescription: string | null;
   description: string | null;
   location: string | null;
+  categoryId: string;
   campaignType: CampaignType;
   status: CampaignStatus;
   goalAmount: number;
@@ -94,6 +95,20 @@ export interface CampaignFinancialProgress {
   investorCount: number;
   currency: string;
   recentInvestments: RecentInvestment[];
+}
+
+export interface CampaignInvestor {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  location: string | null;
+  bio: string | null;
+  email: string;
+  totalInvested: number;
+  investmentCount: number;
+  lastInvestmentAt: string;
 }
 
 export interface PaginatedResponse<T> {

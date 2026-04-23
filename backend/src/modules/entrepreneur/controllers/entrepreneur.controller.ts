@@ -41,6 +41,7 @@ import {
   CampaignFinancialProgress,
   EntrepreneurFinancialSummary,
   CampaignCreationReadiness,
+  CampaignInvestor,
 } from '../models';
 
 @ApiTags('entrepreneur-profile')
@@ -358,5 +359,24 @@ export class EntrepreneurController {
       campaignId,
     );
     return new ApiSuccessResponse(progress);
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Get('me/campaigns/:campaignId/investors')
+  @ApiOperation({ summary: 'Obtener lista de inversores de una campaña propia' })
+  @ApiResponse({ status: 200, description: 'Lista de inversores retornada.' })
+  async getCampaignInvestors(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>> {
+    const userId = (req as any).user.id;
+    const result = await this.entrepreneurService.getCampaignInvestors(
+      userId,
+      campaignId,
+      { page: page ? Number(page) : 1, limit: limit ? Number(limit) : 20 },
+    );
+    return new ApiSuccessResponse(result);
   }
 }

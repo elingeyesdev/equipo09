@@ -148,7 +148,7 @@ CREATE TABLE entrepreneur_profiles (
     user_id                         UUID           NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     first_name                      VARCHAR(100)   NOT NULL,
     last_name                       VARCHAR(100)   NOT NULL,
-    display_name                    VARCHAR(150),
+    display_name                    VARCHAR(150)   UNIQUE,
     bio                             TEXT,
     company_name                    VARCHAR(200),
     website                         VARCHAR(512),
@@ -160,6 +160,8 @@ CREATE TABLE entrepreneur_profiles (
     postal_code                     VARCHAR(20),
     bank_account_number             VARCHAR(100),
     bank_name                       VARCHAR(200),
+    avatar_url                      VARCHAR(512),
+    cover_url                       VARCHAR(512),
     identity_verified               BOOLEAN        NOT NULL DEFAULT false,
     identity_verified_at            TIMESTAMPTZ,
     verification_documents          JSONB          DEFAULT '[]',
@@ -171,6 +173,7 @@ CREATE TABLE entrepreneur_profiles (
 );
 
 CREATE INDEX idx_entrepreneur_profiles_user_id ON entrepreneur_profiles (user_id);
+CREATE INDEX idx_entrepreneur_profiles_display_name ON entrepreneur_profiles (display_name);
 CREATE INDEX idx_entrepreneur_profiles_identity_verified ON entrepreneur_profiles (identity_verified);
 CREATE INDEX idx_entrepreneur_profiles_company_name ON entrepreneur_profiles (company_name) WHERE company_name IS NOT NULL;
 
@@ -205,6 +208,8 @@ CREATE TABLE investor_profiles (
     preferred_categories        JSONB          DEFAULT '[]',
     min_investment              NUMERIC(12,2),
     max_investment              NUMERIC(12,2),
+    avatar_url                  VARCHAR(512),
+    cover_url                   VARCHAR(512),
     identity_verified           BOOLEAN        NOT NULL DEFAULT false,
     identity_verified_at        TIMESTAMPTZ,
     verification_documents      JSONB          DEFAULT '[]',
