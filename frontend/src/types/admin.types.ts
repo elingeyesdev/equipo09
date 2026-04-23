@@ -19,6 +19,7 @@ export interface SystemCampaign {
   current_amount: string;
   created_at: string;
   creator_email: string;
+  creator_name: string;
 }
 
 export interface AdminUser {
@@ -46,6 +47,7 @@ export interface PendingCampaign {
   category_name: string;
   goal_amount: string;
   created_at: string;
+  audit_score?: number;
 }
 
 export interface PendingCampaignDetail {
@@ -55,7 +57,9 @@ export interface PendingCampaignDetail {
   status: string;
   type: 'reward' | 'donation';
   cover_image_url?: string;
+  main_image_url?: string;
   short_description: string;
+  audit_score?: number;
   description: string;
   reward_tiers?: RewardTier[];
   goal_amount: string;
@@ -74,6 +78,13 @@ export interface PendingCampaignDetail {
   entrepreneur_linkedin?: string;
   entrepreneur_website?: string;
   media?: any[];
+  min_investment?: number;
+  max_investment?: number;
+  subtitle?: string;
+  risks_and_challenges?: string;
+  video_url?: string;
+  tags?: string[];
+  social_links?: Record<string, string>;
 }
 
 export interface CampaignHistoryItem {

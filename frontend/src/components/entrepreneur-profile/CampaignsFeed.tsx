@@ -24,7 +24,7 @@ interface Props {
   onCampaignClick: (campaign: EntrepreneurCampaign) => void;
 }
 
-type CampaignFilter = 'all' | 'active' | 'drafts' | 'completed';
+type CampaignFilter = 'all' | 'active' | 'drafts' | 'review' | 'completed';
 
 export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCampaignClick }: Props) {
   const [showTip, setShowTip] = useState(true);
@@ -39,8 +39,10 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
     switch (status) {
       case 'published': return 'bg-[#2e7d32] border-emerald-300';
       case 'draft': return 'bg-slate-500 border-slate-400';
-      case 'pending_review': return 'bg-[#f9a825] border-amber-300';
-      case 'completed': return 'bg-[#1c2b1e] border-[#2e7d32]';
+      case 'pending_review':
+      case 'in_review': return 'bg-[#f9a825] border-amber-300';
+      case 'approved': return 'bg-[#2e7d32] border-emerald-300';
+      case 'rejected': return 'bg-red-500 border-red-300';
       default: return 'bg-slate-400 border-slate-300';
     }
   };
@@ -49,8 +51,10 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
     switch (status) {
       case 'published': return 'ACTIVA';
       case 'draft': return 'BORRADOR';
-      case 'pending_review': return 'REVISIÓN';
-      case 'completed': return 'FINALIZADA';
+      case 'pending_review': return 'EN REVISIÓN';
+      case 'in_review': return 'EN REVISIÓN';
+      case 'approved': return 'APROBADO';
+      case 'rejected': return 'RECHAZADO';
       default: return status.toUpperCase();
     }
   };
@@ -58,8 +62,9 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
   const filteredCampaigns = useMemo(() => {
     if (filter === 'all') return campaigns;
     if (filter === 'active') return campaigns.filter(c => c.status === 'published');
-    if (filter === 'drafts') return campaigns.filter(c => c.status === 'draft' || c.status === 'pending_review');
-    if (filter === 'completed') return campaigns.filter(c => c.status === 'completed');
+    if (filter === 'drafts') return campaigns.filter(c => c.status === 'draft');
+    if (filter === 'review') return campaigns.filter(c => c.status === 'pending_review' || c.status === 'in_review');
+    if (filter === 'completed') return campaigns.filter(c => c.status === 'approved' || c.status === 'rejected');
     return campaigns;
   }, [campaigns, filter]);
 
@@ -67,7 +72,8 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
     { id: 'all', label: 'Todas' },
     { id: 'active', label: 'Activas' },
     { id: 'drafts', label: 'Borradores' },
-    { id: 'completed', label: 'Finalizadas' }
+    { id: 'review', label: 'En revisión' },
+    { id: 'completed', label: 'Resueltas' }
   ];
 
   return (

@@ -20,6 +20,10 @@ interface CampaignSummary {
   entrepreneurName?: string;
   coverImageUrl?: string;
   currency?: string;
+  status?: string;
+  location?: string;
+  endDate?: string;
+  shortDescription?: string;
 }
 
 interface ContributionConfirmModalProps {
@@ -143,27 +147,54 @@ export function ContributionConfirmModal({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 line-clamp-2">
-                {campaign.title}
-              </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-2">
                 <span
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${
+                    campaign.status === 'published' || campaign.status === 'approved'
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                      : 'bg-amber-50 text-amber-600 border-amber-100'
+                  }`}
+                >
+                  {campaign.status === 'published' ? 'Activa' : 'En Proceso'}
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"
                   style={{ backgroundColor: typeInfo.bgColor, color: typeInfo.color }}
                 >
                   <TypeIcon size={10} strokeWidth={3} />
                   {typeInfo.label}
                 </span>
-                {campaign.entrepreneurName && (
-                  <span className="text-[11px] font-bold text-slate-400">
-                    por {campaign.entrepreneurName}
-                  </span>
-                )}
               </div>
+              <p className="text-[15px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 line-clamp-2">
+                {campaign.title}
+              </p>
+              {campaign.entrepreneurName && (
+                <span className="text-[11px] font-bold text-slate-400">
+                  por {campaign.entrepreneurName}
+                </span>
+              )}
             </div>
           </div>
 
           {/* Divider */}
+          <div className="h-px bg-slate-100" />
+
+          {/* Campaign Metadata */}
+          <div className="grid grid-cols-2 gap-4 text-[11px] font-bold">
+            <div className="flex flex-col gap-1">
+              <span className="text-slate-400 uppercase tracking-widest text-[9px]">Ubicación</span>
+              <span className="text-slate-700">{campaign.location || 'Global'}</span>
+            </div>
+            <div className="flex flex-col gap-1 text-right">
+              <span className="text-slate-400 uppercase tracking-widest text-[9px]">Fecha Límite</span>
+              <span className="text-slate-700">
+                {campaign.endDate 
+                  ? new Date(campaign.endDate).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : 'Indefinida'}
+              </span>
+            </div>
+          </div>
+
           <div className="h-px bg-slate-100" />
 
           {/* Amount summary */}

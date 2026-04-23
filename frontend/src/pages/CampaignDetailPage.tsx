@@ -738,6 +738,10 @@ export function CampaignDetailPage() {
             entrepreneurName: campaign.entrepreneurName,
             coverImageUrl: campaign.coverImageUrl,
             currency: campaign.currency,
+            status: campaign.status,
+            location: campaign.location,
+            endDate: campaign.endDate,
+            shortDescription: campaign.shortDescription,
           }}
           amount={parseFloat(customAmount)}
           selectedTier={

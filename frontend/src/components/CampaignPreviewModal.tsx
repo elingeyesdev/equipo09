@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
-import { getCampaignFinancialProgress } from '../api/campaign.api';
-import { getCampaignHistory } from '../api/admin.api';
+import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory } from '../api/campaign.api';
+import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
-import { 
-  FileText, 
-  TrendingUp, 
-  Users, 
-  X, 
-  AlertTriangle, 
+import {
+  FileText,
+  TrendingUp,
+  Users,
+  X,
+  AlertTriangle,
   Rocket,
   Camera,
   Image as ImageIcon,
@@ -25,7 +25,11 @@ import {
   CheckCircle,
   XCircle,
   Heart,
-  Clock
+  Clock,
+  Play,
+  Share2,
+  ShieldCheck,
+  ExternalLink
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -39,15 +43,9 @@ function statusLabel(status: string): string {
     draft: 'Borrador',
     published: 'Publicada',
     in_review: 'En revisión',
-    pending_review: 'En aprobación',
-    approved: 'Aprobada',
-    funded: 'Financiada',
-    partially_funded: 'Parcialmente financiada',
-    completed: 'Completada',
-    failed: 'Fallida',
-    rejected: 'Rechazada',
-    cancelled: 'Cancelada',
-    suspended: 'Suspendida',
+    pending_review: 'En revisión',
+    approved: 'Aprobado',
+    rejected: 'Rechazado',
   };
   return map[status] ?? status;
 }
@@ -58,21 +56,16 @@ function investmentStatusLabel(status: string): string {
     pending: 'Pendiente',
     failed: 'Fallido',
     refunded: 'Reembolsado',
-    partially_refunded: 'Reemb. parcial',
   };
   return map[status] ?? status;
 }
 
-function formatShortDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('es', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return '';
-  }
+function formatShortDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('es', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 }
 
 interface RewardTier {
@@ -99,6 +92,7 @@ interface Props {
   // Entrepreneur actions
   onSubmitForReview?: () => void;
   onPublish?: () => void;
+  onEdit?: (campaign: EntrepreneurCampaign) => void;
   onUploadImage?: (campaignId: string, file: File) => Promise<boolean>;
   // Admin actions
   isAdmin?: boolean;
@@ -108,6 +102,16 @@ interface Props {
   actionLoading?: boolean;
   rewardTiers?: RewardTier[];
   entrepreneur?: EntrepreneurInfo;
+  // Additional Attributes for Expert View
+  media?: { url: string; type: string }[];
+  minInvestment?: number;
+  maxInvestment?: number;
+  subtitle?: string;
+  risksAndChallenges?: string;
+  videoUrl?: string;
+  tags?: string[];
+  socialLinks?: Record<string, string>;
+  auditScore?: number;
 }
 
 export function CampaignPreviewModal({
@@ -116,6 +120,7 @@ export function CampaignPreviewModal({
   onClose,
   onSubmitForReview,
   onPublish,
+  onEdit,
   onUploadImage,
   actionLoading,
   rewardTiers,
@@ -123,83 +128,89 @@ export function CampaignPreviewModal({
   isAdmin,
   onApprove,
   onReject,
+  media,
+  minInvestment,
+  maxInvestment,
+  subtitle,
+  risksAndChallenges,
+  videoUrl,
+  tags,
+  socialLinks,
+  auditScore,
 }: Props) {
   const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
   const [financeLoading, setFinanceLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [adminFeedback, setAdminFeedback] = useState('');
   const [history, setHistory] = useState<CampaignHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [adminFeedback, setAdminFeedback] = useState('');
+
+  const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
+  const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
+  const canPublish = campaign?.status === 'approved';
 
   useEffect(() => {
-    if (!open || !campaign) {
-      setFinance(null);
-      return;
-    }
-
-    let cancelled = false;
-    setFinance(null);
-    setFinanceLoading(true);
-
-    (async () => {
-      try {
-        const data = await getCampaignFinancialProgress(campaign.id);
-        if (!cancelled) setFinance(data);
-      } catch (err) {
-        if (!cancelled) setFinanceLoading(null as any);
-        console.error(err);
-      } finally {
-        if (!cancelled) setFinanceLoading(false);
+    if (open && campaign) {
+      loadHistory();
+      if (campaign.status === 'published' || campaign.status === 'funded' || isAdmin) {
+        loadFinance();
       }
-    })();
-
-    if (isAdmin) {
-      setHistoryLoading(true);
-      (async () => {
-        try {
-          const data = await getCampaignHistory(campaign.id);
-          if (!cancelled) setHistory(data);
-        } catch (err) {
-          console.error('Error fetching campaign history:', err);
-        } finally {
-          if (!cancelled) setHistoryLoading(false);
-        }
-      })();
+    } else {
+      setFinance(null);
+      setHistory([]);
+      setAdminFeedback('');
     }
+  }, [open, campaign]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [open, campaign?.id]);
+  const loadFinance = async () => {
+    if (!campaign) return;
+    try {
+      setFinanceLoading(true);
+      const data = isAdmin
+        ? await getAdminFinancialProgress(campaign.id)
+        : await getCampaignFinancialProgress(campaign.id);
+      setFinance(data);
+    } catch (err) {
+      console.error('Error loading finance:', err);
+    } finally {
+      setFinanceLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  if (!open || !campaign) return null;
-
-  const canSubmit = !isAdmin && campaign.status === 'draft';
-  const canPublish = !isAdmin && (campaign.status === 'draft' || campaign.status === 'approved');
+  const loadHistory = async () => {
+    if (!campaign) return;
+    try {
+      setHistoryLoading(true);
+      const data = isAdmin
+        ? await getAdminHistory(campaign.id)
+        : await getEntrepreneurHistory(campaign.id);
+      setHistory(data);
+    } catch (err) {
+      console.error('Error loading history:', err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const handleImageClick = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
-      if (file && onUploadImage) {
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file && campaign && onUploadImage) {
         setUploading(true);
-        await onUploadImage(campaign.id, file);
-        setUploading(false);
+        try {
+          await onUploadImage(campaign.id, file);
+        } finally {
+          setUploading(false);
+        }
       }
     };
     input.click();
   };
+
+  if (!open || !campaign) return null;
 
   const cur = finance?.currentAmount ?? campaign.currentAmount;
   const goal = finance?.goalAmount ?? campaign.goalAmount;
@@ -209,399 +220,480 @@ export function CampaignPreviewModal({
 
   const node = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-['Sora',sans-serif] animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-      <div className="absolute inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      
-      <div className="bg-white rounded-[32px] w-full max-w-[850px] max-h-[90vh] overflow-y-auto relative z-10 shadow-2xl animate-in zoom-in-95 duration-500 border border-white/20">
-        
-        {/* Header Section */}
-        <header className="sticky top-0 bg-white/90 backdrop-blur-md px-8 py-6 border-b border-emerald-50 flex justify-between items-center z-20">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase text-[#2e7d32] tracking-widest mb-1 leading-none">
-              {isAdmin ? 'Revisión Técnica de Administrador' : 'Visión de Análisis Técnico'}
-            </span>
-            <h2 id="preview-title" className="text-xl font-black text-[#1c2b1e] tracking-tight leading-none">
-              {campaign.title}
-            </h2>
-            <div className="flex items-center gap-3 mt-2">
-               <span className="text-[12px] font-bold text-slate-400">{campaign.categoryName || 'General'}</span>
-               <div className="w-1 h-1 rounded-full bg-slate-200"></div>
-               <span className="text-[10px] font-black uppercase tracking-widest text-[#00897b]">{statusLabel(campaign.status)}</span>
-               {campaign.location && (
-                 <>
-                   <div className="w-1 h-1 rounded-full bg-slate-200"></div>
-                   <div className="flex items-center gap-1 text-slate-400">
-                     <MapPin size={12} strokeWidth={2.5} />
-                     <span className="text-[11px] font-bold">{campaign.location}</span>
-                   </div>
-                 </>
-               )}
+      <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+
+      <div className="bg-[#f8fafc] rounded-[40px] w-full max-w-[1200px] max-h-[95vh] overflow-hidden relative z-10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-500 border border-white/20 flex flex-col">
+
+        {/* Top Navigation Bar */}
+        <header className="bg-white/80 backdrop-blur-xl px-10 py-6 border-b border-slate-200 flex justify-between items-center z-30">
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3 mb-1">
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                  ID: {campaign.id.split('-')[0]}
+                </span>
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">
+                  {isAdmin ? 'Módulo de Auditoría de Capital' : 'Revisión Técnica de Proyecto'}
+                </span>
+                {auditScore !== undefined && (
+                  <div className="flex items-center gap-1.5 ml-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                      Score: {auditScore}/100
+                    </span>
+                  </div>
+                )}
+              </div>
+              <h2 id="preview-title" className="text-2xl font-black text-[#1c2b1e] tracking-tight leading-none mb-2 max-w-xl truncate">
+                {campaign.title}
+              </h2>
+              {campaign.shortDescription && (
+                <p className="text-[14px] font-medium text-slate-500 line-clamp-1 max-w-2xl italic">
+                  {campaign.shortDescription}
+                </p>
+              )}
             </div>
           </div>
-          <button 
-            type="button" 
-            className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-[#2e7d32] transition-all active:scale-95 flex items-center justify-center border-none cursor-pointer" 
-            onClick={onClose}
-          >
-            <X size={24} strokeWidth={2.5} />
-          </button>
+
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end mr-2 md:mr-4">
+              <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</span>
+              <span className={`px-3 md:px-4 py-1 md:py-1.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest shadow-sm border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
+                  ? 'bg-amber-50 text-amber-600 border-amber-100'
+                  : campaign.status === 'approved' || campaign.status === 'published'
+                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                    : campaign.status === 'rejected'
+                      ? 'bg-red-50 text-red-600 border-red-100'
+                      : 'bg-slate-50 text-slate-500 border-slate-100'
+                }`}>
+                {statusLabel(campaign.status || 'draft')}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center border-none cursor-pointer group"
+              onClick={onClose}
+            >
+              <X size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform" />
+            </button>
+          </div>
         </header>
 
-        <div className="p-8 flex flex-col gap-10">
-          
-          {/* Campaign Cover Section */}
-          <div className="relative group h-[250px] rounded-[28px] overflow-hidden bg-slate-100 border border-emerald-50 shadow-inner">
-             {campaign.coverImageUrl ? (
-               <img 
-                 src={campaign.coverImageUrl} 
-                 alt="Portada de Campaña" 
-                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-               />
-             ) : (
-               <div className="w-full h-full bg-gradient-to-br from-slate-50 to-emerald-50/30 flex flex-col items-center justify-center text-slate-300">
-                  <ImageIcon size={64} strokeWidth={1} className="mb-2" />
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Sin imagen de portada</span>
-               </div>
-             )}
-             
-              {/* Type Badge Overlay */}
-              <div className="absolute top-4 left-4 flex gap-2">
-                <span 
-                  className="px-3 py-1.5 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg flex items-center gap-1.5 backdrop-blur-sm"
-                  style={{ backgroundColor: (CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation).color }}
-                >
-                  {(() => {
-                    const info = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
-                    const Icon = info.icon;
-                    return (
-                      <>
-                        <Icon size={12} strokeWidth={3} />
-                        {info.label}
-                      </>
-                    );
-                  })()}
-                </span>
-              </div>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row">
 
-             {onUploadImage && !isAdmin && (
-               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                  <button 
-                    onClick={handleImageClick}
-                    disabled={uploading}
-                    className="bg-white/90 hover:bg-white text-[#1c2b1e] px-6 py-3 rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-xl flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50 border-none cursor-pointer"
+          {/* Left Column: Detailed Content */}
+          <main className="flex-1 p-10 lg:p-12 space-y-12">
+
+            {/* Visual Assets Section */}
+            <section className="space-y-6">
+              <div className="relative group h-[400px] rounded-[32px] overflow-hidden bg-slate-900 border border-slate-200 shadow-2xl">
+                {campaign.coverImageUrl ? (
+                  <img
+                    src={campaign.coverImageUrl}
+                    alt="Cover"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center text-slate-600">
+                    <ImageIcon size={80} strokeWidth={1} className="mb-4 opacity-20" />
+                    <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-40">Digital Asset Missing</span>
+                  </div>
+                )}
+
+                {/* Type & Category Overlays */}
+                <div className="absolute top-6 left-6 flex flex-wrap gap-3">
+                  <span className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2">
+                    <Gem size={14} className="text-amber-400" />
+                    {campaign.categoryName || 'General'}
+                  </span>
+                  <span
+                    className="px-4 py-2 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2 backdrop-blur-md border border-white/20"
+                    style={{ backgroundColor: `${(CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation).color}CC` }}
                   >
-                    {uploading ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <Camera size={18} />
-                    )}
-                    {campaign.coverImageUrl ? 'Cambiar Imagen' : 'Subir Portada'}
-                  </button>
-               </div>
-             )}
-          </div>
-          
-          {/* Metrics Spotlight */}
-          <div className="bg-gradient-to-br from-[#2e7d32] to-[#00897b] rounded-[28px] p-8 text-white flex flex-col md:flex-row items-center gap-8 shadow-xl shadow-emerald-500/20">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 shadow-inner">
-               <CircularFundingRing currentAmount={cur} goalAmount={goal} />
-            </div>
-            
-            <div className="flex flex-col md:flex-row flex-1 w-full justify-around gap-8 md:gap-4">
-              <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-100/60 mb-2 leading-none">Meta del Proyecto</span>
-                <span className="text-3xl font-black tracking-tight">{formatCampaignCurrency(goal, currency)}</span>
-              </div>
-              
-              <div className="w-px h-12 bg-white/20 hidden md:block self-center"></div>
-              
-              <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-100/60 mb-2 leading-none">Cierre de Ronda</span>
-                <div className="flex items-center gap-2 text-xl font-bold tracking-tight">
-                   <Calendar size={18} className="text-emerald-400" />
-                   <span>{campaign.endDate ? formatShortDate(campaign.endDate) : 'Sin fecha'}</span>
+                    {(() => {
+                      const info = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
+                      const Icon = info.icon;
+                      return <><Icon size={14} strokeWidth={3} /> {info.label}</>;
+                    })()}
+                  </span>
                 </div>
+
+                {videoUrl && (
+                  <div className="absolute top-6 right-6">
+                    <a href={videoUrl} target="_blank" rel="noreferrer" className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-2xl flex items-center justify-center shadow-xl transition-all active:scale-95">
+                      <Play size={20} fill="currentColor" />
+                    </a>
+                  </div>
+                )}
+
+                {onUploadImage && !isAdmin && (
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
+                    <button
+                      onClick={handleImageClick}
+                      disabled={uploading}
+                      className="bg-white text-[#1c2b1e] px-8 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest shadow-2xl flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50 border-none cursor-pointer"
+                    >
+                      {uploading ? <Loader2 className="animate-spin" /> : <Camera size={18} />}
+                      Actualizar Portada
+                    </button>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Project Specifications */}
+            <section className="space-y-8">
+              <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
+                <FileText size={20} strokeWidth={2.5} />
+                <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Especificaciones Técnicas</h3>
               </div>
 
-              {campaign.startDate && (
-                <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-emerald-100/60 mb-2 leading-none">Fecha Inicio</span>
-                  <div className="flex items-center gap-2 text-xl font-bold tracking-tight">
-                    <Clock size={18} className="text-emerald-400" />
-                    <span>{formatShortDate(campaign.startDate)}</span>
-                  </div>
-                </div>
-              )}
+              <div className="space-y-8">
+                {subtitle && (
+                  <p className="text-xl font-black text-slate-400 tracking-tight leading-relaxed italic border-l-4 border-indigo-100 pl-6">
+                    {subtitle}
+                  </p>
+                )}
 
-              {investorsTotal > 0 && (
-                <>
-                  <div className="w-px h-12 bg-white/20 hidden md:block self-center"></div>
-                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-100/60 mb-2 leading-none">Participación</span>
-                    <div className="flex items-center gap-2 text-xl font-bold tracking-tight">
-                       <Users size={18} className="text-emerald-400" />
-                       <span>{investorsTotal} Inversores</span>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 text-[#1c2b1e]">
-            {/* Left Column: Description & Tiers */}
-            <div className="flex flex-col gap-10">
-              <section className="flex flex-col gap-6">
-                <div className="bg-emerald-50/20 p-6 rounded-[24px] border border-emerald-50">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest text-[#2e7d32] mb-3 flex items-center gap-2">
-                    <AlertTriangle size={14} />
-                    Resumen Ejecutivo
-                  </h3>
-                  <p className="text-[15px] text-slate-600 font-medium leading-relaxed italic">
-                    {campaign.shortDescription?.trim()
-                      ? campaign.shortDescription
-                      : 'Sin descripción corta disponible.'}
+                <div className="prose prose-slate max-w-none">
+                  <p className="text-[16px] text-slate-600 leading-[1.8] font-medium whitespace-pre-wrap">
+                    {campaign.description || 'La documentación descriptiva aún no ha sido finalizada por el emprendedor.'}
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                   <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
-                    <FileText size={18} className="text-[#2e7d32]" />
-                    Historia Completa y Objetivos
-                  </h3>
-                  <div className="text-[14px] text-slate-600 leading-[1.8] whitespace-pre-wrap">
-                    {campaign.description || 'No se ha proporcionado una descripción detallada todavía.'}
-                  </div>
-                </div>
-              </section>
-
-              {rewardTiers && rewardTiers.length > 0 && (
-                <section className="flex flex-col gap-4">
-                  <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
-                    <Gem size={18} className="text-[#2e7d32]" />
-                    Niveles de Recompensa
-                  </h3>
-                  <div className="grid gap-3">
-                    {rewardTiers.map((tier, idx) => (
-                      <div key={idx} className="p-4 bg-white border border-emerald-50 rounded-2xl flex justify-between items-center shadow-sm hover:shadow-md transition-all">
-                        <div>
-                          <p className="font-black text-[14px] text-slate-900 leading-tight">{tier.title}</p>
-                          <p className="text-[11px] text-slate-400 font-medium mt-0.5">{tier.description}</p>
-                        </div>
-                        <span className="px-3 py-1 bg-emerald-50 text-[#2e7d32] font-black rounded-lg text-[13px]">
-                           {formatCampaignCurrency(tier.amount, currency)}
-                        </span>
-                      </div>
+                {tags && tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-4">
+                    {tags.map((tag, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                        #{tag}
+                      </span>
                     ))}
                   </div>
-                </section>
-              )}
-            </div>
+                )}
+              </div>
 
-            {/* Right Column: Entrepreneur & Investors */}
-            <div className="flex flex-col gap-10">
-              {entrepreneur && (
-                <section className="flex flex-col gap-4">
-                  <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
-                    <User size={18} className="text-[#2e7d32]" />
-                    Emprendedor a Cargo
-                  </h3>
-                  <div className="p-6 bg-white border border-emerald-50 rounded-[32px] space-y-4 shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#2e7d32] to-[#aed581] p-0.5 shadow-lg">
-                        <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center text-slate-200 overflow-hidden">
-                           {entrepreneur.avatar ? (
-                             <img src={entrepreneur.avatar} className="w-full h-full object-cover" alt="Profile" />
-                           ) : (
-                             <User size={28} />
-                           )}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-[16px] font-black text-slate-900 leading-tight">{entrepreneur.firstName} {entrepreneur.lastName}</p>
-                        <p className="text-[11px] font-bold text-[#2e7d32] mt-1 flex items-center gap-1">
-                          <Mail size={12} />
-                          {entrepreneur.email}
-                        </p>
-                      </div>
-                    </div>
-                    {entrepreneur.bio && (
-                      <p className="text-[12px] text-slate-500 font-medium italic border-l-2 border-emerald-100 pl-4 py-1 leading-relaxed">
-                        "{entrepreneur.bio}"
-                      </p>
-                    )}
-                    {entrepreneur.linkedin && (
-                      <div className="pt-1">
-                        <a href={entrepreneur.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-300 hover:text-[#2e7d32] rounded-lg transition-all shadow-sm">
-                          <Globe size={16} />
-                        </a>
-                      </div>
-                    )}
+              {risksAndChallenges && (
+                <div className="bg-amber-50/50 border border-amber-100 p-8 rounded-[32px] space-y-4 shadow-sm">
+                  <div className="flex items-center gap-3 text-amber-700">
+                    <AlertTriangle size={20} strokeWidth={2.5} />
+                    <h4 className="text-[11px] font-black uppercase tracking-widest">Riesgos y Mitigación de Pérdida</h4>
                   </div>
-                </section>
+                  <p className="text-[14px] text-amber-900/70 font-medium italic leading-relaxed">
+                    "{risksAndChallenges}"
+                  </p>
+                </div>
+              )}
+            </section>
+
+            {/* Financial Product Structure (Tiers) */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div className="flex items-center gap-3 text-[#2e7d32]">
+                  <TrendingUp size={20} strokeWidth={2.5} />
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Estructura de Captación</h3>
+                </div>
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                  {rewardTiers?.length || 0} Niveles Disponibles
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {rewardTiers?.map((tier, idx) => (
+                  <div key={idx} className="p-6 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                    <div className="flex justify-between items-start">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center group-hover:bg-[#2e7d32] group-hover:text-white transition-colors">
+                        <Rocket size={20} />
+                      </div>
+                      <span className="text-lg font-black text-[#1c2b1e]">
+                        {formatCampaignCurrency(tier.amount, currency)}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-black text-[15px] text-slate-900 mb-1">{tier.title}</h4>
+                      <p className="text-[12px] text-slate-500 font-medium leading-relaxed">{tier.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Social & Web Presence */}
+            {socialLinks && Object.keys(socialLinks).length > 0 && (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3 text-slate-900 border-b border-slate-200 pb-4">
+                  <Globe size={20} strokeWidth={2.5} />
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Presencia Digital</h3>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {Object.entries(socialLinks).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url as string}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[12px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm flex items-center gap-3 no-underline"
+                    >
+                      <span className="opacity-50">{platform}</span>
+                      <ExternalLink size={14} />
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+          </main>
+
+          {/* Right Column: Expert Analysis & Actions */}
+          <aside className="w-full lg:w-[420px] bg-white border-l border-slate-200 flex flex-col z-20 overflow-y-auto">
+
+            {/* Funding Radar Section */}
+            <section className="p-10 border-b border-slate-100 space-y-8 bg-slate-50/50">
+              <div className="flex justify-between items-center bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm">
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Estado de Campaña</span>
+                <span className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
+                    ? 'bg-amber-50 text-amber-600 border-amber-100'
+                    : campaign.status === 'approved' || campaign.status === 'published'
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                      : campaign.status === 'rejected'
+                        ? 'bg-red-50 text-red-600 border-red-100'
+                        : 'bg-slate-50 text-slate-500 border-slate-100'
+                  }`}>
+                  {statusLabel(campaign.status)}
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
+                <CircularFundingRing currentAmount={cur} goalAmount={goal} size={180} strokeWidth={12} />
+                <div className="mt-6 text-center">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block mb-1">Recaudado</span>
+                  <span className="text-4xl font-black text-[#1c2b1e] tracking-tight">
+                    {formatCampaignCurrency(cur, currency)}
+                  </span>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-[13px] font-black text-emerald-600">
+                      {Math.round((cur / goal) * 100)}% Completado
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200/60">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Mínima</span>
+                  <p className="text-[16px] font-black text-slate-800">{formatCampaignCurrency(minInvestment || 1, currency)}</p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Máxima</span>
+                  <p className="text-[16px] font-black text-slate-800">{maxInvestment ? formatCampaignCurrency(maxInvestment, currency) : 'Sin límite'}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-[12px]">
+                  <span className="font-bold text-slate-500 flex items-center gap-2"><MapPin size={14} /> Ubicación</span>
+                  <span className="font-black text-slate-900">{campaign.location || 'Global'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[12px]">
+                  <span className="font-bold text-slate-500 flex items-center gap-2"><Calendar size={14} /> Fecha Inicio</span>
+                  <span className="font-black text-slate-900">{campaign.startDate ? formatShortDate(campaign.startDate) : 'No definida'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[12px]">
+                  <span className="font-bold text-slate-500 flex items-center gap-2"><Clock size={14} /> Fecha Límite</span>
+                  <span className="font-black text-slate-900">{campaign.endDate ? formatShortDate(campaign.endDate) : 'Indefinida'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[12px]">
+                  <span className="font-bold text-slate-500 flex items-center gap-2"><Users size={14} /> Inversores Activos</span>
+                  <span className="font-black text-slate-900">{investorsTotal} Participantes</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Entrepreneur Intelligence Section */}
+            <section className="p-10 border-b border-slate-100 space-y-6">
+              <div className="flex items-center gap-3 text-slate-900">
+                <User size={18} strokeWidth={2.5} />
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1c2b1e]">Auditoría del Emprendedor</h3>
+              </div>
+
+              {entrepreneur ? (
+                <>
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
+                      {entrepreneur.avatar ? (
+                        <img src={entrepreneur.avatar} className="w-full h-full object-cover" alt="Proponent" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={24} /></div>
+                      )}
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-[15px] font-black text-slate-900 truncate leading-none mb-1">{entrepreneur.firstName} {entrepreneur.lastName}</p>
+                      <p className="text-[11px] font-bold text-indigo-600 truncate flex items-center gap-1">
+                        <Mail size={10} /> {entrepreneur.email}
+                      </p>
+                    </div>
+                  </div>
+                  {entrepreneur.bio && (
+                    <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic border-l-2 border-slate-100 pl-4 py-1">
+                      "{entrepreneur.bio}"
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
+                  <AlertTriangle className="text-red-500" size={18} />
+                  <p className="text-[11px] font-bold text-red-700 leading-tight">Error de integridad: Emprendedor no identificado en el sistema.</p>
+                </div>
               )}
 
-              <section className="flex flex-col gap-4">
-                <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
-                   <TrendingUp size={18} className="text-[#2e7d32]" />
-                   Inversores Recientes
-                </h3>
-                <div className="flex flex-col gap-2 min-h-[100px]">
-                  {financeLoading ? (
-                    <div className="py-6 flex flex-col items-center justify-center gap-2">
-                       <Loader2 className="animate-spin text-emerald-200" size={24} />
-                    </div>
-                  ) : recent.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                       <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Sin aportes registrados</p>
-                    </div>
-                  ) : (
-                    recent.map((inv) => (
-                      <div key={inv.id} className="flex items-center justify-between p-3 bg-white border border-emerald-50 rounded-xl hover:shadow-sm transition-all">
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-black text-slate-800 leading-tight">
-                            {inv.isAnonymous || !inv.investorDisplayName?.trim() ? 'Inversor Confidencial' : inv.investorDisplayName}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                             {formatShortDate(inv.createdAt)}
-                          </span>
+              <div className="flex flex-col gap-3">
+                {entrepreneur?.website && (
+                  <a href={entrepreneur.website} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group">
+                    <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">Portal Corporativo</span>
+                    <Globe size={16} className="text-slate-300 group-hover:text-indigo-500" />
+                  </a>
+                )}
+                {socialLinks && Object.entries(socialLinks).map(([platform, url]) => (
+                  <a key={platform} href={url as string} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 transition-all group capitalize">
+                    <span className="text-[12px] font-black text-slate-400 group-hover:text-indigo-600">{platform}</span>
+                    <Share2 size={16} className="text-slate-300 group-hover:text-indigo-500" />
+                  </a>
+                ))}
+              </div>
+            </section>
+
+            {/* Audit Logs Section (Visible para ambos) */}
+            {(history.length > 0 || historyLoading) && (
+              <section className="p-10 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-[#2e7d32]">
+                    <Clock size={18} strokeWidth={2.5} />
+                    <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Auditoría</h3>
+                  </div>
+                </div>
+
+                <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                  {historyLoading ? (
+                    <div className="flex justify-center py-4"><Loader2 className="animate-spin text-slate-200" /></div>
+                  ) : history.length > 0 ? (
+                    history.map((item, idx) => (
+                      <div key={idx} className="relative pl-8">
+                        <div className="absolute left-[3px] top-1 w-2.5 h-2.5 rounded-full bg-white border-2 border-indigo-400 shadow-sm"></div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[11px] font-black text-slate-900">
+                              {statusLabel(item.to_status)}
+                            </span>
+                            <span className="text-[9px] font-bold text-slate-400">{formatShortDate(item.created_at)}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic line-clamp-2">
+                            "{item.feedback || 'Sin notas.'}"
+                          </p>
                         </div>
-                        <span className="text-[14px] font-black text-[#2e7d32] tracking-tight">
-                           {formatCampaignCurrency(inv.amount, inv.currency || currency)}
-                        </span>
                       </div>
                     ))
+                  ) : (
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center pl-4">Nueva Propuesta Técnica</p>
                   )}
                 </div>
               </section>
+            )}
 
-              {isAdmin && (
-                <section className="flex flex-col gap-4">
-                  <h3 className="text-[13px] font-black border-b border-emerald-50 pb-3 uppercase tracking-widest flex items-center gap-2">
-                     <Clock size={18} className="text-indigo-500" />
-                     Historial de Auditoría
-                  </h3>
-                  <div className="flex flex-col gap-3 min-h-[100px]">
-                    {historyLoading ? (
-                      <div className="py-6 flex flex-col items-center justify-center gap-2">
-                         <Loader2 className="animate-spin text-indigo-200" size={24} />
+            {/* Recent Capital Inflow (Inversores) */}
+            {recent && recent.length > 0 && (
+              <section className="p-10 border-b border-slate-100 space-y-6">
+                <div className="flex items-center gap-3 text-[#1c2b1e]">
+                  <TrendingUp size={18} strokeWidth={2.5} />
+                  <h3 className="text-[11px] font-black uppercase tracking-widest">Flujo de Capital Reciente</h3>
+                </div>
+                <div className="space-y-4">
+                  {recent.map((inv, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px]">
+                          {inv.investor_name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-[12px] font-bold text-slate-700">{inv.investor_name}</span>
                       </div>
-                    ) : history.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                         <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Sin historial previo</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {history.map((item) => (
-                          <div key={item.id} className="relative pl-6 border-l-2 border-indigo-50 pb-1">
-                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-indigo-400"></div>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[12px] font-black text-slate-800">
-                                  {statusLabel(item.from_status || 'draft')} → <span className="text-indigo-600">{statusLabel(item.to_status)}</span>
-                                </span>
-                                <span className="text-[10px] font-bold text-slate-400">
-                                  {formatShortDate(item.created_at)}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                                {item.feedback || 'Sin comentarios registrados.'}
-                              </p>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                                  <User size={10} className="text-slate-400" />
-                                </div>
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">
-                                  {item.changed_by_name}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </section>
-              )}
-            </div>
-          </div>
+                      <span className="text-[12px] font-black text-emerald-600">+{formatCampaignCurrency(inv.amount, currency)}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </aside>
         </div>
 
-        {/* Footer Actions */}
-        {isAdmin ? (
-          <footer className="sticky bottom-0 bg-white/90 backdrop-blur-md px-8 py-6 border-t border-emerald-50 flex flex-col gap-6 z-20">
-             <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Feedback de Revisión Técnica</label>
+        {/* Action Panel: Compact Sticky Footer */}
+        <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-slate-200 px-8 py-5 z-30 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)]">
+          {isAdmin ? (
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1 w-full relative">
                 <textarea
                   value={adminFeedback}
                   onChange={(e) => setAdminFeedback(e.target.value)}
-                  placeholder="Instrucciones para el emprendedor o motivos del rechazo..."
-                  className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[24px] text-[#1c2b1e] placeholder:text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-[13px] font-medium h-24 shadow-sm"
+                  placeholder="El feedback es obligatorio para rechazar..."
+                  className={`w-full pl-5 pr-12 py-3 bg-slate-50 border ${!adminFeedback.trim() ? 'border-amber-200 focus:border-amber-400' : 'border-slate-200 focus:border-indigo-500'} rounded-2xl text-[13px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all h-14 resize-none shadow-inner`}
                 />
-             </div>
-             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-3 text-slate-400">
-                   <AlertTriangle size={18} />
-                   <span className="text-[11px] font-bold leading-tight">La decisión notificará automáticamente al emprendedor.</span>
+                <div className={`absolute right-4 top-1/2 -translate-y-1/2 ${!adminFeedback.trim() ? 'text-amber-400' : 'text-slate-300'}`}>
+                  <FileText size={18} />
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
-                    <button
-                      type="button"
-                      className="flex-1 md:flex-none border-none bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-black px-8 py-4 rounded-2xl transition-all active:scale-95 text-[13px] cursor-pointer flex items-center justify-center gap-2"
-                      disabled={actionLoading}
-                      onClick={() => onReject?.(adminFeedback)}
-                    >
-                      <XCircle size={18} strokeWidth={2.5} />
-                      Rechazar
-                    </button>
-                    <button
-                      type="button"
-                      className="flex-1 md:flex-none border-none bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-xl shadow-emerald-500/20 text-[13px] cursor-pointer flex items-center justify-center gap-2 min-w-[180px]"
-                      disabled={actionLoading}
-                      onClick={() => onApprove?.()}
-                    >
-                      {actionLoading ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <>
-                          <CheckCircle size={18} strokeWidth={2.5} />
-                          Aprobar Proyecto
-                        </>
-                      )}
-                    </button>
-                </div>
-             </div>
-          </footer>
-        ) : (canSubmit || canPublish) ? (
-          <footer className="footer-panel bg-emerald-50/30 px-8 py-6 border-t border-emerald-50 flex flex-col md:flex-row justify-end items-center gap-4 z-20">
-            <div className="flex-1 hidden md:block text-[11px] font-medium text-[#1c2b1e]/50 leading-tight">
-               Al lanzar la campaña, esta entrará en fase de recaudación activa.<br /> Certifica que la documentación técnica está completa.
+              </div>
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={() => onReject?.(adminFeedback)}
+                  disabled={actionLoading || !adminFeedback.trim()}
+                  className="flex-1 md:px-6 h-14 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed border-none cursor-pointer flex items-center justify-center gap-2 min-w-[140px]"
+                  title={!adminFeedback.trim() ? "Debe escribir un motivo para rechazar" : ""}
+                >
+                  <XCircle size={18} /> Rechazar
+                </button>
+                <button
+                  onClick={() => onApprove?.()}
+                  disabled={actionLoading}
+                  className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
+                >
+                  {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Aprobar</>}
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3 w-full md:w-auto">
-               {canSubmit && (
-                 <button
-                   type="button"
-                   className="flex-1 md:flex-none bg-[#f9a825] hover:bg-amber-600 text-white font-black px-8 py-3.5 rounded-xl border-none transition-all active:scale-95 shadow-lg shadow-amber-500/20 text-[14px] cursor-pointer flex items-center justify-center gap-2"
-                   disabled={actionLoading}
-                   onClick={onSubmitForReview}
-                 >
-                   <AlertTriangle size={18} strokeWidth={2.5} />
-                   Enviar a Revisión
-                 </button>
-               )}
-               {canPublish && (
-                 <button
-                   type="button"
-                   className="flex-1 md:flex-none bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-10 py-3.5 rounded-xl border-none transition-all active:scale-95 shadow-lg shadow-emerald-500/20 text-[14px] cursor-pointer flex items-center justify-center gap-2"
-                   disabled={actionLoading}
-                   onClick={onPublish}
-                 >
-                   <Rocket size={18} strokeWidth={2.5} />
-                   Lanzar Campaña
-                 </button>
-               )}
+          ) : (canSubmit || canPublish) ? (
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="hidden lg:flex items-center gap-3 text-slate-400">
+                <ShieldCheck size={18} />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Certificación de Integridad Auditable</span>
+              </div>
+              <div className="flex gap-3 w-full md:w-auto">
+                {canEdit && (
+                  <button
+                    onClick={() => onEdit?.(campaign)}
+                    disabled={actionLoading}
+                    className="flex-1 md:w-48 h-14 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <FileText size={16} strokeWidth={2.5} /> Editar
+                  </button>
+                )}
+                {canSubmit && (
+                  <button
+                    onClick={onSubmitForReview}
+                    disabled={actionLoading}
+                    className="flex-1 md:w-56 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <AlertTriangle size={16} strokeWidth={2.5} /> Enviar Auditoría
+                  </button>
+                )}
+                {canPublish && (
+                  <button
+                    onClick={onPublish}
+                    disabled={actionLoading}
+                    className="flex-1 md:w-56 h-14 bg-[#2e7d32] hover:bg-[#1c2b1e] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Rocket size={16} strokeWidth={2.5} /> Lanzar
+                  </button>
+                )}
+              </div>
             </div>
-          </footer>
-        ) : null}
+          ) : null}
+        </footer>
       </div>
     </div>
   );

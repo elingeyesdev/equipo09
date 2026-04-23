@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { AdminRepository } from '../repositories/admin.repository';
 import { UserRepository } from '../../users/repositories';
+import { EntrepreneurCampaignRepository } from '../../entrepreneur/repositories';
 import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class AdminService {
   constructor(
     private readonly adminRepo: AdminRepository,
     private readonly userRepo: UserRepository,
+    private readonly campaignRepo: EntrepreneurCampaignRepository,
   ) {}
 
   async getDashboardStats() {
@@ -35,6 +37,9 @@ export class AdminService {
   }
 
   async updateCampaignStatus(campaignId: string, status: string, reviewerId: string, feedback?: string) {
+    if (status === 'rejected' && (!feedback || feedback.trim().length < 3)) {
+      throw new BadRequestException('Debe proporcionar un feedback válido (mínimo 3 caracteres) para rechazar la campaña.');
+    }
     const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, reviewerId, feedback);
     if (!updated) {
       throw new NotFoundException('Campaña no encontrada');
@@ -44,6 +49,10 @@ export class AdminService {
 
   async getCampaignHistory(campaignId: string) {
     return this.adminRepo.getCampaignHistory(campaignId);
+  }
+
+  async getCampaignFinancialProgress(campaignId: string) {
+    return this.campaignRepo.getFinancialProgressAdmin(campaignId);
   }
 
   async createAdmin(email: string, passwordString: string) {

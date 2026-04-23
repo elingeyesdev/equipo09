@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   getMyCampaigns,
   createCampaign,
+  updateCampaign as updateCampaignApi,
   submitCampaignForReview,
   publishCampaign as publishCampaignApi,
   uploadCampaignImage as uploadCampaignImageApi,
@@ -111,6 +112,29 @@ export function useCampaigns() {
       setAdding(false);
     }
   };
+  
+  const updateCampaign = async (campaignId: string, dto: Partial<CreateCampaignDto>, coverFile?: File): Promise<boolean> => {
+    try {
+      setAdding(true);
+      setAddError(null);
+      await updateCampaignApi(campaignId, dto);
+      
+      if (coverFile) {
+        await uploadCampaignImageApi(campaignId, coverFile);
+      }
+
+      // Actualizar lista local
+      const paginated = await getMyCampaigns(queryRef.current);
+      setCampaigns(paginated.data);
+      return true;
+    } catch (err: unknown) {
+      console.error('Error updating campaign:', err);
+      setAddError(getApiErrorMessage(err, 'Error al actualizar la campaña'));
+      return false;
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const submitForReview = async (campaignId: string): Promise<boolean> => {
     try {
@@ -179,6 +203,7 @@ export function useCampaigns() {
     addError,
     fetchCampaigns,
     addCampaign,
+    updateCampaign,
     submitForReview,
     publishCampaign,
     uploadCampaignImage,

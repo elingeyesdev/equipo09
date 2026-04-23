@@ -20,13 +20,14 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
+  initialData?: EntrepreneurCampaign | null;
   onSuccess: (dto: CreateCampaignDto, coverFile?: File) => Promise<boolean>;
   onCancel: () => void;
   saving: boolean;
   saveError: string | null;
 }
 
-export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) {
+export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveError }: Props) {
   const {
     register,
     handleSubmit,
@@ -34,20 +35,20 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: '',
-      description: '',
-      shortDescription: '',
-      goalAmount: 1000,
-      campaignType: 'reward',
-      categoryId: '',
-      endDate: '',
+      title: initialData?.title || '',
+      description: initialData?.description || '',
+      shortDescription: initialData?.shortDescription || '',
+      goalAmount: initialData?.goalAmount || 1000,
+      campaignType: initialData?.campaignType || 'reward',
+      categoryId: initialData?.categoryId || '',
+      endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
     },
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(initialData?.coverImageUrl || null);
 
   useEffect(() => {
     let mounted = true;
@@ -98,8 +99,14 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
   return (
     <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-emerald-900/5 border border-emerald-50 animate-in fade-in zoom-in-95 duration-500 font-['Sora',sans-serif]">
       <div className="mb-10">
-        <h2 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-2 leading-none">Lanzar nueva campaña</h2>
-        <p className="text-[14px] font-medium text-slate-400">Completa los datos esenciales para presentar tu idea al mundo con solidez financiera.</p>
+        <h2 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-2 leading-none">
+          {initialData ? 'Actualizar campaña' : 'Lanzar nueva campaña'}
+        </h2>
+        <p className="text-[14px] font-medium text-slate-400">
+          {initialData 
+            ? 'Ajusta los detalles de tu propuesta para cumplir con los requisitos de auditoría.' 
+            : 'Completa los datos esenciales para presentar tu idea al mundo con solidez financiera.'}
+        </p>
       </div>
 
       {saveError && (
@@ -255,12 +262,12 @@ export function CampaignForm({ onSuccess, onCancel, saving, saveError }: Props) 
             {saving ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Publicando...
+                {initialData ? 'Guardando...' : 'Publicando...'}
               </>
             ) : (
               <>
                 <Save size={18} strokeWidth={2.5} />
-                Guardar Borrador
+                {initialData ? 'Actualizar Datos' : 'Guardar Borrador'}
               </>
             )}
           </button>

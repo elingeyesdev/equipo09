@@ -105,12 +105,13 @@ export async function getPendingCampaigns(params: {
       category_name: c.category_name || 'Sin categoría',
       goal_amount: c.goal_amount.toString(),
       created_at: c.created_at,
+      audit_score: c.audit_score,
     })),
     total: data.data.meta.totalItems,
   };
 }
 
-export async function getPendingCampaignById(id: string): Promise<PendingCampaignDetail> {
+export async function getCampaignDetail(id: string): Promise<PendingCampaignDetail> {
   try {
     const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}`);
     const c = data.data;
@@ -132,7 +133,11 @@ export async function getPendingCampaignById(id: string): Promise<PendingCampaig
     return {
       id: c.id || id,
       title: c.title || 'Campaña sin título',
+      slug: c.slug || c.id,
+      status: c.status || 'pending_review',
       type: (c.campaign_type || c.campaignType || 'donation') as 'reward' | 'donation',
+      currency: c.currency || 'USD',
+      audit_score: c.audit_score,
       main_image_url: mainImageUrl,
       short_description: c.short_description || c.shortDescription || '',
       description: c.description || '',
@@ -157,6 +162,13 @@ export async function getPendingCampaignById(id: string): Promise<PendingCampaig
       entrepreneur_linkedin: c.entrepreneur_linkedin || c.metadata?.social_links?.linkedin,
       entrepreneur_website: c.entrepreneur_website || c.metadata?.social_links?.website,
       media: c.media || [],
+      min_investment: parseFloat(c.min_investment || 0),
+      max_investment: c.max_investment ? parseFloat(c.max_investment) : undefined,
+      subtitle: c.subtitle || '',
+      risks_and_challenges: c.risks_and_challenges || '',
+      video_url: c.video_url || '',
+      tags: c.tags || [],
+      social_links: c.social_links || {},
     };
   } catch (error) {
     console.error('Error in getPendingCampaignById:', error);
@@ -165,5 +177,10 @@ export async function getPendingCampaignById(id: string): Promise<PendingCampaig
 }
 export async function getCampaignHistory(id: string): Promise<CampaignHistoryItem[]> {
   const { data } = await api.get<ApiSuccessResponse<CampaignHistoryItem[]>>(`/admin/campaigns/${id}/history`);
+  return data.data;
+}
+
+export async function getCampaignFinancialProgress(id: string): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/financial-progress`);
   return data.data;
 }

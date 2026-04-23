@@ -315,6 +315,47 @@ export class EntrepreneurService {
   }
 
   /**
+   * Actualiza una campaña existente.
+   * Regla: Solo se permite editar si está en 'draft' o 'rejected'.
+   */
+  async updateCampaign(
+    userId: string,
+    campaignId: string,
+    dto: Partial<CreateCampaignDto>,
+  ): Promise<EntrepreneurCampaign> {
+    await this.ensureEntrepreneurProfile(userId);
+    
+    const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+    if (!campaign) {
+      throw new NotFoundException('Campaña', campaignId);
+    }
+
+    if (campaign.status !== 'draft' && campaign.status !== 'rejected') {
+      throw new BadRequestException(
+        `No se puede editar una campaña en estado ${campaign.status}. Debe estar en borrador o rechazada.`,
+      );
+    }
+
+    const updated = await this.campaignRepo.update(campaignId, userId, dto);
+    if (!updated) {
+      throw new NotFoundException('Campaña', campaignId);
+    }
+
+    return updated;
+  }
+
+  async getCampaignHistory(userId: string, campaignId: string) {
+    const campaign = await this.campaignRepo.findOneByCreatorId(
+      campaignId,
+      userId,
+    );
+    if (!campaign) {
+      throw new NotFoundException('Campaña', campaignId);
+    }
+    return this.campaignRepo.getHistory(campaignId);
+  }
+
+  /**
    * Indica si el perfil cumple los requisitos para crear campañas (sin lanzar).
    */
   async getCampaignCreationReadiness(

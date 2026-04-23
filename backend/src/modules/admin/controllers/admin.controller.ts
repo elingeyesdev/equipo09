@@ -62,6 +62,14 @@ export class AdminController {
     return new ApiSuccessResponse(history, 'Historial de campaña obtenido');
   }
 
+  @Get('campaigns/:id/financial-progress')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener progreso financiero detallado de una campaña (Administración)' })
+  async getCampaignFinancialProgress(@Param('id') id: string) {
+    const progress = await this.adminService.getCampaignFinancialProgress(id);
+    return new ApiSuccessResponse(progress, 'Progreso financiero obtenido');
+  }
+
   @Patch('campaigns/:id/status')
   @Roles('admin', 'super_admin')
   @ApiOperation({ summary: 'Aprobar o rechazar campañas con feedback' })

@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   ShieldAlert
 } from 'lucide-react';
-import { getPendingCampaigns, updateCampaignStatus, getPendingCampaignById } from '../../api/admin.api';
+import { getPendingCampaigns, updateCampaignStatus, getCampaignDetail } from '../../api/admin.api';
 import type { PendingCampaign, PendingCampaignDetail } from '../../types/admin.types';
 import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
 
@@ -68,7 +68,7 @@ export const CampaignReviewPage: React.FC = () => {
     setSelectedCampaignId(id);
     setLoading(true);
     try {
-      const detail = await getPendingCampaignById(id);
+      const detail = await getCampaignDetail(id);
       setSelectedCampaignDetail(detail);
       setIsModalOpen(true);
     } catch (err) {
@@ -232,69 +232,87 @@ export const CampaignReviewPage: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-emerald-50 bg-slate-50/50">
-                    <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">Campaña</th>
-                    <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">Emprendedor</th>
-                    <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
-                    <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">Meta</th>
-                    <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">Acción</th>
+                  <tr className="border-b border-slate-200 bg-white">
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Perfil Corporativo</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Emprendedor</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Estructura</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Meta de Capital</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Score</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Acciones de Auditoría</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-emerald-50">
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {campaigns.map((campaign) => (
-                    <tr key={campaign.id} className="hover:bg-emerald-50/30 transition-colors group">
-                      <td className="px-8 py-6">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[#1c2b1e] font-black group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tight ${
-                              campaign.type === 'reward' ? 'bg-indigo-50 text-indigo-500 border border-indigo-100' : 'bg-emerald-50 text-[#2e7d32] border border-emerald-100'
-                            }`}>
-                              {campaign.type === 'reward' ? 'Recompensa' : 'Donación'}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-bold">Registro: {new Date(campaign.created_at).toLocaleDateString()}</span>
+                    <tr key={campaign.id} className="hover:bg-slate-50/80 transition-all group">
+                      <td className="px-8 py-7">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-all font-black text-xs">
+                             {campaign.title.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[#1c2b1e] font-black text-[15px] group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{campaign.category_name}</span>
+                              <div className="w-1 h-1 rounded-full bg-slate-200"></div>
+                              <span className="text-[10px] text-slate-400 font-bold">Ref: {campaign.id.substring(0, 8)}</span>
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="text-slate-600 font-bold text-[14px]">{campaign.entrepreneur_name}</span>
+                      <td className="px-8 py-7">
+                        <div className="flex flex-col">
+                           <span className="text-slate-900 font-black text-[14px]">{campaign.entrepreneur_name}</span>
+                           <span className="text-[10px] text-slate-400 font-bold">Verificado el {new Date(campaign.created_at).toLocaleDateString()}</span>
+                        </div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="px-3 py-1 bg-white border border-slate-100 rounded-full text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                          {campaign.category_name}
+                      <td className="px-8 py-7">
+                        <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
+                          campaign.type === 'reward' 
+                            ? 'bg-amber-50 text-amber-600 border-amber-100' 
+                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        }`}>
+                          {campaign.type === 'reward' ? 'Recompensa' : 'Donación'}
                         </span>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="text-[#1c2b1e] font-black text-[15px]">${parseFloat(campaign.goal_amount).toLocaleString()}</span>
+                      <td className="px-8 py-7">
+                        <div className="flex flex-col">
+                           <span className="text-[#1c2b1e] font-black text-[16px] tracking-tight">${parseFloat(campaign.goal_amount).toLocaleString()}</span>
+                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">USD Equity</span>
+                        </div>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-8 py-7 text-center">
+                         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 font-black text-xs border border-emerald-100 shadow-sm">
+                            {campaign.audit_score || 0}%
+                         </div>
+                      </td>
+                      <td className="px-8 py-7 text-right">
+                        <div className="flex items-center justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
                           <button 
                             onClick={() => openReviewModal(campaign.id)}
-                            className="w-10 h-10 flex items-center justify-center bg-white hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-100 hover:border-indigo-100 shadow-sm cursor-pointer"
-                            title="Visualizar datos"
+                            className="w-11 h-11 flex items-center justify-center bg-white hover:bg-slate-900 text-slate-400 hover:text-white rounded-2xl transition-all border border-slate-200 shadow-sm cursor-pointer active:scale-90"
+                            title="Auditar Documentación"
                           >
-                            <Eye size={18} strokeWidth={2.5} />
+                            <Eye size={20} strokeWidth={2.5} />
                           </button>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               handleQuickApprove(campaign.id, campaign.title);
                             }}
-                            className="w-10 h-10 flex items-center justify-center bg-white hover:bg-emerald-50 text-slate-400 hover:text-[#2e7d32] rounded-xl transition-all border border-slate-100 hover:border-emerald-100 shadow-sm cursor-pointer"
-                            title="Aprobar inmediatamente"
+                            className="w-11 h-11 flex items-center justify-center bg-white hover:bg-emerald-500 text-slate-400 hover:text-white rounded-2xl transition-all border border-slate-200 shadow-sm cursor-pointer active:scale-90"
+                            title="Aprobar Inmediatamente"
                           >
-                            <CheckCircle2 size={18} strokeWidth={2.5} />
+                            <CheckCircle2 size={20} strokeWidth={2.5} />
                           </button>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               handleQuickReject(campaign.id, campaign.title);
                             }}
-                            className="w-10 h-10 flex items-center justify-center bg-white hover:bg-red-50 text-slate-400 hover:text-[#c62828] rounded-xl transition-all border border-slate-100 hover:border-red-100 shadow-sm cursor-pointer"
-                            title="Denegar con feedback"
+                            className="w-11 h-11 flex items-center justify-center bg-white hover:bg-red-500 text-slate-400 hover:text-white rounded-2xl transition-all border border-slate-200 shadow-sm cursor-pointer active:scale-90"
+                            title="Rechazar Perfil Corporativo"
                           >
-                            <ShieldAlert size={18} strokeWidth={2.5} />
+                            <ShieldAlert size={20} strokeWidth={2.5} />
                           </button>
                         </div>
                       </td>
@@ -319,7 +337,7 @@ export const CampaignReviewPage: React.FC = () => {
           {totalPages > 1 && (
             <div className="px-8 py-4 bg-slate-50/30 border-t border-emerald-50 flex items-center justify-between">
               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                Expedientes <span className="text-indigo-600">{campaigns.length}</span> de <span className="text-[#1c2b1e]">{total}</span>
+                Perfiles Corporativos <span className="text-indigo-600">{campaigns.length}</span> de <span className="text-[#1c2b1e]">{total}</span>
               </p>
               <div className="flex items-center gap-2">
                 <button 
@@ -378,7 +396,7 @@ export const CampaignReviewPage: React.FC = () => {
               currentAmount: selectedCampaignDetail.current_amount || 0,
               investorCount: selectedCampaignDetail.investor_count || 0,
               currency: selectedCampaignDetail.currency || 'USD',
-              coverImageUrl: selectedCampaignDetail.cover_image_url || null,
+              coverImageUrl: selectedCampaignDetail.main_image_url || null,
               categoryName: selectedCampaignDetail.category_name,
               categorySlug: '',
               startDate: selectedCampaignDetail.start_date,
@@ -407,6 +425,14 @@ export const CampaignReviewPage: React.FC = () => {
             onApprove={() => handleReviewAction('approved')}
             onReject={(feedback) => handleReviewAction('rejected', feedback)}
             actionLoading={actionLoading}
+            media={selectedCampaignDetail.media}
+            minInvestment={selectedCampaignDetail.min_investment}
+            maxInvestment={selectedCampaignDetail.max_investment}
+            subtitle={selectedCampaignDetail.subtitle}
+            risksAndChallenges={selectedCampaignDetail.risks_and_challenges}
+            videoUrl={selectedCampaignDetail.video_url}
+            tags={selectedCampaignDetail.tags}
+            socialLinks={selectedCampaignDetail.social_links}
           />
         )}
       </div>

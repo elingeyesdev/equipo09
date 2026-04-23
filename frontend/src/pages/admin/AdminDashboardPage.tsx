@@ -1,267 +1,238 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { getDashboardStats, getAllUsers, getAllCampaigns, updateCampaignStatus, softDeleteUser, hardDeleteCampaign } from '../../api/admin.api';
-import type { DashboardStats, SystemUser, SystemCampaign } from '../../types/admin.types';
+import { 
+  getDashboardStats, 
+  getPendingCampaigns, 
+  getCampaignDetail,
+  updateCampaignStatus 
+} from '../../api/admin.api';
+import type { DashboardStats, PendingCampaign, PendingCampaignDetail } from '../../types/admin.types';
 import { 
   Users, 
   Rocket, 
-  CircleDollarSign, 
-  Check, 
-  X, 
-  Trash2, 
-  ShieldAlert 
+  BarChart3, 
+  Clock, 
+  CheckCircle2, 
+  XCircle, 
+  ChevronRight,
+  Search,
+  Filter,
+  Eye,
+  Mail,
+  MoreVertical
 } from 'lucide-react';
+import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
 
 export function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [users, setUsers] = useState<SystemUser[]>([]);
-  const [campaigns, setCampaigns] = useState<SystemCampaign[]>([]);
+  const [campaigns, setCampaigns] = useState<PendingCampaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedCampaignDetail, setSelectedCampaignDetail] = useState<PendingCampaignDetail | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'reward' | 'donation'>('all');
+  const [page, setPage] = useState(1);
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
+
+  useEffect(() => {
+    loadData();
+  }, [page, filterType]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const [st, usr, cmp] = await Promise.all([
+      const [statsData, campaignsData] = await Promise.all([
         getDashboardStats(),
-        getAllUsers(),
-        getAllCampaigns()
+        getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType })
       ]);
-      setStats(st);
-      setUsers(usr);
-      setCampaigns(cmp);
-    } catch (e: any) {
-      if (e.response?.status === 401) {
-        setError('Acceso denegado. Se requieren permisos de administrador.');
-      } else {
-        console.error('Error loading dashboard data:', e);
-        setError('Error al cargar datos del sistema.');
-      }
+      setStats(statsData);
+      setCampaigns(campaignsData.campaigns);
+      setTotalCampaigns(campaignsData.total);
+    } catch (error) {
+      console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleStatusUpdate = async (id: string, status: string) => {
-    if (!window.confirm(`¿Estás seguro de mover la campaña a '${status}'?`)) return;
+  const handleViewDetails = async (id: string) => {
     try {
-      await updateCampaignStatus(id, status);
-      await loadData();
-    } catch(e) {
-      console.error(e);
+      const detail = await getCampaignDetail(id);
+      setSelectedCampaignDetail(detail);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error loading campaign detail:', error);
     }
   };
 
-  const handleDeleteCampaign = async (id: string, title: string) => {
-    if (!window.confirm(`ESTAS SEGURO de eliminar la campaña: "${title}"?\n\nEsta acción es destructiva. Si la campaña tiene inversiones, será Cancelada en lugar de eliminada.`)) return;
+  const handleStatusUpdate = async (id: string, status: string, feedback?: string) => {
     try {
-      await hardDeleteCampaign(id);
-      await loadData();
-    } catch(e) {
-      console.error(e);
+      setActionLoading(true);
+      await updateCampaignStatus(id, status, feedback);
+      setIsModalOpen(false);
+      setSelectedCampaignDetail(null);
+      loadData();
+    } catch (error) {
+      console.error('Error updating campaign status:', error);
+    } finally {
+      setActionLoading(false);
     }
   };
-
-  const handleDeleteUser = async (id: string, email: string) => {
-    if (!window.confirm(`¿Deseas suspender/eliminar al usuario "${email}"?\nLe impedirá iniciar sesión.`)) return;
-    try {
-      await softDeleteUser(id);
-      await loadData();
-    } catch(e) {
-      console.error(e);
-    }
-  };
-
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="h-full flex flex-col items-center justify-center gap-6 py-40">
-            <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
-            <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Auditoría Central...</span>
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <AdminLayout>
-        <div className="h-full flex flex-col items-center justify-center gap-6 py-40">
-            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2">
-              <ShieldAlert size={32} />
-            </div>
-            <h2 className="text-xl font-black text-slate-800">{error}</h2>
-            <p className="text-slate-400 font-medium">Verifica tu sesión o contacta al administrador del sistema.</p>
-            <button 
-              onClick={() => window.location.href = '/login'}
-              className="mt-4 px-6 py-2 bg-[#1c2b1e] text-white font-bold rounded-xl hover:bg-emerald-800 transition-all cursor-pointer"
-            >
-              Ir al Login
-            </button>
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  const statCard = "bg-white border border-emerald-50 rounded-[28px] p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-6 group";
 
   return (
     <AdminLayout>
-      <div className="mb-12 flex flex-col gap-2">
-        <h1 className="text-3xl font-black text-[#1c2b1e] tracking-tight leading-none mb-1">Resumen del Sistema</h1>
-        <p className="text-[15px] font-medium text-slate-400 italic">Gestiona la actividad, integridad y métricas clave de la plataforma con solidez financiera.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className={statCard}>
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#2e7d32] group-hover:scale-110 transition-transform">
-             <Users size={28} strokeWidth={2.5} />
-          </div>
+      <div className="space-y-8 animate-in fade-in duration-500 font-['Sora',sans-serif]">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Usuarios Registrados</div>
-            <div className="text-3xl font-black text-[#1c2b1e] tracking-tight leading-none">{stats?.totalUsers || 0}</div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Panel de Control</h1>
+            <p className="text-slate-500 font-medium mt-1">Supervisión global de la plataforma y auditoría de capital.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-white p-1 rounded-2xl shadow-sm border border-slate-100 flex">
+               <button className="px-4 py-2 text-[12px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 rounded-xl transition-all">Vista General</button>
+               <button className="px-4 py-2 text-[12px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Reportes</button>
+            </div>
           </div>
         </div>
 
-        <div className={statCard}>
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#2e7d32] group-hover:scale-110 transition-transform">
-             <Rocket size={28} strokeWidth={2.5} />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                <Users size={24} strokeWidth={2.5} />
+              </div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Usuarios Totales</span>
+            </div>
+            <div className="flex items-end justify-between">
+              <span className="text-4xl font-black text-slate-900 tracking-tighter">{stats?.totalUsers || 0}</span>
+              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
+                 <ChevronRight size={12} className="-rotate-90" /> +12%
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Campañas Activas</div>
-            <div className="text-3xl font-black text-[#1c2b1e] tracking-tight leading-none">{stats?.totalCampaigns || 0}</div>
+
+          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                <Rocket size={24} strokeWidth={2.5} />
+              </div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Campañas Activas</span>
+            </div>
+            <div className="flex items-end justify-between">
+              <span className="text-4xl font-black text-slate-900 tracking-tighter">{stats?.totalCampaigns || 0}</span>
+              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
+                 <ChevronRight size={12} className="-rotate-90" /> +5%
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                <BarChart3 size={24} strokeWidth={2.5} />
+              </div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Inversión Total</span>
+            </div>
+            <div className="flex items-end justify-between">
+              <span className="text-4xl font-black text-slate-900 tracking-tighter">
+                ${(stats?.totalFunded || 0).toLocaleString()}
+              </span>
+              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
+                 <ChevronRight size={12} className="-rotate-90" /> +24%
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className={statCard}>
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#2e7d32] group-hover:scale-110 transition-transform">
-             <CircleDollarSign size={28} strokeWidth={2.5} />
+        {/* Campaign Management Section */}
+        <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/30">
+            <div className="flex items-center gap-3">
+              <Clock size={20} className="text-indigo-600" />
+              <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Auditoría de Propuestas Técnicas</h2>
+              <span className="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-lg font-black">{totalCampaigns}</span>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3">
+               <div className="relative">
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar por título o emprendedor..."
+                    className="pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-[13px] font-medium w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && loadData()}
+                  />
+               </div>
+               <div className="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl">
+                  <button 
+                    onClick={() => setFilterType('all')}
+                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                  >Todas</button>
+                  <button 
+                    onClick={() => setFilterType('reward')}
+                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'reward' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                  >Reward</button>
+                  <button 
+                    onClick={() => setFilterType('donation')}
+                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'donation' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                  >Donation</button>
+               </div>
+            </div>
           </div>
-          <div>
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Capital Movilizado</div>
-            <div className="text-3xl font-black text-[#1c2b1e] tracking-tight leading-none">${(stats?.totalFunded || 0).toLocaleString()}</div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-12">
-        {/* Campañas Needing Review */}
-        <div className="bg-white rounded-[32px] border border-emerald-50 overflow-hidden shadow-sm">
-          <div className="px-8 py-6 border-b border-emerald-50 flex items-center justify-between">
-            <h2 className="text-[16px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">Revisión de Campañas</h2>
-          </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Título</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Creador</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Objetivo</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Propuesta / Emprendedor</th>
+                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta de Capital</th>
+                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
+                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
+                  <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-emerald-50">
-                {campaigns.map(c => (
-                  <tr key={c.id} className="hover:bg-emerald-50/30 transition-colors group">
-                    <td className="px-8 py-5 text-[14px] font-black text-[#1c2b1e] group-hover:text-[#2e7d32] transition-colors">{c.title}</td>
-                    <td className="px-8 py-5 text-[14px] font-medium text-slate-600">{c.creator_email}</td>
-                    <td className="px-8 py-5 text-[14px] font-black text-[#1c2b1e]">${parseFloat(c.goal_amount).toLocaleString()}</td>
-                    <td className="px-8 py-5">
-                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
-                         ${c.status === 'approved' ? 'bg-emerald-50 text-[#2e7d32] border-emerald-100' : 
-                           c.status === 'pending_review' ? 'bg-amber-50 text-[#f9a825] border-amber-200' : 
-                           'bg-red-50 text-[#c62828] border-red-100'}
-                       `}>
-                          {c.status.replace('_', ' ')}
-                       </span>
-                    </td>
-                    <td className="px-8 py-5">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          className="w-9 h-9 flex items-center justify-center bg-emerald-50 text-[#2e7d32] rounded-xl hover:bg-[#2e7d32] hover:text-white transition-all active:scale-95 border-none cursor-pointer" 
-                          title="Aprobar"
-                          onClick={() => handleStatusUpdate(c.id, 'approved')}
-                        >
-                           <Check size={18} strokeWidth={3} />
-                        </button>
-                        <button 
-                          className="w-9 h-9 flex items-center justify-center bg-amber-50 text-[#f9a825] rounded-xl hover:bg-[#f9a825] hover:text-white transition-all active:scale-95 border-none cursor-pointer" 
-                          title="Rechazar"
-                          onClick={() => handleStatusUpdate(c.id, 'rejected')}
-                        >
-                           <X size={18} strokeWidth={3} />
-                        </button>
-                        <button 
-                          className="w-9 h-9 flex items-center justify-center bg-red-50 text-[#c62828] rounded-xl hover:bg-[#c62828] hover:text-white transition-all active:scale-95 border-none cursor-pointer" 
-                          title="Eliminar"
-                          onClick={() => handleDeleteCampaign(c.id, c.title)}
-                        >
-                           <Trash2 size={18} strokeWidth={2.5} />
-                        </button>
+              <tbody className="divide-y divide-slate-100">
+                {campaigns.map((campaign) => (
+                  <tr key={campaign.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[14px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
+                        <div className="flex items-center gap-2">
+                           <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
+                              <Mail size={10} className="text-slate-400" />
+                           </div>
+                           <span className="text-[11px] font-bold text-slate-400">{campaign.entrepreneur_name}</span>
+                        </div>
                       </div>
                     </td>
-                  </tr>
-                ))}
-                {campaigns.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-8 py-20 text-center">
-                       <div className="text-slate-200 mb-2 flex justify-center">
-                          <Check size={48} strokeWidth={1} />
-                       </div>
-                       <p className="text-[14px] font-bold text-slate-400 uppercase tracking-widest">No hay campañas pendientes de auditoría.</p>
+                    <td className="px-8 py-6">
+                      <span className="text-[14px] font-black text-slate-900">
+                        ${parseFloat(campaign.goal_amount).toLocaleString()}
+                      </span>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">USD</div>
                     </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* System Users */}
-        <div className="bg-white rounded-[32px] border border-emerald-50 overflow-hidden shadow-sm">
-          <div className="px-8 py-6 border-b border-emerald-50 flex items-center justify-between">
-            <h2 className="text-[16px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">Últimos Usuarios</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Email</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Fecha Registro</th>
-                  <th className="px-8 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-emerald-50">
-                {users.slice(0, 10).map(u => (
-                  <tr key={u.id} className="hover:bg-emerald-50/30 transition-colors group">
-                    <td className="px-8 py-5 text-[14px] font-black text-[#1c2b1e] group-hover:text-[#2e7d32] transition-colors">{u.email}</td>
-                    <td className="px-8 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
-                         ${u.is_active ? 'bg-emerald-50 text-[#2e7d32] border-emerald-100' : 'bg-red-50 text-[#c62828] border-red-100'}
-                       `}>
-                        {u.is_active ? 'activo' : 'inactivo'}
+                    <td className="px-8 py-6">
+                      <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm">
+                        {campaign.category_name}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-[14px] font-medium text-slate-400">{new Date(u.created_at).toLocaleDateString()}</td>
-                    <td className="px-8 py-5">
-                      <div className="flex justify-end gap-2">
-                        {u.is_active && (
-                          <button 
-                            className="bg-white hover:bg-red-50 text-slate-400 hover:text-[#c62828] font-bold border border-gray-100 hover:border-red-100 rounded-xl px-4 py-2 text-[12px] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                            onClick={() => handleDeleteUser(u.id, u.email)}
-                          >
-                            <ShieldAlert size={14} strokeWidth={2.5} />
-                            Bloquear
-                          </button>
-                        )}
-                      </div>
+                    <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
+                      {new Date(campaign.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button 
+                        onClick={() => handleViewDetails(campaign.id)}
+                        className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
+                        title="Ver Perfil Corporativo"
+                      >
+                        <Eye size={18} />
+                        <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">Auditar</span>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -270,6 +241,68 @@ export function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {selectedCampaignDetail && (
+        <CampaignPreviewModal 
+          open={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedCampaignDetail(null);
+          }}
+          isAdmin
+          campaign={{
+            id: selectedCampaignDetail.id,
+            title: selectedCampaignDetail.title,
+            slug: selectedCampaignDetail.slug || (selectedCampaignDetail as any).id,
+            shortDescription: selectedCampaignDetail.short_description || '',
+            description: selectedCampaignDetail.description || '',
+            location: selectedCampaignDetail.location || 'Global',
+            campaignType: selectedCampaignDetail.type as any,
+            status: selectedCampaignDetail.status as any,
+            goalAmount: parseFloat(selectedCampaignDetail.goal_amount || '0'),
+            currentAmount: selectedCampaignDetail.current_amount || 0,
+            investorCount: selectedCampaignDetail.investor_count || 0,
+            currency: selectedCampaignDetail.currency || 'USD',
+            coverImageUrl: selectedCampaignDetail.main_image_url || selectedCampaignDetail.cover_image_url || null,
+            categoryName: selectedCampaignDetail.category_name,
+            categorySlug: '',
+            startDate: selectedCampaignDetail.start_date,
+            endDate: selectedCampaignDetail.end_date,
+            fundedAt: null,
+            isFeatured: false,
+            viewCount: 0,
+            createdAt: '',
+            updatedAt: '',
+            publishedAt: null
+          }}
+          auditScore={selectedCampaignDetail.audit_score}
+          entrepreneur={{
+            firstName: selectedCampaignDetail.entrepreneur_first_name || '',
+            lastName: selectedCampaignDetail.entrepreneur_last_name || '',
+            email: selectedCampaignDetail.entrepreneur_email || '',
+            bio: selectedCampaignDetail.entrepreneur_bio,
+            avatar: selectedCampaignDetail.entrepreneur_avatar,
+            linkedin: selectedCampaignDetail.entrepreneur_linkedin,
+            website: selectedCampaignDetail.entrepreneur_website,
+          }}
+          rewardTiers={selectedCampaignDetail.reward_tiers?.map(t => ({
+            title: t.title,
+            description: t.description,
+            amount: t.min_amount || 0
+          })) || []}
+          onApprove={() => handleStatusUpdate(selectedCampaignDetail.id, 'published')}
+          onReject={(feedback) => handleStatusUpdate(selectedCampaignDetail.id, 'rejected', feedback)}
+          actionLoading={actionLoading}
+          media={selectedCampaignDetail.media}
+          minInvestment={selectedCampaignDetail.min_investment}
+          maxInvestment={selectedCampaignDetail.max_investment}
+          subtitle={selectedCampaignDetail.subtitle}
+          risksAndChallenges={selectedCampaignDetail.risks_and_challenges}
+          videoUrl={selectedCampaignDetail.video_url}
+          tags={selectedCampaignDetail.tags}
+          socialLinks={selectedCampaignDetail.social_links}
+        />
+      )}
     </AdminLayout>
   );
 }

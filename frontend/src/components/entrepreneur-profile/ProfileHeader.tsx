@@ -1,13 +1,13 @@
 import { useRef } from 'react';
 import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
-import { 
-  Building2, 
-  MapPin, 
-  Globe, 
-  Camera, 
-  Pencil, 
-  Settings, 
-  CheckCircle2 
+import {
+  Building2,
+  MapPin,
+  Globe,
+  Camera,
+  Pencil,
+  Settings,
+  CheckCircle2
 } from 'lucide-react';
 
 interface Props {
@@ -22,7 +22,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Iniciales si no hay imagen
-  const initials = profile 
+  const initials = profile
     ? (profile.firstName[0] + (profile.lastName?.[0] || '')).toUpperCase()
     : '??';
 
@@ -43,17 +43,17 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
   return (
     <div className="relative mb-8 font-['Sora',sans-serif]">
       {/* Inputs ocultos para subida */}
-      <input 
-        type="file" 
-        ref={avatarInputRef} 
-        className="hidden" 
+      <input
+        type="file"
+        ref={avatarInputRef}
+        className="hidden"
         accept="image/*"
         onChange={handleAvatarChange}
       />
-      <input 
-        type="file" 
-        ref={coverInputRef} 
-        className="hidden" 
+      <input
+        type="file"
+        ref={coverInputRef}
+        className="hidden"
         accept="image/*"
         onChange={handleCoverChange}
       />
@@ -65,11 +65,11 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#2e7d32] rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00897b] rounded-full blur-[120px]"></div>
         </div>
-        
+
         {profile?.coverUrl ? (
-          <div 
+          <div
             className="absolute inset-0 z-10 transition-opacity duration-700"
-            style={{ 
+            style={{
               backgroundImage: `url(${profile.coverUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
@@ -77,13 +77,13 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           />
         ) : (
           <div className="relative z-10 flex flex-col items-center gap-2 text-white/20">
-             <Camera size={48} strokeWidth={1} />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Dossier Corporativo</span>
+            <Camera size={48} strokeWidth={1} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Perfil Corporativo</span>
           </div>
         )}
 
         {/* Botón editar portada */}
-        <button 
+        <button
           onClick={() => coverInputRef.current?.click()}
           className="absolute bottom-6 right-8 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 flex items-center gap-2 z-20 cursor-pointer"
         >
@@ -95,14 +95,14 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
       {/* ── AVATAR & INFO CORE ───────────────────────────── */}
       <div className="max-w-[1100px] mx-auto px-8">
         <div className="relative -mt-20 flex flex-col md:flex-row items-end gap-6 md:gap-8">
-          
+
           {/* Avatar con Anillo de Estatus */}
           <div className="relative group">
             <div className="w-40 h-40 rounded-[48px] border-[6px] border-[#f4f7f4] bg-white shadow-2xl overflow-hidden flex items-center justify-center relative z-10">
               {profile?.avatarUrl ? (
-                <div 
+                <div
                   className="w-full h-full transition-opacity duration-500"
-                  style={{ 
+                  style={{
                     backgroundImage: `url(${profile.avatarUrl})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -114,9 +114,9 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
                 </div>
               )}
             </div>
-            
+
             {/* Cámara hover avatar */}
-            <button 
+            <button
               onClick={() => avatarInputRef.current?.click()}
               className="absolute inset-0 z-20 bg-[#1c2b1e]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-[48px] cursor-pointer border-none"
             >
@@ -154,7 +154,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
                   {profile.companyName}
                 </div>
               )}
-              
+
               {profile?.city && (
                 <div className="flex items-center gap-2 text-[13px] font-medium">
                   <MapPin size={14} className="text-slate-400" />
@@ -173,21 +173,14 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
 
           {/* Acciones de Edición */}
           <div className="flex gap-3 pb-2 w-full md:w-auto">
-            <button 
+            <button
               onClick={() => onEdit('profile')}
               className="flex-1 md:flex-none bg-white hover:bg-emerald-50 text-slate-600 font-bold px-6 py-3 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-[13px]"
             >
               <Pencil size={16} strokeWidth={2.5} />
-              Editar Dossier
-            </button>
-            <button 
-              onClick={() => onEdit('settings')}
-              className="w-12 h-12 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-xl shadow-lg shadow-emerald-900/10 flex items-center justify-center transition-all active:rotate-90 cursor-pointer border-none"
-            >
-              <Settings size={20} strokeWidth={2.5} />
+              Editar Perfil
             </button>
           </div>
-
         </div>
       </div>
     </div>

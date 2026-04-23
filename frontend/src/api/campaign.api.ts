@@ -6,6 +6,7 @@ import type {
   PaginatedResponse,
   CampaignFinancialProgress,
 } from '../types/campaign.types';
+import type { CampaignHistoryItem } from '../types/admin.types';
 
 interface ApiSuccessResponse<T> {
   statusCode: number;
@@ -58,6 +59,17 @@ export async function createCampaign(
   return data.data;
 }
 
+export async function updateCampaign(
+  campaignId: string,
+  dto: Partial<CreateCampaignDto>,
+): Promise<EntrepreneurCampaign> {
+  const { data } = await api.patch<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${campaignId}`,
+    dto,
+  );
+  return data.data;
+}
+
 export async function submitCampaignForReview(
   campaignId: string,
 ): Promise<EntrepreneurCampaign> {
@@ -95,6 +107,15 @@ export async function uploadCampaignImage(
     `/entrepreneurs/me/campaigns/${campaignId}/cover`,
     formData,
     { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}
+
+export async function getCampaignHistory(
+  campaignId: string,
+): Promise<CampaignHistoryItem[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignHistoryItem[]>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/history`,
   );
   return data.data;
 }

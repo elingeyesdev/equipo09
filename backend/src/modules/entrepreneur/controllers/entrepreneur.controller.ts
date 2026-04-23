@@ -4,6 +4,7 @@ import {
   Post,
   Put,
   Delete,
+  Patch,
   Body,
   Param,
   Query,
@@ -201,6 +202,24 @@ export class EntrepreneurController {
   }
 
   @ApiTags('entrepreneur-campaigns')
+  @Patch('me/campaigns/:campaignId')
+  @ApiOperation({ summary: 'Actualizar datos de una campaña (Borrador o Rechazada)' })
+  @ApiResponse({ status: 200, description: 'Campaña actualizada.' })
+  async updateCampaign(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+    @Body() dto: Partial<CreateCampaignDto>,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.updateCampaign(
+      userId,
+      campaignId,
+      dto,
+    );
+    return new ApiSuccessResponse(campaign, 'Campaña actualizada con éxito');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
   @Get('me/campaigns')
   @ApiOperation({ summary: 'Listar mis campañas (EDT 1.3)' })
   @ApiResponse({ status: 200, description: 'Lista paginada de campañas.' })
@@ -229,6 +248,22 @@ export class EntrepreneurController {
       campaignId,
     );
     return new ApiSuccessResponse(campaign, 'Campaña enviada a revisión');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Get('me/campaigns/:campaignId/history')
+  @ApiOperation({ summary: 'Obtener historial de auditoría de una campaña propia' })
+  @ApiResponse({ status: 200, description: 'Historial de estados y feedback.' })
+  async getCampaignHistory(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<any[]>> {
+    const userId = (req as any).user.id;
+    const history = await this.entrepreneurService.getCampaignHistory(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(history, 'Historial de campaña obtenido');
   }
 
   @ApiTags('entrepreneur-campaigns')

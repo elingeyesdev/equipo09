@@ -16,6 +16,7 @@ export function MyCampaignsPage() {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [previewCampaign, setPreviewCampaign] = useState<EntrepreneurCampaign | null>(null);
+  const [editingCampaign, setEditingCampaign] = useState<EntrepreneurCampaign | null>(null);
   const [readiness, setReadiness] = useState<CampaignCreationReadiness | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
 
@@ -31,8 +32,10 @@ export function MyCampaignsPage() {
     addError,
     fetchCampaigns,
     addCampaign,
+    updateCampaign,
     submitForReview,
     publishCampaign,
+    uploadCampaignImage,
     actionCampaignId,
   } = useCampaigns();
 
@@ -92,6 +95,11 @@ export function MyCampaignsPage() {
     const ok = await publishCampaign(previewCampaign.id);
     if (ok) closePreview();
   }, [previewCampaign, publishCampaign, closePreview]);
+
+  const handleModalEdit = useCallback((c: EntrepreneurCampaign) => {
+    setPreviewCampaign(null);
+    setEditingCampaign(c);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
@@ -155,19 +163,34 @@ export function MyCampaignsPage() {
           </div>
         )}
 
-        {showForm ? (
+        {(showForm || editingCampaign) ? (
           <div className="animate-in fade-in duration-500">
             <div className="flex items-center gap-3 mb-8">
-               <button onClick={() => setShowForm(false)} className="bg-white hover:bg-emerald-50 text-slate-500 font-bold px-4 py-2 rounded-lg border border-gray-100 shadow-sm active:scale-95 transition-all cursor-pointer text-[13px] flex items-center gap-2">
+               <button onClick={() => { setShowForm(false); setEditingCampaign(null); }} className="bg-white hover:bg-emerald-50 text-slate-500 font-bold px-4 py-2 rounded-lg border border-gray-100 shadow-sm active:scale-95 transition-all cursor-pointer text-[13px] flex items-center gap-2">
                  <ChevronLeft size={16} strokeWidth={2.5} />
                  Volver
                </button>
                <span className="text-slate-300">/</span>
-               <span className="text-[13px] font-black uppercase tracking-widest text-slate-400">Constructor de Campaña</span>
+               <span className="text-[13px] font-black uppercase tracking-widest text-slate-400">
+                 {editingCampaign ? 'Editor de Campaña' : 'Constructor de Campaña'}
+               </span>
             </div>
             <CampaignForm
-              onSuccess={addCampaign}
-              onCancel={() => setShowForm(false)}
+              initialData={editingCampaign}
+              onSuccess={(dto, file) => {
+                if (editingCampaign) {
+                  return updateCampaign(editingCampaign.id, dto, file).then(ok => {
+                    if (ok) setEditingCampaign(null);
+                    return ok;
+                  });
+                } else {
+                  return addCampaign(dto, file).then(ok => {
+                    if (ok) setShowForm(false);
+                    return ok;
+                  });
+                }
+              }}
+              onCancel={() => { setShowForm(false); setEditingCampaign(null); }}
               saving={adding}
               saveError={addError}
             />
@@ -199,13 +222,9 @@ export function MyCampaignsPage() {
           campaign={previewCampaign}
           open={previewCampaign !== null}
           onClose={closePreview}
-          onSubmitForReview={previewCampaign && previewCampaign.status === 'draft' ? handleModalSubmit : undefined}
-          onPublish={
-            previewCampaign &&
-            (previewCampaign.status === 'draft' || previewCampaign.status === 'approved')
-              ? handleModalPublish
-              : undefined
-          }
+          onSubmitForReview={handleModalSubmit}
+          onPublish={handleModalPublish}
+          onEdit={handleModalEdit}
           onUploadImage={uploadCampaignImage}
           actionLoading={!!actionCampaignId}
         />

@@ -22,21 +22,14 @@ export function CampaignCard({
   const getStatusBadgeStyles = (status: string) => {
     switch (status) {
       case 'published':
-      case 'in_progress':
       case 'approved':
         return 'bg-emerald-50 text-[#2e7d32] border-emerald-100';
-      case 'funded':
-      case 'completed':
-      case 'partially_funded':
-        return 'bg-[#2e7d32]/10 text-[#2e7d32] border-[#2e7d32]/20';
       case 'draft':
+        return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'pending_review':
       case 'in_review':
         return 'bg-amber-50 text-[#f9a825] border-amber-200';
-      case 'failed':
       case 'rejected':
-      case 'cancelled':
-      case 'suspended':
         return 'bg-red-50 text-[#c62828] border-red-200';
       default:
         return 'bg-slate-50 text-slate-600 border-slate-200';
@@ -48,15 +41,9 @@ export function CampaignCard({
       draft: 'Borrador',
       published: 'Publicada',
       in_review: 'En revisión',
-      pending_review: 'En aprobación',
-      approved: 'Aprobada',
-      funded: 'Financiada',
-      partially_funded: 'Parcialmente financiada',
-      completed: 'Completada',
-      failed: 'Fallida',
-      rejected: 'Rechazada',
-      cancelled: 'Cancelada',
-      suspended: 'Suspendida',
+      pending_review: 'En revisión',
+      approved: 'Aprobado',
+      rejected: 'Rechazado',
     };
     return map[status] || status;
   };

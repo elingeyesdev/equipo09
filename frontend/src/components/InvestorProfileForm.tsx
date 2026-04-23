@@ -302,12 +302,12 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
               {isNew ? (
                 <>
                   <Sparkles size={20} strokeWidth={2.5} />
-                  Crear mi Expediente
+                  Crear Perfil Corporativo
                 </>
               ) : (
                 <>
                   <Save size={20} strokeWidth={2.5} />
-                  Actualizar Dossier
+                  Actualizar Perfil Corporativo
                 </>
               )}
             </>

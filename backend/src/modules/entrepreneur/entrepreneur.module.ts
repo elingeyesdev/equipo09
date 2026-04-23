@@ -15,6 +15,10 @@ import { UsersModule } from '../users/user.module';
     EntrepreneurProfileRepository,
     EntrepreneurCampaignRepository,
   ],
-  exports: [EntrepreneurService],
+  exports: [
+    EntrepreneurService,
+    EntrepreneurProfileRepository,
+    EntrepreneurCampaignRepository,
+  ],
 })
 export class EntrepreneurModule {}

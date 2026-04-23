@@ -39,7 +39,7 @@ export function InvestorDashboardPage() {
               Parece que aún no tienes configurado tu perfil de inversor. Complétalo para empezar a invertir y monitorear tu capital con solidez financiera.
             </p>
             <Link to="/profile" className="inline-flex items-center justify-center bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 no-underline cursor-pointer gap-3">
-              Completar Expediente 
+              Completar Perfil Corporativo 
               <ArrowRight size={20} strokeWidth={2.5} />
             </Link>
           </div>

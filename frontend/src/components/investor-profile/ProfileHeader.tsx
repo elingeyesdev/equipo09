@@ -62,7 +62,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
         ) : (
           <div className="relative z-10 flex flex-col items-center gap-2 text-white/20">
              <TrendingUp size={48} strokeWidth={1} />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Expediente de Inversor</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Perfil Corporativo</span>
           </div>
         )}
 
@@ -126,7 +126,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
 
           <div className="flex gap-3 pb-2 w-full md:w-auto">
             <button onClick={() => onEdit('profile')} className="flex-1 md:flex-none bg-white hover:bg-emerald-50 text-slate-600 font-bold px-6 py-3 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-[13px]">
-              <Pencil size={16} strokeWidth={2.5} /> Editar Expediente
+              <Pencil size={16} strokeWidth={2.5} /> Editar Perfil Corporativo
             </button>
             <button onClick={() => onEdit('settings')} className="w-12 h-12 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-xl shadow-lg shadow-emerald-900/10 flex items-center justify-center transition-all active:rotate-90 cursor-pointer border-none">
               <Settings size={20} strokeWidth={2.5} />
