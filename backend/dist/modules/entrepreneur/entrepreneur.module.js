@@ -24,7 +24,11 @@ exports.EntrepreneurModule = EntrepreneurModule = __decorate([
             repositories_1.EntrepreneurProfileRepository,
             repositories_1.EntrepreneurCampaignRepository,
         ],
-        exports: [services_1.EntrepreneurService],
+        exports: [
+            services_1.EntrepreneurService,
+            repositories_1.EntrepreneurProfileRepository,
+            repositories_1.EntrepreneurCampaignRepository,
+        ],
     })
 ], EntrepreneurModule);
 //# sourceMappingURL=entrepreneur.module.js.map

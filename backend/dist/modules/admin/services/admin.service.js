@@ -13,10 +13,12 @@ exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const admin_repository_1 = require("../repositories/admin.repository");
 const repositories_1 = require("../../users/repositories");
+const repositories_2 = require("../../entrepreneur/repositories");
 let AdminService = class AdminService {
-    constructor(adminRepo, userRepo) {
+    constructor(adminRepo, userRepo, campaignRepo) {
         this.adminRepo = adminRepo;
         this.userRepo = userRepo;
+        this.campaignRepo = campaignRepo;
     }
     async getDashboardStats() {
         return this.adminRepo.getDashboardStats();
@@ -38,6 +40,9 @@ let AdminService = class AdminService {
         return campaign;
     }
     async updateCampaignStatus(campaignId, status, reviewerId, feedback) {
+        if (status === 'rejected' && (!feedback || feedback.trim().length < 3)) {
+            throw new common_1.BadRequestException('Debe proporcionar un feedback válido (mínimo 3 caracteres) para rechazar la campaña.');
+        }
         const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, reviewerId, feedback);
         if (!updated) {
             throw new common_1.NotFoundException('Campaña no encontrada');
@@ -46,6 +51,9 @@ let AdminService = class AdminService {
     }
     async getCampaignHistory(campaignId) {
         return this.adminRepo.getCampaignHistory(campaignId);
+    }
+    async getCampaignFinancialProgress(campaignId) {
+        return this.campaignRepo.getFinancialProgressAdmin(campaignId);
     }
     async createAdmin(email, passwordString) {
         const userExists = await this.userRepo.findByEmail(email);
@@ -99,6 +107,7 @@ exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [admin_repository_1.AdminRepository,
-        repositories_1.UserRepository])
+        repositories_1.UserRepository,
+        repositories_2.EntrepreneurCampaignRepository])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

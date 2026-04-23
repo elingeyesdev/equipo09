@@ -141,22 +141,42 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         return row ? (0, models_1.mapRowToEntrepreneurCampaign)(row) : null;
     }
     async submitForReview(campaignId, creatorId) {
-        const row = await this.queryOne(`UPDATE campaigns
-       SET status = 'pending_review', updated_at = NOW()
-       WHERE id = $1 AND creator_id = $2 AND status = 'draft'
-       RETURNING id`, [campaignId, creatorId]);
-        if (!row)
-            return null;
-        return this.findOneByCreatorId(campaignId, creatorId);
+        return this.transaction(async (client) => {
+            const current = await client.query('SELECT status FROM campaigns WHERE id = $1 AND creator_id = $2', [campaignId, creatorId]);
+            if (current.rows.length === 0)
+                return null;
+            const oldStatus = current.rows[0].status;
+            if (oldStatus !== 'draft' && oldStatus !== 'rejected')
+                return null;
+            const res = await client.query(`UPDATE campaigns
+         SET status = 'pending_review', updated_at = NOW()
+         WHERE id = $1 AND creator_id = $2
+         RETURNING id`, [campaignId, creatorId]);
+            if (res.rows.length > 0) {
+                await client.query(`INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
+           VALUES ($1, $2, $3, $4, $5)`, [campaignId, oldStatus, 'pending_review', creatorId, 'Envío para revisión (Emprendedor)']);
+            }
+            return this.findOneByCreatorId(campaignId, creatorId);
+        });
     }
     async publishCampaign(campaignId, creatorId) {
-        const row = await this.queryOne(`UPDATE campaigns
-       SET status = 'published', published_at = COALESCE(published_at, NOW()), updated_at = NOW()
-       WHERE id = $1 AND creator_id = $2 AND status IN ('draft', 'approved')
-       RETURNING id`, [campaignId, creatorId]);
-        if (!row)
-            return null;
-        return this.findOneByCreatorId(campaignId, creatorId);
+        return this.transaction(async (client) => {
+            const current = await client.query('SELECT status FROM campaigns WHERE id = $1 AND creator_id = $2', [campaignId, creatorId]);
+            if (current.rows.length === 0)
+                return null;
+            const oldStatus = current.rows[0].status;
+            if (oldStatus !== 'draft' && oldStatus !== 'approved')
+                return null;
+            const res = await client.query(`UPDATE campaigns
+         SET status = 'published', published_at = COALESCE(published_at, NOW()), updated_at = NOW()
+         WHERE id = $1 AND creator_id = $2
+         RETURNING id`, [campaignId, creatorId]);
+            if (res.rows.length > 0) {
+                await client.query(`INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
+           VALUES ($1, $2, $3, $4, $5)`, [campaignId, oldStatus, 'published', creatorId, 'Lanzamiento público (Emprendedor)']);
+            }
+            return this.findOneByCreatorId(campaignId, creatorId);
+        });
     }
     async updateCoverImageUrl(campaignId, creatorId, coverImageUrl) {
         const row = await this.queryOne(`UPDATE campaigns
@@ -167,13 +187,67 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             return null;
         return this.findOneByCreatorId(campaignId, creatorId);
     }
+    async update(campaignId, creatorId, dto) {
+        const updates = ['updated_at = NOW()'];
+        const values = [campaignId, creatorId];
+        let paramIndex = 3;
+        if (dto.title !== undefined) {
+            updates.push(`title = $${paramIndex++}`);
+            values.push(dto.title);
+        }
+        if (dto.description !== undefined) {
+            updates.push(`description = $${paramIndex++}`);
+            values.push(dto.description);
+        }
+        if (dto.shortDescription !== undefined) {
+            updates.push(`short_description = $${paramIndex++}`);
+            values.push(dto.shortDescription);
+        }
+        if (dto.goalAmount !== undefined) {
+            updates.push(`goal_amount = $${paramIndex++}`);
+            values.push(dto.goalAmount);
+        }
+        if (dto.categoryId !== undefined) {
+            updates.push(`category_id = $${paramIndex++}`);
+            values.push(dto.categoryId);
+        }
+        if (dto.endDate !== undefined) {
+            updates.push(`end_date = $${paramIndex++}`);
+            values.push(dto.endDate || null);
+        }
+        if (dto.campaignType !== undefined) {
+            updates.push(`campaign_type = $${paramIndex++}`);
+            values.push(dto.campaignType);
+        }
+        if (updates.length === 1)
+            return this.findOneByCreatorId(campaignId, creatorId);
+        const query = `
+      UPDATE campaigns
+      SET ${updates.join(', ')}
+      WHERE id = $1 AND creator_id = $2
+      RETURNING id
+    `;
+        const row = await this.queryOne(query, values);
+        if (!row)
+            return null;
+        return this.findOneByCreatorId(campaignId, creatorId);
+    }
     async getFinancialProgress(campaignId, creatorId) {
+        const campaign = await this.queryOne(`SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2`, [campaignId, creatorId]);
+        if (!campaign)
+            return null;
+        return this.getFinancialProgressShared(campaignId);
+    }
+    async getFinancialProgressAdmin(campaignId) {
+        return this.getFinancialProgressShared(campaignId);
+    }
+    async getFinancialProgressShared(campaignId) {
         const campaign = await this.queryOne(`SELECT
         c.id, c.title, c.slug, c.status,
         c.goal_amount, c.current_amount, c.investor_count,
         c.currency, c.start_date, c.end_date, c.funded_at
        FROM campaigns c
-       WHERE c.id = $1 AND c.creator_id = $2`, [campaignId, creatorId]);
+       WHERE c.id = $1`, [campaignId]);
         if (!campaign)
             return null;
         const investmentStats = await this.queryOne(`SELECT
@@ -279,6 +353,23 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             averagePerCampaign: Number(row?.avg_per_campaign ?? 0),
             currency: 'USD',
         };
+    }
+    async getHistory(campaignId) {
+        return this.queryMany(`
+      SELECT 
+        h.id,
+        h.from_status,
+        h.to_status,
+        h.reason as feedback,
+        h.created_at,
+        u.email as changed_by_email,
+        COALESCE(ap.first_name || ' ' || ap.last_name, u.email) as changed_by_name
+      FROM campaign_status_history h
+      LEFT JOIN users u ON h.changed_by = u.id
+      LEFT JOIN admin_profiles ap ON u.id = ap.user_id
+      WHERE h.campaign_id = $1
+      ORDER BY h.created_at DESC
+    `, [campaignId]);
     }
 };
 exports.EntrepreneurCampaignRepository = EntrepreneurCampaignRepository;

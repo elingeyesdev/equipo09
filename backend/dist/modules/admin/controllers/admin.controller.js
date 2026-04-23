@@ -49,6 +49,10 @@ let AdminController = class AdminController {
         const history = await this.adminService.getCampaignHistory(id);
         return new dto_1.ApiSuccessResponse(history, 'Historial de campaña obtenido');
     }
+    async getCampaignFinancialProgress(id) {
+        const progress = await this.adminService.getCampaignFinancialProgress(id);
+        return new dto_1.ApiSuccessResponse(progress, 'Progreso financiero obtenido');
+    }
     async updateCampaignStatus(id, status, feedback, req) {
         const reviewerId = req.user.id;
         const updated = await this.adminService.updateCampaignStatus(id, status, reviewerId, feedback);
@@ -116,6 +120,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getCampaignHistory", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id/financial-progress'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener progreso financiero detallado de una campaña (Administración)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCampaignFinancialProgress", null);
 __decorate([
     (0, common_1.Patch)('campaigns/:id/status'),
     (0, roles_decorator_1.Roles)('admin', 'super_admin'),

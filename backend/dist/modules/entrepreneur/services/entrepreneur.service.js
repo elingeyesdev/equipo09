@@ -155,6 +155,28 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return updated;
     }
+    async updateCampaign(userId, campaignId, dto) {
+        await this.ensureEntrepreneurProfile(userId);
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign) {
+            throw new exceptions_1.NotFoundException('Campaña', campaignId);
+        }
+        if (campaign.status !== 'draft' && campaign.status !== 'rejected') {
+            throw new exceptions_1.BadRequestException(`No se puede editar una campaña en estado ${campaign.status}. Debe estar en borrador o rechazada.`);
+        }
+        const updated = await this.campaignRepo.update(campaignId, userId, dto);
+        if (!updated) {
+            throw new exceptions_1.NotFoundException('Campaña', campaignId);
+        }
+        return updated;
+    }
+    async getCampaignHistory(userId, campaignId) {
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign) {
+            throw new exceptions_1.NotFoundException('Campaña', campaignId);
+        }
+        return this.campaignRepo.getHistory(campaignId);
+    }
     async getCampaignCreationReadiness(userId) {
         const profile = await this.profileRepo.findByUserId(userId);
         if (!profile) {

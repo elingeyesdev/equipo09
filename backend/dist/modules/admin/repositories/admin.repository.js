@@ -32,9 +32,11 @@ let AdminRepository = class AdminRepository extends database_1.BaseRepository {
     async getAllCampaigns() {
         return this.queryMany(`
       SELECT c.id, c.title, c.status, c.goal_amount, c.current_amount, c.created_at,
-             u.email as creator_email
+             u.email as creator_email,
+             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as creator_name
       FROM campaigns c
       JOIN users u ON c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON u.id = ep.user_id
       ORDER BY c.created_at DESC
     `);
     }
@@ -155,7 +157,15 @@ let AdminRepository = class AdminRepository extends database_1.BaseRepository {
         const dataQuery = `
       SELECT c.id, c.title, c.status, c.goal_amount, c.current_amount, c.created_at, c.campaign_type,
              COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as entrepreneur_name,
-             u.email as creator_email
+             u.email as creator_email,
+             (
+               20 + -- Base Score
+               CASE WHEN LENGTH(c.title) > 20 THEN 15 ELSE 0 END +
+               CASE WHEN LENGTH(COALESCE(c.description, '')) > 200 THEN 25 ELSE 0 END +
+               CASE WHEN c.goal_amount > 1000 THEN 15 ELSE 0 END +
+               CASE WHEN c.location IS NOT NULL THEN 10 ELSE 0 END +
+               CASE WHEN c.cover_image_url IS NOT NULL THEN 15 ELSE 0 END
+             ) as audit_score
       FROM campaigns c
       JOIN users u ON c.creator_id = u.id
       LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id

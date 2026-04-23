@@ -21,6 +21,8 @@ export declare class EntrepreneurService {
     submitCampaignForReview(userId: string, campaignId: string): Promise<EntrepreneurCampaign>;
     publishCampaign(userId: string, campaignId: string): Promise<EntrepreneurCampaign>;
     updateCampaignCover(userId: string, campaignId: string, coverUrl: string): Promise<EntrepreneurCampaign>;
+    updateCampaign(userId: string, campaignId: string, dto: Partial<CreateCampaignDto>): Promise<EntrepreneurCampaign>;
+    getCampaignHistory(userId: string, campaignId: string): Promise<any[]>;
     getCampaignCreationReadiness(userId: string): Promise<CampaignCreationReadiness>;
     getCampaignFinancialProgress(userId: string, campaignId: string): Promise<CampaignFinancialProgress>;
     getMyFinancialSummary(userId: string): Promise<EntrepreneurFinancialSummary>;

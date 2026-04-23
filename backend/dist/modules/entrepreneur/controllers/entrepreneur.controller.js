@@ -76,6 +76,11 @@ let EntrepreneurController = class EntrepreneurController {
         const campaign = await this.entrepreneurService.createCampaign(userId, dto);
         return new dto_2.ApiSuccessResponse(campaign, 'Campaña creada exitosamente');
     }
+    async updateCampaign(req, campaignId, dto) {
+        const userId = req.user.id;
+        const campaign = await this.entrepreneurService.updateCampaign(userId, campaignId, dto);
+        return new dto_2.ApiSuccessResponse(campaign, 'Campaña actualizada con éxito');
+    }
     async getMyCampaigns(req, query) {
         const userId = req.user.id;
         const result = await this.entrepreneurService.getMyCampaigns(userId, query);
@@ -85,6 +90,11 @@ let EntrepreneurController = class EntrepreneurController {
         const userId = req.user.id;
         const campaign = await this.entrepreneurService.submitCampaignForReview(userId, campaignId);
         return new dto_2.ApiSuccessResponse(campaign, 'Campaña enviada a revisión');
+    }
+    async getCampaignHistory(req, campaignId) {
+        const userId = req.user.id;
+        const history = await this.entrepreneurService.getCampaignHistory(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(history, 'Historial de campaña obtenido');
     }
     async publishCampaign(req, campaignId) {
         const userId = req.user.id;
@@ -241,6 +251,18 @@ __decorate([
 ], EntrepreneurController.prototype, "createCampaign", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Patch)('me/campaigns/:campaignId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Actualizar datos de una campaña (Borrador o Rechazada)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Campaña actualizada.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "updateCampaign", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Get)('me/campaigns'),
     (0, swagger_1.ApiOperation)({ summary: 'Listar mis campañas (EDT 1.3)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista paginada de campañas.' }),
@@ -263,6 +285,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "submitCampaignForReview", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Get)('me/campaigns/:campaignId/history'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener historial de auditoría de una campaña propia' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Historial de estados y feedback.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "getCampaignHistory", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Post)('me/campaigns/:campaignId/publish'),

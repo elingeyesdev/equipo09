@@ -23,6 +23,7 @@ export declare class AdminController {
     }>>;
     getCampaignDetail(id: string): Promise<ApiSuccessResponse<any>>;
     getCampaignHistory(id: string): Promise<ApiSuccessResponse<any[]>>;
+    getCampaignFinancialProgress(id: string): Promise<ApiSuccessResponse<import("../../entrepreneur/models").CampaignFinancialProgress | null>>;
     updateCampaignStatus(id: string, status: string, feedback: string | undefined, req: any): Promise<ApiSuccessResponse<any>>;
     softDeleteUser(id: string): Promise<ApiSuccessResponse<any>>;
     deleteCampaign(id: string, req: any): Promise<ApiSuccessResponse<any>>;
