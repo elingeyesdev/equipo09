@@ -50,3 +50,29 @@ export interface InvestmentResult {
   ticket: Investment;
   remainingBalance: number;
 }
+
+export interface InvestmentHistoryItem {
+  id: string;
+  amount: number;
+  investmentStatus: string;
+  createdAt: Date;
+  campaignId: string;
+  campaignTitle: string;
+  campaignCoverImage: string | null;
+  campaignStatus: string;
+  rewardTitle: string | null;
+}
+
+export function mapRowToInvestmentHistoryItem(row: any): InvestmentHistoryItem {
+  return {
+    id: row.id,
+    amount: Number(row.amount),
+    investmentStatus: row.investment_status,
+    createdAt: row.created_at,
+    campaignId: row.campaign_id,
+    campaignTitle: row.campaign_title,
+    campaignCoverImage: row.campaign_cover_image,
+    campaignStatus: row.campaign_status,
+    rewardTitle: row.reward_title ?? null,
+  };
+}

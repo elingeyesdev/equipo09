@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 
@@ -9,7 +9,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { InvestmentsService } from '../services/investments.service';
 import { InvestmentDto } from '../dto/investment.dto';
 import { ApiSuccessResponse } from '../../../common/dto';
-import { InvestmentResult } from '../models/investment.model';
+import { InvestmentResult, InvestmentHistoryItem } from '../models/investment.model';
 
 @ApiTags('investments')
 @ApiBearerAuth()
@@ -37,5 +37,22 @@ export class InvestmentsController {
     const result = await this.investmentsService.createInvestment(userId, dto);
     
     return new ApiSuccessResponse(result, 'Inversión procesada exitosamente.');
+  }
+
+  /**
+   * GET /investments/me
+   * Endpoint para listar el historial de inversiones del usuario.
+   */
+  @Get('me')
+  @Roles('investor')
+  @ApiOperation({ summary: 'Obtener historial de inversiones del usuario' })
+  @ApiResponse({ status: 200, description: 'Historial obtenido exitosamente.' })
+  async getMyInvestments(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<InvestmentHistoryItem[]>> {
+    const userId = (req as any).user.id;
+    const history = await this.investmentsService.getMyInvestments(userId);
+    
+    return new ApiSuccessResponse(history, 'Historial de inversiones recuperado.');
   }
 }

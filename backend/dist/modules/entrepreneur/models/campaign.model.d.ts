@@ -17,6 +17,8 @@ export interface EntrepreneurCampaign {
     viewCount: number;
     categoryName: string;
     categorySlug: string;
+    categoryId: string;
+    description: string;
     createdAt: Date;
     updatedAt: Date;
     publishedAt: Date | null;
@@ -70,5 +72,18 @@ export interface EntrepreneurFinancialSummary {
     totalInvestors: number;
     averagePerCampaign: number;
     currency: string;
+}
+export interface CampaignInvestor {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    location: string | null;
+    bio: string | null;
+    email: string;
+    totalInvested: number;
+    investmentCount: number;
+    lastInvestmentAt: Date;
 }
 export declare function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign;

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
-import { Investment, InvestmentResult, mapRowToInvestment } from '../models/investment.model';
+import { Investment, InvestmentResult, InvestmentHistoryItem, mapRowToInvestment, mapRowToInvestmentHistoryItem } from '../models/investment.model';
 import { InvestmentDto } from '../dto/investment.dto';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       // 3. Validar estado de la campaña y aplicar bloqueo concurrente
       const campaignResult = await client.query(
-        `SELECT id, status, end_date, min_investment, goal_amount, current_amount FROM campaigns WHERE id = $1 FOR UPDATE`,
+        `SELECT id, creator_id, title, status, end_date, min_investment, goal_amount, current_amount FROM campaigns WHERE id = $1 FOR UPDATE`,
         [dto.campaignId]
       );
 
@@ -177,6 +177,35 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.campaignId, JSON.stringify({ amount: dto.amount, investment_id: investment.id })]
       );
 
+      // 10. Crear Notificación para el Emprendedor
+      let notificationTypeId: string;
+      const typeResult = await client.query(
+        `SELECT id FROM notification_types WHERE code = 'investment_received'`
+      );
+      if (typeResult.rows.length > 0) {
+        notificationTypeId = typeResult.rows[0].id;
+      } else {
+        const insertType = await client.query(
+          `INSERT INTO notification_types (code, name, category) VALUES ('investment_received', 'Inversión Recibida', 'investment') RETURNING id`
+        );
+        notificationTypeId = insertType.rows[0].id;
+      }
+
+      await client.query(
+        `INSERT INTO notifications (
+          user_id, type_id, title, body, reference_type, reference_id
+        ) VALUES (
+          $1, $2, $3, $4, 'campaign', $5
+        )`,
+        [
+          campaign.creator_id,
+          notificationTypeId,
+          '¡Nueva inversión recibida!',
+          `Un inversor acaba de aportar $${dto.amount} a tu campaña "${campaign.title}".`,
+          dto.campaignId
+        ]
+      );
+
       const investmentObj = mapRowToInvestment(investment);
       
       return {
@@ -184,6 +213,32 @@ export class InvestmentsRepository extends BaseRepository {
         remainingBalance: availableCapital - dto.amount
       };
     });
+  }
+
+  /**
+   * Obtiene el historial detallado de inversiones de un usuario.
+   */
+  async getMyInvestments(userId: string): Promise<InvestmentHistoryItem[]> {
+    const query = `
+      SELECT 
+        i.id, 
+        i.amount, 
+        i.status as investment_status, 
+        i.created_at,
+        c.id as campaign_id, 
+        c.title as campaign_title, 
+        c.cover_image_url as campaign_cover_image, 
+        c.status as campaign_status,
+        rt.title as reward_title
+      FROM investments i
+      JOIN campaigns c ON i.campaign_id = c.id
+      LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+      WHERE i.investor_id = $1
+      ORDER BY i.created_at DESC
+    `;
+    
+    const rows = await this.queryMany(query, [userId]);
+    return rows.map(mapRowToInvestmentHistoryItem);
   }
 }
 

@@ -2,10 +2,23 @@ import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
-import { Gem, TrendingUp, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+import { getMyInvestments, InvestmentHistoryItem } from '../api/investor.api';
+import { useState, useEffect } from 'react';
 
 export function InvestorDashboardPage() {
   const { data, loading, error } = useInvestorDashboard();
+  const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
+  const [loadingInvestments, setLoadingInvestments] = useState(true);
+
+  useEffect(() => {
+    if (data) {
+      getMyInvestments()
+        .then(setInvestments)
+        .catch(console.error)
+        .finally(() => setLoadingInvestments(false));
+    }
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
@@ -52,18 +65,65 @@ export function InvestorDashboardPage() {
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between border-b border-emerald-50 pb-4">
                  <h2 className="text-[18px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">Operaciones Recientes</h2>
-                 <button className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer">Ver Historial Completo</button>
               </div>
-              <div className="bg-white rounded-[32px] border border-dashed border-emerald-200 p-20 text-center">
-                <div className="text-emerald-100 mb-6 flex justify-center">
-                   <TrendingUp size={64} strokeWidth={1} />
+              
+              {loadingInvestments ? (
+                <div className="py-10 text-center text-slate-400 font-bold text-[13px] uppercase tracking-widest">
+                  Cargando operaciones...
                 </div>
-                <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-3">Sin Actividad Pendiente</h3>
-                <p className="text-[14px] text-slate-400 font-medium max-w-xs mx-auto">Explora nuestras campañas activas y encuentra tu próxima oportunidad de alto impacto financiero.</p>
-                <button className="mt-8 bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black px-8 py-3 rounded-xl transition-all border-none active:scale-95 cursor-pointer">
-                  Explorar Campañas
-                </button>
-              </div>
+              ) : investments.length === 0 ? (
+                <div className="bg-white rounded-[32px] border border-dashed border-emerald-200 p-20 text-center">
+                  <div className="text-emerald-100 mb-6 flex justify-center">
+                     <TrendingUp size={64} strokeWidth={1} />
+                  </div>
+                  <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-3">Sin Actividad Pendiente</h3>
+                  <p className="text-[14px] text-slate-400 font-medium max-w-xs mx-auto">Explora nuestras campañas activas y encuentra tu próxima oportunidad de alto impacto financiero.</p>
+                  <Link to="/explore" className="inline-block mt-8 bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black px-8 py-3 rounded-xl transition-all border-none active:scale-95 cursor-pointer no-underline">
+                    Explorar Campañas
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {investments.map((inv) => (
+                    <div key={inv.id} className="bg-white rounded-[24px] p-6 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-shadow">
+                      <div className="w-full md:w-32 h-32 rounded-2xl bg-slate-100 overflow-hidden shrink-0">
+                        {inv.campaignCoverImage ? (
+                          <img src={inv.campaignCoverImage} alt={inv.campaignTitle} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32]" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 w-full">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${inv.investmentStatus === 'completed' ? 'bg-emerald-100 text-[#2e7d32]' : 'bg-slate-100 text-slate-500'}`}>
+                            {inv.investmentStatus === 'completed' ? 'Completado' : inv.investmentStatus}
+                          </span>
+                          <span className="text-[12px] font-bold text-slate-400 flex items-center gap-1">
+                            <Clock size={12} />
+                            {new Date(inv.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-1 truncate">
+                          {inv.campaignTitle}
+                        </h3>
+                        {inv.rewardTitle && (
+                          <p className="text-[13px] text-[#2e7d32] font-bold mb-3 flex items-center gap-1">
+                            <Gem size={14} />
+                            Recompensa: {inv.rewardTitle}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Invertido</p>
+                        <p className="text-2xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
+                        <Link to={`/campaigns/${inv.campaignId}`} className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer inline-flex items-center gap-1 mt-3">
+                          Ver Campaña <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

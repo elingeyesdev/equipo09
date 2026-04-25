@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { EntrepreneurService } from '../services';
 import { CreateEntrepreneurProfileDto, UpdateEntrepreneurProfileDto, QueryCampaignsDto, CreateCampaignDto } from '../dto';
 import { ApiSuccessResponse, PaginatedResponse } from '../../../common/dto';
-import { EntrepreneurProfile, EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignCreationReadiness } from '../models';
+import { EntrepreneurProfile, EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignCreationReadiness, CampaignInvestor } from '../models';
 export declare class EntrepreneurController {
     private readonly entrepreneurService;
     constructor(entrepreneurService: EntrepreneurService);
@@ -24,4 +24,5 @@ export declare class EntrepreneurController {
     getMyCampaignById(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     getMyFinancialSummary(req: Request): Promise<ApiSuccessResponse<EntrepreneurFinancialSummary>>;
     getCampaignFinancialProgress(req: Request, campaignId: string): Promise<ApiSuccessResponse<CampaignFinancialProgress>>;
+    getCampaignInvestors(req: Request, campaignId: string, page?: number, limit?: number): Promise<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>>;
 }
