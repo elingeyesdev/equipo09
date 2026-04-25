@@ -599,6 +599,7 @@ CREATE TABLE reward_tiers (
     includes_shipping   BOOLEAN        NOT NULL DEFAULT false,
     shipping_details    TEXT,
     image_url           VARCHAR(512),
+    expires_at          TIMESTAMPTZ,
     items               JSONB          DEFAULT '[]',
     sort_order          INTEGER        NOT NULL DEFAULT 0,
     is_active           BOOLEAN        NOT NULL DEFAULT true,

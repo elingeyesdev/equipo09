@@ -6,6 +6,10 @@ import type {
   PaginatedResponse,
   CampaignFinancialProgress,
   CampaignInvestor,
+  RewardTier,
+  CreateRewardTierDto,
+  UpdateRewardTierDto,
+  RewardClaim,
 } from '../types/campaign.types';
 import type { CampaignHistoryItem } from '../types/admin.types';
 
@@ -129,6 +133,54 @@ export async function getCampaignInvestors(
   const { data } = await api.get<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>>(
     `/entrepreneurs/me/campaigns/${campaignId}/investors`,
     { params: { page, limit } },
+  );
+  return data.data;
+}
+
+export async function getRewardTiers(
+  campaignId: string,
+): Promise<RewardTier[]> {
+  const { data } = await api.get<ApiSuccessResponse<RewardTier[]>>(
+    `/campaigns/${campaignId}/rewards`,
+  );
+  return data.data;
+}
+
+export async function createRewardTier(
+  campaignId: string,
+  dto: CreateRewardTierDto,
+): Promise<RewardTier> {
+  const { data } = await api.post<ApiSuccessResponse<RewardTier>>(
+    `/campaigns/${campaignId}/rewards`,
+    dto,
+  );
+  return data.data;
+}
+
+export async function updateRewardTier(
+  campaignId: string,
+  rewardId: string,
+  dto: UpdateRewardTierDto,
+): Promise<RewardTier> {
+  const { data } = await api.patch<ApiSuccessResponse<RewardTier>>(
+    `/campaigns/${campaignId}/rewards/${rewardId}`,
+    dto,
+  );
+  return data.data;
+}
+
+export async function deleteRewardTier(
+  campaignId: string,
+  rewardId: string,
+): Promise<void> {
+  await api.delete(`/campaigns/${campaignId}/rewards/${rewardId}`);
+}
+
+export async function getRewardClaims(
+  campaignId: string,
+): Promise<RewardClaim[]> {
+  const { data } = await api.get<ApiSuccessResponse<RewardClaim[]>>(
+    `/campaigns/${campaignId}/rewards/claims`,
   );
   return data.data;
 }

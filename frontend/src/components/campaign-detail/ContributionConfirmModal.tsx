@@ -89,8 +89,8 @@ export function ContributionConfirmModal({
 
       {/* ── Modal Card ── */}
       <div
-        className="relative w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-hidden"
-        style={{ animation: 'slideUp 0.3s ease-out' }}
+        className="relative w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-y-auto"
+        style={{ animation: 'slideUp 0.3s ease-out', maxHeight: 'calc(100vh - 2rem)' }}
       >
         {/* ── Header with gradient ── */}
         <div

@@ -121,3 +121,55 @@ export interface PaginatedResponse<T> {
     currentPage: number;
   };
 }
+
+export interface RewardTier {
+  id: string;
+  campaignId: string;
+  title: string;
+  description: string;
+  amount: number;
+  currency: string;
+  maxClaims: number | null;
+  currentClaims: number;
+  estimatedDelivery: string | null;
+  includesShipping: boolean;
+  shippingDetails: string | null;
+  imageUrl: string | null;
+  expiresAt: string | null;
+  items: any[];
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRewardTierDto {
+  title: string;
+  description: string;
+  amount: number;
+  currency?: string;
+  maxClaims?: number | null;
+  estimatedDelivery?: string;
+  includesShipping?: boolean;
+  shippingDetails?: string;
+  imageUrl?: string;
+  expiresAt?: string;
+  items?: any[];
+  sortOrder?: number;
+}
+
+export interface UpdateRewardTierDto extends Partial<CreateRewardTierDto> {
+  isActive?: boolean;
+}
+
+export interface RewardClaim {
+  investment_id: string;
+  amount: number;
+  invested_at: string;
+  reward_title: string;
+  reward_id: string;
+  expires_at: string | null;
+  investor_email: string;
+  first_name: string;
+  last_name: string;
+}

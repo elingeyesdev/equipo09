@@ -9,6 +9,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { CampaignsModule } from './modules/campaigns/campaign.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
+import { RewardTiersModule } from './modules/reward-tiers/reward-tiers.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -27,6 +28,7 @@ import { join } from 'path';
     CampaignsModule,
     AdminModule,
     InvestmentsModule,
+    RewardTiersModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
