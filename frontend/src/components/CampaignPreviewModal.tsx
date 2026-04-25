@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
 import { CampaignInvestorsTab } from './CampaignInvestorsTab';
+import { CampaignRewardsTab } from './CampaignRewardsTab';
 import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory } from '../api/campaign.api';
 import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
@@ -145,7 +146,7 @@ export function CampaignPreviewModal({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
-  const [activeTab, setActiveTab] = useState<'details' | 'investors'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards'>('details');
 
   const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
@@ -300,6 +301,17 @@ export function CampaignPreviewModal({
           >
             Inversores Activos ({investorsTotal})
           </button>
+          {campaign.campaignType === 'reward' && !isAdmin && (
+            <button
+              onClick={() => setActiveTab('rewards')}
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${
+                activeTab === 'rewards' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <Gem size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
+              Recompensas
+            </button>
+          )}
         </div>
 
         {/* Main Content Area */}
@@ -645,11 +657,15 @@ export function CampaignPreviewModal({
                 )}
               </aside>
             </>
-          ) : (
+          ) : activeTab === 'investors' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
                <CampaignInvestorsTab campaignId={campaign.id} currency={currency} />
             </div>
-          )}
+          ) : activeTab === 'rewards' ? (
+            <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
+               <CampaignRewardsTab campaignId={campaign.id} currency={currency} />
+            </div>
+          ) : null}
         </div>
 
         {/* Action Panel: Compact Sticky Footer */}

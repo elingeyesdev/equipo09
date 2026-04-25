@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       // 3. Validar estado de la campaña y aplicar bloqueo concurrente
       const campaignResult = await client.query(
-        `SELECT id, status, end_date, min_investment, goal_amount, current_amount FROM campaigns WHERE id = $1 FOR UPDATE`,
+        `SELECT id, status, end_date, min_investment, goal_amount, current_amount, campaign_type FROM campaigns WHERE id = $1 FOR UPDATE`,
         [dto.campaignId]
       );
 
@@ -66,36 +66,46 @@ export class InvestmentsRepository extends BaseRepository {
       // 4. Validar reward tier si fue seleccionado
       let rewardTierId: string | null = null;
       if (dto.rewardTierId) {
+        // REGLA: Solo campañas tipo 'reward' permiten recompensas
+        if (campaign.campaign_type !== 'reward') {
+          throw new BadRequestException('Esta campaña no admite niveles de recompensa.');
+        }
+
         const tierResult = await client.query(
-          `SELECT id, amount, max_claims, current_claims
-           FROM reward_tiers
-           WHERE id = $1 AND campaign_id = $2 AND is_active = true
+          `SELECT id, amount, max_claims, current_claims, is_active 
+           FROM reward_tiers 
+           WHERE id = $1 AND campaign_id = $2
            FOR UPDATE`,
           [dto.rewardTierId, dto.campaignId]
         );
 
         if (tierResult.rows.length === 0) {
-          throw new BadRequestException('El nivel de recompensa seleccionado no existe o no pertenece a esta campaña.');
+          throw new BadRequestException('La recompensa no existe o no pertenece a esta campaña.');
         }
 
         const tier = tierResult.rows[0];
-        const tierAmount = Number(tier.amount);
-        const tierMaxClaims = tier.max_claims ? Number(tier.max_claims) : null;
-        const tierCurrentClaims = Number(tier.current_claims) || 0;
 
-        // Validar monto mínimo del tier
+        if (!tier.is_active) {
+          throw new BadRequestException('La recompensa seleccionada no está activa.');
+        }
+
+        // REGLA: Validar monto mínimo
+        const tierAmount = Number(tier.amount);
         if (dto.amount < tierAmount) {
           throw new BadRequestException(
-            `El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la recompensa ($${tierAmount}).`
+            `El monto de inversión ($${dto.amount}) es insuficiente para este nivel ($${tierAmount}).`
           );
         }
 
-        // Validar disponibilidad de claims
+        // REGLA: Validar stock (atómico via FOR UPDATE + check)
+        const tierMaxClaims = tier.max_claims !== null ? Number(tier.max_claims) : null;
+        const tierCurrentClaims = Number(tier.current_claims);
+
         if (tierMaxClaims !== null && tierCurrentClaims >= tierMaxClaims) {
-          throw new BadRequestException('Esta recompensa ha alcanzado su límite máximo de reclamaciones.');
+          throw new BadRequestException('Esta recompensa está agotada (Sold Out).');
         }
 
-        // Incrementar current_claims manualmente
+        // Incrementar reclamos de forma atómica
         await client.query(
           `UPDATE reward_tiers SET current_claims = current_claims + 1 WHERE id = $1`,
           [dto.rewardTierId]
