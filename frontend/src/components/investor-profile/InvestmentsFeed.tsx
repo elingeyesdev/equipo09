@@ -1,12 +1,21 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
+import { getMyInvestments } from '../../api/investor.api';
+import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { 
   TrendingUp, 
   Wallet, 
   BarChart3, 
-  ArrowUpRight, 
   Clock,
   FolderOpen,
   Gem,
+  Heart,
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  Gift,
+  Loader2,
 } from 'lucide-react';
 
 interface Props {
@@ -14,7 +23,41 @@ interface Props {
   capitalLoading: boolean;
 }
 
+const CAMPAIGN_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+  donation: { icon: Heart, label: 'Donación', color: '#e91e63' },
+  reward: { icon: Gem, label: 'Recompensa', color: '#f9a825' },
+  equity: { icon: TrendingUp, label: 'Equity', color: '#2e7d32' },
+};
+
+const STATUS_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
+  completed: { icon: CheckCircle2, color: '#2e7d32', bg: '#e8f5e9', label: 'Completada' },
+  pending: { icon: Clock, color: '#f9a825', bg: '#fff8e1', label: 'Pendiente' },
+  processing: { icon: Clock, color: '#1976d2', bg: '#e3f2fd', label: 'Procesando' },
+  failed: { icon: XCircle, color: '#c62828', bg: '#ffebee', label: 'Fallida' },
+  cancelled: { icon: XCircle, color: '#64748b', bg: '#f1f5f9', label: 'Cancelada' },
+  refunded: { icon: DollarSign, color: '#7b1fa2', bg: '#f3e5f5', label: 'Reembolsada' },
+};
+
 export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
+  const navigate = useNavigate();
+  const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
+  const [investmentsLoading, setInvestmentsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInvestments = async () => {
+      try {
+        setInvestmentsLoading(true);
+        const data = await getMyInvestments(50, 0);
+        setInvestments(data);
+      } catch {
+        // silently fail — will show empty state
+      } finally {
+        setInvestmentsLoading(false);
+      }
+    };
+    fetchInvestments();
+  }, []);
+
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-8 font-['Sora',sans-serif]">
 
@@ -93,22 +136,99 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                Historial de Inversiones
              </span>
           </div>
-          <button className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white border-none rounded-xl px-4 py-3 text-[12px] font-black uppercase tracking-widest cursor-pointer transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-emerald-900/10">
-            <ArrowUpRight size={16} strokeWidth={3} /> Explorar Campañas
-          </button>
         </div>
 
-        {/* Empty state */}
-        <div className="py-24 text-center bg-slate-50/20 border-[2px] border-dashed border-emerald-200 rounded-[40px] flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-white rounded-[28px] shadow-sm flex items-center justify-center text-emerald-200 mb-6 group hover:scale-110 transition-transform">
-             <FolderOpen size={40} strokeWidth={1} />
+        {investmentsLoading ? (
+          <div className="py-16 flex flex-col items-center justify-center gap-4">
+            <Loader2 size={32} strokeWidth={2} className="text-[#2e7d32] animate-spin" />
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Cargando historial...</span>
           </div>
-          <p className="text-[#1c2b1e] font-black text-[20px] mb-2 uppercase tracking-tight">Sin Inversiones Aún</p>
-          <p className="text-slate-400 font-medium text-[15px] max-w-[360px] leading-relaxed mb-10">Explora campañas activas y comienza a construir tu portafolio de inversión con impacto real.</p>
-          <button className="text-[#2e7d32] font-black text-[13px] uppercase tracking-widest hover:underline cursor-pointer border-none bg-transparent">
-            Explorar oportunidades disponibles
-          </button>
-        </div>
+        ) : investments.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            {investments.map((inv) => {
+              const typeConfig = CAMPAIGN_TYPE_CONFIG[inv.campaignType] || CAMPAIGN_TYPE_CONFIG.donation;
+              const TypeIcon = typeConfig.icon;
+              const statusConfig = STATUS_CONFIG[inv.status] || STATUS_CONFIG.completed;
+              const StatusIcon = statusConfig.icon;
+
+              return (
+                <div
+                  key={inv.id}
+                  onClick={() => navigate(`/campaign/${inv.campaignId}`)}
+                  className="rounded-2xl border border-slate-100 p-4 hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Campaign thumbnail */}
+                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm">
+                      {inv.campaignCover ? (
+                        <img src={inv.campaignCover} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ background: `linear-gradient(135deg, #1c2b1e, ${typeConfig.color})` }}
+                        >
+                          <TypeIcon size={18} strokeWidth={1.5} className="text-white/40" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 truncate group-hover:text-[#2e7d32] transition-colors">
+                        {inv.campaignTitle}
+                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest"
+                          style={{ backgroundColor: typeConfig.color + '15', color: typeConfig.color }}
+                        >
+                          <TypeIcon size={8} strokeWidth={3} />
+                          {typeConfig.label}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest"
+                          style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
+                        >
+                          <StatusIcon size={8} strokeWidth={3} />
+                          {statusConfig.label}
+                        </span>
+                        {inv.rewardTitle && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-amber-50 text-amber-700">
+                            <Gift size={8} strokeWidth={3} />
+                            {inv.rewardTitle}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Amount & Date */}
+                    <div className="text-right shrink-0">
+                      <p className="text-[15px] font-black text-[#1c2b1e] tracking-tighter">
+                        ${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                        {new Date(inv.createdAt).toLocaleDateString('es-BO', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Empty state */
+          <div className="py-24 text-center bg-slate-50/20 border-[2px] border-dashed border-emerald-200 rounded-[40px] flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 bg-white rounded-[28px] shadow-sm flex items-center justify-center text-emerald-200 mb-6 group hover:scale-110 transition-transform">
+               <FolderOpen size={40} strokeWidth={1} />
+            </div>
+            <p className="text-[#1c2b1e] font-black text-[20px] mb-2 uppercase tracking-tight">Sin Inversiones Aún</p>
+            <p className="text-slate-400 font-medium text-[15px] max-w-[360px] leading-relaxed">Explora campañas activas y comienza a construir tu portafolio de inversión con impacto real.</p>
+          </div>
+        )}
       </div>
     </div>
   );

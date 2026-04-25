@@ -122,6 +122,11 @@ let EntrepreneurController = class EntrepreneurController {
         const progress = await this.entrepreneurService.getCampaignFinancialProgress(userId, campaignId);
         return new dto_2.ApiSuccessResponse(progress);
     }
+    async getCampaignInvestors(req, campaignId, page, limit) {
+        const userId = req.user.id;
+        const result = await this.entrepreneurService.getCampaignInvestors(userId, campaignId, { page: page ? Number(page) : 1, limit: limit ? Number(limit) : 20 });
+        return new dto_2.ApiSuccessResponse(result);
+    }
 };
 exports.EntrepreneurController = EntrepreneurController;
 __decorate([
@@ -362,6 +367,19 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "getCampaignFinancialProgress", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Get)('me/campaigns/:campaignId/investors'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener lista de inversores de una campaña propia' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de inversores retornada.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Number, Number]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "getCampaignInvestors", null);
 exports.EntrepreneurController = EntrepreneurController = __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-profile'),
     (0, swagger_1.ApiBearerAuth)(),

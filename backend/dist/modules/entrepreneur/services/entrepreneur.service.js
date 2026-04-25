@@ -200,6 +200,11 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return progress;
     }
+    async getCampaignInvestors(userId, campaignId, query) {
+        await this.ensureEntrepreneurProfile(userId);
+        const { investors, total } = await this.campaignRepo.getCampaignInvestors(campaignId, userId, query);
+        return new dto_1.PaginatedResponse(investors, total, query.page || 1, query.limit || 20);
+    }
     async getMyFinancialSummary(userId) {
         await this.ensureEntrepreneurProfile(userId);
         return this.campaignRepo.getFinancialSummary(userId);

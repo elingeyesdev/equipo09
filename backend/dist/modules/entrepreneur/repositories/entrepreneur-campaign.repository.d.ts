@@ -1,5 +1,5 @@
 import { BaseRepository } from '../../../common/database';
-import { EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary } from '../models';
+import { EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignInvestor } from '../models';
 import { QueryCampaignsDto, CreateCampaignDto } from '../dto';
 export declare class EntrepreneurCampaignRepository extends BaseRepository {
     create(creatorId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign>;
@@ -17,4 +17,11 @@ export declare class EntrepreneurCampaignRepository extends BaseRepository {
     private getFinancialProgressShared;
     getFinancialSummary(creatorId: string): Promise<EntrepreneurFinancialSummary>;
     getHistory(campaignId: string): Promise<any[]>;
+    getCampaignInvestors(campaignId: string, creatorId: string, query?: {
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        investors: CampaignInvestor[];
+        total: number;
+    }>;
 }

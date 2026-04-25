@@ -2,7 +2,7 @@ import { PaginatedResponse } from '../../../common/dto';
 import { EntrepreneurProfileRepository, EntrepreneurCampaignRepository } from '../repositories';
 import { UserRepository } from '../../users/repositories';
 import { CreateEntrepreneurProfileDto, UpdateEntrepreneurProfileDto, QueryCampaignsDto, CreateCampaignDto } from '../dto';
-import { EntrepreneurProfile, EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignCreationReadiness } from '../models';
+import { EntrepreneurProfile, EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignCreationReadiness, CampaignInvestor } from '../models';
 export declare class EntrepreneurService {
     private readonly profileRepo;
     private readonly campaignRepo;
@@ -25,6 +25,10 @@ export declare class EntrepreneurService {
     getCampaignHistory(userId: string, campaignId: string): Promise<any[]>;
     getCampaignCreationReadiness(userId: string): Promise<CampaignCreationReadiness>;
     getCampaignFinancialProgress(userId: string, campaignId: string): Promise<CampaignFinancialProgress>;
+    getCampaignInvestors(userId: string, campaignId: string, query: {
+        page?: number;
+        limit?: number;
+    }): Promise<PaginatedResponse<CampaignInvestor>>;
     getMyFinancialSummary(userId: string): Promise<EntrepreneurFinancialSummary>;
     private ensureEntrepreneurProfile;
     private ensureProfileCompleteForNewCampaign;

@@ -21,6 +21,8 @@ function mapRowToEntrepreneurCampaign(row) {
         viewCount: Number(row.view_count),
         categoryName: row.category_name,
         categorySlug: row.category_slug,
+        categoryId: row.category_id,
+        description: row.description,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         publishedAt: row.published_at,

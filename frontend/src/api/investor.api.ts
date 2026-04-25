@@ -115,3 +115,29 @@ export async function createInvestment(dto: CreateInvestmentDto): Promise<any> {
   return data.data;
 }
 
+// ============================================================
+// INVESTMENT HISTORY
+// ============================================================
+
+export interface InvestmentHistoryItem {
+  id: string;
+  campaignId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  rewardTierId: string | null;
+  createdAt: string;
+  campaignTitle: string;
+  campaignType: string;
+  campaignCover: string | null;
+  campaignStatus: string;
+  rewardTitle: string | null;
+  rewardDescription: string | null;
+}
+
+export async function getMyInvestments(limit = 20, offset = 0): Promise<InvestmentHistoryItem[]> {
+  const { data } = await api.get<ApiSuccessResponse<InvestmentHistoryItem[]>>(
+    `/investments/me?limit=${limit}&offset=${offset}`,
+  );
+  return data.data;
+}
