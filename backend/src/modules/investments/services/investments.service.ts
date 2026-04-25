@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InvestmentsRepository } from '../repositories/investments.repository';
 import { InvestmentDto } from '../dto/investment.dto';
-import { Investment } from '../models/investment.model';
+import { InvestmentResult } from '../models/investment.model';
 
 @Injectable()
 export class InvestmentsService {
@@ -10,7 +10,7 @@ export class InvestmentsService {
   /**
    * Crea una nueva inversión utilizando el motor transaccional SQL
    */
-  async createInvestment(userId: string, dto: InvestmentDto): Promise<Investment> {
+  async createInvestment(userId: string, dto: InvestmentDto): Promise<InvestmentResult> {
     return this.investmentsRepository.createInvestmentTransaction(userId, dto);
   }
 }

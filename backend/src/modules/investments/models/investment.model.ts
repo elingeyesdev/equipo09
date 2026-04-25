@@ -45,3 +45,8 @@ export function mapRowToInvestment(row: any): Investment {
     updatedAt: row.updated_at,
   };
 }
+
+export interface InvestmentResult {
+  ticket: Investment;
+  remainingBalance: number;
+}

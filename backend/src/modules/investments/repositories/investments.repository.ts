@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
-import { Investment, mapRowToInvestment } from '../models/investment.model';
+import { Investment, InvestmentResult, mapRowToInvestment } from '../models/investment.model';
 import { InvestmentDto } from '../dto/investment.dto';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class InvestmentsRepository extends BaseRepository {
    * y registra la inversión utilizando bloqueos pesimistas (FOR UPDATE)
    * 
    */
-  async createInvestmentTransaction(userId: string, dto: InvestmentDto): Promise<Investment> {
+  async createInvestmentTransaction(userId: string, dto: InvestmentDto): Promise<InvestmentResult> {
     return this.transaction(async (client) => {
       // 1. Read & Lock Investor Profile (Pessimistic Write Lock)
       const investorResult = await client.query(
@@ -177,7 +177,12 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.campaignId, JSON.stringify({ amount: dto.amount, investment_id: investment.id })]
       );
 
-      return mapRowToInvestment(investment);
+      const investmentObj = mapRowToInvestment(investment);
+      
+      return {
+        ticket: investmentObj,
+        remainingBalance: availableCapital - dto.amount
+      };
     });
   }
 }

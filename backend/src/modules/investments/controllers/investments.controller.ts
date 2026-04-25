@@ -9,7 +9,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { InvestmentsService } from '../services/investments.service';
 import { InvestmentDto } from '../dto/investment.dto';
 import { ApiSuccessResponse } from '../../../common/dto';
-import { Investment } from '../models/investment.model';
+import { InvestmentResult } from '../models/investment.model';
 
 @ApiTags('investments')
 @ApiBearerAuth()
@@ -32,10 +32,10 @@ export class InvestmentsController {
   async createInvestment(
     @Req() req: Request,
     @Body() dto: InvestmentDto,
-  ): Promise<ApiSuccessResponse<Investment>> {
+  ): Promise<ApiSuccessResponse<InvestmentResult>> {
     const userId = (req as any).user.id;
-    const investment = await this.investmentsService.createInvestment(userId, dto);
+    const result = await this.investmentsService.createInvestment(userId, dto);
     
-    return new ApiSuccessResponse(investment, 'Inversión procesada exitosamente.');
+    return new ApiSuccessResponse(result, 'Inversión procesada exitosamente.');
   }
 }
