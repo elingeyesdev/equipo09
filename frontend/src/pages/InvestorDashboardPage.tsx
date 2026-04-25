@@ -3,7 +3,7 @@ import { InvestorDashboardOverview } from '../components/InvestorDashboardOvervi
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
 import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, Calendar, CheckCircle2 } from 'lucide-react';
-import { getMyInvestments, InvestmentHistoryItem } from '../api/investor.api';
+import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
 import { useState, useEffect } from 'react';
 
 export function InvestorDashboardPage() {
