@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { formatCampaignCurrency } from '../utils/campaignFunding';
+import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
@@ -181,11 +183,6 @@ export function CampaignDetailPage() {
   const typeInfo = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
   const TypeIcon = typeInfo.icon;
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
-    return `/${url}`;
-  };
 
   const coverUrl = getImageUrl(campaign.coverImageUrl);
 

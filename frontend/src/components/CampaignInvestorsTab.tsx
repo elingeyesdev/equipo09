@@ -13,8 +13,10 @@ import {
   ChevronRight,
   ExternalLink,
   Search,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
+import { getImageUrl } from '../utils/image.utils';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 
 interface Props {
@@ -111,8 +113,8 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
               
               <div className="flex items-start gap-5 relative z-10">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 shadow-inner border border-white">
-                  {inv.avatarUrl ? (
-                    <img src={inv.avatarUrl} alt={inv.firstName} className="w-full h-full object-cover" />
+                  {getImageUrl(inv.avatarUrl) ? (
+                    <img src={getImageUrl(inv.avatarUrl)} alt={inv.firstName} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 bg-gradient-to-tr from-slate-50 to-slate-100">
                       <Users size={24} />
@@ -130,15 +132,24 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-3 text-slate-400 text-[12px] font-medium mb-3">
-                    <span className="flex items-center gap-1"><TrendingUp size={12} /> {inv.investmentCount} inv.</span>
-                    <span className="w-1 h-1 rounded-full bg-slate-200"></span>
-                    <span className="flex items-center gap-1 truncate"><MapPin size={12} /> {inv.location || 'Global'}</span>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-medium bg-slate-50 px-2 py-1 rounded-lg">
+                      <Calendar size={12} /> {new Date(inv.lastInvestmentAt).toLocaleDateString()}
+                    </div>
+                    {inv.rewardTitle ? (
+                      <div className="flex items-center gap-1.5 text-amber-600 text-[11px] font-black bg-amber-50 px-2 py-1 rounded-lg uppercase tracking-wider">
+                        <Heart size={10} fill="currentColor" /> {inv.rewardTitle}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-bold bg-slate-100/50 px-2 py-1 rounded-lg uppercase tracking-wider">
+                        Donación Directa
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50">
                     <div>
-                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block">Total Aportado</span>
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block">Monto Invertido</span>
                       <span className="text-[14px] font-black text-slate-900">
                         {formatCampaignCurrency(inv.totalInvested, currency)}
                       </span>
@@ -202,8 +213,8 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
 
             <div className="px-8 pb-10 -mt-16 text-center">
               <div className="w-32 h-32 rounded-[40px] bg-white p-2 mx-auto mb-6 shadow-xl relative overflow-hidden">
-                {selectedInvestor.avatarUrl ? (
-                  <img src={selectedInvestor.avatarUrl} className="w-full h-full object-cover rounded-[32px]" />
+                {getImageUrl(selectedInvestor.avatarUrl) ? (
+                  <img src={getImageUrl(selectedInvestor.avatarUrl)} className="w-full h-full object-cover rounded-[32px]" />
                 ) : (
                   <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300 rounded-[32px]">
                     <Users size={40} />
@@ -223,13 +234,11 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Aportado</span>
                   <span className="text-[14px] font-black text-slate-900">{formatCampaignCurrency(selectedInvestor.totalInvested, currency)}</span>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Inversiones</span>
-                  <span className="text-[14px] font-black text-slate-900">{selectedInvestor.investmentCount}</span>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Última</span>
-                  <span className="text-[11px] font-black text-slate-900">{new Date(selectedInvestor.lastInvestmentAt).toLocaleDateString()}</span>
+                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100 col-span-2">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Recompensa Seleccionada</span>
+                  <span className="text-[13px] font-black text-emerald-600 truncate block">
+                    {selectedInvestor.rewardTitle || 'Sin Recompensa (Donación)'}
+                  </span>
                 </div>
               </div>
 
@@ -272,20 +281,3 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
   );
 }
 
-function X({ size, strokeWidth }: { size: number; strokeWidth: number }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth={strokeWidth} 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  );
-}

@@ -84,6 +84,7 @@ export interface RecentInvestment {
   status: string;
   isAnonymous: boolean;
   investorDisplayName: string | null;
+  rewardTitle?: string;
   createdAt: string;
 }
 
@@ -111,6 +112,8 @@ export interface CampaignInvestor {
   totalInvested: number;
   investmentCount: number;
   lastInvestmentAt: string;
+  investmentId?: string;
+  rewardTitle?: string;
 }
 
 export interface PaginatedResponse<T> {

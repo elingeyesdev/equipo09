@@ -8,6 +8,7 @@ import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHist
 import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
+import { getImageUrl } from '../utils/image.utils';
 import {
   FileText,
   TrendingUp,
@@ -223,11 +224,6 @@ export function CampaignPreviewModal({
   const investorsTotal = finance?.investorCount ?? campaign.investorCount;
   const recent = finance?.recentInvestments ?? [];
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
-    return `/${url}`;
-  };
 
   const node = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-['Sora',sans-serif] animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="preview-title">
@@ -582,9 +578,16 @@ export function CampaignPreviewModal({
                       )}
                     </>
                   ) : (
-                    <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
-                      <AlertTriangle className="text-red-500" size={18} />
-                      <p className="text-[11px] font-bold text-red-700 leading-tight">Error de integridad: Emprendedor no identificado en el sistema.</p>
+                    <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-[24px] flex flex-col items-center text-center gap-3">
+                      <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-300">
+                        <User size={24} />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-black text-slate-900 uppercase tracking-tight mb-1">Información del Emprendedor</p>
+                        <p className="text-[11px] font-medium text-slate-400 leading-tight max-w-[200px]">
+                          {isAdmin ? 'No se pudo recuperar el perfil del emprendedor vinculado a esta campaña.' : 'Aún no has completado tu perfil de emprendedor. Ve a la sección de perfil para actualizarlo.'}
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -649,12 +652,19 @@ export function CampaignPreviewModal({
                     </div>
                     <div className="space-y-4">
                       {recent.map((inv, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px]">
-                              {inv.investor_name.substring(0, 2).toUpperCase()}
+                              {(inv.investorDisplayName || 'Anónimo').substring(0, 2).toUpperCase()}
                             </div>
-                            <span className="text-[12px] font-bold text-slate-700">{inv.investor_name}</span>
+                            <div className="flex flex-col">
+                              <span className="text-[12px] font-bold text-slate-700">{inv.isAnonymous ? 'Inversor Anónimo' : (inv.investorDisplayName || 'Usuario')}</span>
+                              {inv.rewardTitle && (
+                                <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-1">
+                                  <Heart size={8} fill="currentColor" /> {inv.rewardTitle}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <span className="text-[12px] font-black text-emerald-600">+{formatCampaignCurrency(inv.amount, currency)}</span>
                         </div>

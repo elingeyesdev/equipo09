@@ -6,6 +6,7 @@ import { AlertCircle, Save, X, Plus, Trash2, Gem, Edit2 } from 'lucide-react';
 import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, CampaignType } from '../types/campaign.types';
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
+import { getImageUrl } from '../utils/image.utils';
 
 const schema = z.object({
   title: z.string().min(5, 'El título debe tener mínimo 5 caracteres').max(255),
@@ -53,7 +54,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(initialData?.coverImageUrl || null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(getImageUrl(initialData?.coverImageUrl) || null);
   
   const [rewards, setRewards] = useState<CreateRewardTierDto[]>([]);
   const [showRewardForm, setShowRewardForm] = useState(false);

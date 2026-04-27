@@ -4,6 +4,7 @@ import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
 import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, Calendar, CheckCircle2 } from 'lucide-react';
 import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
+import { getImageUrl } from '../utils/image.utils';
 import { useState, useEffect } from 'react';
 
 export function InvestorDashboardPage() {
@@ -87,8 +88,8 @@ export function InvestorDashboardPage() {
                   {investments.map((inv) => (
                     <div key={inv.id} className="bg-white rounded-[24px] p-6 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-shadow">
                       <div className="w-full md:w-32 h-32 rounded-2xl bg-slate-100 overflow-hidden shrink-0">
-                        {inv.campaignCoverImage ? (
-                          <img src={inv.campaignCoverImage} alt={inv.campaignTitle} className="w-full h-full object-cover" />
+                        {getImageUrl(inv.campaignCoverImage) ? (
+                          <img src={getImageUrl(inv.campaignCoverImage)} alt={inv.campaignTitle} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32]" />
                         )}

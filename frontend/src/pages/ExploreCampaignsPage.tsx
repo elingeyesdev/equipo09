@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
+import { getImageUrl } from '../utils/image.utils';
 import type { PublicCampaign } from '../api/public-campaigns.api';
 import {
   Search,
@@ -31,11 +32,6 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
     : 0;
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
-    return `/${url}`;
-  };
 
   const coverUrl = getImageUrl(campaign.coverImageUrl);
   const avatarUrl = getImageUrl(campaign.entrepreneurAvatar);

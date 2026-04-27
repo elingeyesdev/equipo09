@@ -465,12 +465,14 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       `SELECT
         i.id, i.amount, i.currency, i.status,
         i.is_anonymous, i.created_at,
+        rt.title as reward_title,
         CASE
           WHEN i.is_anonymous THEN NULL
           ELSE COALESCE(ip.display_name, ip.first_name || ' ' || ip.last_name)
         END AS investor_display_name
        FROM investments i
        LEFT JOIN investor_profiles ip ON i.investor_id = ip.user_id
+       LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
        WHERE i.campaign_id = $1
        ORDER BY i.created_at DESC
        LIMIT 10`,
@@ -525,6 +527,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         status: row.status,
         isAnonymous: row.is_anonymous,
         investorDisplayName: row.investor_display_name,
+        rewardTitle: row.reward_title,
         createdAt: row.created_at,
       })),
     };
@@ -607,30 +610,25 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
 
     const rows = await this.queryMany(
       `SELECT 
-        stats.investor_id,
+        i.id as investment_id,
+        i.amount,
+        i.created_at,
+        rt.title as reward_title,
+        rt.id as reward_tier_id,
+        ip.user_id as investor_id,
         ip.first_name,
         ip.last_name,
         ip.display_name,
         ip.avatar_url,
         CONCAT(ip.city, ', ', ip.country) as location,
         ip.bio,
-        u.email,
-        stats.total_invested,
-        stats.investment_count,
-        stats.last_investment_at
-      FROM (
-        SELECT 
-          investor_id,
-          SUM(amount) as total_invested,
-          COUNT(id) as investment_count,
-          MAX(created_at) as last_investment_at
-        FROM investments
-        WHERE campaign_id = $1 AND status = 'completed'
-        GROUP BY investor_id
-      ) stats
-      JOIN investor_profiles ip ON stats.investor_id = ip.user_id
-      JOIN users u ON stats.investor_id = u.id
-      ORDER BY stats.last_investment_at DESC
+        u.email
+      FROM investments i
+      JOIN investor_profiles ip ON i.investor_id = ip.user_id
+      JOIN users u ON i.investor_id = u.id
+      LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+      WHERE i.campaign_id = $1 AND i.status = 'completed'
+      ORDER BY i.created_at DESC
       LIMIT $2 OFFSET $3`,
       [campaignId, limit, offset]
     );
@@ -645,9 +643,11 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         location: row.location,
         bio: row.bio,
         email: row.email,
-        totalInvested: Number(row.total_invested),
-        investmentCount: Number(row.investment_count),
-        lastInvestmentAt: row.last_investment_at,
+        totalInvested: Number(row.amount),
+        investmentCount: 1,
+        lastInvestmentAt: row.created_at,
+        investmentId: row.investment_id,
+        rewardTitle: row.reward_title,
       })),
       total,
     };

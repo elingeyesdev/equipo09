@@ -9,6 +9,7 @@ import {
   Settings,
   CheckCircle2
 } from 'lucide-react';
+import { getImageUrl } from '../../utils/image.utils';
 
 interface Props {
   profile: EntrepreneurProfile | null;
@@ -40,11 +41,6 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
     }
   };
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
-    return `/${url}`;
-  };
 
   const coverUrl = getImageUrl(profile?.coverUrl);
   const avatarUrl = getImageUrl(profile?.avatarUrl);

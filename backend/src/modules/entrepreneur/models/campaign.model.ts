@@ -77,6 +77,7 @@ export interface RecentInvestment {
   status: string;
   isAnonymous: boolean;
   investorDisplayName: string | null;
+  rewardTitle?: string;
   createdAt: Date;
 }
 
@@ -105,6 +106,8 @@ export interface CampaignInvestor {
   totalInvested: number;
   investmentCount: number;
   lastInvestmentAt: Date;
+  investmentId?: string;
+  rewardTitle?: string;
 }
 
 import { mapRowToRewardTier } from '../../reward-tiers/models/reward-tier.model';

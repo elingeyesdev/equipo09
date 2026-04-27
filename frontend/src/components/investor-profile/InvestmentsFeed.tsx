@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
 import { getMyInvestments } from '../../api/investor.api';
+import { getImageUrl } from '../../utils/image.utils';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { 
   TrendingUp, 
@@ -160,8 +161,8 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                   <div className="flex items-center gap-4">
                     {/* Campaign thumbnail */}
                     <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm">
-                      {inv.campaignCover ? (
-                        <img src={inv.campaignCover} alt="" className="w-full h-full object-cover" />
+                      {getImageUrl(inv.campaignCover) ? (
+                        <img src={getImageUrl(inv.campaignCover)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div
                           className="w-full h-full flex items-center justify-center"

@@ -1,6 +1,7 @@
 // v2026-04-27-02: Fix for deleteCampaign ReferenceError and cache invalidation
 import { useState, useCallback, useEffect } from 'react';
 import { useCampaigns } from '../hooks/useCampaigns';
+import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { Navbar } from '../components/Navbar';
 import { CampaignCard } from '../components/CampaignCard';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
@@ -32,6 +33,8 @@ export function MyCampaignsPage() {
     finalizeCampaign: handleFinalize,
     actionCampaignId,
   } = useCampaigns();
+  
+  const { profile } = useEntrepreneurProfile();
 
   const [previewCampaign, setPreviewCampaign] = useState<EntrepreneurCampaign | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<EntrepreneurCampaign | null>(null);
@@ -229,6 +232,15 @@ export function MyCampaignsPage() {
               }
             }}
             onEdit={handleModalEdit}
+            entrepreneur={profile ? {
+              firstName: profile.firstName,
+              lastName: profile.lastName,
+              email: profile.email || '',
+              avatar: profile.avatarUrl,
+              bio: profile.bio,
+              website: profile.website,
+              linkedin: profile.linkedinUrl
+            } : undefined}
           />
         )}
       </main>
