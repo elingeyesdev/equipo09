@@ -9,12 +9,14 @@ export class PaginatedResponse<T> {
 
   constructor(data: T[], total: number, page: number, limit: number) {
     this.data = data;
+    const totalPages = Math.ceil(total / limit);
     this.meta = {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-      hasNextPage: page < Math.ceil(total / limit),
+      totalItems: total,
+      itemCount: data.length,
+      itemsPerPage: limit,
+      totalPages: totalPages,
+      currentPage: page,
+      hasNextPage: page < totalPages,
       hasPreviousPage: page > 1,
     };
   }
@@ -22,16 +24,19 @@ export class PaginatedResponse<T> {
 
 export class PaginationMeta {
   @ApiProperty({ example: 50 })
-  total: number;
-
-  @ApiProperty({ example: 1 })
-  page: number;
+  totalItems: number;
 
   @ApiProperty({ example: 10 })
-  limit: number;
+  itemCount: number;
+
+  @ApiProperty({ example: 10 })
+  itemsPerPage: number;
 
   @ApiProperty({ example: 5 })
   totalPages: number;
+
+  @ApiProperty({ example: 1 })
+  currentPage: number;
 
   @ApiProperty({ example: true })
   hasNextPage: boolean;

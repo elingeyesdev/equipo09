@@ -47,28 +47,30 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
     <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Sora',sans-serif]">
       
       {/* Profile completeness */}
-      <div className={`${cardClass} border-l-[6px] border-l-[#2e7d32]`}>
-        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
-        <div className={sectionTitle}>
-           Proceso de Perfil
-          <span className="text-[14px] text-[#2e7d32] font-black">{percentage}%</span>
+      {percentage < 100 && (
+        <div className={`${cardClass} border-l-[6px] border-l-[#2e7d32]`}>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
+          <div className={sectionTitle}>
+             Proceso de Perfil
+            <span className="text-[14px] text-[#2e7d32] font-black">{percentage}%</span>
+          </div>
+          <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
+            <div 
+              className="h-full bg-gradient-to-r from-[#aed581] to-[#2e7d32] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
+              style={{ width: `${percentage}%` }}
+            ></div>
+          </div>
+          {nextStep && (
+            <button 
+              className="mt-5 w-full text-center py-3 text-[13px] text-[#2e7d32] font-black bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-[#2e7d32] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10" 
+              onClick={() => openModal(nextStep.modal as any)}
+            >
+              Siguiente: {nextStep.label}
+              <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
+            </button>
+          )}
         </div>
-        <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
-          <div 
-            className="h-full bg-gradient-to-r from-[#aed581] to-[#2e7d32] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
-            style={{ width: `${percentage}%` }}
-          ></div>
-        </div>
-        {percentage < 100 && nextStep && (
-          <button 
-            className="mt-5 w-full text-center py-3 text-[13px] text-[#2e7d32] font-black bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-[#2e7d32] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10" 
-            onClick={() => openModal(nextStep.modal as any)}
-          >
-            Siguiente: {nextStep.label}
-            <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Personal data */}
       <div className={cardClass}>

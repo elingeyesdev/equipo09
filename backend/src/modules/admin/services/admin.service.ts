@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PaginatedResponse } from '../../../common/dto';
 import { AdminRepository } from '../repositories/admin.repository';
 import { UserRepository } from '../../users/repositories';
 import { EntrepreneurCampaignRepository } from '../../entrepreneur/repositories';
+import { RewardTierRepository } from '../../reward-tiers/repositories/reward-tier.repository';
 import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 
 @Injectable()
@@ -10,6 +12,7 @@ export class AdminService {
     private readonly adminRepo: AdminRepository,
     private readonly userRepo: UserRepository,
     private readonly campaignRepo: EntrepreneurCampaignRepository,
+    private readonly rewardRepo: RewardTierRepository,
   ) {}
 
   async getDashboardStats() {
@@ -53,6 +56,22 @@ export class AdminService {
 
   async getCampaignFinancialProgress(campaignId: string) {
     return this.campaignRepo.getFinancialProgressAdmin(campaignId);
+  }
+  
+  async getCampaignInvestors(campaignId: string, query: { page?: number; limit?: number }) {
+    // Pass undefined as creatorId to bypass ownership check for admins
+    const { investors, total } = await this.campaignRepo.getCampaignInvestors(campaignId, undefined as any, query);
+    return new PaginatedResponse(
+      investors,
+      total,
+      query.page || 1,
+      query.limit || 20
+    );
+  }
+
+  async getRewardClaims(campaignId: string) {
+    // Return all claims for this campaign
+    return this.rewardRepo.getRewardClaims(campaignId);
   }
 
   async createAdmin(email: string, passwordString: string) {

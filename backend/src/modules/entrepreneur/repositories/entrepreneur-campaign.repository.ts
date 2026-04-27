@@ -595,10 +595,17 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     const limit = query.limit || 20;
     const offset = (page - 1) * limit;
 
-    // Verificar que la campaña existe y pertenece al emprendedor
+    // Verificar que la campaña existe (y pertenece al emprendedor si se provee creatorId)
+    const conditions = ['id = $1'];
+    const params = [campaignId];
+    if (creatorId) {
+      conditions.push('creator_id = $2');
+      params.push(creatorId);
+    }
+
     const campaign = await this.queryOne(
-      `SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2`,
-      [campaignId, creatorId]
+      `SELECT id FROM campaigns WHERE ${conditions.join(' AND ')}`,
+      params
     );
     if (!campaign) return { investors: [], total: 0 };
 

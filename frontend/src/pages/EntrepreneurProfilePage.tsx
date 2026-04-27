@@ -127,7 +127,7 @@ export function EntrepreneurProfilePage() {
       <main className="flex-1 w-full relative z-0 pb-20">
 
         {profileLoading ? (
-          <div className="max-w-[1100px] mx-auto p-40 flex flex-col items-center justify-center gap-6">
+          <div className="max-w-[1100px] mx-auto py-32 flex flex-col items-center justify-center gap-6">
             <Loader2 className="w-14 h-14 text-[#2e7d32] animate-spin" strokeWidth={2.5} />
             <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando Perfil Corporativo...</p>
           </div>
@@ -148,7 +148,7 @@ export function EntrepreneurProfilePage() {
             </div>
 
             {/* MAIN GRID */}
-            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 mt-10 flex flex-col lg:flex-row gap-10 items-start">
+            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 mt-8 flex flex-col lg:flex-row gap-8 items-start">
 
               <ProfileSidebar
                 profile={profile}
@@ -157,7 +157,7 @@ export function EntrepreneurProfilePage() {
                 onDeleteProfile={profile ? handleDeleteProfile : undefined}
               />
 
-              <div className="flex-1 min-w-0 flex flex-col gap-10 w-full">
+              <div className="flex-1 min-w-0 flex flex-col  w-full">
                 {/* Mensajes de Estado y Onboarding */}
                 <div className="w-full mb-2 flex flex-col gap-4">
                   {!profileLoading && !profile && (
@@ -177,19 +177,6 @@ export function EntrepreneurProfilePage() {
                       >
                         Completar Ahora
                       </button>
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="bg-red-50 text-[#c62828] p-5 rounded-[24px] text-[14px] font-bold border border-red-100 shadow-sm flex items-center gap-3">
-                      <AlertCircle size={20} strokeWidth={2.5} />
-                      {error}
-                    </div>
-                  )}
-                  {successMessage && (
-                    <div className="bg-emerald-50 text-[#2e7d32] p-5 rounded-[24px] text-[14px] font-bold border border-emerald-100 shadow-sm flex items-center gap-3">
-                      <CheckCircle2 size={20} strokeWidth={2.5} />
-                      {successMessage}
                     </div>
                   )}
                 </div>

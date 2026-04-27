@@ -57,6 +57,10 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
             src={coverUrl}
             alt={campaign.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLImageElement).onerror = null;
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1554224155-1696413565d3?q=80&w=1000'; // Default business image
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -93,7 +97,15 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[10px] font-black overflow-hidden shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img 
+                src={avatarUrl} 
+                alt="" 
+                className="w-full h-full object-cover" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).onerror = null;
+                  (e.target as HTMLImageElement).src = '/default-avatar.png';
+                }}
+              />
             ) : (
               campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
             )}

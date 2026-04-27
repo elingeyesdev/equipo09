@@ -86,6 +86,7 @@ export async function getPendingCampaigns(params: {
   limit: number;
   search?: string;
   type?: string;
+  status?: string;
 }): Promise<{ campaigns: PendingCampaign[]; total: number }> {
   const { data } = await api.get<ApiSuccessResponse<any>>('/admin/campaigns/pending', {
     params: {
@@ -93,6 +94,7 @@ export async function getPendingCampaigns(params: {
       limit: params.limit,
       q: params.search,
       campaignType: params.type === 'all' ? undefined : params.type,
+      status: params.status,
     },
   });
 
@@ -182,5 +184,17 @@ export async function getCampaignHistory(id: string): Promise<CampaignHistoryIte
 
 export async function getCampaignFinancialProgress(id: string): Promise<any> {
   const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/financial-progress`);
+  return data.data;
+}
+
+export async function getAdminCampaignInvestors(id: string, page: number = 1, limit: number = 20): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/investors`, {
+    params: { page, limit }
+  });
+  return data.data;
+}
+
+export async function getAdminRewardClaims(id: string): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(`/admin/campaigns/${id}/rewards/claims`);
   return data.data;
 }

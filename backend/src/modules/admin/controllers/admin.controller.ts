@@ -92,6 +92,29 @@ export class AdminController {
     return new ApiSuccessResponse(deleted, 'Usuario inhabilitado con éxito');
   }
 
+  @Get('campaigns/:id/investors')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener lista de inversores de una campaña (Administración)' })
+  async getCampaignInvestors(
+    @Param('id') id: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    const result = await this.adminService.getCampaignInvestors(id, {
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 20
+    });
+    return new ApiSuccessResponse(result, 'Listado de inversores obtenido');
+  }
+
+  @Get('campaigns/:id/rewards/claims')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener reclamos de recompensas (Administración)' })
+  async getRewardClaims(@Param('id') id: string) {
+    const claims = await this.adminService.getRewardClaims(id);
+    return new ApiSuccessResponse(claims, 'Reclamos obtenidos');
+  }
+
   @Delete('campaigns/:id')
   @Roles('admin', 'super_admin')
   @ApiOperation({ summary: 'Borra físicamente una campaña, si aplica' })

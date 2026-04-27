@@ -153,6 +153,7 @@ export function CampaignPreviewModal({
   const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canPublish = campaign?.status === 'approved';
+  const isPendingReview = campaign?.status === 'pending_review' || campaign?.status === 'in_review';
 
   useEffect(() => {
     if (open && campaign) {
@@ -296,14 +297,16 @@ export function CampaignPreviewModal({
           >
             Detalles de Proyecto
           </button>
-          <button
-            onClick={() => setActiveTab('investors')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
-              activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Inversores Activos ({investorsTotal})
-          </button>
+          {(campaign.status === 'published' || campaign.status === 'funded') && (
+            <button
+              onClick={() => setActiveTab('investors')}
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
+                activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Inversores Activos ({investorsTotal})
+            </button>
+          )}
           {campaign.campaignType === 'reward' && !isAdmin && (
             <button
               onClick={() => setActiveTab('rewards')}
@@ -332,6 +335,9 @@ export function CampaignPreviewModal({
                         src={getImageUrl(campaign.coverImageUrl)}
                         alt="Cover"
                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2574&auto=format&fit=crop';
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center text-slate-600">
@@ -559,7 +565,14 @@ export function CampaignPreviewModal({
                       <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
                         <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
                           {getImageUrl(entrepreneur.avatar) ? (
-                            <img src={getImageUrl(entrepreneur.avatar)} className="w-full h-full object-cover" alt="Proponent" />
+                            <img 
+                              src={getImageUrl(entrepreneur.avatar)} 
+                              className="w-full h-full object-cover" 
+                              alt="Proponent" 
+                              onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(entrepreneur.firstName || 'E')}+${encodeURIComponent(entrepreneur.lastName || '')}&background=random`;
+                              }}
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={24} /></div>
                           )}
@@ -676,86 +689,88 @@ export function CampaignPreviewModal({
             </>
           ) : activeTab === 'investors' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-               <CampaignInvestorsTab campaignId={campaign.id} currency={currency} />
+               <CampaignInvestorsTab campaignId={campaign.id} currency={currency} isAdmin={isAdmin} />
             </div>
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} />
+               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} />
             </div>
           ) : null}
         </div>
 
         {/* Action Panel: Compact Sticky Footer */}
-        <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-slate-200 px-8 py-5 z-30 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)]">
-          {isAdmin ? (
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1 w-full relative">
-                <textarea
-                  value={adminFeedback}
-                  onChange={(e) => setAdminFeedback(e.target.value)}
-                  placeholder="El feedback es obligatorio para rechazar..."
-                  className={`w-full pl-5 pr-12 py-3 bg-slate-50 border ${!adminFeedback.trim() ? 'border-amber-200 focus:border-amber-400' : 'border-slate-200 focus:border-indigo-500'} rounded-2xl text-[13px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all h-14 resize-none shadow-inner`}
-                />
-                <div className={`absolute right-4 top-1/2 -translate-y-1/2 ${!adminFeedback.trim() ? 'text-amber-400' : 'text-slate-300'}`}>
-                  <FileText size={18} />
+        {((isAdmin && isPendingReview) || (!isAdmin && (canSubmit || canPublish))) && (
+          <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-slate-200 px-8 py-5 z-30 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)]">
+            {isAdmin && isPendingReview ? (
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-1 w-full relative">
+                  <textarea
+                    value={adminFeedback}
+                    onChange={(e) => setAdminFeedback(e.target.value)}
+                    placeholder="El feedback es obligatorio para rechazar..."
+                    className={`w-full pl-5 pr-12 py-3 bg-slate-50 border ${!adminFeedback.trim() ? 'border-amber-200 focus:border-amber-400' : 'border-slate-200 focus:border-indigo-500'} rounded-2xl text-[13px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all h-14 resize-none shadow-inner`}
+                  />
+                  <div className={`absolute right-4 top-1/2 -translate-y-1/2 ${!adminFeedback.trim() ? 'text-amber-400' : 'text-slate-300'}`}>
+                    <FileText size={18} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <button
+                    onClick={() => onReject?.(adminFeedback)}
+                    disabled={actionLoading || !adminFeedback.trim()}
+                    className="flex-1 md:px-6 h-14 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed border-none cursor-pointer flex items-center justify-center gap-2 min-w-[140px]"
+                    title={!adminFeedback.trim() ? "Debe escribir un motivo para rechazar" : ""}
+                  >
+                    <XCircle size={18} /> Rechazar
+                  </button>
+                  <button
+                    onClick={() => onApprove?.()}
+                    disabled={actionLoading}
+                    className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
+                  >
+                    {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Aprobar</>}
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <button
-                  onClick={() => onReject?.(adminFeedback)}
-                  disabled={actionLoading || !adminFeedback.trim()}
-                  className="flex-1 md:px-6 h-14 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed border-none cursor-pointer flex items-center justify-center gap-2 min-w-[140px]"
-                  title={!adminFeedback.trim() ? "Debe escribir un motivo para rechazar" : ""}
-                >
-                  <XCircle size={18} /> Rechazar
-                </button>
-                <button
-                  onClick={() => onApprove?.()}
-                  disabled={actionLoading}
-                  className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
-                >
-                  {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Aprobar</>}
-                </button>
+            ) : (canSubmit || canPublish) ? (
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="hidden lg:flex items-center gap-3 text-slate-400">
+                  <ShieldCheck size={18} />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Certificación de Integridad Auditable</span>
+                </div>
+                <div className="flex gap-3 w-full md:w-auto">
+                  {canEdit && (
+                    <button
+                      onClick={() => onEdit?.(campaign!)}
+                      disabled={actionLoading}
+                      className="flex-1 md:w-48 h-14 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <FileText size={16} strokeWidth={2.5} /> Editar
+                    </button>
+                  )}
+                  {canSubmit && (
+                    <button
+                      onClick={onSubmitForReview}
+                      disabled={actionLoading}
+                      className="flex-1 md:w-56 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <AlertTriangle size={16} strokeWidth={2.5} /> Enviar Auditoría
+                    </button>
+                  )}
+                  {canPublish && (
+                    <button
+                      onClick={onPublish}
+                      disabled={actionLoading}
+                      className="flex-1 md:w-56 h-14 bg-[#2e7d32] hover:bg-[#1c2b1e] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Rocket size={16} strokeWidth={2.5} /> Lanzar
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (canSubmit || canPublish) ? (
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="hidden lg:flex items-center gap-3 text-slate-400">
-                <ShieldCheck size={18} />
-                <span className="text-[11px] font-bold uppercase tracking-wider">Certificación de Integridad Auditable</span>
-              </div>
-              <div className="flex gap-3 w-full md:w-auto">
-                {canEdit && (
-                  <button
-                    onClick={() => onEdit?.(campaign)}
-                    disabled={actionLoading}
-                    className="flex-1 md:w-48 h-14 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <FileText size={16} strokeWidth={2.5} /> Editar
-                  </button>
-                )}
-                {canSubmit && (
-                  <button
-                    onClick={onSubmitForReview}
-                    disabled={actionLoading}
-                    className="flex-1 md:w-56 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <AlertTriangle size={16} strokeWidth={2.5} /> Enviar Auditoría
-                  </button>
-                )}
-                {canPublish && (
-                  <button
-                    onClick={onPublish}
-                    disabled={actionLoading}
-                    className="flex-1 md:w-56 h-14 bg-[#2e7d32] hover:bg-[#1c2b1e] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Rocket size={16} strokeWidth={2.5} /> Lanzar
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : null}
-        </footer>
+            ) : null}
+          </footer>
+        )}
       </div>
     </div>
   );

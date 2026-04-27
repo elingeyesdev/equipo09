@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCampaignInvestors } from '../api/campaign.api';
+import { getAdminCampaignInvestors } from '../api/admin.api';
 import type { CampaignInvestor, PaginatedResponse } from '../types/campaign.types';
 import { 
   Users, 
@@ -22,9 +23,10 @@ import { formatCampaignCurrency } from '../utils/campaignFunding';
 interface Props {
   campaignId: string;
   currency: string;
+  isAdmin?: boolean;
 }
 
-export function CampaignInvestorsTab({ campaignId, currency }: Props) {
+export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: Props) {
   const [data, setData] = useState<PaginatedResponse<CampaignInvestor> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,9 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
   const loadInvestors = async () => {
     try {
       setLoading(true);
-      const result = await getCampaignInvestors(campaignId, page);
+      const result = isAdmin 
+        ? await getAdminCampaignInvestors(campaignId, page)
+        : await getCampaignInvestors(campaignId, page);
       setData(result);
     } catch (err) {
       console.error(err);
@@ -91,7 +95,7 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
         <div className="flex items-center gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl px-5 py-3 shadow-sm">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Inversores</span>
-            <span className="text-xl font-black text-slate-900">{data?.meta.totalItems || 0}</span>
+            <span className="text-xl font-black text-slate-900">{data?.meta?.totalItems || 0}</span>
           </div>
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 shadow-sm">
             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Retención de Capital</span>
@@ -114,7 +118,15 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
               <div className="flex items-start gap-5 relative z-10">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 shadow-inner border border-white">
                   {getImageUrl(inv.avatarUrl) ? (
-                    <img src={getImageUrl(inv.avatarUrl)} alt={inv.firstName} className="w-full h-full object-cover" />
+                    <img 
+                      src={getImageUrl(inv.avatarUrl)} 
+                      alt={inv.firstName} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).onerror = null;
+                        (e.target as HTMLImageElement).src = '/default-avatar.png'; // Fallback to a default if 404
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 bg-gradient-to-tr from-slate-50 to-slate-100">
                       <Users size={24} />
@@ -176,9 +188,9 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
       </div>
 
       {/* Pagination */}
-      {data && data.meta.totalPages > 1 && (
+      {data?.meta && data.meta.totalPages > 1 && (
         <div className="flex justify-center gap-2 pt-6">
-          {Array.from({ length: data.meta.totalPages }).map((_, i) => (
+          {Array.from({ length: data?.meta?.totalPages || 0 }).map((_, i) => (
             <button
               key={i}
               onClick={() => setPage(i + 1)}
@@ -214,7 +226,13 @@ export function CampaignInvestorsTab({ campaignId, currency }: Props) {
             <div className="px-8 pb-10 -mt-16 text-center">
               <div className="w-32 h-32 rounded-[40px] bg-white p-2 mx-auto mb-6 shadow-xl relative overflow-hidden">
                 {getImageUrl(selectedInvestor.avatarUrl) ? (
-                  <img src={getImageUrl(selectedInvestor.avatarUrl)} className="w-full h-full object-cover rounded-[32px]" />
+                  <img 
+                    src={getImageUrl(selectedInvestor.avatarUrl)} 
+                    className="w-full h-full object-cover rounded-[32px]"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedInvestor.firstName || 'I')}+${encodeURIComponent(selectedInvestor.lastName || '')}&background=random`;
+                    }}
+                  />
                 ) : (
                   <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300 rounded-[32px]">
                     <Users size={40} />

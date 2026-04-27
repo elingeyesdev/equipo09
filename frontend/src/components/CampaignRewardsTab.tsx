@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress } from '../api/campaign.api';
+import { getAdminRewardClaims, getCampaignFinancialProgress as getAdminFinancialProgress } from '../api/admin.api';
 import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim, CampaignFinancialProgress } from '../types/campaign.types';
 import { 
   Gem, 
@@ -22,9 +23,10 @@ interface Props {
   campaignId: string;
   currency: string;
   readOnly?: boolean;
+  isAdmin?: boolean;
 }
 
-export function CampaignRewardsTab({ campaignId, currency, readOnly = false }: Props) {
+export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isAdmin = false }: Props) {
   const [tiers, setTiers] = useState<RewardTier[]>([]);
   const [claims, setClaims] = useState<RewardClaim[]>([]);
   const [financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
@@ -46,8 +48,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false }: P
       setError(null);
       const [tiersData, claimsData, progressData] = await Promise.all([
         getRewardTiers(campaignId),
-        getRewardClaims(campaignId),
-        getCampaignFinancialProgress(campaignId)
+        isAdmin ? getAdminRewardClaims(campaignId) : getRewardClaims(campaignId),
+        isAdmin ? getAdminFinancialProgress(campaignId) : getCampaignFinancialProgress(campaignId)
       ]);
       setTiers(tiersData);
       setClaims(claimsData);

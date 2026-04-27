@@ -34,17 +34,18 @@ export function AdminDashboardPage() {
   const [filterType, setFilterType] = useState<'all' | 'reward' | 'donation'>('all');
   const [page, setPage] = useState(1);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<'pending_review' | 'published'>('pending_review');
 
   useEffect(() => {
     loadData();
-  }, [page, filterType]);
+  }, [page, filterType, statusFilter]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [statsData, campaignsData] = await Promise.all([
         getDashboardStats(),
-        getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType })
+        getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType, status: statusFilter })
       ]);
       setStats(statsData);
       setCampaigns(campaignsData.campaigns);
@@ -91,8 +92,14 @@ export function AdminDashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-white p-1 rounded-2xl shadow-sm border border-slate-100 flex">
-               <button className="px-4 py-2 text-[12px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 rounded-xl transition-all">Vista General</button>
-               <button className="px-4 py-2 text-[12px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Reportes</button>
+               <button 
+                 onClick={() => setStatusFilter('pending_review')}
+                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'pending_review' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}
+               >En Revisión</button>
+               <button 
+                 onClick={() => setStatusFilter('published')}
+                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'published' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+               >Campañas Activas</button>
             </div>
           </div>
         </div>
@@ -151,9 +158,11 @@ export function AdminDashboardPage() {
         <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/30">
             <div className="flex items-center gap-3">
-              <Clock size={20} className="text-indigo-600" />
-              <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Auditoría de Propuestas Técnicas</h2>
-              <span className="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-lg font-black">{totalCampaigns}</span>
+              {statusFilter === 'pending_review' ? <Clock size={20} className="text-indigo-600" /> : <Rocket size={20} className="text-emerald-600" />}
+              <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
+                {statusFilter === 'pending_review' ? 'Auditoría de Propuestas Técnicas' : 'Monitoreo de Capital Activo'}
+              </h2>
+              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] px-2 py-0.5 rounded-lg font-black`}>{totalCampaigns}</span>
             </div>
             
             <div className="flex flex-wrap items-center gap-3">
@@ -231,7 +240,9 @@ export function AdminDashboardPage() {
                         title="Ver Perfil Corporativo"
                       >
                         <Eye size={18} />
-                        <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">Auditar</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">
+                          {statusFilter === 'pending_review' ? 'Auditar' : 'Detalle'}
+                        </span>
                       </button>
                     </td>
                   </tr>

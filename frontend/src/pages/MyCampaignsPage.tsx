@@ -7,12 +7,12 @@ import { CampaignCard } from '../components/CampaignCard';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
 import type { EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
-import { 
-  Rocket, 
-  Plus, 
-  Search, 
-  Filter, 
-  AlertCircle, 
+import {
+  Rocket,
+  Plus,
+  Search,
+  Filter,
+  AlertCircle,
   Loader2,
   LayoutGrid,
   List,
@@ -33,7 +33,7 @@ export function MyCampaignsPage() {
     finalizeCampaign: handleFinalize,
     actionCampaignId,
   } = useCampaigns();
-  
+
   const { profile } = useEntrepreneurProfile();
 
   const [previewCampaign, setPreviewCampaign] = useState<EntrepreneurCampaign | null>(null);
@@ -72,7 +72,7 @@ export function MyCampaignsPage() {
 
       <main className="max-w-[1200px] mx-auto px-6 py-12">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-4">
           <div>
             <div className="flex items-center gap-3 text-[#2e7d32] mb-3">
               <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center">
@@ -98,10 +98,10 @@ export function MyCampaignsPage() {
         </div>
 
         {/* Filters & View Toggle */}
-        <div className="bg-white rounded-3xl p-4 mb-10 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-4">
+        <div className="bg-white rounded-3xl p-4 mb-5 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
+            <input
               type="text"
               placeholder="Buscar por título..."
               className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-[14px] font-medium outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
@@ -109,10 +109,10 @@ export function MyCampaignsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className="flex items-center gap-2 w-full md:w-auto">
             <Filter className="text-slate-400 mr-1" size={18} />
-            <select 
+            <select
               className="bg-slate-50 border-none rounded-2xl py-3 px-4 text-[13px] font-black uppercase tracking-wider outline-none cursor-pointer focus:ring-2 focus:ring-emerald-500/20"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -128,13 +128,13 @@ export function MyCampaignsPage() {
           <div className="h-10 w-[1px] bg-slate-100 hidden md:block"></div>
 
           <div className="flex bg-slate-50 p-1 rounded-xl">
-            <button 
+            <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
               <LayoutGrid size={18} />
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
             >
@@ -153,7 +153,7 @@ export function MyCampaignsPage() {
           <div className="bg-red-50 border border-red-100 rounded-3xl p-10 text-center">
             <AlertCircle className="text-red-400 mx-auto mb-4" size={40} />
             <p className="text-red-700 font-bold mb-4">{error}</p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="text-[#c62828] font-black uppercase text-[12px] tracking-widest hover:underline"
             >
@@ -200,7 +200,7 @@ export function MyCampaignsPage() {
               <CampaignForm
                 initialData={editingCampaign.id ? editingCampaign : null}
                 onSuccess={async (dto, file) => {
-                  const success = editingCampaign.id 
+                  const success = editingCampaign.id
                     ? await updateCampaign(editingCampaign.id, dto, file)
                     : await addCampaign(dto, file);
                   if (success) setEditingCampaign(null);
