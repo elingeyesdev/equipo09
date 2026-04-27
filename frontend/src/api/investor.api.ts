@@ -134,3 +134,18 @@ export async function getMyInvestments(): Promise<InvestmentHistoryItem[]> {
   return data.data;
 }
 
+export async function downloadInvestmentReceipt(id: string): Promise<void> {
+  const response = await api.get(`/investments/${id}/receipt`, {
+    responseType: 'blob',
+  });
+  
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `recibo_inversion_${id}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+

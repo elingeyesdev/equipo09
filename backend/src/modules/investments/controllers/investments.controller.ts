@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Body, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Req, Res, UseGuards, HttpCode, HttpStatus, StreamableFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 import { JwtAuthGuard } from '../../auth/guards';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -54,5 +54,30 @@ export class InvestmentsController {
     const history = await this.investmentsService.getMyInvestments(userId);
     
     return new ApiSuccessResponse(history, 'Historial de inversiones recuperado.');
+  }
+
+  /**
+   * GET /investments/:id/receipt
+   * Genera y descarga el comprobante en PDF
+   */
+  @Get(':id/receipt')
+  @Roles('investor')
+  @ApiOperation({ summary: 'Descargar comprobante en PDF de una inversión' })
+  @ApiResponse({ status: 200, description: 'Archivo PDF generado exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Inversión no encontrada.' })
+  async downloadReceipt(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Param('id') id: string,
+  ): Promise<StreamableFile> {
+    const userId = (req as any).user.id;
+    const stream = await this.investmentsService.generateReceiptPdf(userId, id);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="recibo_inversion_${id}.pdf"`,
+    });
+
+    return new StreamableFile(stream);
   }
 }

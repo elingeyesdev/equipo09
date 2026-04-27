@@ -1,5 +1,6 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Rocket, User, LogOut } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -73,13 +74,14 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {userEmail && (
           <div className="hidden sm:flex items-center gap-2 bg-emerald-50/80 px-4 py-2 rounded-full border border-emerald-100/50">
              <User size={14} className="text-[#2e7d32]" strokeWidth={3} />
              <span className="text-[12px] font-bold text-emerald-900 truncate max-w-[150px]">{userEmail}</span>
           </div>
         )}
+        {userEmail && <NotificationBell />}
         <button 
           className="bg-white hover:bg-red-50 text-slate-500 hover:text-red-700 border border-slate-200 hover:border-red-100 rounded-xl px-4 py-2 text-[13px] font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-2"
           onClick={handleLogout}

@@ -2,8 +2,8 @@ import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
-import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, Calendar, CheckCircle2 } from 'lucide-react';
-import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
+import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
+import { getMyInvestments, downloadInvestmentReceipt, type InvestmentHistoryItem } from '../api/investor.api';
 import { getImageUrl } from '../utils/image.utils';
 import { useState, useEffect } from 'react';
 
@@ -11,6 +11,19 @@ export function InvestorDashboardPage() {
   const { data, loading, error } = useInvestorDashboard();
   const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
   const [loadingInvestments, setLoadingInvestments] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadReceipt = async (id: string) => {
+    try {
+      setDownloadingId(id);
+      await downloadInvestmentReceipt(id);
+    } catch (err) {
+      console.error('Error al descargar recibo:', err);
+      alert('Hubo un error al generar el recibo. Por favor intenta de nuevo.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   useEffect(() => {
     if (data) {
@@ -114,12 +127,30 @@ export function InvestorDashboardPage() {
                           </p>
                         )}
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Invertido</p>
-                        <p className="text-2xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
-                        <Link to={`/campaigns/${inv.campaignId}`} className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer inline-flex items-center gap-1 mt-3">
-                          Ver Campaña <ArrowRight size={14} />
-                        </Link>
+                      <div className="text-right shrink-0 flex flex-col items-end justify-between h-full">
+                        <div>
+                          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Invertido</p>
+                          <p className="text-2xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 mt-3">
+                          <Link to={`/campaigns/${inv.campaignId}`} className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer inline-flex items-center gap-1">
+                            Ver Campaña <ArrowRight size={14} />
+                          </Link>
+                          {inv.investmentStatus === 'completed' && (
+                            <button
+                              onClick={() => handleDownloadReceipt(inv.id)}
+                              disabled={downloadingId === inv.id}
+                              className="text-[12px] font-black text-slate-600 hover:text-[#2e7d32] bg-slate-100 hover:bg-emerald-50 px-3 py-1.5 rounded-lg border-none cursor-pointer inline-flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {downloadingId === inv.id ? (
+                                <div className="w-3 h-3 border-2 border-slate-300 border-t-[#2e7d32] rounded-full animate-spin" />
+                              ) : (
+                                <FileText size={14} />
+                              )}
+                              Descargar Recibo
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

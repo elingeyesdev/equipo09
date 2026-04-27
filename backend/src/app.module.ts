@@ -10,6 +10,7 @@ import { CampaignsModule } from './modules/campaigns/campaign.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { RewardTiersModule } from './modules/reward-tiers/reward-tiers.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -29,6 +30,7 @@ import { join } from 'path';
     AdminModule,
     InvestmentsModule,
     RewardTiersModule,
+    NotificationsModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
