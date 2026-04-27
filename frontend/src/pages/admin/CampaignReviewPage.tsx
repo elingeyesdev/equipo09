@@ -42,7 +42,8 @@ export const CampaignReviewPage: React.FC = () => {
         page,
         limit: pageSize,
         search: searchTerm,
-        type: typeFilter
+        type: typeFilter,
+        status: 'pending_review'
       });
       setCampaigns(response.campaigns);
       setTotal(response.total);
