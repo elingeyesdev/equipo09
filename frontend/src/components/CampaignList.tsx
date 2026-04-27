@@ -33,6 +33,8 @@ interface Props {
   onPreview?: (campaign: EntrepreneurCampaign) => void;
   onSubmitForReview?: (campaignId: string) => void;
   onPublish?: (campaignId: string) => void;
+  onDelete?: (campaignId: string) => void;
+  onFinalize?: (campaignId: string) => void;
   actionCampaignId?: string | null;
 }
 
@@ -50,6 +52,8 @@ export function CampaignList({
   onPreview,
   onSubmitForReview,
   onPublish,
+  onDelete,
+  onFinalize,
   actionCampaignId,
 }: Props) {
   if (loading && campaigns.length === 0) {
@@ -120,6 +124,8 @@ export function CampaignList({
             onPreview={onPreview}
             onSubmitForReview={onSubmitForReview}
             onPublish={onPublish}
+            onDelete={onDelete}
+            onFinalize={onFinalize}
             actionCampaignId={actionCampaignId}
           />
         ))}

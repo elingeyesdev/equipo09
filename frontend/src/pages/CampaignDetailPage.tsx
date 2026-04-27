@@ -181,6 +181,14 @@ export function CampaignDetailPage() {
   const typeInfo = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
   const TypeIcon = typeInfo.icon;
 
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
+  const coverUrl = getImageUrl(campaign.coverImageUrl);
+
   return (
     <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
       <Navbar />
@@ -197,9 +205,9 @@ export function CampaignDetailPage() {
 
         {/* ── Hero Image ── */}
         <div className="relative h-[320px] md:h-[440px] rounded-[28px] overflow-hidden shadow-xl shadow-black/5 mb-10">
-          {campaign.coverImageUrl ? (
+          {coverUrl ? (
             <img
-              src={campaign.coverImageUrl}
+              src={coverUrl}
               alt={campaign.title}
               className="w-full h-full object-cover"
             />
@@ -258,8 +266,8 @@ export function CampaignDetailPage() {
             {/* Entrepreneur mini banner */}
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[12px] font-black overflow-hidden shrink-0">
-                {campaign.entrepreneurAvatar ? (
-                  <img src={campaign.entrepreneurAvatar} alt="" className="w-full h-full object-cover" />
+                {getImageUrl(campaign.entrepreneurAvatar) ? (
+                  <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
                 )}
@@ -357,8 +365,8 @@ export function CampaignDetailPage() {
               <div className="flex items-start gap-5">
                 {/* Avatar */}
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-emerald-500/10">
-                  {campaign.entrepreneurAvatar ? (
-                    <img src={campaign.entrepreneurAvatar} alt="" className="w-full h-full object-cover" />
+                  {getImageUrl(campaign.entrepreneurAvatar) ? (
+                    <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                   ) : (
                     campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
                   )}
@@ -510,12 +518,14 @@ export function CampaignDetailPage() {
                         step="0.01"
                         value={customAmount}
                         onChange={(e) => {
-                          setCustomAmount(e.target.value);
-                          setInvestmentError(null);
+                          if (campaign.campaignType !== 'reward') {
+                            setCustomAmount(e.target.value);
+                            setInvestmentError(null);
+                          }
                         }}
-                        placeholder={`Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
-                        disabled={investmentLoading}
-                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50"
+                        placeholder={campaign.campaignType === 'reward' ? 'Selecciona una recompensa' : `Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
+                        disabled={investmentLoading || campaign.campaignType === 'reward'}
+                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
                       />
                     </div>
                     {selectedTierId && (
@@ -560,10 +570,13 @@ export function CampaignDetailPage() {
 
                   const canInvest = !isExpired && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
 
-                  // Opens the confirmation modal instead of calling the API directly
                   const handleInvest = () => {
                     if (!token) {
                       navigate('/login', { state: { from: location.pathname } });
+                      return;
+                    }
+                    if (campaign.campaignType === 'reward' && !selectedTierId) {
+                      setInvestmentError('Para esta campaña, es obligatorio seleccionar una recompensa de la lista.');
                       return;
                     }
                     if (!hasValidAmount) {

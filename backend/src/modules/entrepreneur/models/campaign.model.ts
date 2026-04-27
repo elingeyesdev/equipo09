@@ -1,3 +1,5 @@
+import { RewardTier } from '../../reward-tiers/models/reward-tier.model';
+
 /**
  * Modelo de dominio: Campaña (vista del emprendedor)
  * Subconjunto de campos relevantes para el dashboard del emprendedor.
@@ -26,6 +28,7 @@ export interface EntrepreneurCampaign {
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
+  rewardTiers?: RewardTier[];
 }
 
 /**
@@ -104,11 +107,13 @@ export interface CampaignInvestor {
   lastInvestmentAt: Date;
 }
 
+import { mapRowToRewardTier } from '../../reward-tiers/models/reward-tier.model';
+
 /**
  * Mapea un row de PostgreSQL al modelo de campaña del emprendedor.
  */
 export function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign {
-  return {
+  const campaign: EntrepreneurCampaign = {
     id: row.id,
     title: row.title,
     slug: row.slug,
@@ -133,4 +138,10 @@ export function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign {
     updatedAt: row.updated_at,
     publishedAt: row.published_at,
   };
+
+  if (row.reward_tiers) {
+    campaign.rewardTiers = row.reward_tiers.map(mapRowToRewardTier);
+  }
+
+  return campaign;
 }

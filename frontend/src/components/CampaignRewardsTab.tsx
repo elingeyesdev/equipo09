@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims } from '../api/campaign.api';
-import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim } from '../types/campaign.types';
+import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress } from '../api/campaign.api';
+import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim, CampaignFinancialProgress } from '../types/campaign.types';
 import { 
   Gem, 
   Plus, 
@@ -21,11 +21,13 @@ import { formatCampaignCurrency } from '../utils/campaignFunding';
 interface Props {
   campaignId: string;
   currency: string;
+  readOnly?: boolean;
 }
 
-export function CampaignRewardsTab({ campaignId, currency }: Props) {
+export function CampaignRewardsTab({ campaignId, currency, readOnly = false }: Props) {
   const [tiers, setTiers] = useState<RewardTier[]>([]);
   const [claims, setClaims] = useState<RewardClaim[]>([]);
+  const [financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,12 +44,14 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
     try {
       setLoading(true);
       setError(null);
-      const [tiersData, claimsData] = await Promise.all([
+      const [tiersData, claimsData, progressData] = await Promise.all([
         getRewardTiers(campaignId),
-        getRewardClaims(campaignId)
+        getRewardClaims(campaignId),
+        getCampaignFinancialProgress(campaignId)
       ]);
       setTiers(tiersData);
       setClaims(claimsData);
+      setFinancialProgress(progressData);
     } catch (err: any) {
       console.error(err);
       setError('Error al cargar la información de recompensas.');
@@ -95,9 +99,23 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.amount) {
+    if (readOnly) return;
+    if (!formData.title || !formData.description || !formData.amount || !formData.maxClaims) {
       alert('Por favor completa todos los campos requeridos (*)');
       return;
+    }
+
+    if (financialProgress && formData.isActive !== false) {
+      const currentOtherTiersValue = tiers
+        .filter(t => t.isActive && t.id !== isEditing)
+        .reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0);
+      
+      const newTierValue = formData.amount * formData.maxClaims;
+      
+      if (currentOtherTiersValue + newTierValue > financialProgress.goalAmount) {
+        alert(`El valor acumulado en recompensas no puede superar la meta de la campaña (${formatCampaignCurrency(financialProgress.goalAmount, currency)}).`);
+        return;
+      }
     }
     
     try {
@@ -109,7 +127,8 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
       if (typeof payload.maxClaims === 'string') payload.maxClaims = parseInt(payload.maxClaims, 10);
       
       if (isEditing === 'new') {
-        const newTier = await createRewardTier(campaignId, payload as CreateRewardTierDto);
+        const { isActive, ...createPayload } = payload;
+        const newTier = await createRewardTier(campaignId, createPayload as CreateRewardTierDto);
         setTiers([...tiers, newTier]);
       } else {
         const updatedTier = await updateRewardTier(campaignId, isEditing!, payload as UpdateRewardTierDto);
@@ -150,18 +169,39 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-['Sora',sans-serif]">
       
-      {/* Header */}
+      {/* Header y Progreso */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
+        <div className="flex-1 max-w-xl">
           <div className="flex items-center gap-3 text-amber-500 mb-2">
             <Gem size={20} strokeWidth={2.5} />
             <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Gestión de Recompensas</h3>
           </div>
-          <p className="text-slate-500 text-[14px] font-medium max-w-md">
-            Define niveles de aportación y los beneficios que ofrecerás a tus inversores.
+          <p className="text-slate-500 text-[14px] font-medium mb-6">
+            Define niveles de aportación y los beneficios que ofrecerás a tus inversores. El valor total de las recompensas no puede superar la meta.
           </p>
+          
+          {financialProgress && (
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Valor Asignado</span>
+                <span className="text-[13px] font-black text-[#1c2b1e]">
+                  {formatCampaignCurrency(
+                    tiers.filter(t => t.isActive).reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0), 
+                    currency
+                  )} 
+                  <span className="text-slate-400 font-medium"> / {formatCampaignCurrency(financialProgress.goalAmount, currency)}</span>
+                </span>
+              </div>
+              <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 transition-all duration-500" 
+                  style={{ width: `${Math.min(100, (tiers.filter(t => t.isActive).reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0) / financialProgress.goalAmount) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
-        {!isEditing && (
+        {!isEditing && !readOnly && (
           <button
             onClick={handleAddNew}
             className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-6 py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[13px] flex items-center justify-center gap-2"
@@ -215,14 +255,15 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
                 />
               </div>
               <div>
-                <label className={labelClass}>Stock Disponible (Opcional)</label>
+                <label className={labelClass}>Stock Disponible (Personas) *</label>
                 <input 
                   type="number" 
+                  required
                   min="1"
                   className={inputClass}
                   value={formData.maxClaims === null ? '' : formData.maxClaims}
                   onChange={e => setFormData({...formData, maxClaims: e.target.value ? parseInt(e.target.value) : null})}
-                  placeholder="Dejar vacío para ilimitado"
+                  placeholder="Ej. 10"
                 />
               </div>
               <div>
@@ -293,15 +334,22 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
                       <Lock size={10} /> Agotada
                     </span>
                   )}
+                  {tier.isActive && tier.expiresAt && new Date(tier.expiresAt) < new Date() && (
+                    <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-widest flex items-center gap-1">
+                      <Calendar size={10} /> Expirada
+                    </span>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(tier)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors">
-                    <Edit2 size={14} strokeWidth={2.5} />
-                  </button>
-                  <button onClick={() => handleDelete(tier.id)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-100 text-slate-400 hover:text-red-600 flex items-center justify-center transition-colors">
-                    <Trash2 size={14} strokeWidth={2.5} />
-                  </button>
-                </div>
+                {!readOnly && (
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(tier)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors">
+                      <Edit2 size={14} strokeWidth={2.5} />
+                    </button>
+                    <button onClick={() => handleDelete(tier.id)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-100 text-slate-400 hover:text-red-600 flex items-center justify-center transition-colors">
+                      <Trash2 size={14} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
               </div>
               <h4 className="text-[16px] font-black text-[#1c2b1e] mb-2">{tier.title}</h4>
               <p className="text-[13px] text-slate-500 leading-relaxed mb-6 line-clamp-3">
@@ -366,7 +414,7 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
                       <th className="px-6 py-4">Inversor</th>
                       <th className="px-6 py-4">Recompensa</th>
                       <th className="px-6 py-4">Monto Aportado</th>
-                      <th className="px-6 py-4">Fecha</th>
+                      <th className="px-6 py-4">Estado</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -375,6 +423,7 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
                         <td className="px-6 py-4">
                           <div className="font-bold text-slate-800">{claim.first_name} {claim.last_name}</div>
                           <div className="text-slate-500 text-[11px]">{claim.investor_email}</div>
+                          <div className="text-slate-400 text-[10px] mt-1">{new Date(claim.invested_at).toLocaleDateString()}</div>
                         </td>
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 font-bold px-3 py-1.5 rounded-lg text-[11px]">
@@ -385,8 +434,31 @@ export function CampaignRewardsTab({ campaignId, currency }: Props) {
                         <td className="px-6 py-4 font-black text-emerald-700">
                           {formatCampaignCurrency(claim.amount, currency)}
                         </td>
-                        <td className="px-6 py-4 text-slate-500 font-medium text-[12px]">
-                          {new Date(claim.invested_at).toLocaleDateString()}
+                        <td className="px-6 py-4">
+                          {claim.claim_id ? (
+                            <select 
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 outline-none"
+                              value={claim.claim_status || 'pending'}
+                              onChange={async (e) => {
+                                try {
+                                  await import('../api/campaign.api').then(m => 
+                                    m.updateRewardClaim(campaignId, claim.claim_id, { status: e.target.value })
+                                  );
+                                  setClaims(claims.map(c => c.claim_id === claim.claim_id ? { ...c, claim_status: e.target.value } : c));
+                                } catch(err) {
+                                  alert('Error al actualizar el estado.');
+                                }
+                              }}
+                            >
+                              <option value="pending">Pendiente</option>
+                              <option value="processing">Procesando</option>
+                              <option value="shipped">Enviado</option>
+                              <option value="delivered">Entregado</option>
+                              <option value="issue_reported">Problema</option>
+                            </select>
+                          ) : (
+                            <span className="text-slate-400 text-[11px] italic">Sin registro logístico</span>
+                          )}
                         </td>
                       </tr>
                     ))}

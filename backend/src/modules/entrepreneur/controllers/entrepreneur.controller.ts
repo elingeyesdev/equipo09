@@ -379,4 +379,35 @@ export class EntrepreneurController {
     );
     return new ApiSuccessResponse(result);
   }
+  @ApiTags('entrepreneur-campaigns')
+  @Delete('me/campaigns/:campaignId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar una campaña (Solo Borrador o Rechazada)' })
+  @ApiResponse({ status: 200, description: 'Campaña eliminada exitosamente.' })
+  @ApiResponse({ status: 400, description: 'No se puede eliminar una campaña activa.' })
+  async deleteCampaign(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<null>> {
+    const userId = (req as any).user.id;
+    await this.entrepreneurService.deleteCampaign(userId, campaignId);
+    return new ApiSuccessResponse(null, 'Campaña eliminada exitosamente');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns/:campaignId/finalize')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Finalizar una campaña activa' })
+  @ApiResponse({ status: 200, description: 'Campaña finalizada exitosamente.' })
+  async finalizeCampaign(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<EntrepreneurCampaign>> {
+    const userId = (req as any).user.id;
+    const campaign = await this.entrepreneurService.finalizeCampaign(
+      userId,
+      campaignId,
+    );
+    return new ApiSuccessResponse(campaign, 'Campaña finalizada exitosamente');
+  }
 }

@@ -40,6 +40,15 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
     }
   };
 
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
+  const coverUrl = getImageUrl(profile?.coverUrl);
+  const avatarUrl = getImageUrl(profile?.avatarUrl);
+
   return (
     <div className="relative mb-8 font-['Sora',sans-serif]">
       {/* Inputs ocultos para subida */}
@@ -66,11 +75,11 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00897b] rounded-full blur-[120px]"></div>
         </div>
 
-        {profile?.coverUrl ? (
+        {coverUrl ? (
           <div
             className="absolute inset-0 z-10 transition-opacity duration-700"
             style={{
-              backgroundImage: `url(${profile.coverUrl})`,
+              backgroundImage: `url(${coverUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -99,11 +108,11 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           {/* Avatar con Anillo de Estatus */}
           <div className="relative group">
             <div className="w-40 h-40 rounded-[48px] border-[6px] border-[#f4f7f4] bg-white shadow-2xl overflow-hidden flex items-center justify-center relative z-10">
-              {profile?.avatarUrl ? (
+              {avatarUrl ? (
                 <div
                   className="w-full h-full transition-opacity duration-500"
                   style={{
-                    backgroundImage: `url(${profile.avatarUrl})`,
+                    backgroundImage: `url(${avatarUrl})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}

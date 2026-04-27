@@ -54,6 +54,15 @@ export async function getMyCampaigns(
   return data.data;
 }
 
+export async function getMyCampaignById(
+  id: string,
+): Promise<EntrepreneurCampaign> {
+  const { data } = await api.get<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${id}`,
+  );
+  return data.data;
+}
+
 export async function createCampaign(
   dto: CreateCampaignDto,
 ): Promise<EntrepreneurCampaign> {
@@ -141,7 +150,7 @@ export async function getRewardTiers(
   campaignId: string,
 ): Promise<RewardTier[]> {
   const { data } = await api.get<ApiSuccessResponse<RewardTier[]>>(
-    `/campaigns/${campaignId}/rewards`,
+    `/campaigns/${campaignId}/rewards/all`,
   );
   return data.data;
 }
@@ -181,6 +190,29 @@ export async function getRewardClaims(
 ): Promise<RewardClaim[]> {
   const { data } = await api.get<ApiSuccessResponse<RewardClaim[]>>(
     `/campaigns/${campaignId}/rewards/claims`,
+  );
+  return data.data;
+}
+
+export async function updateRewardClaim(
+  campaignId: string,
+  claimId: string,
+  dto: { status?: string; trackingNumber?: string; trackingUrl?: string; notes?: string },
+): Promise<RewardClaim> {
+  const { data } = await api.patch<ApiSuccessResponse<RewardClaim>>(
+    `/campaigns/${campaignId}/rewards/claims/${claimId}`,
+    dto,
+  );
+  return data.data;
+}
+
+export async function deleteCampaign(campaignId: string): Promise<void> {
+  await api.delete(`/entrepreneurs/me/campaigns/${campaignId}`);
+}
+
+export async function finalizeCampaign(campaignId: string): Promise<EntrepreneurCampaign> {
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/finalize`
   );
   return data.data;
 }

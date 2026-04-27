@@ -20,11 +20,10 @@ export class CreateRewardTierDto {
   @IsString()
   currency?: string;
 
-  @ApiPropertyOptional({ example: 100, description: 'Null for unlimited' })
-  @IsOptional()
+  @ApiProperty({ example: 100, description: 'Número máximo de reclamos permitidos' })
   @IsNumber()
   @Min(1)
-  maxClaims?: number | null;
+  maxClaims: number;
 
   @ApiPropertyOptional({ example: '2026-12-31' })
   @IsOptional()
@@ -67,4 +66,26 @@ export class UpdateRewardTierDto extends CreateRewardTierDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+}
+
+export class UpdateRewardClaimDto {
+  @ApiPropertyOptional({ example: 'shipped' })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiPropertyOptional({ example: '1Z9999999999999999' })
+  @IsOptional()
+  @IsString()
+  trackingNumber?: string;
+
+  @ApiPropertyOptional({ example: 'https://ups.com/track?num=1Z9999999999999999' })
+  @IsOptional()
+  @IsString()
+  trackingUrl?: string;
+
+  @ApiPropertyOptional({ example: 'Enviado por UPS.' })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

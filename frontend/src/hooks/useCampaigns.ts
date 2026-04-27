@@ -6,6 +6,8 @@ import {
   submitCampaignForReview,
   publishCampaign as publishCampaignApi,
   uploadCampaignImage as uploadCampaignImageApi,
+  deleteCampaign as deleteCampaignApi,
+  finalizeCampaign as finalizeCampaignApi,
 } from '../api/campaign.api';
 import type {
   EntrepreneurCampaign,
@@ -191,6 +193,41 @@ export function useCampaigns() {
     }
   };
 
+  const deleteCampaign = async (campaignId: string): Promise<boolean> => {
+    if (!confirm('¿Estás seguro de eliminar esta campaña permanentemente?')) return false;
+    try {
+      setError(null);
+      setActionCampaignId(campaignId);
+      await deleteCampaignApi(campaignId);
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'No se pudo eliminar la campaña'));
+      return false;
+    } finally {
+      setActionCampaignId(null);
+    }
+  };
+
+  const finalizeCampaign = async (campaignId: string): Promise<boolean> => {
+    if (!confirm('¿Deseas finalizar esta campaña? Ya no podrá recibir más inversiones.')) return false;
+    try {
+      setError(null);
+      setActionCampaignId(campaignId);
+      await finalizeCampaignApi(campaignId);
+      const paginated = await getMyCampaigns(queryRef.current);
+      setCampaigns(paginated.data);
+      return true;
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'No se pudo finalizar la campaña'));
+      return false;
+    } finally {
+      setActionCampaignId(null);
+    }
+  };
+
   return {
     campaigns,
     meta,
@@ -207,6 +244,8 @@ export function useCampaigns() {
     submitForReview,
     publishCampaign,
     uploadCampaignImage,
+    deleteCampaign,
+    finalizeCampaign,
     actionCampaignId,
   };
 }

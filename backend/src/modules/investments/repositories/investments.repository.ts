@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
-import { Investment, InvestmentResult, InvestmentHistoryItem, mapRowToInvestment, mapRowToInvestmentHistoryItem } from '../models/investment.model';
+import { Investment, InvestmentResult, mapRowToInvestment } from '../models/investment.model';
 import { InvestmentDto } from '../dto/investment.dto';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       // 3. Validar estado de la campaña y aplicar bloqueo concurrente
       const campaignResult = await client.query(
-        `SELECT id, creator_id, title, status, end_date, min_investment, goal_amount, current_amount FROM campaigns WHERE id = $1 FOR UPDATE`,
+        `SELECT id, status, end_date, min_investment, goal_amount, current_amount, campaign_type FROM campaigns WHERE id = $1 FOR UPDATE`,
         [dto.campaignId]
       );
 
@@ -58,44 +58,63 @@ export class InvestmentsRepository extends BaseRepository {
 
       const goalAmount = Number(campaign.goal_amount) || 0;
       const currentAmount = Number(campaign.current_amount) || 0;
+      const remainingAmount = goalAmount - currentAmount;
+      
+      if (dto.amount > remainingAmount) {
+        throw new BadRequestException(`El monto de inversión ($${dto.amount}) supera el saldo restante de la campaña ($${remainingAmount}).`);
+      }
       
       const newCurrentAmount = currentAmount + dto.amount;
       const isFunded = newCurrentAmount >= goalAmount;
       const newStatus = isFunded && campaign.status === 'published' ? 'funded' : campaign.status;
 
-      // 4. Validar reward tier si fue seleccionado
+      // 4. Validar reward tier si fue seleccionado o requerido
       let rewardTierId: string | null = null;
+      if (campaign.campaign_type === 'reward' && !dto.rewardTierId) {
+        throw new BadRequestException('Para campañas de tipo recompensa, es obligatorio seleccionar un nivel de recompensa.');
+      }
+
       if (dto.rewardTierId) {
+        // REGLA: Solo campañas tipo 'reward' permiten recompensas
+        if (campaign.campaign_type !== 'reward') {
+          throw new BadRequestException('Esta campaña no admite niveles de recompensa.');
+        }
+
         const tierResult = await client.query(
-          `SELECT id, amount, max_claims, current_claims
-           FROM reward_tiers
-           WHERE id = $1 AND campaign_id = $2 AND is_active = true
+          `SELECT id, amount, max_claims, current_claims, is_active 
+           FROM reward_tiers 
+           WHERE id = $1 AND campaign_id = $2
            FOR UPDATE`,
           [dto.rewardTierId, dto.campaignId]
         );
 
         if (tierResult.rows.length === 0) {
-          throw new BadRequestException('El nivel de recompensa seleccionado no existe o no pertenece a esta campaña.');
+          throw new BadRequestException('La recompensa no existe o no pertenece a esta campaña.');
         }
 
         const tier = tierResult.rows[0];
-        const tierAmount = Number(tier.amount);
-        const tierMaxClaims = tier.max_claims ? Number(tier.max_claims) : null;
-        const tierCurrentClaims = Number(tier.current_claims) || 0;
 
-        // Validar monto mínimo del tier
-        if (dto.amount < tierAmount) {
+        if (!tier.is_active) {
+          throw new BadRequestException('La recompensa seleccionada no está activa.');
+        }
+
+        // REGLA: Validar monto EXACTO
+        const tierAmount = Number(tier.amount);
+        if (dto.amount !== tierAmount) {
           throw new BadRequestException(
-            `El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la recompensa ($${tierAmount}).`
+            `El monto de inversión ($${dto.amount}) debe ser exactamente igual al valor de la recompensa ($${tierAmount}).`
           );
         }
 
-        // Validar disponibilidad de claims
+        // REGLA: Validar stock (atómico via FOR UPDATE + check)
+        const tierMaxClaims = tier.max_claims !== null ? Number(tier.max_claims) : null;
+        const tierCurrentClaims = Number(tier.current_claims);
+
         if (tierMaxClaims !== null && tierCurrentClaims >= tierMaxClaims) {
-          throw new BadRequestException('Esta recompensa ha alcanzado su límite máximo de reclamaciones.');
+          throw new BadRequestException('Esta recompensa está agotada (Sold Out).');
         }
 
-        // Incrementar current_claims
+        // Incrementar reclamos de forma atómica
         await client.query(
           `UPDATE reward_tiers SET current_claims = current_claims + 1 WHERE id = $1`,
           [dto.rewardTierId]
@@ -113,39 +132,21 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.amount]
       );
 
-      // 6. Actualizar los totales de la campaña (y estado si se alcanzó la meta)
-      let campaignUpdateQuery = `
-        UPDATE campaigns 
-        SET current_amount = current_amount + $2, 
-            investor_count = investor_count + 1 
-        WHERE id = $1
-      `;
-
-      if (newStatus === 'funded' && campaign.status !== 'funded') {
-        campaignUpdateQuery = `
-          UPDATE campaigns 
-          SET current_amount = current_amount + $2, 
-              investor_count = investor_count + 1,
-              status = 'funded'
-          WHERE id = $1
-        `;
-      }
+      // 6. Actualizar los totales de la campaña
+      const campaignUpdateQuery = newStatus === 'funded' && campaign.status !== 'funded'
+        ? `UPDATE campaigns 
+           SET current_amount = current_amount + $2, 
+               investor_count = investor_count + 1,
+               status = 'funded'
+           WHERE id = $1`
+        : `UPDATE campaigns 
+           SET current_amount = current_amount + $2, 
+               investor_count = investor_count + 1 
+           WHERE id = $1`;
 
       await client.query(campaignUpdateQuery, [dto.campaignId, dto.amount]);
 
-      // Registrar en el historial si cambió de estado a funded
-      if (newStatus === 'funded' && campaign.status !== 'funded') {
-        await client.query(
-          `INSERT INTO campaign_status_history (
-            campaign_id, from_status, to_status, changed_by
-          ) VALUES (
-            $1, $2, $3, $4
-          )`,
-          [dto.campaignId, campaign.status, newStatus, userId]
-        );
-      }
-
-      // 7. Insertar el registro final de la inversión marcado como completado
+      // 7. Insertar el registro de la inversión marcado como completado
       const insertResult = await client.query(
         `INSERT INTO investments (
           campaign_id, investor_id, amount, reward_tier_id, status
@@ -167,44 +168,13 @@ export class InvestmentsRepository extends BaseRepository {
         [investment.id, dto.amount]
       );
 
-      // 9. Registrar Auditoría inmutable (audit_logs)
-      await client.query(
-        `INSERT INTO audit_logs (
-          user_id, action, entity_type, entity_id, new_values
-        ) VALUES (
-          $1, 'investment_created', 'campaign', $2, $3
-        )`,
-        [userId, dto.campaignId, JSON.stringify({ amount: dto.amount, investment_id: investment.id })]
-      );
-
-      // 10. Crear Notificación para el Emprendedor
-      let notificationTypeId: string;
-      const typeResult = await client.query(
-        `SELECT id FROM notification_types WHERE code = 'investment_received'`
-      );
-      if (typeResult.rows.length > 0) {
-        notificationTypeId = typeResult.rows[0].id;
-      } else {
-        const insertType = await client.query(
-          `INSERT INTO notification_types (code, name, category) VALUES ('investment_received', 'Inversión Recibida', 'investment') RETURNING id`
+      // 9. Crear el registro en reward_claims si corresponde
+      if (rewardTierId) {
+        await client.query(
+          `INSERT INTO reward_claims (investment_id, status) VALUES ($1, 'pending')`,
+          [investment.id]
         );
-        notificationTypeId = insertType.rows[0].id;
       }
-
-      await client.query(
-        `INSERT INTO notifications (
-          user_id, type_id, title, body, reference_type, reference_id
-        ) VALUES (
-          $1, $2, $3, $4, 'campaign', $5
-        )`,
-        [
-          campaign.creator_id,
-          notificationTypeId,
-          '¡Nueva inversión recibida!',
-          `Un inversor acaba de aportar $${dto.amount} a tu campaña "${campaign.title}".`,
-          dto.campaignId
-        ]
-      );
 
       const investmentObj = mapRowToInvestment(investment);
       
@@ -216,29 +186,43 @@ export class InvestmentsRepository extends BaseRepository {
   }
 
   /**
-   * Obtiene el historial detallado de inversiones de un usuario.
+   * Obtiene el historial de inversiones de un inversor con información de campaña y recompensa
    */
-  async getMyInvestments(userId: string): Promise<InvestmentHistoryItem[]> {
-    const query = `
-      SELECT 
-        i.id, 
-        i.amount, 
-        i.status as investment_status, 
-        i.created_at,
-        c.id as campaign_id, 
-        c.title as campaign_title, 
-        c.cover_image_url as campaign_cover_image, 
-        c.status as campaign_status,
-        rt.title as reward_title
-      FROM investments i
-      JOIN campaigns c ON i.campaign_id = c.id
-      LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
-      WHERE i.investor_id = $1
-      ORDER BY i.created_at DESC
-    `;
-    
-    const rows = await this.queryMany(query, [userId]);
-    return rows.map(mapRowToInvestmentHistoryItem);
+  async getInvestmentsByUserId(userId: string, limit: number, offset: number): Promise<any[]> {
+    const result = await this.query(
+      `SELECT 
+         i.id,
+         i.campaign_id,
+         i.amount,
+         i.currency,
+         i.status,
+         i.reward_tier_id,
+         i.created_at,
+         c.title AS campaign_title,
+         c.campaign_type,
+         c.cover_image_url AS campaign_cover,
+         c.status AS campaign_status,
+         rt.title AS reward_title,
+         rt.description AS reward_description
+       FROM investments i
+       JOIN campaigns c ON c.id = i.campaign_id
+       LEFT JOIN reward_tiers rt ON rt.id = i.reward_tier_id
+       WHERE i.investor_id = $1
+       ORDER BY i.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
+    );
+
+    return result.rows.map((row: any) => ({
+      id: row.id,
+      amount: Number(row.amount),
+      investmentStatus: row.status,
+      createdAt: row.created_at,
+      campaignId: row.campaign_id,
+      campaignTitle: row.campaign_title,
+      campaignCoverImage: row.campaign_cover,
+      campaignStatus: row.campaign_status,
+      rewardTitle: row.reward_title,
+    }));
   }
 }
-

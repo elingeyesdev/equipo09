@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { CreateCampaignDto, CampaignType } from '../types/campaign.types';
+import { AlertCircle, Save, X, Plus, Trash2, Gem, Edit2 } from 'lucide-react';
+import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, CampaignType } from '../types/campaign.types';
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
-import { AlertCircle, Save, X } from 'lucide-react';
 
 const schema = z.object({
   title: z.string().min(5, 'El título debe tener mínimo 5 caracteres').max(255),
@@ -32,6 +32,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -46,10 +47,42 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     },
   });
 
+  const campaignType = watch('campaignType');
+  const goalAmount = watch('goalAmount') || 1000;
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(initialData?.coverImageUrl || null);
+  
+  const [rewards, setRewards] = useState<CreateRewardTierDto[]>([]);
+  const [showRewardForm, setShowRewardForm] = useState(false);
+  const [editingRewardIndex, setEditingRewardIndex] = useState<number | null>(null);
+  const [rewardData, setRewardData] = useState<CreateRewardTierDto>({
+    title: '',
+    description: '',
+    amount: 10,
+    maxClaims: 10
+  });
+
+  // Sync rewards when editing
+  useEffect(() => {
+    if (initialData?.rewardTiers) {
+      console.log('CampaignForm: Loading rewards from initialData', initialData.rewardTiers);
+      setRewards(initialData.rewardTiers.map(rt => ({
+        title: rt.title,
+        description: rt.description,
+        amount: rt.amount,
+        maxClaims: rt.maxClaims ?? 0
+      })));
+    } else {
+      setRewards([]);
+    }
+  }, [initialData]);
+
+  const totalRewardsValue = rewards.reduce((sum, r) => sum + (r.amount * (r.maxClaims || 0)), 0);
+  const progressPercentage = Math.min(100, (totalRewardsValue / goalAmount) * 100);
+  const isRewardsComplete = totalRewardsValue === goalAmount;
 
   useEffect(() => {
     let mounted = true;
@@ -79,6 +112,43 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     }
   }, [loadingCats, initialData, reset]);
 
+  const addReward = () => {
+    // Basic validation: title and description required, amount > 0
+    if (!rewardData.title || !rewardData.description || rewardData.amount <= 0) {
+      alert('Por favor completa el título, descripción y un monto válido.');
+      return;
+    }
+
+    // maxClaims validation: only if it's not meant to be infinite (0/null)
+    // For now, let's assume if it's 0 it's invalid unless we want to support infinite.
+    if ((rewardData.maxClaims || 0) < 0) {
+      alert('El stock no puede ser negativo.');
+      return;
+    }
+
+    if (editingRewardIndex !== null) {
+      const updated = [...rewards];
+      updated[editingRewardIndex] = { ...rewardData };
+      setRewards(updated);
+      setEditingRewardIndex(null);
+    } else {
+      setRewards([...rewards, { ...rewardData }]);
+    }
+    
+    setRewardData({ title: '', description: '', amount: 10, maxClaims: 10 });
+    setShowRewardForm(false);
+  };
+
+  const editRewardItem = (index: number) => {
+    setRewardData({ ...rewards[index] });
+    setEditingRewardIndex(index);
+    setShowRewardForm(true);
+  };
+
+  const removeReward = (index: number) => {
+    setRewards(rewards.filter((_, i) => i !== index));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -100,6 +170,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       goalAmount: data.goalAmount,
       campaignType: data.campaignType as CampaignType,
       endDate: data.endDate || undefined,
+      rewards: data.campaignType === 'reward' ? rewards : undefined
     };
 
     const success = await onSuccess(dto, coverFile || undefined);
@@ -260,6 +331,181 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
         </div>
 
+        {/* Reward Management Section */}
+        {campaignType === 'reward' && (
+          <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+              <div>
+                <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
+                  <Gem size={20} className="text-amber-500" />
+                  Estructura de Recompensas
+                </h3>
+                <p className="text-[13px] text-slate-500 font-medium">
+                  Define cómo se divide tu meta de <span className="font-bold text-[#2e7d32]">${goalAmount}</span> en beneficios para tus inversores.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRewardForm(true)}
+                className="bg-white hover:bg-emerald-50 text-[#2e7d32] font-black px-6 py-2.5 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center gap-2 text-[13px]"
+              >
+                <Plus size={16} strokeWidth={3} />
+                Agregar Nivel
+              </button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-10">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Valor Asignado</span>
+                <span className={`text-[13px] font-black ${isRewardsComplete ? 'text-[#2e7d32]' : 'text-slate-900'}`}>
+                  ${totalRewardsValue} 
+                  <span className="text-slate-400 font-medium"> / ${goalAmount}</span>
+                </span>
+              </div>
+              <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className={`h-full transition-all duration-500 ${isRewardsComplete ? 'bg-[#2e7d32]' : totalRewardsValue > goalAmount ? 'bg-red-500' : 'bg-amber-500'}`}
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              {totalRewardsValue > goalAmount && (
+                <p className="text-[11px] font-bold text-red-500 mt-2 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  Has superado la meta de la campaña. Ajusta los montos o el stock.
+                </p>
+              )}
+              {!isRewardsComplete && totalRewardsValue < goalAmount && (
+                <p className="text-[11px] font-bold text-amber-600 mt-2">
+                  Faltan ${(goalAmount - totalRewardsValue)} para completar la meta.
+                </p>
+              )}
+            </div>
+
+            {/* Rewards List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {rewards.length === 0 ? (
+                <div className="md:col-span-2 py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+                  <p className="text-slate-400 font-medium text-[14px]">No has definido recompensas aún.</p>
+                </div>
+              ) : (
+                rewards.map((r, idx) => (
+                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-start group">
+                    <div>
+                      <h4 className="font-black text-[#1c2b1e] text-[15px] mb-1">{r.title}</h4>
+                      <p className="text-[12px] text-slate-500 font-medium mb-3 line-clamp-1">{r.description}</p>
+                      <div className="flex gap-4">
+                        <div className="text-[11px] font-black text-[#2e7d32] bg-emerald-50 px-2 py-1 rounded-md uppercase">
+                          ${r.amount} / u
+                        </div>
+                        <div className="text-[11px] font-black text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase">
+                          Stock: {r.maxClaims}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => editRewardItem(idx)}
+                        className="p-2 text-slate-300 hover:text-emerald-600 transition-colors"
+                        title="Editar Nivel"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeReward(idx)}
+                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                        title="Eliminar Nivel"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Reward Add Form (Modal/Overlay style) */}
+            {showRewardForm && (
+              <div className="fixed inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="bg-white rounded-[32px] w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+                  <h4 className="text-xl font-black text-[#1c2b1e] mb-6 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                      {editingRewardIndex !== null ? <Edit2 size={20} className="text-[#2e7d32]" /> : <Plus size={20} className="text-[#2e7d32]" />}
+                    </div>
+                    {editingRewardIndex !== null ? 'Editar Nivel' : 'Nuevo Nivel'}
+                  </h4>
+                  
+                  <div className="space-y-5">
+                    <div>
+                      <label className={labelClass}>Título *</label>
+                      <input 
+                        type="text" 
+                        className={inputClass}
+                        value={rewardData.title}
+                        onChange={e => setRewardData({...rewardData, title: e.target.value})}
+                        placeholder="Ej. Acceso Anticipado"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Descripción *</label>
+                      <textarea 
+                        className={`${inputClass} resize-none`}
+                        rows={3}
+                        value={rewardData.description}
+                        onChange={e => setRewardData({...rewardData, description: e.target.value})}
+                        placeholder="Qué incluye este beneficio..."
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Monto Unitario ($) *</label>
+                        <input 
+                          type="number" 
+                          className={inputClass}
+                          value={rewardData.amount}
+                          onChange={e => setRewardData({...rewardData, amount: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Stock (Personas) *</label>
+                        <input 
+                          type="number" 
+                          className={inputClass}
+                          value={rewardData.maxClaims || 0}
+                          onChange={e => setRewardData({...rewardData, maxClaims: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-8">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRewardForm(false);
+                        setEditingRewardIndex(null);
+                        setRewardData({ title: '', description: '', amount: 10, maxClaims: 10 });
+                      }}
+                      className="flex-1 px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-[14px] active:scale-95 transition-all"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addReward}
+                      className="flex-1 px-6 py-3 rounded-xl bg-[#2e7d32] text-white font-black text-[14px] active:scale-95 transition-all"
+                    >
+                      {editingRewardIndex !== null ? 'Guardar Cambios' : 'Agregar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-emerald-50">
           <button
             type="button"
@@ -272,8 +518,8 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </button>
           <button
             type="submit"
-            className="w-full md:w-auto bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2"
-            disabled={saving}
+            disabled={saving || (campaignType === 'reward' && !isRewardsComplete)}
+            className="w-full md:w-auto bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>

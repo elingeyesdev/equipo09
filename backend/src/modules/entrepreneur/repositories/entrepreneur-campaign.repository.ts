@@ -9,6 +9,7 @@ import {
   CampaignInvestor,
 } from '../models';
 import { QueryCampaignsDto, CreateCampaignDto } from '../dto';
+import { mapRowToRewardTier } from '../../reward-tiers/models/reward-tier.model';
 
 @Injectable()
 export class EntrepreneurCampaignRepository extends BaseRepository {
@@ -25,27 +26,53 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       categoryId = cat.id;
     }
 
-    const result = await this.queryOne(
-      `INSERT INTO campaigns (
-        creator_id, category_id, title, slug, short_description, description,
-        campaign_type, goal_amount, end_date, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`,
-      [
-        creatorId,
-        categoryId,
-        dto.title,
-        slug,
-        dto.shortDescription || null,
-        dto.description,
-        dto.campaignType,
-        dto.goalAmount,
-        dto.endDate || null
-      ]
-    );
+    return this.transaction(async (client) => {
+      const result = await client.query(
+        `INSERT INTO campaigns (
+          creator_id, category_id, title, slug, short_description, description,
+          campaign_type, goal_amount, end_date, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`,
+        [
+          creatorId,
+          categoryId,
+          dto.title,
+          slug,
+          dto.shortDescription || null,
+          dto.description,
+          dto.campaignType,
+          dto.goalAmount,
+          dto.endDate || null
+        ]
+      );
 
-    const created = await this.findOneByCreatorId(result.id, creatorId);
-    if (!created) throw new Error('Error al recuperar campaña creada');
-    return created;
+      const campaignId = result.rows[0].id;
+
+      // Si se enviaron recompensas en la creación, guardarlas
+      if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
+        for (const reward of dto.rewards) {
+          await client.query(
+            `INSERT INTO reward_tiers (
+              campaign_id, title, description, amount, max_claims, is_active
+            ) VALUES ($1, $2, $3, $4, $5, true)`,
+            [
+              campaignId,
+              reward.title,
+              reward.description,
+              reward.amount,
+              reward.maxClaims || null
+            ]
+          );
+        }
+      }
+
+      const created = await this.findOneByCreatorId(campaignId, creatorId, {
+        queryOne: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows[0]),
+        queryMany: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows),
+      });
+      if (!created) throw new Error('Error al recuperar campaña creada');
+
+      return created;
+    });
   }
 
   async findByCreatorId(
@@ -169,8 +196,10 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
   async findOneByCreatorId(
     campaignId: string,
     creatorId: string,
+    client?: any
   ): Promise<EntrepreneurCampaign | null> {
-    const row = await this.queryOne(
+    const executor = client || this;
+    const row = await executor.queryOne(
       `SELECT
         c.id, c.title, c.slug, c.short_description, c.campaign_type,
         c.status, c.goal_amount, c.current_amount, c.investor_count,
@@ -187,7 +216,16 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       [campaignId, creatorId],
     );
 
-    return row ? mapRowToEntrepreneurCampaign(row) : null;
+    if (!row) return null;
+
+    const rewardTiers = await executor.queryMany(
+      'SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY amount ASC',
+      [campaignId]
+    );
+
+    const campaign = mapRowToEntrepreneurCampaign(row);
+    campaign.rewardTiers = rewardTiers.map(mapRowToRewardTier);
+    return campaign;
   }
 
   async submitForReview(
@@ -220,7 +258,10 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         );
       }
 
-      return this.findOneByCreatorId(campaignId, creatorId);
+      return this.findOneByCreatorId(campaignId, creatorId, {
+        queryOne: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows[0]),
+        queryMany: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows),
+      });
     });
   }
 
@@ -254,8 +295,26 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         );
       }
 
-      return this.findOneByCreatorId(campaignId, creatorId);
+      return this.findOneByCreatorId(campaignId, creatorId, {
+        queryOne: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows[0]),
+        queryMany: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows),
+      });
     });
+  }
+
+  async validateRewardsSum(campaignId: string): Promise<boolean> {
+    const campaign = await this.queryOne(`SELECT goal_amount, campaign_type FROM campaigns WHERE id = $1`, [campaignId]);
+    if (!campaign || campaign.campaign_type !== 'reward') return true;
+
+    const sumResult = await this.queryOne(
+      `SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true`,
+      [campaignId]
+    );
+
+    const totalValue = Number(sumResult?.total_value) || 0;
+    const goalAmount = Number(campaign.goal_amount) || 0;
+
+    return totalValue === goalAmount;
   }
 
   async updateCoverImageUrl(
@@ -312,18 +371,44 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       values.push(dto.campaignType);
     }
 
-    if (updates.length === 1) return this.findOneByCreatorId(campaignId, creatorId);
+    return this.transaction(async (client) => {
+      const query = `
+        UPDATE campaigns
+        SET ${updates.join(', ')}
+        WHERE id = $1 AND creator_id = $2
+        RETURNING id
+      `;
 
-    const query = `
-      UPDATE campaigns
-      SET ${updates.join(', ')}
-      WHERE id = $1 AND creator_id = $2
-      RETURNING id
-    `;
+      const result = await client.query(query, values);
+      if (result.rowCount === 0) return null;
 
-    const row = await this.queryOne(query, values);
-    if (!row) return null;
-    return this.findOneByCreatorId(campaignId, creatorId);
+      // Si se enviaron recompensas, reemplazar las existentes
+      if (dto.rewards && Array.isArray(dto.rewards)) {
+        // Opcional: Verificar si hay inversiones antes de borrar
+        // Por ahora, asumimos que si está editando puede resetearlas
+        await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);
+        
+        for (const reward of dto.rewards) {
+          await client.query(
+            `INSERT INTO reward_tiers (
+              campaign_id, title, description, amount, max_claims, is_active
+            ) VALUES ($1, $2, $3, $4, $5, true)`,
+            [
+              campaignId,
+              reward.title,
+              reward.description,
+              reward.amount,
+              reward.maxClaims || null
+            ]
+          );
+        }
+      }
+
+      return this.findOneByCreatorId(campaignId, creatorId, {
+        queryOne: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows[0]),
+        queryMany: (sql: string, params: any[]) => client.query(sql, params).then((r: any) => r.rows),
+      });
+    });
   }
 
   async getFinancialProgress(
@@ -566,5 +651,43 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       })),
       total,
     };
+  }
+
+  async delete(campaignId: string, creatorId: string): Promise<boolean> {
+    return this.transaction(async (client) => {
+      // Verificar estado
+      const check = await client.query(
+        'SELECT status FROM campaigns WHERE id = $1 AND creator_id = $2',
+        [campaignId, creatorId]
+      );
+      if (check.rowCount === 0) return false;
+      const status = check.rows[0].status;
+
+      if (status !== 'draft' && status !== 'rejected') {
+        throw new Error('Solo se pueden eliminar campañas en borrador o rechazadas');
+      }
+
+      // Eliminar dependencias primero (recompensas, etc.)
+      await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);
+      await client.query('DELETE FROM campaign_status_history WHERE campaign_id = $1', [campaignId]);
+      
+      const res = await client.query(
+        'DELETE FROM campaigns WHERE id = $1 AND creator_id = $2',
+        [campaignId, creatorId]
+      );
+      return res.rowCount > 0;
+    });
+  }
+
+  async finalize(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null> {
+    const res = await this.queryOne(
+      `UPDATE campaigns 
+       SET status = 'finished', updated_at = NOW() 
+       WHERE id = $1 AND creator_id = $2 AND status = 'published'
+       RETURNING id`,
+      [campaignId, creatorId]
+    );
+    if (!res) return null;
+    return this.findOneByCreatorId(campaignId, creatorId);
   }
 }

@@ -148,6 +148,7 @@ export function CampaignPreviewModal({
   const [adminFeedback, setAdminFeedback] = useState('');
   const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards'>('details');
 
+  const effectiveRewards = rewardTiers || campaign?.rewardTiers || [];
   const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
   const canPublish = campaign?.status === 'approved';
@@ -221,6 +222,12 @@ export function CampaignPreviewModal({
   const currency = campaign.currency || 'USD';
   const investorsTotal = finance?.investorCount ?? campaign.investorCount;
   const recent = finance?.recentInvestments ?? [];
+
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
 
   const node = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-['Sora',sans-serif] animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="preview-title">
@@ -324,9 +331,9 @@ export function CampaignPreviewModal({
                 {/* Visual Assets Section */}
                 <section className="space-y-6">
                   <div className="relative group h-[400px] rounded-[32px] overflow-hidden bg-slate-900 border border-slate-200 shadow-2xl">
-                    {campaign.coverImageUrl ? (
+                    {getImageUrl(campaign.coverImageUrl) ? (
                       <img
-                        src={campaign.coverImageUrl}
+                        src={getImageUrl(campaign.coverImageUrl)}
                         alt="Cover"
                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                       />
@@ -430,12 +437,12 @@ export function CampaignPreviewModal({
                       <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Estructura de Captación</h3>
                     </div>
                     <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                      {rewardTiers?.length || 0} Niveles Disponibles
+                      {effectiveRewards.length} Niveles Disponibles
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rewardTiers?.map((tier, idx) => (
+                    {effectiveRewards.map((tier, idx) => (
                       <div key={idx} className="p-6 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
                         <div className="flex justify-between items-start">
                           <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center group-hover:bg-[#2e7d32] group-hover:text-white transition-colors">
@@ -555,8 +562,8 @@ export function CampaignPreviewModal({
                     <>
                       <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
                         <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
-                          {entrepreneur.avatar ? (
-                            <img src={entrepreneur.avatar} className="w-full h-full object-cover" alt="Proponent" />
+                          {getImageUrl(entrepreneur.avatar) ? (
+                            <img src={getImageUrl(entrepreneur.avatar)} className="w-full h-full object-cover" alt="Proponent" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-400"><User size={24} /></div>
                           )}
@@ -663,7 +670,7 @@ export function CampaignPreviewModal({
             </div>
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-               <CampaignRewardsTab campaignId={campaign.id} currency={currency} />
+               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} />
             </div>
           ) : null}
         </div>

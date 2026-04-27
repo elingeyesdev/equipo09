@@ -60,4 +60,8 @@ export class CreateCampaignDto {
   @Transform(emptyToUndefined)
   @IsUUID()
   categoryId?: string;
+
+  @ApiPropertyOptional({ type: 'array', items: { type: 'object' } })
+  @IsOptional()
+  rewards?: any[];
 }

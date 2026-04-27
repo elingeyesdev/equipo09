@@ -31,6 +31,15 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
     : 0;
 
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
+    return `/${url}`;
+  };
+
+  const coverUrl = getImageUrl(campaign.coverImageUrl);
+  const avatarUrl = getImageUrl(campaign.entrepreneurAvatar);
+
   let daysRemaining: number | null = null;
   if (campaign.endDate) {
     const ms = new Date(campaign.endDate).getTime() - Date.now();
@@ -47,9 +56,9 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
 
       {/* Cover Image */}
       <div className="relative h-48 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
-        {campaign.coverImageUrl ? (
+        {coverUrl ? (
           <img
-            src={campaign.coverImageUrl}
+            src={coverUrl}
             alt={campaign.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -87,8 +96,8 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         {/* Entrepreneur info */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[10px] font-black overflow-hidden shrink-0">
-            {campaign.entrepreneurAvatar ? (
-              <img src={campaign.entrepreneurAvatar} alt="" className="w-full h-full object-cover" />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             ) : (
               campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
             )}

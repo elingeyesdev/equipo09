@@ -39,15 +39,15 @@ export function EntrepreneurProfilePage() {
     submitProfile,
     uploadAvatarPhoto,
     uploadCoverPhoto,
-    deleteProfile,
+    deleteProfile: performDeleteProfile,
   } = useEntrepreneurProfile();
 
-  const handleDeleteEntrepreneurProfile = async () => {
+  const handleDeleteProfile = async () => {
     const ok = window.confirm(
       '¿Eliminar tu perfil de emprendedor? Tu cuenta seguirá activa. No es posible si ya tienes campañas registradas en la plataforma.',
     );
     if (!ok) return;
-    await deleteProfile();
+    await performDeleteProfile();
   };
 
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
@@ -84,27 +84,9 @@ export function EntrepreneurProfilePage() {
 
   const handleSave = async (type: string, data: any, file?: File) => {
     if (type === 'new-campaign') {
-      const goal = Number(data.goalAmount);
-      const minGoal = 100;
-      await addCampaign({
-        title: (data.title || 'Nueva Campaña').trim(),
-        description: (data.description || '').trim() || 'Descripción pendiente.',
-        shortDescription: (data.shortDescription || '').trim(),
-        goalAmount: Number.isFinite(goal) && goal >= minGoal ? goal : minGoal,
-        campaignType: data.campaignType || 'donation',
-        categoryId: data.categoryId,
-        endDate: data.endDate || undefined,
-      }, file);
+      await addCampaign(data, file);
     } else if (type === 'edit-campaign' && selectedCampaign) {
-      await updateCampaign(selectedCampaign.id, {
-        title: data.title,
-        description: data.description,
-        shortDescription: data.shortDescription,
-        goalAmount: data.goalAmount,
-        campaignType: data.campaignType,
-        categoryId: data.categoryId,
-        endDate: data.endDate || undefined,
-      }, file);
+      await updateCampaign(selectedCampaign.id, data, file);
     } else {
       // Filtrar el payload para enviar solo campos permitidos por el DTO
       const baseData = { ...profile, ...data };
@@ -172,7 +154,7 @@ export function EntrepreneurProfilePage() {
                 profile={profile}
                 openModal={(type: ModalType) => setModalType(type)}
                 userEmail={userEmail}
-                onDeleteProfile={profile ? handleDeleteEntrepreneurProfile : undefined}
+                onDeleteProfile={profile ? handleDeleteProfile : undefined}
               />
 
               <div className="flex-1 min-w-0 flex flex-col gap-10 w-full">
@@ -218,8 +200,15 @@ export function EntrepreneurProfilePage() {
                     hasBanking={!!profile?.bankAccountNumber}
                     campaigns={campaigns}
                     loading={campaignsLoading}
-                    onCampaignClick={(campaign) => {
-                      setSelectedCampaign(campaign);
+                    onCampaignClick={async (campaign) => {
+                      try {
+                        const { getMyCampaignById } = await import('../api/campaign.api');
+                        const fullCampaign = await getMyCampaignById(campaign.id);
+                        setSelectedCampaign(fullCampaign);
+                      } catch (err) {
+                        console.error('Error fetching full campaign for preview:', err);
+                        setSelectedCampaign(campaign);
+                      }
                       setPreviewOpen(true);
                     }}
                   />
@@ -396,9 +385,18 @@ export function EntrepreneurProfilePage() {
             publishCampaign(selectedCampaign.id).then(() => setPreviewOpen(false));
           }
         }}
-        onEdit={(campaign) => {
+        onEdit={async (campaign) => {
           setPreviewOpen(false);
-          setModalType('edit-campaign');
+          try {
+            const { getMyCampaignById } = await import('../api/campaign.api');
+            const fullCampaign = await getMyCampaignById(campaign.id);
+            setSelectedCampaign(fullCampaign);
+            setModalType('edit-campaign');
+          } catch (err) {
+            console.error('Error fetching campaign detail for edit:', err);
+            setSelectedCampaign(campaign);
+            setModalType('edit-campaign');
+          }
         }}
         onUploadImage={uploadCampaignImage}
         actionLoading={adding}

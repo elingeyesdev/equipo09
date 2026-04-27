@@ -18,6 +18,6 @@ export class InvestmentsService {
    * Obtiene el historial de inversiones de un usuario
    */
   async getMyInvestments(userId: string): Promise<InvestmentHistoryItem[]> {
-    return this.investmentsRepository.getMyInvestments(userId);
+    return this.investmentsRepository.getInvestmentsByUserId(userId, 50, 0);
   }
 }

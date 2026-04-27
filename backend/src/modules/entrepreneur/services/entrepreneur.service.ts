@@ -269,6 +269,15 @@ export class EntrepreneurService {
     campaignId: string,
   ): Promise<EntrepreneurCampaign> {
     await this.ensureEntrepreneurProfile(userId);
+    
+    // Validar sumatoria de recompensas antes de enviar a revisión
+    const isRewardsValid = await this.campaignRepo.validateRewardsSum(campaignId);
+    if (!isRewardsValid) {
+      throw new BadRequestException(
+        'La sumatoria total de las recompensas (monto × personas) debe ser exactamente igual a la meta de la campaña.',
+      );
+    }
+
     const updated = await this.campaignRepo.submitForReview(campaignId, userId);
     if (!updated) {
       throw new BadRequestException(
@@ -286,6 +295,15 @@ export class EntrepreneurService {
     campaignId: string,
   ): Promise<EntrepreneurCampaign> {
     await this.ensureEntrepreneurProfile(userId);
+
+    // Validar sumatoria de recompensas antes de publicar
+    const isRewardsValid = await this.campaignRepo.validateRewardsSum(campaignId);
+    if (!isRewardsValid) {
+      throw new BadRequestException(
+        'La sumatoria total de las recompensas (monto × personas) debe ser exactamente igual a la meta de la campaña.',
+      );
+    }
+
     const updated = await this.campaignRepo.publishCampaign(campaignId, userId);
     if (!updated) {
       throw new BadRequestException(
@@ -474,5 +492,32 @@ export class EntrepreneurService {
         `Completa tu perfil para crear campañas. Falta: ${missing.join(', ')}.`,
       );
     }
+  }
+  /**
+   * Elimina una campaña.
+   * Regla: Solo se permite eliminar si está en 'draft' o 'rejected'.
+   */
+  async deleteCampaign(userId: string, campaignId: string): Promise<boolean> {
+    await this.ensureEntrepreneurProfile(userId);
+    try {
+      return await this.campaignRepo.delete(campaignId, userId);
+    } catch (err: any) {
+      throw new BadRequestException(err.message || 'Error al eliminar campaña');
+    }
+  }
+
+  /**
+   * Finaliza una campaña activa.
+   * Regla: Solo se permite si el estado es 'published'.
+   */
+  async finalizeCampaign(userId: string, campaignId: string): Promise<EntrepreneurCampaign> {
+    await this.ensureEntrepreneurProfile(userId);
+    const updated = await this.campaignRepo.finalize(campaignId, userId);
+    if (!updated) {
+      throw new BadRequestException(
+        'Solo se pueden finalizar campañas que estén publicadas (activas)'
+      );
+    }
+    return updated;
   }
 }

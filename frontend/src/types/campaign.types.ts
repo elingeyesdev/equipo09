@@ -39,6 +39,7 @@ export interface EntrepreneurCampaign {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
+  rewardTiers?: RewardTier[];
 }
 
 export interface CreateCampaignDto {
@@ -50,6 +51,7 @@ export interface CreateCampaignDto {
   endDate?: string;
   /** Si se omite, el backend asigna una categoría por defecto. Debe ser UUID. */
   categoryId?: string;
+  rewards?: CreateRewardTierDto[];
 }
 
 export type CampaignFilterPreset =
@@ -163,6 +165,10 @@ export interface UpdateRewardTierDto extends Partial<CreateRewardTierDto> {
 }
 
 export interface RewardClaim {
+  claim_id: string;
+  claim_status: string;
+  tracking_number: string | null;
+  tracking_url: string | null;
   investment_id: string;
   amount: number;
   invested_at: string;

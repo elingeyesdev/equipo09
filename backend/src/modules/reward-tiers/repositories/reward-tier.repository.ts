@@ -109,6 +109,10 @@ export class RewardTierRepository extends BaseRepository {
   async getRewardClaims(campaignId: string): Promise<any[]> {
     const query = `
       SELECT 
+        rc.id as claim_id,
+        rc.status as claim_status,
+        rc.tracking_number,
+        rc.tracking_url,
         i.id as investment_id,
         i.amount,
         i.created_at as invested_at,
@@ -122,9 +126,28 @@ export class RewardTierRepository extends BaseRepository {
       JOIN reward_tiers rt ON i.reward_tier_id = rt.id
       JOIN users u ON i.investor_id = u.id
       JOIN investor_profiles ip ON i.investor_id = ip.user_id
+      LEFT JOIN reward_claims rc ON rc.investment_id = i.id
       WHERE i.campaign_id = $1 AND i.status = 'completed'
       ORDER BY i.created_at DESC;
     `;
     return this.queryMany(query, [campaignId]);
+  }
+
+  async updateRewardClaim(claimId: string, dto: any): Promise<any> {
+    const { clause, values, nextIndex } = this.buildUpdateSet({
+      status: dto.status,
+      tracking_number: dto.trackingNumber,
+      tracking_url: dto.trackingUrl,
+      notes: dto.notes,
+      shipped_at: dto.status === 'shipped' ? new Date() : undefined,
+      delivered_at: dto.status === 'delivered' ? new Date() : undefined,
+    });
+
+    if (!clause) return null;
+
+    const query = `UPDATE reward_claims SET ${clause} WHERE id = $${nextIndex} RETURNING *;`;
+    const row = await this.queryOne(query, [...values, claimId]);
+    if (!row) throw new NotFoundException('Reclamo de recompensa no encontrado');
+    return row;
   }
 }

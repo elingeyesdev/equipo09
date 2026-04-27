@@ -7,6 +7,8 @@ interface Props {
   onPreview?: (campaign: EntrepreneurCampaign) => void;
   onSubmitForReview?: (campaignId: string) => void;
   onPublish?: (campaignId: string) => void;
+  onDelete?: (campaignId: string) => void;
+  onFinalize?: (campaignId: string) => void;
   actionCampaignId?: string | null;
 }
 
@@ -15,6 +17,8 @@ export function CampaignCard({
   onPreview,
   onSubmitForReview,
   onPublish,
+  onDelete,
+  onFinalize,
   actionCampaignId,
 }: Props) {
   const busy = actionCampaignId === campaign.id;
@@ -50,6 +54,8 @@ export function CampaignCard({
 
   const canSubmit = campaign.status === 'draft';
   const canPublish = campaign.status === 'draft' || campaign.status === 'approved';
+  const canDelete = campaign.status === 'draft' || campaign.status === 'rejected';
+  const canFinalize = campaign.status === 'published';
 
   return (
     <div className="bg-white border border-emerald-50 rounded-[24px] p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col gap-6 font-['Sora',sans-serif] group">
@@ -108,6 +114,26 @@ export function CampaignCard({
             onClick={() => onPublish(campaign.id)}
           >
             {busy ? 'Publicando…' : 'Publicar Ahora'}
+          </button>
+        )}
+        {canDelete && onDelete && (
+          <button
+            type="button"
+            className="col-span-2 bg-red-50 hover:bg-red-100 text-[#c62828] font-bold border border-red-100 rounded-xl py-2.5 text-[13px] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+            disabled={busy}
+            onClick={() => onDelete(campaign.id)}
+          >
+            {busy ? 'Eliminando...' : 'Eliminar Campaña'}
+          </button>
+        )}
+        {canFinalize && onFinalize && (
+          <button
+            type="button"
+            className="col-span-1 bg-slate-800 hover:bg-black text-white font-bold border-none rounded-xl py-2.5 text-[13px] active:scale-95 transition-all disabled:opacity-50 shadow-sm cursor-pointer"
+            disabled={busy}
+            onClick={() => onFinalize(campaign.id)}
+          >
+            {busy ? 'Finalizando...' : 'Finalizar Campaña'}
           </button>
         )}
       </div>
