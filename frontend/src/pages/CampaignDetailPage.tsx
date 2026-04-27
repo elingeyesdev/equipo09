@@ -167,9 +167,10 @@ export function CampaignDetailPage() {
   }
 
   /* ── Computed values ── */
-  const progress = campaign.goalAmount > 0
-    ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
+  const exactProgress = campaign.goalAmount > 0
+    ? Number(((campaign.currentAmount / campaign.goalAmount) * 100).toFixed(2))
     : 0;
+  const visualProgress = Math.min(exactProgress, 100);
 
   let daysRemaining: number | null = null;
   if (campaign.endDate) {
@@ -230,8 +231,8 @@ export function CampaignDetailPage() {
             <div
               className="h-full transition-all duration-1000 ease-out"
               style={{
-                width: `${progress}%`,
-                background: progress >= 100
+                width: `${visualProgress}%`,
+                background: exactProgress >= 100
                   ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
                   : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
               }}
@@ -405,8 +406,8 @@ export function CampaignDetailPage() {
                     <div
                       className="h-full rounded-full transition-all duration-1000 ease-out"
                       style={{
-                        width: `${progress}%`,
-                        background: progress >= 100
+                        width: `${visualProgress}%`,
+                        background: exactProgress >= 100
                           ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
                           : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
                         boxShadow: '0 0 8px rgba(46,125,50,0.3)',
@@ -415,7 +416,7 @@ export function CampaignDetailPage() {
                   </div>
                   <div className="flex justify-between mt-2">
                     <span className="text-[13px] font-black text-[#2e7d32]">
-                      {progress}%
+                      {exactProgress}%
                     </span>
                     <span className="text-[13px] font-bold text-slate-400">
                       Meta: ${campaign.goalAmount.toLocaleString()}

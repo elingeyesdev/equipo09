@@ -69,12 +69,13 @@ export function CampaignCard({
           currentAmount={campaign.currentAmount}
           goalAmount={campaign.goalAmount}
           currency={campaign.currency || 'USD'}
+          endDate={campaign.endDate}
+          investorCount={campaign.investorCount}
         />
 
         <CampaignProgress
           currentAmount={campaign.currentAmount}
           goalAmount={campaign.goalAmount}
-          investorCount={campaign.investorCount}
         />
       </div>
 

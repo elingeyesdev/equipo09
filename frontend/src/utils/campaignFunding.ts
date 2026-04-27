@@ -11,7 +11,8 @@ export function clampPercentForBar(percent: number): number {
 }
 
 export function formatFundingPercent(currentAmount: number, goalAmount: number): number {
-  return Math.round(Math.min(computeFundingPercent(currentAmount, goalAmount), 100));
+  const percent = computeFundingPercent(currentAmount, goalAmount);
+  return Number(percent.toFixed(2));
 }
 
 export function formatCampaignCurrency(amount: number, currency: string): string {
