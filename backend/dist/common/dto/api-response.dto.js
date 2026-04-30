@@ -14,12 +14,14 @@ const swagger_1 = require("@nestjs/swagger");
 class PaginatedResponse {
     constructor(data, total, page, limit) {
         this.data = data;
+        const totalPages = Math.ceil(total / limit);
         this.meta = {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            hasNextPage: page < Math.ceil(total / limit),
+            totalItems: total,
+            itemCount: data.length,
+            itemsPerPage: limit,
+            totalPages: totalPages,
+            currentPage: page,
+            hasNextPage: page < totalPages,
             hasPreviousPage: page > 1,
         };
     }
@@ -31,19 +33,23 @@ exports.PaginationMeta = PaginationMeta;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 50 }),
     __metadata("design:type", Number)
-], PaginationMeta.prototype, "total", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
-    __metadata("design:type", Number)
-], PaginationMeta.prototype, "page", void 0);
+], PaginationMeta.prototype, "totalItems", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 10 }),
     __metadata("design:type", Number)
-], PaginationMeta.prototype, "limit", void 0);
+], PaginationMeta.prototype, "itemCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 10 }),
+    __metadata("design:type", Number)
+], PaginationMeta.prototype, "itemsPerPage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 5 }),
     __metadata("design:type", Number)
 ], PaginationMeta.prototype, "totalPages", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    __metadata("design:type", Number)
+], PaginationMeta.prototype, "currentPage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true }),
     __metadata("design:type", Boolean)

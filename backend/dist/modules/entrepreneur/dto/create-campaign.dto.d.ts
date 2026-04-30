@@ -11,4 +11,5 @@ export declare class CreateCampaignDto {
     campaignType: CampaignType;
     endDate?: string;
     categoryId?: string;
+    rewards?: any[];
 }

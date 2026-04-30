@@ -25,4 +25,6 @@ export declare class EntrepreneurController {
     getMyFinancialSummary(req: Request): Promise<ApiSuccessResponse<EntrepreneurFinancialSummary>>;
     getCampaignFinancialProgress(req: Request, campaignId: string): Promise<ApiSuccessResponse<CampaignFinancialProgress>>;
     getCampaignInvestors(req: Request, campaignId: string, page?: number, limit?: number): Promise<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>>;
+    deleteCampaign(req: Request, campaignId: string): Promise<ApiSuccessResponse<null>>;
+    finalizeCampaign(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
 }

@@ -10,6 +10,7 @@ exports.EntrepreneurCampaignRepository = void 0;
 const common_1 = require("@nestjs/common");
 const database_1 = require("../../../common/database");
 const models_1 = require("../models");
+const reward_tier_model_1 = require("../../reward-tiers/models/reward-tier.model");
 let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extends database_1.BaseRepository {
     async create(creatorId, dto) {
         const baseSlug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -22,24 +23,43 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 throw new Error('No categories found in database to assign to campaign');
             categoryId = cat.id;
         }
-        const result = await this.queryOne(`INSERT INTO campaigns (
-        creator_id, category_id, title, slug, short_description, description,
-        campaign_type, goal_amount, end_date, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`, [
-            creatorId,
-            categoryId,
-            dto.title,
-            slug,
-            dto.shortDescription || null,
-            dto.description,
-            dto.campaignType,
-            dto.goalAmount,
-            dto.endDate || null
-        ]);
-        const created = await this.findOneByCreatorId(result.id, creatorId);
-        if (!created)
-            throw new Error('Error al recuperar campaña creada');
-        return created;
+        return this.transaction(async (client) => {
+            const result = await client.query(`INSERT INTO campaigns (
+          creator_id, category_id, title, slug, short_description, description,
+          campaign_type, goal_amount, end_date, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`, [
+                creatorId,
+                categoryId,
+                dto.title,
+                slug,
+                dto.shortDescription || null,
+                dto.description,
+                dto.campaignType,
+                dto.goalAmount,
+                dto.endDate || null
+            ]);
+            const campaignId = result.rows[0].id;
+            if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
+                for (const reward of dto.rewards) {
+                    await client.query(`INSERT INTO reward_tiers (
+              campaign_id, title, description, amount, max_claims, is_active
+            ) VALUES ($1, $2, $3, $4, $5, true)`, [
+                        campaignId,
+                        reward.title,
+                        reward.description,
+                        reward.amount,
+                        reward.maxClaims || null
+                    ]);
+                }
+            }
+            const created = await this.findOneByCreatorId(campaignId, creatorId, {
+                queryOne: (sql, params) => client.query(sql, params).then((r) => r.rows[0]),
+                queryMany: (sql, params) => client.query(sql, params).then((r) => r.rows),
+            });
+            if (!created)
+                throw new Error('Error al recuperar campaña creada');
+            return created;
+        });
     }
     async findByCreatorId(creatorId, query) {
         const conditions = ['c.creator_id = $1'];
@@ -128,8 +148,9 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             total,
         };
     }
-    async findOneByCreatorId(campaignId, creatorId) {
-        const row = await this.queryOne(`SELECT
+    async findOneByCreatorId(campaignId, creatorId, client) {
+        const executor = client || this;
+        const row = await executor.queryOne(`SELECT
         c.id, c.title, c.slug, c.short_description, c.campaign_type,
         c.status, c.goal_amount, c.current_amount, c.investor_count,
         c.currency, c.cover_image_url, c.start_date, c.end_date,
@@ -142,7 +163,12 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
        FROM campaigns c
        JOIN categories cat ON c.category_id = cat.id
        WHERE c.id = $1 AND c.creator_id = $2`, [campaignId, creatorId]);
-        return row ? (0, models_1.mapRowToEntrepreneurCampaign)(row) : null;
+        if (!row)
+            return null;
+        const rewardTiers = await executor.queryMany('SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY amount ASC', [campaignId]);
+        const campaign = (0, models_1.mapRowToEntrepreneurCampaign)(row);
+        campaign.rewardTiers = rewardTiers.map(reward_tier_model_1.mapRowToRewardTier);
+        return campaign;
     }
     async submitForReview(campaignId, creatorId) {
         return this.transaction(async (client) => {
@@ -160,7 +186,10 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 await client.query(`INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
            VALUES ($1, $2, $3, $4, $5)`, [campaignId, oldStatus, 'pending_review', creatorId, 'Envío para revisión (Emprendedor)']);
             }
-            return this.findOneByCreatorId(campaignId, creatorId);
+            return this.findOneByCreatorId(campaignId, creatorId, {
+                queryOne: (sql, params) => client.query(sql, params).then((r) => r.rows[0]),
+                queryMany: (sql, params) => client.query(sql, params).then((r) => r.rows),
+            });
         });
     }
     async publishCampaign(campaignId, creatorId) {
@@ -179,8 +208,20 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 await client.query(`INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
            VALUES ($1, $2, $3, $4, $5)`, [campaignId, oldStatus, 'published', creatorId, 'Lanzamiento público (Emprendedor)']);
             }
-            return this.findOneByCreatorId(campaignId, creatorId);
+            return this.findOneByCreatorId(campaignId, creatorId, {
+                queryOne: (sql, params) => client.query(sql, params).then((r) => r.rows[0]),
+                queryMany: (sql, params) => client.query(sql, params).then((r) => r.rows),
+            });
         });
+    }
+    async validateRewardsSum(campaignId) {
+        const campaign = await this.queryOne(`SELECT goal_amount, campaign_type FROM campaigns WHERE id = $1`, [campaignId]);
+        if (!campaign || campaign.campaign_type !== 'reward')
+            return true;
+        const sumResult = await this.queryOne(`SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true`, [campaignId]);
+        const totalValue = Number(sumResult?.total_value) || 0;
+        const goalAmount = Number(campaign.goal_amount) || 0;
+        return totalValue === goalAmount;
     }
     async updateCoverImageUrl(campaignId, creatorId, coverImageUrl) {
         const row = await this.queryOne(`UPDATE campaigns
@@ -223,18 +264,35 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             updates.push(`campaign_type = $${paramIndex++}`);
             values.push(dto.campaignType);
         }
-        if (updates.length === 1)
-            return this.findOneByCreatorId(campaignId, creatorId);
-        const query = `
-      UPDATE campaigns
-      SET ${updates.join(', ')}
-      WHERE id = $1 AND creator_id = $2
-      RETURNING id
-    `;
-        const row = await this.queryOne(query, values);
-        if (!row)
-            return null;
-        return this.findOneByCreatorId(campaignId, creatorId);
+        return this.transaction(async (client) => {
+            const query = `
+        UPDATE campaigns
+        SET ${updates.join(', ')}
+        WHERE id = $1 AND creator_id = $2
+        RETURNING id
+      `;
+            const result = await client.query(query, values);
+            if (result.rowCount === 0)
+                return null;
+            if (dto.rewards && Array.isArray(dto.rewards)) {
+                await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);
+                for (const reward of dto.rewards) {
+                    await client.query(`INSERT INTO reward_tiers (
+              campaign_id, title, description, amount, max_claims, is_active
+            ) VALUES ($1, $2, $3, $4, $5, true)`, [
+                        campaignId,
+                        reward.title,
+                        reward.description,
+                        reward.amount,
+                        reward.maxClaims || null
+                    ]);
+                }
+            }
+            return this.findOneByCreatorId(campaignId, creatorId, {
+                queryOne: (sql, params) => client.query(sql, params).then((r) => r.rows[0]),
+                queryMany: (sql, params) => client.query(sql, params).then((r) => r.rows),
+            });
+        });
     }
     async getFinancialProgress(campaignId, creatorId) {
         const campaign = await this.queryOne(`SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2`, [campaignId, creatorId]);
@@ -271,12 +329,14 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         const recentRows = await this.queryMany(`SELECT
         i.id, i.amount, i.currency, i.status,
         i.is_anonymous, i.created_at,
+        rt.title as reward_title,
         CASE
           WHEN i.is_anonymous THEN NULL
           ELSE COALESCE(ip.display_name, ip.first_name || ' ' || ip.last_name)
         END AS investor_display_name
        FROM investments i
        LEFT JOIN investor_profiles ip ON i.investor_id = ip.user_id
+       LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
        WHERE i.campaign_id = $1
        ORDER BY i.created_at DESC
        LIMIT 10`, [campaignId]);
@@ -326,6 +386,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 status: row.status,
                 isAnonymous: row.is_anonymous,
                 investorDisplayName: row.investor_display_name,
+                rewardTitle: row.reward_title,
                 createdAt: row.created_at,
             })),
         };
@@ -379,36 +440,37 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         const page = query.page || 1;
         const limit = query.limit || 20;
         const offset = (page - 1) * limit;
-        const campaign = await this.queryOne(`SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2`, [campaignId, creatorId]);
+        const conditions = ['id = $1'];
+        const params = [campaignId];
+        if (creatorId) {
+            conditions.push('creator_id = $2');
+            params.push(creatorId);
+        }
+        const campaign = await this.queryOne(`SELECT id FROM campaigns WHERE ${conditions.join(' AND ')}`, params);
         if (!campaign)
             return { investors: [], total: 0 };
         const totalRes = await this.queryOne(`SELECT COUNT(DISTINCT investor_id) as total FROM investments WHERE campaign_id = $1 AND status = 'completed'`, [campaignId]);
         const total = parseInt(totalRes.total, 10);
         const rows = await this.queryMany(`SELECT 
-        stats.investor_id,
+        i.id as investment_id,
+        i.amount,
+        i.created_at,
+        rt.title as reward_title,
+        rt.id as reward_tier_id,
+        ip.user_id as investor_id,
         ip.first_name,
         ip.last_name,
         ip.display_name,
         ip.avatar_url,
         CONCAT(ip.city, ', ', ip.country) as location,
         ip.bio,
-        u.email,
-        stats.total_invested,
-        stats.investment_count,
-        stats.last_investment_at
-      FROM (
-        SELECT 
-          investor_id,
-          SUM(amount) as total_invested,
-          COUNT(id) as investment_count,
-          MAX(created_at) as last_investment_at
-        FROM investments
-        WHERE campaign_id = $1 AND status = 'completed'
-        GROUP BY investor_id
-      ) stats
-      JOIN investor_profiles ip ON stats.investor_id = ip.user_id
-      JOIN users u ON stats.investor_id = u.id
-      ORDER BY stats.last_investment_at DESC
+        u.email
+      FROM investments i
+      JOIN investor_profiles ip ON i.investor_id = ip.user_id
+      JOIN users u ON i.investor_id = u.id
+      LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+      WHERE i.campaign_id = $1 AND i.status = 'completed'
+      ORDER BY i.created_at DESC
       LIMIT $2 OFFSET $3`, [campaignId, limit, offset]);
         return {
             investors: rows.map(row => ({
@@ -420,12 +482,38 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 location: row.location,
                 bio: row.bio,
                 email: row.email,
-                totalInvested: Number(row.total_invested),
-                investmentCount: Number(row.investment_count),
-                lastInvestmentAt: row.last_investment_at,
+                totalInvested: Number(row.amount),
+                investmentCount: 1,
+                lastInvestmentAt: row.created_at,
+                investmentId: row.investment_id,
+                rewardTitle: row.reward_title,
             })),
             total,
         };
+    }
+    async delete(campaignId, creatorId) {
+        return this.transaction(async (client) => {
+            const check = await client.query('SELECT status FROM campaigns WHERE id = $1 AND creator_id = $2', [campaignId, creatorId]);
+            if (check.rowCount === 0)
+                return false;
+            const status = check.rows[0].status;
+            if (status !== 'draft' && status !== 'rejected') {
+                throw new Error('Solo se pueden eliminar campañas en borrador o rechazadas');
+            }
+            await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);
+            await client.query('DELETE FROM campaign_status_history WHERE campaign_id = $1', [campaignId]);
+            const res = await client.query('DELETE FROM campaigns WHERE id = $1 AND creator_id = $2', [campaignId, creatorId]);
+            return res.rowCount > 0;
+        });
+    }
+    async finalize(campaignId, creatorId) {
+        const res = await this.queryOne(`UPDATE campaigns 
+       SET status = 'finished', updated_at = NOW() 
+       WHERE id = $1 AND creator_id = $2 AND status = 'published'
+       RETURNING id`, [campaignId, creatorId]);
+        if (!res)
+            return null;
+        return this.findOneByCreatorId(campaignId, creatorId);
     }
 };
 exports.EntrepreneurCampaignRepository = EntrepreneurCampaignRepository;

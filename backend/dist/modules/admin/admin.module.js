@@ -14,12 +14,13 @@ const admin_service_1 = require("./services/admin.service");
 const admin_repository_1 = require("./repositories/admin.repository");
 const user_module_1 = require("../users/user.module");
 const entrepreneur_module_1 = require("../entrepreneur/entrepreneur.module");
+const reward_tiers_module_1 = require("../reward-tiers/reward-tiers.module");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
 exports.AdminModule = AdminModule = __decorate([
     (0, common_1.Module)({
-        imports: [user_module_1.UsersModule, entrepreneur_module_1.EntrepreneurModule],
+        imports: [user_module_1.UsersModule, entrepreneur_module_1.EntrepreneurModule, reward_tiers_module_1.RewardTiersModule],
         controllers: [admin_controller_1.AdminController, superadmin_controller_1.SuperAdminController],
         providers: [admin_service_1.AdminService, admin_repository_1.AdminRepository],
     })

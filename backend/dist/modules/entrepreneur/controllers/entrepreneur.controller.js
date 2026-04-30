@@ -127,6 +127,16 @@ let EntrepreneurController = class EntrepreneurController {
         const result = await this.entrepreneurService.getCampaignInvestors(userId, campaignId, { page: page ? Number(page) : 1, limit: limit ? Number(limit) : 20 });
         return new dto_2.ApiSuccessResponse(result);
     }
+    async deleteCampaign(req, campaignId) {
+        const userId = req.user.id;
+        await this.entrepreneurService.deleteCampaign(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(null, 'Campaña eliminada exitosamente');
+    }
+    async finalizeCampaign(req, campaignId) {
+        const userId = req.user.id;
+        const campaign = await this.entrepreneurService.finalizeCampaign(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(campaign, 'Campaña finalizada exitosamente');
+    }
 };
 exports.EntrepreneurController = EntrepreneurController;
 __decorate([
@@ -380,6 +390,31 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Number, Number]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "getCampaignInvestors", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Delete)('me/campaigns/:campaignId'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Eliminar una campaña (Solo Borrador o Rechazada)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Campaña eliminada exitosamente.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'No se puede eliminar una campaña activa.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "deleteCampaign", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Post)('me/campaigns/:campaignId/finalize'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Finalizar una campaña activa' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Campaña finalizada exitosamente.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "finalizeCampaign", null);
 exports.EntrepreneurController = EntrepreneurController = __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-profile'),
     (0, swagger_1.ApiBearerAuth)(),

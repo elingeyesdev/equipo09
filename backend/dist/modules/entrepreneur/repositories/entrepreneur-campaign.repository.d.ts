@@ -7,9 +7,10 @@ export declare class EntrepreneurCampaignRepository extends BaseRepository {
         campaigns: EntrepreneurCampaign[];
         total: number;
     }>;
-    findOneByCreatorId(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
+    findOneByCreatorId(campaignId: string, creatorId: string, client?: any): Promise<EntrepreneurCampaign | null>;
     submitForReview(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
     publishCampaign(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
+    validateRewardsSum(campaignId: string): Promise<boolean>;
     updateCoverImageUrl(campaignId: string, creatorId: string, coverImageUrl: string): Promise<EntrepreneurCampaign | null>;
     update(campaignId: string, creatorId: string, dto: Partial<CreateCampaignDto>): Promise<EntrepreneurCampaign | null>;
     getFinancialProgress(campaignId: string, creatorId: string): Promise<CampaignFinancialProgress | null>;
@@ -24,4 +25,6 @@ export declare class EntrepreneurCampaignRepository extends BaseRepository {
         investors: CampaignInvestor[];
         total: number;
     }>;
+    delete(campaignId: string, creatorId: string): Promise<boolean>;
+    finalize(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
 }

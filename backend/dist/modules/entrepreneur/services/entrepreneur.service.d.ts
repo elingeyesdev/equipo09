@@ -32,4 +32,6 @@ export declare class EntrepreneurService {
     getMyFinancialSummary(userId: string): Promise<EntrepreneurFinancialSummary>;
     private ensureEntrepreneurProfile;
     private ensureProfileCompleteForNewCampaign;
+    deleteCampaign(userId: string, campaignId: string): Promise<boolean>;
+    finalizeCampaign(userId: string, campaignId: string): Promise<EntrepreneurCampaign>;
 }

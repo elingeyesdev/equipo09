@@ -1,3 +1,4 @@
+import { RewardTier } from '../../reward-tiers/models/reward-tier.model';
 export interface EntrepreneurCampaign {
     id: string;
     title: string;
@@ -22,6 +23,7 @@ export interface EntrepreneurCampaign {
     createdAt: Date;
     updatedAt: Date;
     publishedAt: Date | null;
+    rewardTiers?: RewardTier[];
 }
 export interface CampaignFinancialProgress {
     campaignId: string;
@@ -62,6 +64,7 @@ export interface RecentInvestment {
     status: string;
     isAnonymous: boolean;
     investorDisplayName: string | null;
+    rewardTitle?: string;
     createdAt: Date;
 }
 export interface EntrepreneurFinancialSummary {
@@ -85,5 +88,7 @@ export interface CampaignInvestor {
     totalInvested: number;
     investmentCount: number;
     lastInvestmentAt: Date;
+    investmentId?: string;
+    rewardTitle?: string;
 }
 export declare function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign;

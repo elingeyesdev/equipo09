@@ -71,4 +71,9 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: 'array', items: { type: 'object' } }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateCampaignDto.prototype, "rewards", void 0);
 //# sourceMappingURL=create-campaign.dto.js.map

@@ -11,14 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
+const dto_1 = require("../../../common/dto");
 const admin_repository_1 = require("../repositories/admin.repository");
 const repositories_1 = require("../../users/repositories");
 const repositories_2 = require("../../entrepreneur/repositories");
+const reward_tier_repository_1 = require("../../reward-tiers/repositories/reward-tier.repository");
 let AdminService = class AdminService {
-    constructor(adminRepo, userRepo, campaignRepo) {
+    constructor(adminRepo, userRepo, campaignRepo, rewardRepo) {
         this.adminRepo = adminRepo;
         this.userRepo = userRepo;
         this.campaignRepo = campaignRepo;
+        this.rewardRepo = rewardRepo;
     }
     async getDashboardStats() {
         return this.adminRepo.getDashboardStats();
@@ -54,6 +57,13 @@ let AdminService = class AdminService {
     }
     async getCampaignFinancialProgress(campaignId) {
         return this.campaignRepo.getFinancialProgressAdmin(campaignId);
+    }
+    async getCampaignInvestors(campaignId, query) {
+        const { investors, total } = await this.campaignRepo.getCampaignInvestors(campaignId, undefined, query);
+        return new dto_1.PaginatedResponse(investors, total, query.page || 1, query.limit || 20);
+    }
+    async getRewardClaims(campaignId) {
+        return this.rewardRepo.getRewardClaims(campaignId);
     }
     async createAdmin(email, passwordString) {
         const userExists = await this.userRepo.findByEmail(email);
@@ -108,6 +118,7 @@ exports.AdminService = AdminService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [admin_repository_1.AdminRepository,
         repositories_1.UserRepository,
-        repositories_2.EntrepreneurCampaignRepository])
+        repositories_2.EntrepreneurCampaignRepository,
+        reward_tier_repository_1.RewardTierRepository])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

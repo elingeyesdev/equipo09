@@ -133,6 +133,10 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
     }
     async submitCampaignForReview(userId, campaignId) {
         await this.ensureEntrepreneurProfile(userId);
+        const isRewardsValid = await this.campaignRepo.validateRewardsSum(campaignId);
+        if (!isRewardsValid) {
+            throw new exceptions_1.BadRequestException('La sumatoria total de las recompensas (monto × personas) debe ser exactamente igual a la meta de la campaña.');
+        }
         const updated = await this.campaignRepo.submitForReview(campaignId, userId);
         if (!updated) {
             throw new exceptions_1.BadRequestException('Solo las campañas en borrador pueden enviarse a revisión');
@@ -141,6 +145,10 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
     }
     async publishCampaign(userId, campaignId) {
         await this.ensureEntrepreneurProfile(userId);
+        const isRewardsValid = await this.campaignRepo.validateRewardsSum(campaignId);
+        if (!isRewardsValid) {
+            throw new exceptions_1.BadRequestException('La sumatoria total de las recompensas (monto × personas) debe ser exactamente igual a la meta de la campaña.');
+        }
         const updated = await this.campaignRepo.publishCampaign(campaignId, userId);
         if (!updated) {
             throw new exceptions_1.BadRequestException('No se puede publicar: la campaña debe estar en borrador o aprobada');
@@ -224,6 +232,23 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         if (missing.length > 0) {
             throw new exceptions_1.BadRequestException(`Completa tu perfil para crear campañas. Falta: ${missing.join(', ')}.`);
         }
+    }
+    async deleteCampaign(userId, campaignId) {
+        await this.ensureEntrepreneurProfile(userId);
+        try {
+            return await this.campaignRepo.delete(campaignId, userId);
+        }
+        catch (err) {
+            throw new exceptions_1.BadRequestException(err.message || 'Error al eliminar campaña');
+        }
+    }
+    async finalizeCampaign(userId, campaignId) {
+        await this.ensureEntrepreneurProfile(userId);
+        const updated = await this.campaignRepo.finalize(campaignId, userId);
+        if (!updated) {
+            throw new exceptions_1.BadRequestException('Solo se pueden finalizar campañas que estén publicadas (activas)');
+        }
+        return updated;
     }
 };
 exports.EntrepreneurService = EntrepreneurService;

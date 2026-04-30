@@ -19,6 +19,7 @@ const campaign_module_1 = require("./modules/campaigns/campaign.module");
 const admin_module_1 = require("./modules/admin/admin.module");
 const investments_module_1 = require("./modules/investments/investments.module");
 const reward_tiers_module_1 = require("./modules/reward-tiers/reward-tiers.module");
+const notifications_module_1 = require("./modules/notifications/notifications.module");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 let AppModule = class AppModule {
@@ -41,9 +42,14 @@ exports.AppModule = AppModule = __decorate([
             admin_module_1.AdminModule,
             investments_module_1.InvestmentsModule,
             reward_tiers_module_1.RewardTiersModule,
+            notifications_module_1.NotificationsModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
                 serveRoot: '/uploads',
+                serveStaticOptions: {
+                    index: false,
+                    redirect: false,
+                },
             }),
         ],
     })

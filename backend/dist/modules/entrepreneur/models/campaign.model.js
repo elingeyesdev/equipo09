@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapRowToEntrepreneurCampaign = mapRowToEntrepreneurCampaign;
+const reward_tier_model_1 = require("../../reward-tiers/models/reward-tier.model");
 function mapRowToEntrepreneurCampaign(row) {
-    return {
+    const campaign = {
         id: row.id,
         title: row.title,
         slug: row.slug,
@@ -27,5 +28,9 @@ function mapRowToEntrepreneurCampaign(row) {
         updatedAt: row.updated_at,
         publishedAt: row.published_at,
     };
+    if (row.reward_tiers) {
+        campaign.rewardTiers = row.reward_tiers.map(reward_tier_model_1.mapRowToRewardTier);
+    }
+    return campaign;
 }
 //# sourceMappingURL=campaign.model.js.map

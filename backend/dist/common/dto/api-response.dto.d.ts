@@ -4,10 +4,11 @@ export declare class PaginatedResponse<T> {
     constructor(data: T[], total: number, page: number, limit: number);
 }
 export declare class PaginationMeta {
-    total: number;
-    page: number;
-    limit: number;
+    totalItems: number;
+    itemCount: number;
+    itemsPerPage: number;
     totalPages: number;
+    currentPage: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
 }

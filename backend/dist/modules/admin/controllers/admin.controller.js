@@ -62,6 +62,17 @@ let AdminController = class AdminController {
         const deleted = await this.adminService.softDeleteUser(id);
         return new dto_1.ApiSuccessResponse(deleted, 'Usuario inhabilitado con éxito');
     }
+    async getCampaignInvestors(id, page, limit) {
+        const result = await this.adminService.getCampaignInvestors(id, {
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 20
+        });
+        return new dto_1.ApiSuccessResponse(result, 'Listado de inversores obtenido');
+    }
+    async getRewardClaims(id) {
+        const claims = await this.adminService.getRewardClaims(id);
+        return new dto_1.ApiSuccessResponse(claims, 'Reclamos obtenidos');
+    }
     async deleteCampaign(id, req) {
         const reviewerId = req.user.id;
         const deleted = await this.adminService.hardDeleteCampaign(id, reviewerId);
@@ -150,6 +161,26 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "softDeleteUser", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id/investors'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener lista de inversores de una campaña (Administración)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCampaignInvestors", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id/rewards/claims'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener reclamos de recompensas (Administración)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getRewardClaims", null);
 __decorate([
     (0, common_1.Delete)('campaigns/:id'),
     (0, roles_decorator_1.Roles)('admin', 'super_admin'),
