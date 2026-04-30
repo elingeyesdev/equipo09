@@ -111,7 +111,7 @@ export function CampaignDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { campaign, loading, error, retry } = useCampaignDetail(id);
+  const { campaign, loading, error, retry, refetch } = useCampaignDetail(id);
 
   // ── Investment state ──
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
@@ -609,6 +609,8 @@ export function CampaignDetailPage() {
                       });
                       setShowConfirmModal(false);
                       setInvestmentSuccess(true);
+                      // Recargar datos de la campaña en tiempo real
+                      refetch();
                     } catch (err: any) {
                       const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
                       setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
@@ -774,6 +776,8 @@ export function CampaignDetailPage() {
               });
               setShowConfirmModal(false);
               setInvestmentSuccess(true);
+              // Recargar datos de la campaña en tiempo real
+              refetch();
             } catch (err: any) {
               const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
               setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');

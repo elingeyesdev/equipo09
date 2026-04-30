@@ -27,6 +27,17 @@ export function useCampaignDetail(id: string | undefined) {
     }
   }, []);
 
+  /** Recarga silenciosa sin mostrar el loading spinner (para actualizar datos en tiempo real) */
+  const refetch = useCallback(async () => {
+    if (!id) return;
+    try {
+      const result = await fetchPublicCampaignById(id);
+      setCampaign(result);
+    } catch {
+      // Error silencioso: los datos actuales se mantienen
+    }
+  }, [id]);
+
   useEffect(() => {
     if (id) {
       loadCampaign(id);
@@ -40,5 +51,6 @@ export function useCampaignDetail(id: string | undefined) {
     if (id) loadCampaign(id);
   }, [id, loadCampaign]);
 
-  return { campaign, loading, error, retry };
+  return { campaign, loading, error, retry, refetch };
 }
+

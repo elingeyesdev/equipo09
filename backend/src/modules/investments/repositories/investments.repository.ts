@@ -163,34 +163,18 @@ export class InvestmentsRepository extends BaseRepository {
         [userId, dto.amount]
       );
 
-      // 5.1. Actualizar campaña manualmente (por si el trigger falla o no existe)
-      const newStatus = isFunded && campaign.status !== 'funded' ? 'funded' : campaign.status;
-      if (newStatus === 'funded' && campaign.status !== 'funded') {
+      // 5.1. Actualizar estado de campaña a 'funded' si corresponde.
+      //      NOTA: current_amount e investor_count los actualiza el trigger
+      //      trg_sync_campaign_totals automáticamente al insertar la inversión.
+      //      Aquí solo cambiamos el status si se alcanzó la meta.
+      if (isFunded && campaign.status !== 'funded') {
         await client.query(
-          `UPDATE campaigns 
-           SET current_amount = current_amount + $2, 
-               investor_count = investor_count + 1,
-               status = 'funded'
-           WHERE id = $1`,
-          [dto.campaignId, dto.amount]
-        );
-      } else {
-        await client.query(
-          `UPDATE campaigns 
-           SET current_amount = current_amount + $2, 
-               investor_count = investor_count + 1 
-           WHERE id = $1`,
-          [dto.campaignId, dto.amount]
+          `UPDATE campaigns SET status = 'funded' WHERE id = $1`,
+          [dto.campaignId]
         );
       }
 
-      // 5.2. Actualizar recompensa manualmente
-      if (rewardTierId) {
-        await client.query(
-          `UPDATE reward_tiers SET current_claims = current_claims + 1 WHERE id = $1`,
-          [rewardTierId]
-        );
-      }
+      // 5.2. reward_tiers.current_claims lo actualiza el trigger trg_sync_reward_tier_claims.
 
       // 5.3. Actualizar total recaudado del emprendedor
       await client.query(
