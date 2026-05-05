@@ -43,7 +43,10 @@ export function useCampaigns() {
   const [addError, setAddError] = useState<string | null>(null);
   const [actionCampaignId, setActionCampaignId] = useState<string | null>(null);
 
-  const queryKey = useMemo(() => JSON.stringify(query), [query]);
+  // Token que fuerza un re-fetch incluso cuando el query no cambia
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const queryKey = useMemo(() => JSON.stringify(query) + '::' + refreshToken, [query, refreshToken]);
   const queryRef = useRef(query);
   queryRef.current = query;
 
@@ -85,7 +88,7 @@ export function useCampaigns() {
   }, []);
 
   const fetchCampaigns = useCallback(() => {
-    setQuery((q) => ({ ...q }));
+    setRefreshToken((t) => t + 1);
   }, []);
 
   const addCampaign = async (dto: CreateCampaignDto, coverFile?: File): Promise<boolean> => {
@@ -104,7 +107,9 @@ export function useCampaigns() {
         }
       }
 
+      // Resetear al query por defecto Y forzar re-fetch con token
       setQuery({ ...DEFAULT_QUERY });
+      setRefreshToken((t) => t + 1);
       return true;
     } catch (err: unknown) {
       console.error('Error creating campaign:', err);
@@ -249,3 +254,4 @@ export function useCampaigns() {
     actionCampaignId,
   };
 }
+
