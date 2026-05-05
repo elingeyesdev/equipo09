@@ -1,5 +1,6 @@
 import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
+import { AddCapitalModal } from '../components/AddCapitalModal';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
 import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
@@ -8,10 +9,11 @@ import { getImageUrl } from '../utils/image.utils';
 import { useState, useEffect } from 'react';
 
 export function InvestorDashboardPage() {
-  const { data, loading, error } = useInvestorDashboard();
+  const { data, loading, error, refetch } = useInvestorDashboard();
   const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
   const [loadingInvestments, setLoadingInvestments] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [showAddCapital, setShowAddCapital] = useState(false);
 
   const handleDownloadReceipt = async (id: string) => {
     try {
@@ -74,7 +76,10 @@ export function InvestorDashboardPage() {
 
         {data && (
           <div className="flex flex-col gap-16 animate-in fade-in duration-700">
-            <InvestorDashboardOverview data={data} />
+            <InvestorDashboardOverview
+              data={data}
+              onAddCapital={() => setShowAddCapital(true)}
+            />
             
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between border-b border-emerald-50 pb-4">
@@ -160,6 +165,16 @@ export function InvestorDashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Modal de Aumentar Capital */}
+      <AddCapitalModal
+        isOpen={showAddCapital}
+        onClose={() => setShowAddCapital(false)}
+        onSuccess={refetch}
+        currentAvailable={data?.availableCapital ?? null}
+        currentMax={data?.maxInvestmentLimit ?? null}
+      />
     </div>
   );
 }
+

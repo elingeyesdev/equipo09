@@ -149,3 +149,21 @@ export async function downloadInvestmentReceipt(id: string): Promise<void> {
   window.URL.revokeObjectURL(url);
 }
 
+// ============================================================
+// CAPITAL — Aumentar
+// ============================================================
+
+export interface AddCapitalResponse {
+  newMax: number;
+  availableCapital: number;
+}
+
+export async function addCapital(amount: number, notes?: string): Promise<AddCapitalResponse> {
+  const { data } = await api.post<ApiSuccessResponse<AddCapitalResponse>>(
+    '/investors/me/capital/add',
+    { amount, notes },
+  );
+  return data.data;
+}
+
+

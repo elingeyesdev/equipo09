@@ -11,4 +11,9 @@ export declare class InvestorProfileRepository extends BaseRepository {
     create(userId: string, dto: CreateInvestorProfileDto): Promise<InvestorProfile>;
     update(userId: string, dto: UpdateInvestorProfileDto): Promise<InvestorProfile | null>;
     getCapitalOverview(userId: string): Promise<CapitalOverview | null>;
+    addCapital(userId: string, amount: number, notes?: string): Promise<{
+        newMax: number;
+        availableCapital: number;
+    }>;
+    getCapitalHistory(userId: string, limit?: number): Promise<any[]>;
 }

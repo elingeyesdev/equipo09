@@ -16,4 +16,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./create-investor-profile.dto"), exports);
 __exportStar(require("./update-investor-profile.dto"), exports);
+__exportStar(require("./add-capital.dto"), exports);
 //# sourceMappingURL=index.js.map

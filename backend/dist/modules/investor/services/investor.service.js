@@ -52,6 +52,16 @@ let InvestorService = InvestorService_1 = class InvestorService {
         }
         return overview;
     }
+    async addCapital(userId, dto) {
+        this.logger.log(`Inyección de capital para user ${userId}: +$${dto.amount}`);
+        const exists = await this.profileRepo.existsByUserId(userId);
+        if (!exists) {
+            throw new exceptions_1.NotFoundException('Perfil de inversor');
+        }
+        const result = await this.profileRepo.addCapital(userId, dto.amount, dto.notes);
+        this.logger.log(`Capital actualizado para user ${userId}: nuevo max=$${result.newMax}, disponible=$${result.availableCapital}`);
+        return result;
+    }
     async updateMyProfile(userId, dto) {
         this.logger.log(`Actualizando perfil de inversor para user ${userId}`);
         const exists = await this.profileRepo.existsByUserId(userId);

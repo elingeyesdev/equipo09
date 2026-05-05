@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { InvestorService } from '../services';
-import { CreateInvestorProfileDto, UpdateInvestorProfileDto } from '../dto';
+import { CreateInvestorProfileDto, UpdateInvestorProfileDto, AddCapitalDto } from '../dto';
 import { ApiSuccessResponse } from '../../../common/dto';
 import { InvestorProfile, CapitalOverview } from '../models';
 export declare class InvestorController {
@@ -9,6 +9,10 @@ export declare class InvestorController {
     createProfile(req: Request, dto: CreateInvestorProfileDto): Promise<ApiSuccessResponse<InvestorProfile>>;
     getMyProfile(req: Request): Promise<ApiSuccessResponse<InvestorProfile>>;
     getCapitalOverview(req: Request): Promise<ApiSuccessResponse<CapitalOverview>>;
+    addCapital(req: Request, dto: AddCapitalDto): Promise<ApiSuccessResponse<{
+        newMax: number;
+        availableCapital: number;
+    }>>;
     updateMyProfile(req: Request, dto: UpdateInvestorProfileDto): Promise<ApiSuccessResponse<InvestorProfile>>;
     deleteMyProfile(req: Request): Promise<ApiSuccessResponse<null>>;
     getProfileById(id: string): Promise<ApiSuccessResponse<InvestorProfile>>;

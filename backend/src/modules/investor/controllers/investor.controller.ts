@@ -29,6 +29,7 @@ import { InvestorService } from '../services';
 import {
   CreateInvestorProfileDto,
   UpdateInvestorProfileDto,
+  AddCapitalDto,
 } from '../dto';
 import { ApiSuccessResponse } from '../../../common/dto';
 import { InvestorProfile, CapitalOverview } from '../models';
@@ -102,6 +103,30 @@ export class InvestorController {
     const userId = (req as any).user.id;
     const overview = await this.investorService.getCapitalOverview(userId);
     return new ApiSuccessResponse(overview);
+  }
+
+  // =========================================================================
+  // AUMENTAR CAPITAL
+  // =========================================================================
+
+  /**
+   * POST /investors/me/capital/add
+   * Permite al inversor inyectar más capital simulado a su cuenta.
+   * Registra la operación en la tabla capital_transactions para auditoría.
+   */
+  @Post('me/capital/add')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Aumentar capital del inversor' })
+  @ApiResponse({ status: 200, description: 'Capital aumentado exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Perfil no encontrado.' })
+  @ApiResponse({ status: 400, description: 'Monto inválido.' })
+  async addCapital(
+    @Req() req: Request,
+    @Body() dto: AddCapitalDto,
+  ): Promise<ApiSuccessResponse<{ newMax: number; availableCapital: number }>> {
+    const userId = (req as any).user.id;
+    const result = await this.investorService.addCapital(userId, dto);
+    return new ApiSuccessResponse(result, 'Capital aumentado exitosamente');
   }
 
   // =========================================================================

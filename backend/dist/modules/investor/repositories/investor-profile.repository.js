@@ -128,6 +128,45 @@ let InvestorProfileRepository = class InvestorProfileRepository extends database
             pendingAmount: Number(row.pending_amount) || 0,
         };
     }
+    async addCapital(userId, amount, notes) {
+        return this.transaction(async (client) => {
+            const result = await client.query(`SELECT max_investment, total_invested
+         FROM investor_profiles
+         WHERE user_id = $1 FOR UPDATE`, [userId]);
+            if (result.rows.length === 0) {
+                throw new Error('Perfil de inversor no encontrado');
+            }
+            const { max_investment, total_invested } = result.rows[0];
+            const previousMax = Number(max_investment) || 0;
+            const newMax = previousMax + amount;
+            const totalInvestedNum = Number(total_invested) || 0;
+            await client.query(`UPDATE investor_profiles
+         SET max_investment = $2
+         WHERE user_id = $1`, [userId, newMax]);
+            await client.query(`INSERT INTO capital_transactions (user_id, amount, type, previous_max, new_max, notes)
+         VALUES ($1, $2, 'deposit', $3, $4, $5)`, [userId, amount, previousMax, newMax, notes ?? null]);
+            return {
+                newMax,
+                availableCapital: newMax - totalInvestedNum,
+            };
+        });
+    }
+    async getCapitalHistory(userId, limit = 20) {
+        const result = await this.query(`SELECT id, amount, type, previous_max, new_max, notes, created_at
+       FROM capital_transactions
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2`, [userId, limit]);
+        return result.rows.map((row) => ({
+            id: row.id,
+            amount: Number(row.amount),
+            type: row.type,
+            previousMax: Number(row.previous_max),
+            newMax: Number(row.new_max),
+            notes: row.notes,
+            createdAt: row.created_at,
+        }));
+    }
 };
 exports.InvestorProfileRepository = InvestorProfileRepository;
 exports.InvestorProfileRepository = InvestorProfileRepository = __decorate([

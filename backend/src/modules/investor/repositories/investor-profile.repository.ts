@@ -210,5 +210,78 @@ export class InvestorProfileRepository extends BaseRepository {
       pendingAmount: Number(row.pending_amount) || 0,
     };
   }
+
+  /**
+   * Inyecta capital adicional al inversor (aumenta max_investment).
+   * Transacción atómica con lock pesimista + registro en capital_transactions.
+   */
+  async addCapital(
+    userId: string,
+    amount: number,
+    notes?: string,
+  ): Promise<{ newMax: number; availableCapital: number }> {
+    return this.transaction(async (client) => {
+      // 1. Bloquear perfil para escritura (pessimistic lock)
+      const result = await client.query(
+        `SELECT max_investment, total_invested
+         FROM investor_profiles
+         WHERE user_id = $1 FOR UPDATE`,
+        [userId],
+      );
+
+      if (result.rows.length === 0) {
+        throw new Error('Perfil de inversor no encontrado');
+      }
+
+      const { max_investment, total_invested } = result.rows[0];
+      const previousMax = Number(max_investment) || 0;
+      const newMax = previousMax + amount;
+      const totalInvestedNum = Number(total_invested) || 0;
+
+      // 2. Actualizar max_investment
+      await client.query(
+        `UPDATE investor_profiles
+         SET max_investment = $2
+         WHERE user_id = $1`,
+        [userId, newMax],
+      );
+
+      // 3. Registrar en historial de capital
+      await client.query(
+        `INSERT INTO capital_transactions (user_id, amount, type, previous_max, new_max, notes)
+         VALUES ($1, $2, 'deposit', $3, $4, $5)`,
+        [userId, amount, previousMax, newMax, notes ?? null],
+      );
+
+      return {
+        newMax,
+        availableCapital: newMax - totalInvestedNum,
+      };
+    });
+  }
+
+  /**
+   * Obtiene el historial de transacciones de capital de un inversor.
+   */
+  async getCapitalHistory(userId: string, limit = 20): Promise<any[]> {
+    const result = await this.query(
+      `SELECT id, amount, type, previous_max, new_max, notes, created_at
+       FROM capital_transactions
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2`,
+      [userId, limit],
+    );
+
+    return result.rows.map((row: any) => ({
+      id: row.id,
+      amount: Number(row.amount),
+      type: row.type,
+      previousMax: Number(row.previous_max),
+      newMax: Number(row.new_max),
+      notes: row.notes,
+      createdAt: row.created_at,
+    }));
+  }
 }
 

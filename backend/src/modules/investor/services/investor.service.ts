@@ -9,6 +9,7 @@ import { UserRepository } from '../../users/repositories';
 import {
   CreateInvestorProfileDto,
   UpdateInvestorProfileDto,
+  AddCapitalDto,
 } from '../dto';
 import { InvestorProfile, CapitalOverview } from '../models';
 
@@ -95,6 +96,26 @@ export class InvestorService {
     return overview;
   }
 
+  /**
+   * Inyecta capital adicional al inversor.
+   * Aumenta el max_investment y registra en historial.
+   */
+  async addCapital(
+    userId: string,
+    dto: AddCapitalDto,
+  ): Promise<{ newMax: number; availableCapital: number }> {
+    this.logger.log(`Inyección de capital para user ${userId}: +$${dto.amount}`);
+
+    const exists = await this.profileRepo.existsByUserId(userId);
+    if (!exists) {
+      throw new NotFoundException('Perfil de inversor');
+    }
+
+    const result = await this.profileRepo.addCapital(userId, dto.amount, dto.notes);
+    this.logger.log(`Capital actualizado para user ${userId}: nuevo max=$${result.newMax}, disponible=$${result.availableCapital}`);
+    return result;
+  }
+
   // =========================================================================
   // PERFIL DE INVERSOR — Editar
   // =========================================================================
@@ -148,3 +169,4 @@ export class InvestorService {
     this.logger.log(`Perfil de inversor eliminado para user ${userId}`);
   }
 }
+

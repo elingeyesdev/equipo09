@@ -41,6 +41,11 @@ let InvestorController = class InvestorController {
         const overview = await this.investorService.getCapitalOverview(userId);
         return new dto_2.ApiSuccessResponse(overview);
     }
+    async addCapital(req, dto) {
+        const userId = req.user.id;
+        const result = await this.investorService.addCapital(userId, dto);
+        return new dto_2.ApiSuccessResponse(result, 'Capital aumentado exitosamente');
+    }
     async updateMyProfile(req, dto) {
         const userId = req.user.id;
         const profile = await this.investorService.updateMyProfile(userId, dto);
@@ -106,6 +111,19 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], InvestorController.prototype, "getCapitalOverview", null);
+__decorate([
+    (0, common_1.Post)('me/capital/add'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Aumentar capital del inversor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Capital aumentado exitosamente.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Perfil no encontrado.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Monto inválido.' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, dto_1.AddCapitalDto]),
+    __metadata("design:returntype", Promise)
+], InvestorController.prototype, "addCapital", null);
 __decorate([
     (0, common_1.Put)('me/profile'),
     (0, swagger_1.ApiOperation)({ summary: 'Editar datos personales del inversor' }),
