@@ -42,7 +42,7 @@ export class NotificationsService {
       body: `Recibiste una inversión de ${params.amount} ${params.currency} en "${params.campaignTitle}".`,
       referenceType: 'investment',
       referenceId: params.investmentId,
-      actionUrl: `/entrepreneur-campaigns/${params.campaignId}`,
+      actionUrl: `/campaigns/${params.campaignId}`,
       data: {
         amount: params.amount,
         currency: params.currency,

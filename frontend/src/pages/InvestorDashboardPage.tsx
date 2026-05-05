@@ -133,7 +133,7 @@ export function InvestorDashboardPage() {
                           <p className="text-2xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
                         </div>
                         <div className="flex flex-col items-end gap-2 mt-3">
-                          <Link to={`/campaigns/${inv.campaignId}`} className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer inline-flex items-center gap-1">
+                          <Link to={`/campaign/${inv.campaignId}`} className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 border-none bg-transparent cursor-pointer inline-flex items-center gap-1">
                             Ver Campaña <ArrowRight size={14} />
                           </Link>
                           {inv.investmentStatus === 'completed' && (
