@@ -267,12 +267,12 @@ export function CampaignPreviewModal({
             <div className="flex flex-col items-end mr-2 md:mr-4">
               <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</span>
               <span className={`px-3 md:px-4 py-1 md:py-1.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest shadow-sm border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
-                  ? 'bg-amber-50 text-amber-600 border-amber-100'
-                  : campaign.status === 'approved' || campaign.status === 'published'
-                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                    : campaign.status === 'rejected'
-                      ? 'bg-red-50 text-red-600 border-red-100'
-                      : 'bg-slate-50 text-slate-500 border-slate-100'
+                ? 'bg-amber-50 text-amber-600 border-amber-100'
+                : campaign.status === 'approved' || campaign.status === 'published'
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                  : campaign.status === 'rejected'
+                    ? 'bg-red-50 text-red-600 border-red-100'
+                    : 'bg-slate-50 text-slate-500 border-slate-100'
                 }`}>
                 {statusLabel(campaign.status || 'draft')}
               </span>
@@ -291,18 +291,16 @@ export function CampaignPreviewModal({
         <div className="bg-white px-10 border-b border-slate-100 flex items-center gap-8 z-30">
           <button
             onClick={() => setActiveTab('details')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
-              activeTab === 'details' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'details' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
           >
             Detalles de Proyecto
           </button>
           {(campaign.status === 'published' || campaign.status === 'funded') && (
             <button
               onClick={() => setActiveTab('investors')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${
-                activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
             >
               Inversores Activos ({investorsTotal})
             </button>
@@ -310,9 +308,8 @@ export function CampaignPreviewModal({
           {campaign.campaignType === 'reward' && !isAdmin && (
             <button
               onClick={() => setActiveTab('rewards')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${
-                activeTab === 'rewards' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
             >
               <Gem size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
               Recompensas
@@ -326,6 +323,26 @@ export function CampaignPreviewModal({
             <>
               {/* Left Column: Detailed Content */}
               <main className="flex-1 p-10 lg:p-12 space-y-12">
+                {/* Rejection Feedback Alert */}
+                {campaign.status === 'rejected' && (
+                  <div className="bg-red-50 border-2 border-red-100 p-8 rounded-[40px] shadow-sm animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-4 text-red-700 mb-4">
+                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <AlertTriangle size={24} strokeWidth={2.5} />
+                      </div>
+                      <div className="flex flex-col">
+                        <h3 className="text-[12px] font-black uppercase tracking-[0.2em] leading-none mb-1">Propuesta Rechazada</h3>
+                        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Requiere ajustes técnicos para aprobación</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/80 p-6 rounded-[24px] border border-red-100 italic text-[15px] text-red-900/80 font-medium leading-relaxed relative">
+                      <div className="absolute -top-3 -left-3 bg-red-100 text-red-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white shadow-sm">
+                        Retroalimentación Oficial
+                      </div>
+                      "{history.find(h => h.to_status === 'rejected')?.feedback || 'No se ha proporcionado un motivo detallado aún. Por favor, revisa las especificaciones generales.'}"
+                    </div>
+                  </div>
+                )}
 
                 {/* Visual Assets Section */}
                 <section className="space-y-6">
@@ -496,12 +513,12 @@ export function CampaignPreviewModal({
                   <div className="flex justify-between items-center bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm">
                     <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Estado de Campaña</span>
                     <span className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
-                        ? 'bg-amber-50 text-amber-600 border-amber-100'
-                        : campaign.status === 'approved' || campaign.status === 'published'
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                          : campaign.status === 'rejected'
-                            ? 'bg-red-50 text-red-600 border-red-100'
-                            : 'bg-slate-50 text-slate-500 border-slate-100'
+                      ? 'bg-amber-50 text-amber-600 border-amber-100'
+                      : campaign.status === 'approved' || campaign.status === 'published'
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        : campaign.status === 'rejected'
+                          ? 'bg-red-50 text-red-600 border-red-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
                       }`}>
                       {statusLabel(campaign.status)}
                     </span>
@@ -565,10 +582,10 @@ export function CampaignPreviewModal({
                       <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[24px] border border-slate-100">
                         <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 flex-shrink-0 shadow-inner">
                           {getImageUrl(entrepreneur.avatar) ? (
-                            <img 
-                              src={getImageUrl(entrepreneur.avatar)} 
-                              className="w-full h-full object-cover" 
-                              alt="Proponent" 
+                            <img
+                              src={getImageUrl(entrepreneur.avatar)}
+                              className="w-full h-full object-cover"
+                              alt="Proponent"
                               onError={(e) => {
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(entrepreneur.firstName || 'E')}+${encodeURIComponent(entrepreneur.lastName || '')}&background=random`;
                               }}
@@ -689,11 +706,11 @@ export function CampaignPreviewModal({
             </>
           ) : activeTab === 'investors' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-               <CampaignInvestorsTab campaignId={campaign.id} currency={currency} isAdmin={isAdmin} />
+              <CampaignInvestorsTab campaignId={campaign.id} currency={currency} isAdmin={isAdmin} />
             </div>
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} />
+              <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} />
             </div>
           ) : null}
         </div>
