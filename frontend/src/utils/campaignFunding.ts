@@ -16,7 +16,7 @@ export function formatFundingPercent(currentAmount: number, goalAmount: number):
 }
 
 export function formatCampaignCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: currency || 'USD',
     maximumFractionDigits: 0,

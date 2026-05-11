@@ -1,4 +1,26 @@
 /**
+ * Formatea un número con separadores de miles (puntos como 1.000)
+ * @param value - Número a formatear
+ * @returns Número formateado con puntos
+ */
+export const formatNumberSpanish = (value: number | string | undefined | null): string => {
+  if (value === undefined || value === null || value === '') return '';
+  const num = typeof value === 'string' ? parseFloat(value.replace(/\./g, '').replace(',', '.')) : value;
+  if (isNaN(num)) return '';
+  return Math.floor(num).toLocaleString('de-DE'); // de-DE uses dot for thousands
+};
+
+/**
+ * Remueve puntos de un número formateado
+ * @param value - String con puntos a parsear
+ * @returns Número sin formato
+ */
+export const parseNumberSpanish = (value: string): number => {
+  if (!value) return 0;
+  return parseInt(value.replace(/\./g, ''), 10) || 0;
+};
+
+/**
  * Formatea un número con separadores de miles (comas)
  * @param value - Número a formatear
  * @returns Número formateado con comas
@@ -33,11 +55,9 @@ export const isValidAmount = (value: number): boolean => {
  * @returns true si la fecha es en el futuro
  */
 export const isFutureDate = (dateString: string): boolean => {
-  if (!dateString) return true; // Si está vacío, es válido (opcional)
+  if (!dateString) return true;
   const date = new Date(dateString);
   const now = new Date();
-  // Comparar sin la hora para validar solo fechas futuras
-  now.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return date > now; // Estrictamente futuro, no permite hoy
+  return date > now;
 };
+

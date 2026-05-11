@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, useEffect, useRef } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Save, X, Plus, Trash2, Gem, Edit2 } from 'lucide-react';
@@ -7,15 +7,19 @@ import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, Camp
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
+import { formatNumberSpanish, parseNumberSpanish, isFutureDate } from '../utils/numberFormat';
 
 const schema = z.object({
-  title: z.string().min(5, 'El título debe tener mínimo 5 caracteres').max(255),
-  description: z.string().min(20, 'Describe tu proyecto más detalladamente').max(5000),
-  shortDescription: z.string().max(500).optional().or(z.literal('')),
+  title: z.string().min(5, 'El título debe tener entre 5 y 90 caracteres').max(90, 'El título debe tener entre 5 y 90 caracteres'),
+  description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
+  shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es $100'),
   campaignType: z.enum(['donation', 'reward', 'equity']),
   categoryId: z.string().min(1, 'Debes seleccionar una categoría principal'),
-  endDate: z.string().optional().or(z.literal('')),
+  endDate: z.string().optional().or(z.literal(''))
+    .refine((val) => !val || isFutureDate(val), {
+      message: 'La fecha de cierre debe ser posterior a hoy',
+    }),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -34,6 +38,8 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     handleSubmit,
     reset,
     watch,
+    control,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -50,6 +56,11 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
   const campaignType = watch('campaignType');
   const goalAmount = watch('goalAmount') || 1000;
+  const titleVal = watch('title') || '';
+  const sloganVal = watch('shortDescription') || '';
+  const descVal = watch('description') || '';
+
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
@@ -97,6 +108,14 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       });
     return () => { mounted = false; };
   }, []);
+
+  // Auto-expand textarea logic
+  useEffect(() => {
+    if (descriptionRef.current) {
+      descriptionRef.current.style.height = 'auto';
+      descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+    }
+  }, [descVal]);
 
   // Sincronizar valores cuando se cargan las categorías o cambia initialData
   useEffect(() => {
@@ -206,12 +225,18 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
       <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="flex flex-col">
-          <label htmlFor="title" className={labelClass}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span></label>
+          <div className="flex justify-between items-end mb-2">
+            <label htmlFor="title" className={labelClass + " mb-0"}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span></label>
+            <span className={`text-[10px] font-bold ${titleVal.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
+              {titleVal.length}/90
+            </span>
+          </div>
           <input
             id="title"
             type="text"
             placeholder="E.g. Botellas de agua reusables del océano"
             className={`${inputClass} ${errors.title ? errorClass : ''}`}
+            maxLength={90}
             {...register('title')}
           />
           {errors.title && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.title.message}</span>}
@@ -255,26 +280,44 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
           <div className="flex flex-col">
             <label htmlFor="goalAmount" className={labelClass}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span></label>
-            <input
-              id="goalAmount"
-              type="number"
-              placeholder="10000"
-              min="100"
-              className={`${inputClass} ${errors.goalAmount ? errorClass : ''}`}
-              {...register('goalAmount', { valueAsNumber: true })}
+            <Controller
+              name="goalAmount"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id="goalAmount"
+                  type="text"
+                  placeholder="10.000"
+                  className={`${inputClass} ${errors.goalAmount ? errorClass : ''}`}
+                  maxLength={15}
+                  value={formatNumberSpanish(field.value)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                    field.onChange(parseInt(rawValue, 10) || 0);
+                  }}
+                />
+              )}
             />
             {errors.goalAmount && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.goalAmount.message)}</span>}
           </div>
 
           <div className="flex flex-col md:col-span-2">
-            <label htmlFor="shortDescription" className={labelClass}>Eslogan / Frase corta</label>
+            <div className="flex justify-between items-end mb-2">
+              <label htmlFor="shortDescription" className={labelClass + " mb-0"}>Eslogan / Frase corta <span className="text-[#c62828] font-bold">*</span></label>
+              <span className={`text-[10px] font-bold ${sloganVal.length > 50 ? 'text-red-500' : 'text-slate-400'}`}>
+                {sloganVal.length}/50
+              </span>
+            </div>
             <input
               id="shortDescription"
               type="text"
               placeholder="Una frase impactante que defina tu proyecto"
-              className={inputClass}
+              className={`${inputClass} ${errors.shortDescription ? errorClass : ''}`}
+              maxLength={50}
               {...register('shortDescription')}
             />
+            {errors.shortDescription && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.shortDescription.message}</span>}
           </div>
 
           <div className="flex flex-col">
@@ -283,8 +326,10 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
               id="endDate"
               type="datetime-local"
               className={inputClass}
+              min={new Date().toISOString().slice(0, 16)}
               {...register('endDate')}
             />
+            {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
           </div>
 
           <div className="flex flex-col md:col-span-3">
@@ -320,13 +365,22 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col md:col-span-3">
-            <label htmlFor="description" className={labelClass}>Propuesta de Valor en Detalle <span className="text-[#c62828] font-bold">*</span></label>
+            <div className="flex justify-between items-end mb-2">
+              <label htmlFor="description" className={labelClass + " mb-0"}>Propuesta de Valor en Detalle <span className="text-[#c62828] font-bold">*</span></label>
+              <span className={`text-[10px] font-bold ${descVal.length > 800 ? 'text-red-500' : 'text-slate-400'}`}>
+                {descVal.length}/800
+              </span>
+            </div>
             <textarea
               id="description"
               placeholder="Cuenta tu historia, el origen de tu idea y cómo planeas usar el capital..."
-              rows={6}
-              className={`${inputClass} resize-none ${errors.description ? errorClass : ''}`}
+              className={`${inputClass} resize-none overflow-hidden ${errors.description ? errorClass : ''}`}
+              maxLength={800}
               {...register('description')}
+              ref={(e) => {
+                register('description').ref(e);
+                descriptionRef.current = e;
+              }}
             />
             {errors.description && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.description.message}</span>}
           </div>
@@ -447,6 +501,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                         value={rewardData.title}
                         onChange={e => setRewardData({...rewardData, title: e.target.value})}
                         placeholder="Ej. Acceso Anticipado"
+                        maxLength={100}
                       />
                     </div>
                     <div>
@@ -457,25 +512,36 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                         value={rewardData.description}
                         onChange={e => setRewardData({...rewardData, description: e.target.value})}
                         placeholder="Qué incluye este beneficio..."
+                        maxLength={500}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className={labelClass}>Monto Unitario ($) *</label>
                         <input 
-                          type="number" 
+                          type="text" 
                           className={inputClass}
-                          value={rewardData.amount}
-                          onChange={e => setRewardData({...rewardData, amount: parseInt(e.target.value) || 0})}
+                          value={formatNumberSpanish(rewardData.amount)}
+                          onChange={e => {
+                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                            setRewardData({...rewardData, amount: parseInt(rawValue) || 0});
+                          }}
+                          placeholder="0"
+                          maxLength={15}
                         />
                       </div>
                       <div>
                         <label className={labelClass}>Stock (Personas) *</label>
                         <input 
-                          type="number" 
+                          type="text" 
                           className={inputClass}
-                          value={rewardData.maxClaims || 0}
-                          onChange={e => setRewardData({...rewardData, maxClaims: parseInt(e.target.value) || 0})}
+                          value={formatNumberSpanish(rewardData.maxClaims)}
+                          onChange={e => {
+                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                            setRewardData({...rewardData, maxClaims: parseInt(rawValue) || 0});
+                          }}
+                          placeholder="0"
+                          maxLength={10}
                         />
                       </div>
                     </div>
