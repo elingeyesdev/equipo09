@@ -141,10 +141,12 @@ export function EntrepreneurProfilePage() {
                 uploadAvatar={uploadAvatarPhoto}
                 uploadCover={uploadCoverPhoto}
               />
-              <ProfileTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
+              <div className="sticky top-[72px] z-10 bg-white shadow-sm">
+                <ProfileTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+              </div>
             </div>
 
             {/* MAIN GRID */}
