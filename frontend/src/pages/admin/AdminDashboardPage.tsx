@@ -88,7 +88,7 @@ export function AdminDashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Panel de Control</h1>
-            <p className="text-slate-500 font-medium mt-1">Supervisión global de la plataforma y auditoría de capital.</p>
+            <p className="text-slate-500 font-medium mt-1">Supervisión global de la plataforma y revisión de capital.</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-white p-1 rounded-2xl shadow-sm border border-slate-100 flex">
@@ -160,7 +160,7 @@ export function AdminDashboardPage() {
             <div className="flex items-center gap-3">
               {statusFilter === 'pending_review' ? <Clock size={20} className="text-indigo-600" /> : <Rocket size={20} className="text-emerald-600" />}
               <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
-                {statusFilter === 'pending_review' ? 'Auditoría de Propuestas Técnicas' : 'Monitoreo de Capital Activo'}
+                {statusFilter === 'pending_review' ? 'Revisión de Propuestas Técnicas' : 'Monitoreo de Capital Activo'}
               </h2>
               <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] px-2 py-0.5 rounded-lg font-black`}>{totalCampaigns}</span>
             </div>
@@ -241,7 +241,7 @@ export function AdminDashboardPage() {
                       >
                         <Eye size={18} />
                         <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">
-                          {statusFilter === 'pending_review' ? 'Auditar' : 'Detalle'}
+                          {statusFilter === 'pending_review' ? 'Revisar' : 'Detalle'}
                         </span>
                       </button>
                     </td>

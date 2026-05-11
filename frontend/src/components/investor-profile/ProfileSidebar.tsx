@@ -176,7 +176,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       {/* Identity verification */}
       <div className={`rounded-[28px] p-6 shadow-sm ring-1 group transition-all hover:shadow-lg ${profile?.identityVerified ? 'bg-emerald-50/50 ring-emerald-100' : 'bg-slate-50/50 ring-slate-100 hover:ring-slate-200'}`}>
         <div className="flex justify-between items-center mb-5">
-          <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Auditoría</span>
+          <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Revisión</span>
         </div>
         
         {profile?.identityVerified ? (

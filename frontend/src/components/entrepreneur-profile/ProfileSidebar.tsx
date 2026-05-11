@@ -178,7 +178,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       {/* Identity verification */}
       <div className={`rounded-[28px] p-6 shadow-sm ring-1 group transition-all hover:shadow-lg ${profile?.identityVerified ? 'bg-emerald-50/50 ring-emerald-100' : 'bg-slate-50/50 ring-slate-100 hover:ring-slate-200'}`}>
         <div className="flex justify-between items-center mb-5">
-          <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Auditoría</span>
+          <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Revisión</span>
         </div>
         
         {profile?.identityVerified ? (
@@ -245,7 +245,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
               <Link2 size={14} strokeWidth={2.5} />
            </div>
            <div className="min-w-0">
-              <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">AUDITOR LÍDER</div>
+              <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">REVISOR LÍDER</div>
               <div className="text-[12px] font-bold text-slate-600 truncate">{userEmail}</div>
            </div>
         </div>

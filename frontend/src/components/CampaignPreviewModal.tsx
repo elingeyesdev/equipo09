@@ -241,7 +241,7 @@ export function CampaignPreviewModal({
                   ID: {campaign.id.split('-')[0]}
                 </span>
                 <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">
-                  {isAdmin ? 'Módulo de Auditoría de Capital' : 'Revisión Técnica de Proyecto'}
+                  {isAdmin ? 'Módulo de Revisión de Capital' : 'Revisión Técnica de Proyecto'}
                 </span>
                 {auditScore !== undefined && (
                   <div className="flex items-center gap-1.5 ml-2">
@@ -574,7 +574,7 @@ export function CampaignPreviewModal({
                 <section className="p-10 border-b border-slate-100 space-y-6">
                   <div className="flex items-center gap-3 text-slate-900">
                     <User size={18} strokeWidth={2.5} />
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1c2b1e]">Auditoría del Emprendedor</h3>
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1c2b1e]">Revisión del Emprendedor</h3>
                   </div>
 
                   {entrepreneur ? (
@@ -643,7 +643,7 @@ export function CampaignPreviewModal({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-[#2e7d32]">
                         <Clock size={18} strokeWidth={2.5} />
-                        <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Auditoría</h3>
+                        <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Revisión</h3>
                       </div>
                     </div>
 
@@ -724,7 +724,7 @@ export function CampaignPreviewModal({
                   <textarea
                     value={adminFeedback}
                     onChange={(e) => setAdminFeedback(e.target.value)}
-                    placeholder="El feedback es obligatorio para rechazar..."
+                    placeholder="La retroalimentación es obligatoria para rechazar..."
                     className={`w-full pl-5 pr-12 py-3 bg-slate-50 border ${!adminFeedback.trim() ? 'border-amber-200 focus:border-amber-400' : 'border-slate-200 focus:border-indigo-500'} rounded-2xl text-[13px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all h-14 resize-none shadow-inner`}
                   />
                   <div className={`absolute right-4 top-1/2 -translate-y-1/2 ${!adminFeedback.trim() ? 'text-amber-400' : 'text-slate-300'}`}>
@@ -771,7 +771,7 @@ export function CampaignPreviewModal({
                       disabled={actionLoading}
                       className="flex-1 md:w-56 h-14 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <AlertTriangle size={16} strokeWidth={2.5} /> Enviar Auditoría
+                      <AlertTriangle size={16} strokeWidth={2.5} /> Enviar Revisión
                     </button>
                   )}
                   {canPublish && (

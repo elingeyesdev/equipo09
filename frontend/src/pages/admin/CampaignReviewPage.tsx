@@ -239,7 +239,7 @@ export const CampaignReviewPage: React.FC = () => {
                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Estructura</th>
                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Meta de Capital</th>
                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Score</th>
-                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Acciones de Auditoría</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Acciones de Revisión</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -291,7 +291,7 @@ export const CampaignReviewPage: React.FC = () => {
                           <button 
                             onClick={() => openReviewModal(campaign.id)}
                             className="w-11 h-11 flex items-center justify-center bg-white hover:bg-slate-900 text-slate-400 hover:text-white rounded-2xl transition-all border border-slate-200 shadow-sm cursor-pointer active:scale-90"
-                            title="Auditar Documentación"
+                            title="Revisar Documentación"
                           >
                             <Eye size={20} strokeWidth={2.5} />
                           </button>

@@ -211,7 +211,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         </h2>
         <p className="text-[14px] font-medium text-slate-400">
           {initialData 
-            ? 'Ajusta los detalles de tu propuesta para cumplir con los requisitos de auditoría.' 
+            ? 'Ajusta los detalles de tu propuesta para cumplir con los requisitos de revisión.' 
             : 'Completa los datos esenciales para presentar tu idea al mundo con solidez financiera.'}
         </p>
       </div>
