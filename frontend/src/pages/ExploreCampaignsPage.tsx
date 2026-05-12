@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
 import { getImageUrl } from '../utils/image.utils';
+import { getCategories } from '../api/categories.api';
 import type { PublicCampaign } from '../api/public-campaigns.api';
+import type { Category } from '../types/category.types';
 import {
   Search,
   AlertCircle,
@@ -19,7 +21,42 @@ import {
   Heart,
   Gem,
   FolderOpen,
+  Cpu,
+  Stethoscope,
+  GraduationCap,
+  Leaf,
+  Palette,
+  Handshake,
+  Utensils,
+  Shirt,
+  Gamepad2,
+  Building2,
+  Coins,
+  Sprout,
+  Car,
+  Radio,
+  Pin,
+  LayoutGrid,
+  X,
 } from 'lucide-react';
+
+const CATEGORY_ICONS: Record<string, any> = {
+  technology: Cpu,
+  health: Stethoscope,
+  education: GraduationCap,
+  environment: Leaf,
+  art: Palette,
+  social_impact: Handshake,
+  food: Utensils,
+  fashion: Shirt,
+  gaming: Gamepad2,
+  real_estate: Building2,
+  fintech: Coins,
+  agriculture: Sprout,
+  mobility: Car,
+  media: Radio,
+  community: Users,
+};
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
@@ -179,8 +216,17 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
 export function ExploreCampaignsPage() {
   const { campaigns, meta, loading, error, filters, updateFilters, goToPage } = usePublicCampaigns();
   const [searchInput, setSearchInput] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => {})
+      .finally(() => setCategoriesLoading(false));
+  }, []);
 
   const handleCardClick = (campaignId: string) => {
     navigate(`/campaign/${campaignId}`, {
@@ -253,48 +299,107 @@ export function ExploreCampaignsPage() {
 
       {/* Filters Bar */}
       <div className="bg-white border-b border-emerald-50 shadow-sm sticky top-0 z-30">
-        <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col sm:flex-row items-center gap-4">
-          {/* Type filters */}
-          <div className="flex items-center gap-2 flex-1 overflow-x-auto">
-            <Filter size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
-            {typeFilters.map(tf => (
-              <button
-                key={tf.value}
-                onClick={() => updateFilters({ campaignType: tf.value || undefined })}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
-                  (filters.campaignType || '') === tf.value
-                    ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                    : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-                }`}
-              >
-                {tf.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ArrowUpDown size={16} className="text-slate-400" strokeWidth={2.5} />
-            <select
-              value={currentSort}
-              onChange={e => {
-                const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
-                updateFilters({ sortBy, sortOrder });
-              }}
-              className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-emerald-500/20"
-            >
-              {sortOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+        <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col gap-3">
+          {/* Row 1: Type filters + Sort + Count */}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Type filters */}
+            <div className="flex items-center gap-2 flex-1 overflow-x-auto">
+              <Filter size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
+              {typeFilters.map(tf => (
+                <button
+                  key={tf.value}
+                  onClick={() => updateFilters({ campaignType: tf.value || undefined })}
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
+                    (filters.campaignType || '') === tf.value
+                      ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                      : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                  }`}
+                >
+                  {tf.label}
+                </button>
               ))}
-            </select>
+            </div>
+
+            {/* Sort */}
+            <div className="flex items-center gap-2 shrink-0">
+              <ArrowUpDown size={16} className="text-slate-400" strokeWidth={2.5} />
+              <select
+                value={currentSort}
+                onChange={e => {
+                  const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
+                  updateFilters({ sortBy, sortOrder });
+                }}
+                className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-emerald-500/20"
+              >
+                {sortOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Results count */}
+            {meta && (
+              <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+                {meta.totalItems} campaña{meta.totalItems !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
 
-          {/* Results count */}
-          {meta && (
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">
-              {meta.totalItems} campaña{meta.totalItems !== 1 ? 's' : ''}
-            </div>
-          )}
+          {/* Row 2: Category filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <LayoutGrid size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 mr-1">Sector:</span>
+
+            {/* "Todos" chip */}
+            <button
+              onClick={() => updateFilters({ categoryId: undefined })}
+              className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${
+                !filters.categoryId
+                  ? 'bg-[#1c2b1e] text-white shadow-lg shadow-black/10'
+                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+              }`}
+            >
+              Todos
+            </button>
+
+            {categoriesLoading ? (
+              // Skeleton chips while loading
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-8 w-24 bg-slate-100 rounded-xl animate-pulse shrink-0" />
+              ))
+            ) : (
+              categories.filter(c => c.isActive).map(cat => {
+                const IconComp = CATEGORY_ICONS[cat.name] ?? Pin;
+                const isActive = filters.categoryId === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => updateFilters({ categoryId: isActive ? undefined : cat.id })}
+                    title={cat.description || cat.displayName}
+                    className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
+                      isActive
+                        ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                        : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                    }`}
+                  >
+                    <IconComp size={13} strokeWidth={2.5} />
+                    {cat.displayName}
+                  </button>
+                );
+              })
+            )}
+
+            {/* Clear category filter indicator */}
+            {filters.categoryId && (
+              <button
+                onClick={() => updateFilters({ categoryId: undefined })}
+                className="shrink-0 w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 flex items-center justify-center transition-all active:scale-90 border-none cursor-pointer"
+                title="Quitar filtro de categoría"
+              >
+                <X size={13} strokeWidth={3} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
