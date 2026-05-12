@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
 import { getImageUrl } from '../utils/image.utils';
 import { getCategories } from '../api/categories.api';
-import type { PublicCampaign } from '../api/public-campaigns.api';
+import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import type { Category } from '../types/category.types';
 import {
   Search,
@@ -21,42 +21,12 @@ import {
   Heart,
   Gem,
   FolderOpen,
-  Cpu,
-  Stethoscope,
-  GraduationCap,
-  Leaf,
-  Palette,
-  Handshake,
-  Utensils,
-  Shirt,
-  Gamepad2,
-  Building2,
-  Coins,
-  Sprout,
-  Car,
-  Radio,
-  Pin,
   LayoutGrid,
-  X,
+  Loader2,
+  ArrowRight,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
-
-const CATEGORY_ICONS: Record<string, any> = {
-  technology: Cpu,
-  health: Stethoscope,
-  education: GraduationCap,
-  environment: Leaf,
-  art: Palette,
-  social_impact: Handshake,
-  food: Utensils,
-  fashion: Shirt,
-  gaming: Gamepad2,
-  real_estate: Building2,
-  fintech: Coins,
-  agriculture: Sprout,
-  mobility: Car,
-  media: Radio,
-  community: Users,
-};
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
@@ -221,11 +191,64 @@ export function ExploreCampaignsPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ── Search suggestions state ──
+  const [suggestions, setSuggestions] = useState<PublicCampaign[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // ── Category dropdown state ──
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     getCategories()
       .then(setCategories)
       .catch(() => {})
       .finally(() => setCategoriesLoading(false));
+  }, []);
+
+  // ── Debounced search suggestions ──
+  useEffect(() => {
+    const trimmed = searchInput.trim();
+    if (trimmed.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSuggestionsLoading(true);
+      try {
+        const result = await fetchPublicCampaigns({ q: trimmed, limit: 5 });
+        setSuggestions(result.data);
+        setShowSuggestions(true);
+        setSelectedIndex(-1);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // ── Close suggestions on outside click ──
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const handleCardClick = (campaignId: string) => {
@@ -234,9 +257,42 @@ export function ExploreCampaignsPage() {
     });
   };
 
+  const handleSuggestionClick = useCallback((campaignId: string) => {
+    setShowSuggestions(false);
+    navigate(`/campaign/${campaignId}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [navigate, location]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     updateFilters({ q: searchInput || undefined });
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+        break;
+      case 'Enter':
+        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+          e.preventDefault();
+          handleSuggestionClick(suggestions[selectedIndex].id);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        break;
+    }
   };
 
   const sortOptions = [
@@ -261,7 +317,7 @@ export function ExploreCampaignsPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#1c2b1e] via-[#2e7d32] to-[#1c2b1e] relative overflow-hidden">
+      <div className={`bg-gradient-to-br from-[#1c2b1e] via-[#2e7d32] to-[#1c2b1e] relative transition-[z-index] ${showSuggestions ? 'z-40' : 'z-0'}`}>
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[60%] bg-[#a5d6a7] rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-20%] right-[-10%] w-[30%] h-[50%] bg-[#00897b] rounded-full blur-[100px]"></div>
@@ -275,131 +331,268 @@ export function ExploreCampaignsPage() {
             Explora proyectos innovadores de emprendedores bolivianos. Invierte en ideas que transforman comunidades.
           </p>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-[640px] mx-auto flex gap-3">
-            <div className="flex-1 relative">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={2.5} />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                placeholder="Buscar campañas por nombre, descripción..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-md border-none text-[15px] font-medium outline-none focus:ring-4 focus:ring-emerald-500/20 shadow-xl shadow-black/10 placeholder:text-slate-400"
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-white text-[#2e7d32] px-8 py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-black/10 border-none cursor-pointer"
-            >
-              Buscar
-            </button>
-          </form>
+          {/* Search Bar with Autocomplete */}
+          <div ref={searchContainerRef} className="max-w-[640px] mx-auto relative z-40">
+            <form onSubmit={handleSearch} className="flex gap-3">
+              <div className="flex-1 relative">
+                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />
+                {suggestionsLoading && (
+                  <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 animate-spin z-10" strokeWidth={2.5} />
+                )}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={searchInput}
+                  onChange={e => {
+                    setSearchInput(e.target.value);
+                    if (!e.target.value.trim()) setShowSuggestions(false);
+                  }}
+                  onFocus={() => {
+                    if (suggestions.length > 0 && searchInput.trim().length >= 2) setShowSuggestions(true);
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Buscar campañas por nombre, descripción..."
+                  className="w-full pl-12 pr-10 py-4 rounded-2xl bg-white/95 backdrop-blur-md border-none text-[15px] font-medium outline-none focus:ring-4 focus:ring-emerald-500/20 shadow-xl shadow-black/10 placeholder:text-slate-400"
+                  autoComplete="off"
+                  role="combobox"
+                  aria-expanded={showSuggestions}
+                  aria-haspopup="listbox"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-white text-[#2e7d32] px-8 py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-black/10 border-none cursor-pointer"
+              >
+                Buscar
+              </button>
+            </form>
+
+            {/* ── Suggestions Dropdown ── */}
+            {showSuggestions && (
+              <div
+                className="absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/15 border border-emerald-100/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                role="listbox"
+              >
+                {suggestions.length === 0 && !suggestionsLoading ? (
+                  <div className="px-5 py-6 text-center">
+                    <Search size={24} className="text-slate-300 mx-auto mb-2" strokeWidth={1.5} />
+                    <p className="text-[13px] font-bold text-slate-400">No se encontraron campañas</p>
+                    <p className="text-[11px] text-slate-300 mt-1">Intenta con otros términos de búsqueda</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="px-4 py-2.5 border-b border-slate-50 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Sugerencias
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-300">
+                        {suggestions.length} resultado{suggestions.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    {suggestions.map((s, idx) => {
+                      const progress = s.goalAmount > 0
+                        ? Math.min(Math.round((s.currentAmount / s.goalAmount) * 100), 100)
+                        : 0;
+                      const thumbUrl = getImageUrl(s.coverImageUrl);
+                      const isSelected = idx === selectedIndex;
+
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 text-left transition-all cursor-pointer border-none ${
+                            isSelected
+                              ? 'bg-emerald-50/80'
+                              : 'bg-transparent hover:bg-slate-50/80'
+                          }`}
+                          onClick={() => handleSuggestionClick(s.id)}
+                          onMouseEnter={() => setSelectedIndex(idx)}
+                        >
+                          {/* Thumbnail */}
+                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] shrink-0 shadow-sm">
+                            {thumbUrl ? (
+                              <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Rocket size={20} strokeWidth={1} className="text-white/30" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[14px] font-black text-[#1c2b1e] truncate leading-tight">
+                              {s.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[10px] font-black text-white bg-[#2e7d32]/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                {s.categoryName}
+                              </span>
+                              <span className="text-[11px] font-medium text-slate-400 truncate">
+                                por {s.entrepreneurDisplayName ? `@${s.entrepreneurDisplayName}` : s.entrepreneurName}
+                              </span>
+                            </div>
+                            {/* Mini progress bar */}
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{
+                                    width: `${progress}%`,
+                                    background: progress >= 100
+                                      ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
+                                      : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
+                                  }}
+                                />
+                              </div>
+                              <span className="text-[10px] font-black text-[#2e7d32] shrink-0">
+                                {progress}%
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Arrow indicator */}
+                          <ArrowRight size={14} strokeWidth={2.5} className={`shrink-0 transition-all ${
+                            isSelected ? 'text-[#2e7d32] translate-x-0.5' : 'text-slate-300'
+                          }`} />
+                        </button>
+                      );
+                    })}
+
+                    {/* "Ver todos" footer */}
+                    <button
+                      type="button"
+                      className="w-full px-4 py-3 text-center border-t border-slate-50 text-[12px] font-black text-[#2e7d32] uppercase tracking-widest hover:bg-emerald-50/50 transition-all cursor-pointer border-x-0 border-b-0 bg-transparent flex items-center justify-center gap-2"
+                      onClick={() => {
+                        setShowSuggestions(false);
+                        updateFilters({ q: searchInput || undefined });
+                      }}
+                    >
+                      <Search size={13} strokeWidth={2.5} />
+                      Ver todos los resultados
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Filters Bar */}
       <div className="bg-white border-b border-emerald-50 shadow-sm sticky top-0 z-30">
-        <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col gap-3">
-          {/* Row 1: Type filters + Sort + Count */}
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            {/* Type filters */}
-            <div className="flex items-center gap-2 flex-1 overflow-x-auto">
-              <Filter size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
-              {typeFilters.map(tf => (
-                <button
-                  key={tf.value}
-                  onClick={() => updateFilters({ campaignType: tf.value || undefined })}
-                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
-                    (filters.campaignType || '') === tf.value
-                      ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                      : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-                  }`}
-                >
-                  {tf.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Sort */}
-            <div className="flex items-center gap-2 shrink-0">
-              <ArrowUpDown size={16} className="text-slate-400" strokeWidth={2.5} />
-              <select
-                value={currentSort}
-                onChange={e => {
-                  const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
-                  updateFilters({ sortBy, sortOrder });
-                }}
-                className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-emerald-500/20"
+        <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col sm:flex-row items-center gap-4">
+          {/* Type filters */}
+          <div className="flex items-center gap-2 flex-1 overflow-x-auto">
+            <Filter size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
+            {typeFilters.map(tf => (
+              <button
+                key={tf.value}
+                onClick={() => updateFilters({ campaignType: tf.value || undefined })}
+                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
+                  (filters.campaignType || '') === tf.value
+                    ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                    : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                }`}
               >
-                {sortOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+                {tf.label}
+              </button>
+            ))}
+          </div>
 
-            {/* Results count */}
-            {meta && (
-              <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">
-                {meta.totalItems} campaña{meta.totalItems !== 1 ? 's' : ''}
+          {/* Category custom dropdown */}
+          <div ref={categoryDropdownRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowCategoryDropdown(prev => !prev)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
+                filters.categoryId
+                  ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+              }`}
+            >
+              <LayoutGrid size={14} strokeWidth={2.5} />
+              {filters.categoryId
+                ? categories.find(c => c.id === filters.categoryId)?.displayName || 'Sector'
+                : 'Sector'}
+              <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showCategoryDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-emerald-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="max-h-[220px] overflow-y-auto">
+                  {/* "Todos" option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateFilters({ categoryId: undefined });
+                      setShowCategoryDropdown(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${
+                      !filters.categoryId
+                        ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                        : 'bg-transparent text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="flex-1">Todos los sectores</span>
+                    {!filters.categoryId && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
+                  </button>
+
+                  {/* Divider */}
+                  <div className="h-px bg-slate-100 mx-3" />
+
+                  {/* Category options */}
+                  {!categoriesLoading && categories.filter(c => c.isActive).map(cat => {
+                    const isActive = filters.categoryId === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          updateFilters({ categoryId: isActive ? undefined : cat.id });
+                          setShowCategoryDropdown(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${
+                          isActive
+                            ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                            : 'bg-transparent text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className="flex-1">{cat.displayName}</span>
+                        {isActive && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Row 2: Category filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <LayoutGrid size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 mr-1">Sector:</span>
-
-            {/* "Todos" chip */}
-            <button
-              onClick={() => updateFilters({ categoryId: undefined })}
-              className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${
-                !filters.categoryId
-                  ? 'bg-[#1c2b1e] text-white shadow-lg shadow-black/10'
-                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-              }`}
+          {/* Sort */}
+          <div className="flex items-center gap-2 shrink-0">
+            <ArrowUpDown size={16} className="text-slate-400" strokeWidth={2.5} />
+            <select
+              value={currentSort}
+              onChange={e => {
+                const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
+                updateFilters({ sortBy, sortOrder });
+              }}
+              className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-emerald-500/20"
             >
-              Todos
-            </button>
-
-            {categoriesLoading ? (
-              // Skeleton chips while loading
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-8 w-24 bg-slate-100 rounded-xl animate-pulse shrink-0" />
-              ))
-            ) : (
-              categories.filter(c => c.isActive).map(cat => {
-                const IconComp = CATEGORY_ICONS[cat.name] ?? Pin;
-                const isActive = filters.categoryId === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => updateFilters({ categoryId: isActive ? undefined : cat.id })}
-                    title={cat.description || cat.displayName}
-                    className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
-                      isActive
-                        ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                        : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-                    }`}
-                  >
-                    <IconComp size={13} strokeWidth={2.5} />
-                    {cat.displayName}
-                  </button>
-                );
-              })
-            )}
-
-            {/* Clear category filter indicator */}
-            {filters.categoryId && (
-              <button
-                onClick={() => updateFilters({ categoryId: undefined })}
-                className="shrink-0 w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 flex items-center justify-center transition-all active:scale-90 border-none cursor-pointer"
-                title="Quitar filtro de categoría"
-              >
-                <X size={13} strokeWidth={3} />
-              </button>
-            )}
+              {sortOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
+
+          {/* Results count */}
+          {meta && (
+            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+              {meta.totalItems} campaña{meta.totalItems !== 1 ? 's' : ''}
+            </div>
+          )}
         </div>
       </div>
 
