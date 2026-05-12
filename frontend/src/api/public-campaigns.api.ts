@@ -35,6 +35,7 @@ export interface RewardTier {
 }
 
 export interface PublicCampaignDetail extends PublicCampaign {
+  categoryId: string;
   description: string;
   subtitle: string | null;
   currency: string;

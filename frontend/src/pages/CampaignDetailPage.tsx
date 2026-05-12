@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
+import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
@@ -25,6 +26,8 @@ import {
   Loader2,
   CheckCircle2,
   LogIn,
+  Sparkles,
+  Flame,
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -120,6 +123,18 @@ export function CampaignDetailPage() {
   const [investmentError, setInvestmentError] = useState<string | null>(null);
   const [investmentSuccess, setInvestmentSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // ── Related campaigns state ──
+  const [relatedCampaigns, setRelatedCampaigns] = useState<PublicCampaign[]>([]);
+
+  useEffect(() => {
+    if (!campaign?.categoryId || !campaign?.id) return;
+    fetchPublicCampaigns({ categoryId: campaign.categoryId, limit: 4 })
+      .then(result => {
+        setRelatedCampaigns(result.data.filter(c => c.id !== campaign.id).slice(0, 3));
+      })
+      .catch(() => {});
+  }, [campaign?.categoryId, campaign?.id]);
 
   // Determine where to go back — preserve filter state
   const backUrl = (location.state as any)?.from || '/explore';
@@ -741,6 +756,91 @@ export function CampaignDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Related Campaigns ── */}
+      {relatedCampaigns.length > 0 && (
+        <div className="max-w-[1200px] mx-auto px-6 pb-16">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <Sparkles size={20} strokeWidth={2.5} className="text-[#2e7d32]" />
+            </div>
+            <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight">
+              También te puede interesar
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedCampaigns.map(rc => {
+              const rcProgress = rc.goalAmount > 0
+                ? Math.min(Math.round((rc.currentAmount / rc.goalAmount) * 100), 100)
+                : 0;
+              const rcCover = getImageUrl(rc.coverImageUrl);
+              let rcDays: number | null = null;
+              if (rc.endDate) {
+                const ms = new Date(rc.endDate).getTime() - Date.now();
+                rcDays = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+              }
+
+              return (
+                <div
+                  key={rc.id}
+                  onClick={() => navigate(`/campaign/${rc.id}`)}
+                  className="bg-white rounded-[22px] shadow-sm border border-emerald-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+                >
+                  {/* Cover */}
+                  <div className="relative h-40 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
+                    {rcCover ? (
+                      <img src={rcCover} alt={rc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Rocket size={36} strokeWidth={1} className="text-white/20" />
+                      </div>
+                    )}
+
+                    {/* Category badge */}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[9px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
+                      {rc.categoryName}
+                    </div>
+
+                    {/* Ending soon */}
+                    {rcDays !== null && rcDays > 0 && rcDays <= 7 && (
+                      <div className="absolute bottom-2.5 left-3 bg-red-500/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[9px] font-black text-white uppercase tracking-wider shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse">
+                        <Flame size={10} strokeWidth={3} />
+                        {rcDays === 1 ? '¡Último día!' : `${rcDays} días`}
+                      </div>
+                    )}
+
+                    {/* Mini progress */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+                      <div className="h-full bg-white/90" style={{ width: `${rcProgress}%` }} />
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-5 flex-1 flex flex-col gap-2">
+                    <h4 className="text-[14px] font-black text-[#1c2b1e] leading-tight line-clamp-2 group-hover:text-[#2e7d32] transition-colors">
+                      {rc.title}
+                    </h4>
+                    <p className="text-[12px] text-slate-400 font-bold">
+                      por {rc.entrepreneurDisplayName ? `@${rc.entrepreneurDisplayName}` : rc.entrepreneurName}
+                    </p>
+
+                    <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-50">
+                      <div className="flex items-center gap-1.5">
+                        <Target size={12} strokeWidth={2.5} className="text-[#2e7d32]" />
+                        <span className="text-[12px] font-black text-[#2e7d32]">{rcProgress}%</span>
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-400">
+                        ${rc.currentAmount.toLocaleString()} / ${rc.goalAmount.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Contribution Confirmation Modal ── */}
       {showConfirmModal && (

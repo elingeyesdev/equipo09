@@ -26,6 +26,8 @@ import {
   ArrowRight,
   ChevronDown,
   Check,
+  Flame,
+  Clock,
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -88,6 +90,14 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
           <TypeIcon size={12} strokeWidth={3} />
           {typeInfo.label}
         </div>
+
+        {/* Ending Soon Badge */}
+        {daysRemaining !== null && daysRemaining > 0 && daysRemaining <= 7 && (
+          <div className="absolute bottom-3 left-4 bg-red-500/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-black text-white uppercase tracking-wider shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse">
+            <Flame size={11} strokeWidth={3} />
+            {daysRemaining === 1 ? '¡Último día!' : `${daysRemaining} días`}
+          </div>
+        )}
 
         {/* Progress overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/20">
@@ -501,6 +511,27 @@ export function ExploreCampaignsPage() {
               </button>
             ))}
           </div>
+
+          {/* Ending soon quick filter */}
+          <button
+            type="button"
+            onClick={() => {
+              const isActive = filters.sortBy === 'end_date' && filters.sortOrder === 'ASC';
+              if (isActive) {
+                updateFilters({ sortBy: 'created_at', sortOrder: 'DESC' });
+              } else {
+                updateFilters({ sortBy: 'end_date', sortOrder: 'ASC' });
+              }
+            }}
+            className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
+              filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
+                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/20'
+                : 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600'
+            }`}
+          >
+            <Flame size={14} strokeWidth={2.5} />
+            Terminan pronto
+          </button>
 
           {/* Category custom dropdown */}
           <div ref={categoryDropdownRef} className="relative shrink-0">

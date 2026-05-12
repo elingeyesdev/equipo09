@@ -242,7 +242,7 @@ export class CampaignRepository {
   async findPublicById(id: string): Promise<any | null> {
     const query = `
       SELECT
-        c.id, c.title, c.slug, c.subtitle, c.short_description,
+        c.id, c.category_id, c.title, c.slug, c.subtitle, c.short_description,
         c.description, c.campaign_type, c.status,
         c.goal_amount, c.current_amount, c.investor_count,
         c.cover_image_url, c.currency,
@@ -291,6 +291,7 @@ export class CampaignRepository {
     const row = rows[0];
     return {
       ...this.mapRowToPublicCampaign(row),
+      categoryId: row.category_id,
       description: row.description,
       subtitle: row.subtitle,
       currency: row.currency,
