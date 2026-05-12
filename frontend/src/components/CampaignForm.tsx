@@ -325,8 +325,16 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             <input
               id="endDate"
               type="datetime-local"
-              className={inputClass}
-              min={new Date().toISOString().slice(0, 16)}
+              className={`${inputClass} ${errors.endDate ? errorClass : ''}`}
+              min={(() => {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                const h = String(now.getHours()).padStart(2, '0');
+                const mi = String(now.getMinutes()).padStart(2, '0');
+                return `${y}-${m}-${d}T${h}:${mi}`;
+              })()}
               {...register('endDate')}
             />
             {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
