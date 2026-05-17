@@ -58,6 +58,8 @@ export interface InvestmentHistoryItem {
   createdAt: Date;
   campaignId: string;
   campaignTitle: string;
+  campaignType: string;
+  campaignGoal: number;
   campaignCoverImage: string | null;
   campaignStatus: string;
   rewardTitle: string | null;
@@ -71,6 +73,8 @@ export function mapRowToInvestmentHistoryItem(row: any): InvestmentHistoryItem {
     createdAt: row.created_at,
     campaignId: row.campaign_id,
     campaignTitle: row.campaign_title,
+    campaignType: row.campaign_type,
+    campaignGoal: Number(row.campaign_goal) || 0,
     campaignCoverImage: row.campaign_cover_image,
     campaignStatus: row.campaign_status,
     rewardTitle: row.reward_title ?? null,

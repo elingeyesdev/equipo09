@@ -246,13 +246,6 @@ export class InvestorProfileRepository extends BaseRepository {
         [userId, newMax],
       );
 
-      // 3. Registrar en historial de capital
-      await client.query(
-        `INSERT INTO capital_transactions (user_id, amount, type, previous_max, new_max, notes)
-         VALUES ($1, $2, 'deposit', $3, $4, $5)`,
-        [userId, amount, previousMax, newMax, notes ?? null],
-      );
-
       return {
         newMax,
         availableCapital: newMax - totalInvestedNum,

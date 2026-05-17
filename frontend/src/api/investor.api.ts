@@ -122,6 +122,8 @@ export interface InvestmentHistoryItem {
   createdAt: string;
   campaignId: string;
   campaignTitle: string;
+  campaignType: string;
+  campaignGoal: number;
   campaignCoverImage: string | null;
   campaignStatus: string;
   rewardTitle: string | null;
