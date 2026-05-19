@@ -8,6 +8,7 @@ import {
   uploadCampaignImage as uploadCampaignImageApi,
   deleteCampaign as deleteCampaignApi,
   finalizeCampaign as finalizeCampaignApi,
+  uploadCampaignDocument as uploadCampaignDocumentApi,
 } from '../api/campaign.api';
 import type {
   EntrepreneurCampaign,
@@ -91,7 +92,7 @@ export function useCampaigns() {
     setRefreshToken((t) => t + 1);
   }, []);
 
-  const addCampaign = async (dto: CreateCampaignDto, coverFile?: File): Promise<boolean> => {
+  const addCampaign = async (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]): Promise<boolean> => {
     try {
       setAdding(true);
       setAddError(null);
@@ -104,6 +105,16 @@ export function useCampaigns() {
           console.error('Error uploading campaign cover after creation:', uploadErr);
           // Opcional: podrías decidir si esto invalida la creación o no. 
           // Por ahora, la campaña ya se creó, así que retornamos true pero logueamos el error.
+        }
+      }
+
+      if (documents && documents.length > 0) {
+        for (const doc of documents) {
+          try {
+            await uploadCampaignDocumentApi(campaign.id, doc.file, doc.justification);
+          } catch (docErr) {
+            console.error('Error uploading campaign document:', docErr);
+          }
         }
       }
 
@@ -120,7 +131,7 @@ export function useCampaigns() {
     }
   };
   
-  const updateCampaign = async (campaignId: string, dto: Partial<CreateCampaignDto>, coverFile?: File): Promise<boolean> => {
+  const updateCampaign = async (campaignId: string, dto: Partial<CreateCampaignDto>, coverFile?: File, documents?: { file: File; justification: string }[]): Promise<boolean> => {
     try {
       setAdding(true);
       setAddError(null);
@@ -128,6 +139,16 @@ export function useCampaigns() {
       
       if (coverFile) {
         await uploadCampaignImageApi(campaignId, coverFile);
+      }
+
+      if (documents && documents.length > 0) {
+        for (const doc of documents) {
+          try {
+            await uploadCampaignDocumentApi(campaignId, doc.file, doc.justification);
+          } catch (docErr) {
+            console.error('Error uploading campaign document:', docErr);
+          }
+        }
       }
 
       // Actualizar lista local

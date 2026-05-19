@@ -14,8 +14,7 @@ const schema = z.object({
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es $100'),
-  campaignType: z.enum(['donation', 'reward', 'equity']),
-  categoryId: z.string().min(1, 'Debes seleccionar una categoría principal'),
+  categoryIds: z.array(z.string()).min(1, 'Debes seleccionar al menos una categoría'),
   endDate: z.string().optional().or(z.literal(''))
     .refine((val) => !val || isFutureDate(val), {
       message: 'La fecha de cierre debe ser posterior a hoy',
@@ -26,7 +25,7 @@ type FormValues = z.infer<typeof schema>;
 
 interface Props {
   initialData?: EntrepreneurCampaign | null;
-  onSuccess: (dto: CreateCampaignDto, coverFile?: File) => Promise<boolean>;
+  onSuccess: (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]) => Promise<boolean>;
   onCancel: () => void;
   saving: boolean;
   saveError: string | null;
@@ -48,13 +47,12 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       description: initialData?.description || '',
       shortDescription: initialData?.shortDescription || '',
       goalAmount: initialData?.goalAmount || 1000,
-      campaignType: initialData?.campaignType || 'reward',
-      categoryId: initialData?.categoryId || '',
+      categoryIds: initialData?.categoryIds || (initialData?.categoryId ? [initialData.categoryId] : []),
       endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
     },
   });
 
-  const campaignType = watch('campaignType');
+
   const goalAmount = watch('goalAmount') || 1000;
   const titleVal = watch('title') || '';
   const sloganVal = watch('shortDescription') || '';
@@ -70,11 +68,15 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   const [rewards, setRewards] = useState<CreateRewardTierDto[]>([]);
   const [showRewardForm, setShowRewardForm] = useState(false);
   const [editingRewardIndex, setEditingRewardIndex] = useState<number | null>(null);
+  const [documents, setDocuments] = useState<{ file: File; justification: string }[]>([]);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docJustification, setDocJustification] = useState('');
+
   const [rewardData, setRewardData] = useState<CreateRewardTierDto>({
     title: '',
     description: '',
-    amount: 10,
-    maxClaims: 10
+    minPercentage: 0,
+    maxPercentage: 10
   });
 
   // Sync rewards when editing
@@ -84,17 +86,13 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       setRewards(initialData.rewardTiers.map(rt => ({
         title: rt.title,
         description: rt.description,
-        amount: rt.amount,
-        maxClaims: rt.maxClaims ?? 0
+        minPercentage: rt.minPercentage || 0,
+        maxPercentage: rt.maxPercentage || 100
       })));
     } else {
       setRewards([]);
     }
   }, [initialData]);
-
-  const totalRewardsValue = rewards.reduce((sum, r) => sum + (r.amount * (r.maxClaims || 0)), 0);
-  const progressPercentage = Math.min(100, (totalRewardsValue / goalAmount) * 100);
-  const isRewardsComplete = totalRewardsValue === goalAmount;
 
   useEffect(() => {
     let mounted = true;
@@ -125,24 +123,20 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         description: initialData.description || '',
         shortDescription: initialData.shortDescription || '',
         goalAmount: initialData.goalAmount || 1000,
-        campaignType: initialData.campaignType || 'reward',
-        categoryId: initialData.categoryId || '',
+        categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
         endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
       });
     }
   }, [loadingCats, initialData, reset]);
 
   const addReward = () => {
-    // Basic validation: title and description required, amount > 0
-    if (!rewardData.title || !rewardData.description || rewardData.amount <= 0) {
-      alert('Por favor completa el título, descripción y un monto válido.');
+    if (!rewardData.title || !rewardData.description) {
+      alert('Por favor completa el título y la descripción.');
       return;
     }
 
-    // maxClaims validation: only if it's not meant to be infinite (0/null)
-    // For now, let's assume if it's 0 it's invalid unless we want to support infinite.
-    if ((rewardData.maxClaims || 0) < 0) {
-      alert('El stock no puede ser negativo.');
+    if (rewardData.minPercentage < 0 || rewardData.maxPercentage > 100 || rewardData.minPercentage >= rewardData.maxPercentage) {
+      alert('Los porcentajes son inválidos.');
       return;
     }
 
@@ -155,8 +149,22 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       setRewards([...rewards, { ...rewardData }]);
     }
     
-    setRewardData({ title: '', description: '', amount: 10, maxClaims: 10 });
+    setRewardData({ title: '', description: '', minPercentage: 0, maxPercentage: 10 });
     setShowRewardForm(false);
+  };
+
+  const handleAddDocument = () => {
+    if (!docFile || !docJustification) {
+      alert('Debes seleccionar un archivo y proporcionar una justificación.');
+      return;
+    }
+    setDocuments([...documents, { file: docFile, justification: docJustification }]);
+    setDocFile(null);
+    setDocJustification('');
+  };
+
+  const removeDocument = (index: number) => {
+    setDocuments(documents.filter((_, i) => i !== index));
   };
 
   const editRewardItem = (index: number) => {
@@ -186,14 +194,13 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       title: data.title,
       description: data.description,
       shortDescription: data.shortDescription || undefined,
-      categoryId: data.categoryId,
+      categoryIds: data.categoryIds,
       goalAmount: data.goalAmount,
-      campaignType: data.campaignType as CampaignType,
       endDate: data.endDate || undefined,
-      rewards: data.campaignType === 'reward' ? rewards : undefined
+      rewards: rewards
     };
 
-    const success = await onSuccess(dto, coverFile || undefined);
+    const success = await onSuccess(dto, coverFile || undefined, documents);
     if (success) {
       onCancel();
     }
@@ -243,39 +250,28 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="flex flex-col">
-            <label htmlFor="campaignType" className={labelClass}>Incentivo de Financiación <span className="text-[#c62828] font-bold">*</span></label>
-            <div className="relative">
-              <select
-                id="campaignType"
-                className={`${inputClass} cursor-pointer appearance-none bg-no-repeat ${errors.campaignType ? errorClass : ''}`}
-                {...register('campaignType')}
-              >
-                <option value="reward">Con Recompensa (Reward)</option>
-                <option value="donation">Donación (Donation)</option>
-                <option value="equity">Participación (Equity)</option>
-              </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                <Save size={14} className="rotate-90" />
-              </div>
+          <div className="flex flex-col md:col-span-2">
+            <label className={labelClass}>Etiquetas de Categoría <span className="text-[#c62828] font-bold">*</span></label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {loadingCats ? (
+                <div className="text-sm text-slate-500">Cargando categorías...</div>
+              ) : (
+                categories.map(c => (
+                  <label key={c.id} className="cursor-pointer flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2 hover:bg-emerald-50 hover:border-emerald-200 transition-colors">
+                    <input
+                      type="checkbox"
+                      value={c.id}
+                      className="hidden"
+                      {...register('categoryIds')}
+                    />
+                    <span className={`text-[13px] font-bold ${watch('categoryIds')?.includes(c.id) ? 'text-emerald-700' : 'text-slate-600'}`}>
+                      {watch('categoryIds')?.includes(c.id) ? '✓ ' : ''}{c.displayName}
+                    </span>
+                  </label>
+                ))
+              )}
             </div>
-            {errors.campaignType && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.campaignType.message}</span>}
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="categoryId" className={labelClass}>Categoría Principal <span className="text-[#c62828] font-bold">*</span></label>
-            <select
-              id="categoryId"
-              className={`${inputClass} cursor-pointer ${errors.categoryId ? errorClass : ''}`}
-              disabled={loadingCats}
-              {...register('categoryId')}
-            >
-              <option value="">Selecciona una categoría...</option>
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.displayName}</option>
-              ))}
-            </select>
-            {errors.categoryId && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.categoryId.message}</span>}
+            {errors.categoryIds && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.categoryIds.message}</span>}
           </div>
 
           <div className="flex flex-col">
@@ -394,59 +390,29 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
         </div>
 
-        {/* Reward Management Section */}
-        {campaignType === 'reward' && (
-          <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-              <div>
-                <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
-                  <Gem size={20} className="text-amber-500" />
-                  Estructura de Recompensas
-                </h3>
-                <p className="text-[13px] text-slate-500 font-medium">
-                  Define cómo se divide tu meta de <span className="font-bold text-[#2e7d32]">${goalAmount}</span> en beneficios para tus inversores.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowRewardForm(true)}
-                className="bg-white hover:bg-emerald-50 text-[#2e7d32] font-black px-6 py-2.5 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center gap-2 text-[13px]"
-              >
-                <Plus size={16} strokeWidth={3} />
-                Agregar Nivel
-              </button>
+        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div>
+              <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
+                <Gem size={20} className="text-amber-500" />
+                Estructura de Recompensas
+              </h3>
+              <p className="text-[13px] text-slate-500 font-medium">
+                Define beneficios automáticos basados en el porcentaje de contribución respecto a la meta.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowRewardForm(true)}
+              className="bg-white hover:bg-emerald-50 text-[#2e7d32] font-black px-6 py-2.5 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center gap-2 text-[13px]"
+            >
+              <Plus size={16} strokeWidth={3} />
+              Agregar Nivel
+            </button>
+          </div>
 
-            {/* Progress Bar */}
-            <div className="mb-10">
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Valor Asignado</span>
-                <span className={`text-[13px] font-black ${isRewardsComplete ? 'text-[#2e7d32]' : 'text-slate-900'}`}>
-                  ${totalRewardsValue} 
-                  <span className="text-slate-400 font-medium"> / ${goalAmount}</span>
-                </span>
-              </div>
-              <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
-                <div 
-                  className={`h-full transition-all duration-500 ${isRewardsComplete ? 'bg-[#2e7d32]' : totalRewardsValue > goalAmount ? 'bg-red-500' : 'bg-amber-500'}`}
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
-              {totalRewardsValue > goalAmount && (
-                <p className="text-[11px] font-bold text-red-500 mt-2 flex items-center gap-1">
-                  <AlertCircle size={12} />
-                  Has superado la meta de la campaña. Ajusta los montos o el stock.
-                </p>
-              )}
-              {!isRewardsComplete && totalRewardsValue < goalAmount && (
-                <p className="text-[11px] font-bold text-amber-600 mt-2">
-                  Faltan ${(goalAmount - totalRewardsValue)} para completar la meta.
-                </p>
-              )}
-            </div>
-
-            {/* Rewards List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Rewards List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {rewards.length === 0 ? (
                 <div className="md:col-span-2 py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
                   <p className="text-slate-400 font-medium text-[14px]">No has definido recompensas aún.</p>
@@ -459,10 +425,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                       <p className="text-[12px] text-slate-500 font-medium mb-3 line-clamp-1">{r.description}</p>
                       <div className="flex gap-4">
                         <div className="text-[11px] font-black text-[#2e7d32] bg-emerald-50 px-2 py-1 rounded-md uppercase">
-                          ${r.amount} / u
-                        </div>
-                        <div className="text-[11px] font-black text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase">
-                          Stock: {r.maxClaims}
+                          {r.minPercentage}% - {r.maxPercentage}%
                         </div>
                       </div>
                     </div>
@@ -525,31 +488,31 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={labelClass}>Monto Unitario ($) *</label>
+                        <label className={labelClass}>Porcentaje Mínimo (%) *</label>
                         <input 
-                          type="text" 
+                          type="number" 
                           className={inputClass}
-                          value={formatNumberSpanish(rewardData.amount)}
+                          value={rewardData.minPercentage}
                           onChange={e => {
-                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                            setRewardData({...rewardData, amount: parseInt(rawValue) || 0});
+                            setRewardData({...rewardData, minPercentage: Number(e.target.value)});
                           }}
                           placeholder="0"
-                          maxLength={15}
+                          min="0"
+                          max="100"
                         />
                       </div>
                       <div>
-                        <label className={labelClass}>Stock (Personas) *</label>
+                        <label className={labelClass}>Porcentaje Máximo (%) *</label>
                         <input 
-                          type="text" 
+                          type="number" 
                           className={inputClass}
-                          value={formatNumberSpanish(rewardData.maxClaims)}
+                          value={rewardData.maxPercentage}
                           onChange={e => {
-                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                            setRewardData({...rewardData, maxClaims: parseInt(rawValue) || 0});
+                            setRewardData({...rewardData, maxPercentage: Number(e.target.value)});
                           }}
-                          placeholder="0"
-                          maxLength={10}
+                          placeholder="100"
+                          min="0"
+                          max="100"
                         />
                       </div>
                     </div>
@@ -561,7 +524,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                       onClick={() => {
                         setShowRewardForm(false);
                         setEditingRewardIndex(null);
-                        setRewardData({ title: '', description: '', amount: 10, maxClaims: 10 });
+                        setRewardData({ title: '', description: '', minPercentage: 0, maxPercentage: 10 });
                       }}
                       className="flex-1 px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-[14px] active:scale-95 transition-all"
                     >
@@ -579,7 +542,67 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
               </div>
             )}
           </div>
-        )}
+
+        {/* Documents Section */}
+        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
+          <div className="mb-6">
+            <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
+              <AlertCircle size={20} className="text-[#2e7d32]" />
+              Documentación de Respaldo
+            </h3>
+            <p className="text-[13px] text-slate-500 font-medium">
+              Sube los documentos que certifican la veracidad de tu campaña (ej. cotizaciones, permisos, actas).
+            </p>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            {documents.length === 0 ? (
+              <p className="text-[13px] text-slate-400">No hay documentos adjuntos aún.</p>
+            ) : (
+              documents.map((doc, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
+                  <div>
+                    <p className="font-bold text-[14px]">{doc.file.name}</p>
+                    <p className="text-[12px] text-slate-500">{doc.justification}</p>
+                  </div>
+                  <button type="button" onClick={() => removeDocument(idx)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Archivo *</label>
+                <input
+                  type="file"
+                  className={inputClass}
+                  onChange={e => setDocFile(e.target.files?.[0] || null)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Justificación *</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Cotización oficial del proveedor"
+                  className={inputClass}
+                  value={docJustification}
+                  onChange={e => setDocJustification(e.target.value)}
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddDocument}
+              className="mt-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-[13px] transition-colors"
+            >
+              Añadir Documento
+            </button>
+          </div>
+        </div>
 
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-emerald-50">
           <button
@@ -593,7 +616,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </button>
           <button
             type="submit"
-            disabled={saving || (campaignType === 'reward' && !isRewardsComplete)}
+            disabled={saving}
             className="w-full md:w-auto bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? (

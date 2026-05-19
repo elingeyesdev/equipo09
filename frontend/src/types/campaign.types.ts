@@ -21,8 +21,9 @@ export interface EntrepreneurCampaign {
   shortDescription: string | null;
   description: string | null;
   location: string | null;
-  categoryId: string;
-  campaignType: CampaignType;
+  categoryId?: string;
+  categoryIds?: string[];
+  categories?: any[];
   status: CampaignStatus;
   goalAmount: number;
   currentAmount: number;
@@ -47,10 +48,8 @@ export interface CreateCampaignDto {
   description: string;
   shortDescription?: string;
   goalAmount: number;
-  campaignType: CampaignType;
   endDate?: string;
-  /** Si se omite, el backend asigna una categoría por defecto. Debe ser UUID. */
-  categoryId?: string;
+  categoryIds?: string[];
   rewards?: CreateRewardTierDto[];
 }
 
@@ -67,7 +66,6 @@ export interface QueryCampaignsDto {
   /** Tiene prioridad sobre filterPreset si ambos se envían */
   status?: CampaignStatus;
   filterPreset?: CampaignFilterPreset;
-  campaignType?: CampaignType;
   search?: string;
   sortBy?: 'created_at' | 'current_amount' | 'goal_amount' | 'end_date' | 'title';
   sortOrder?: 'ASC' | 'DESC';
@@ -132,7 +130,9 @@ export interface RewardTier {
   campaignId: string;
   title: string;
   description: string;
-  amount: number;
+  amount?: number;
+  minPercentage: number;
+  maxPercentage: number;
   currency: string;
   maxClaims: number | null;
   currentClaims: number;
@@ -151,7 +151,9 @@ export interface RewardTier {
 export interface CreateRewardTierDto {
   title: string;
   description: string;
-  amount: number;
+  amount?: number;
+  minPercentage: number;
+  maxPercentage: number;
   currency?: string;
   maxClaims?: number | null;
   estimatedDelivery?: string;
@@ -181,4 +183,19 @@ export interface RewardClaim {
   investor_email: string;
   first_name: string;
   last_name: string;
+}
+
+export interface CampaignDocument {
+  id: string;
+  campaign_id: string;
+  file_url: string;
+  original_name: string;
+  mime_type: string;
+  file_size_bytes: number;
+  justification: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewer_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
 }

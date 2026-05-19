@@ -199,10 +199,10 @@ export function MyCampaignsPage() {
             <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
               <CampaignForm
                 initialData={editingCampaign.id ? editingCampaign : null}
-                onSuccess={async (dto, file) => {
+                onSuccess={async (dto, file, documents) => {
                   const success = editingCampaign.id
-                    ? await updateCampaign(editingCampaign.id, dto, file)
-                    : await addCampaign(dto, file);
+                    ? await updateCampaign(editingCampaign.id, dto, file, documents)
+                    : await addCampaign(dto, file, documents);
                   if (success) setEditingCampaign(null);
                   return success;
                 }}

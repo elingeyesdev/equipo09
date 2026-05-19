@@ -203,6 +203,69 @@ export class EntrepreneurController {
   }
 
   @ApiTags('entrepreneur-campaigns')
+  @Post('me/campaigns/:campaignId/documents')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/campaign-documents',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir documento de respaldo para una campaña' })
+  async uploadCampaignDocument(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('justification') justification: string,
+  ): Promise<ApiSuccessResponse<any>> {
+    const userId = (req as any).user.id;
+    if (!file) throw new Error('El archivo es obligatorio');
+    if (!justification) throw new Error('La justificación es obligatoria');
+    
+    const documentUrl = `/uploads/campaign-documents/${file.filename}`;
+    const result = await this.entrepreneurService.uploadCampaignDocument(
+      userId,
+      campaignId,
+      file,
+      documentUrl,
+      justification
+    );
+    return new ApiSuccessResponse(result, 'Documento subido correctamente');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Get('me/campaigns/:campaignId/documents')
+  @ApiOperation({ summary: 'Obtener los documentos de respaldo de la campaña' })
+  async getCampaignDocuments(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+  ): Promise<ApiSuccessResponse<any[]>> {
+    const userId = (req as any).user.id;
+    const documents = await this.entrepreneurService.getCampaignDocuments(userId, campaignId);
+    return new ApiSuccessResponse(documents);
+  }
+
+  @ApiTags('entrepreneur-campaigns')
+  @Delete('me/campaigns/:campaignId/documents/:docId')
+  @ApiOperation({ summary: 'Eliminar un documento de respaldo' })
+  async deleteCampaignDocument(
+    @Req() req: Request,
+    @Param('campaignId') campaignId: string,
+    @Param('docId') docId: string,
+  ): Promise<ApiSuccessResponse<null>> {
+    const userId = (req as any).user.id;
+    await this.entrepreneurService.deleteCampaignDocument(userId, campaignId, docId);
+    return new ApiSuccessResponse(null, 'Documento eliminado');
+  }
+
+  @ApiTags('entrepreneur-campaigns')
   @Patch('me/campaigns/:campaignId')
   @ApiOperation({ summary: 'Actualizar datos de una campaña (Borrador o Rechazada)' })
   @ApiResponse({ status: 200, description: 'Campaña actualizada.' })

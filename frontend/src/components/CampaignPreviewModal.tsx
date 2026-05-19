@@ -4,8 +4,8 @@ import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/c
 import { CircularFundingRing } from './CircularFundingRing';
 import { CampaignInvestorsTab } from './CampaignInvestorsTab';
 import { CampaignRewardsTab } from './CampaignRewardsTab';
-import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory } from '../api/campaign.api';
-import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory } from '../api/admin.api';
+import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory, getCampaignDocuments as getEntrepreneurDocuments } from '../api/campaign.api';
+import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory, getAdminCampaignDocuments, reviewAdminCampaignDocument } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { getImageUrl } from '../utils/image.utils';
@@ -75,7 +75,8 @@ interface RewardTier {
   id?: string;
   title: string;
   description: string;
-  amount: number;
+  minPercentage: number;
+  maxPercentage: number;
 }
 
 interface EntrepreneurInfo {
@@ -147,7 +148,10 @@ export function CampaignPreviewModal({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
-  const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards' | 'documents'>('details');
+
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
 
   const effectiveRewards = rewardTiers || campaign?.rewardTiers || [];
   const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
@@ -196,6 +200,40 @@ export function CampaignPreviewModal({
       console.error('Error loading history:', err);
     } finally {
       setHistoryLoading(false);
+    }
+  };
+
+  const loadDocuments = async () => {
+    if (!campaign) return;
+    try {
+      setDocumentsLoading(true);
+      const data = isAdmin
+        ? await getAdminCampaignDocuments(campaign.id)
+        : await getEntrepreneurDocuments(campaign.id);
+      setDocuments(data);
+    } catch (err) {
+      console.error('Error loading documents:', err);
+    } finally {
+      setDocumentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'documents' && campaign) {
+      loadDocuments();
+    }
+  }, [activeTab, campaign]);
+
+  const handleReviewDocument = async (docId: string, status: 'approved' | 'rejected') => {
+    const feedback = status === 'rejected' ? window.prompt('Motivo del rechazo del documento:') : '';
+    if (status === 'rejected' && !feedback) return;
+    
+    try {
+      await reviewAdminCampaignDocument(campaign!.id, docId, status, feedback || '');
+      await loadDocuments();
+    } catch (err) {
+      console.error('Error reviewing document:', err);
+      alert('Error al actualizar el estado del documento.');
     }
   };
 
@@ -315,6 +353,14 @@ export function CampaignPreviewModal({
               Recompensas
             </button>
           )}
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'documents' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+          >
+            <FileText size={14} className={activeTab === 'documents' ? 'text-blue-500' : 'text-slate-400'} />
+            Documentación
+          </button>
         </div>
 
         {/* Main Content Area */}
@@ -468,7 +514,7 @@ export function CampaignPreviewModal({
                             <Rocket size={20} />
                           </div>
                           <span className="text-lg font-black text-[#1c2b1e]">
-                            {formatCampaignCurrency(tier.amount, currency)}
+                            {tier.minPercentage}% - {tier.maxPercentage}%
                           </span>
                         </div>
                         <div>
@@ -711,6 +757,44 @@ export function CampaignPreviewModal({
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} />
+            </div>
+          ) : activeTab === 'documents' ? (
+            <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
+              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 className="text-xl font-black text-[#1c2b1e] mb-6 flex items-center gap-2">
+                  <FileText size={24} className="text-blue-500" />
+                  Documentos de Respaldo
+                </h3>
+                {documentsLoading ? (
+                  <div className="flex justify-center py-10"><Loader2 className="animate-spin text-slate-300" size={32} /></div>
+                ) : documents.length === 0 ? (
+                  <p className="text-slate-400 text-center py-10">No hay documentos subidos para esta campaña.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {documents.map((doc: any) => (
+                      <div key={doc.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-slate-100 rounded-2xl gap-4">
+                        <div className="flex-1">
+                          <p className="font-bold text-[14px] mb-1">{doc.original_filename}</p>
+                          <p className="text-[12px] text-slate-500">{doc.justification}</p>
+                          <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">
+                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-emerald-500' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{statusLabel(doc.verification_status)}</span>
+                          </p>
+                          {doc.reviewer_notes && <p className="text-[11px] text-red-500 mt-1 italic">"{doc.reviewer_notes}"</p>}
+                        </div>
+                        <div className="flex gap-2">
+                          <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[12px] font-bold no-underline">Ver Documento</a>
+                          {isAdmin && doc.verification_status === 'pending' && (
+                            <>
+                              <button onClick={() => handleReviewDocument(doc.id, 'approved')} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[12px] font-bold border-none cursor-pointer">Aprobar</button>
+                              <button onClick={() => handleReviewDocument(doc.id, 'rejected')} className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[12px] font-bold border-none cursor-pointer">Rechazar</button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ) : null}
         </div>

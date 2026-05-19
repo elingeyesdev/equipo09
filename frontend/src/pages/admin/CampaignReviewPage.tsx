@@ -421,7 +421,8 @@ export const CampaignReviewPage: React.FC = () => {
             rewardTiers={selectedCampaignDetail.reward_tiers?.map(t => ({
               title: t.title,
               description: t.description,
-              amount: t.min_amount || 0
+              minPercentage: t.min_percentage || 0,
+              maxPercentage: t.max_percentage || 100
             })) || []}
             onApprove={() => handleReviewAction('approved')}
             onReject={(feedback) => handleReviewAction('rejected', feedback)}

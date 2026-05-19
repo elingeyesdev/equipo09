@@ -28,6 +28,7 @@ export interface EntrepreneurCampaign {
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
+  categories?: any[];
   rewardTiers?: RewardTier[];
 }
 

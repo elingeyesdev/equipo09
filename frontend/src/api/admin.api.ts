@@ -145,7 +145,8 @@ export async function getCampaignDetail(id: string): Promise<PendingCampaignDeta
       description: c.description || '',
       reward_tiers: (c.reward_tiers || c.rewardTiers || []).map((t: any) => ({
         title: t.title || 'Recompensa',
-        min_amount: parseFloat(t.min_amount || t.minAmount || t.amount || 0),
+        min_percentage: parseFloat(t.min_percentage || t.minPercentage || 0),
+        max_percentage: parseFloat(t.max_percentage || t.maxPercentage || 100),
         description: t.description || '',
         delivery_date: t.delivery_date || t.deliveryDate || new Date().toISOString(),
       })),
@@ -196,5 +197,23 @@ export async function getAdminCampaignInvestors(id: string, page: number = 1, li
 
 export async function getAdminRewardClaims(id: string): Promise<any[]> {
   const { data } = await api.get<ApiSuccessResponse<any[]>>(`/admin/campaigns/${id}/rewards/claims`);
+  return data.data;
+}
+
+export async function getAdminCampaignDocuments(id: string): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(`/admin/campaigns/${id}/documents`);
+  return data.data;
+}
+
+export async function reviewAdminCampaignDocument(
+  campaignId: string,
+  docId: string,
+  status: 'approved' | 'rejected',
+  reviewerNotes: string
+): Promise<any> {
+  const { data } = await api.patch<ApiSuccessResponse<any>>(
+    `/admin/campaigns/${campaignId}/documents/${docId}/review`,
+    { status, reviewerNotes }
+  );
   return data.data;
 }

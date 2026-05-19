@@ -8,6 +8,7 @@ import {
   IsUUID,
   MaxLength,
   IsDateString,
+  IsArray,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -17,11 +18,7 @@ function emptyToUndefined({ value }: { value: unknown }): unknown {
   return value;
 }
 
-export enum CampaignType {
-  DONATION = 'donation',
-  REWARD = 'reward',
-  EQUITY = 'equity',
-}
+
 
 export class CreateCampaignDto {
   @ApiProperty({ example: 'My Awesome Project' })
@@ -46,20 +43,18 @@ export class CreateCampaignDto {
   @Min(1)
   goalAmount: number;
 
-  @ApiProperty({ enum: CampaignType, example: CampaignType.REWARD })
-  @IsEnum(CampaignType)
-  campaignType: CampaignType;
+
 
   @ApiPropertyOptional({ example: '2026-12-31T23:59:59Z' })
   @IsOptional()
   @IsDateString()
   endDate?: string;
 
-  @ApiPropertyOptional({ example: 'uuid-string' })
+  @ApiPropertyOptional({ type: 'array', items: { type: 'string' }, example: ['uuid1', 'uuid2'] })
   @IsOptional()
-  @Transform(emptyToUndefined)
-  @IsUUID()
-  categoryId?: string;
+  @IsArray()
+  @IsString({ each: true })
+  categoryIds?: string[];
 
   @ApiPropertyOptional({ type: 'array', items: { type: 'object' } })
   @IsOptional()

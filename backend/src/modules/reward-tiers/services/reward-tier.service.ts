@@ -28,26 +28,9 @@ export class RewardTierService {
       throw new ForbiddenException('No tienes permiso para gestionar esta campaña');
     }
 
-    // 2. REGLA DE NEGOCIO: Solo campañas tipo 'reward' pueden tener tiers
-    if (campaign_type !== 'reward') {
-      throw new BadRequestException('Solo las campañas de tipo "reward" (recompensa) pueden tener niveles de recompensa');
-    }
+    // 3. (Removed) Goal amount sum validation since it's now percentage based
 
-    // 3. Validar que la sumatoria total no supere la meta de la campaña
-    if (!dto.maxClaims || dto.maxClaims <= 0) {
-      throw new BadRequestException('El campo maxClaims (Stock Disponible) es obligatorio.');
-    }
-
-    const sumResult = await this.pool.query(
-      `SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true`,
-      [campaignId]
-    );
-    const currentTotalValue = Number(sumResult.rows[0].total_value) || 0;
-    const newTierValue = dto.amount * dto.maxClaims;
-
-    if (currentTotalValue + newTierValue > Number(goal_amount)) {
-      throw new BadRequestException(`El monto acumulado en recompensas ($${currentTotalValue + newTierValue}) supera la meta de la campaña ($${goal_amount}).`);
-    }
+    // TODO: Add percentage overlap validation if needed
 
     return this.repository.create(campaignId, dto);
   }
@@ -69,27 +52,7 @@ export class RewardTierService {
       throw new BadRequestException('No se pueden modificar recompensas de una campaña que ya está activa o finalizada.');
     }
 
-    // Validar suma total si se modifica el monto, maxClaims o estado activo
-    const newAmount = dto.amount !== undefined ? dto.amount : tier.amount;
-    const newMaxClaims = dto.maxClaims !== undefined ? dto.maxClaims : tier.maxClaims;
-    const newIsActive = dto.isActive !== undefined ? dto.isActive : tier.isActive;
-
-    if (newIsActive) {
-      if (!newMaxClaims || newMaxClaims <= 0) {
-        throw new BadRequestException('El campo maxClaims (Stock Disponible) es obligatorio.');
-      }
-
-      const sumResult = await this.pool.query(
-        `SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true AND id != $2`,
-        [campaignId, rewardId]
-      );
-      const currentTotalValue = Number(sumResult.rows[0].total_value) || 0;
-      const newTierValue = newAmount * newMaxClaims;
-
-      if (currentTotalValue + newTierValue > Number(campaign.rows[0].goal_amount)) {
-        throw new BadRequestException(`El monto acumulado en recompensas ($${currentTotalValue + newTierValue}) supera la meta de la campaña ($${campaign.rows[0].goal_amount}).`);
-      }
-    }
+    // Goal amount sum validation removed as it's now percentage based
 
     return this.repository.update(rewardId, dto);
   }

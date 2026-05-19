@@ -125,4 +125,16 @@ export class AdminService {
       throw err;
     }
   }
+
+  async getCampaignDocuments(campaignId: string) {
+    return this.adminRepo.getCampaignDocuments(campaignId);
+  }
+
+  async reviewCampaignDocument(campaignId: string, docId: string, status: string, reviewerNotes: string, reviewerId: string) {
+    const updated = await this.adminRepo.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
+    if (!updated) {
+      throw new NotFoundException('Documento no encontrado o no pertenece a la campaña');
+    }
+    return updated;
+  }
 }

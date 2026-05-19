@@ -67,9 +67,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
     setFormData({
       title: '',
       description: '',
-      amount: 10,
-      currency: currency,
-      maxClaims: null,
+      minPercentage: 0,
+      maxPercentage: 10,
       isActive: true,
       items: []
     } as any);
@@ -80,10 +79,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
     setFormData({
       title: tier.title,
       description: tier.description,
-      amount: tier.amount,
-      currency: tier.currency,
-      maxClaims: tier.maxClaims,
-      estimatedDelivery: tier.estimatedDelivery ? new Date(tier.estimatedDelivery).toISOString().slice(0, 16) : undefined,
+      minPercentage: tier.minPercentage || 0,
+      maxPercentage: tier.maxPercentage || 100,
       isActive: tier.isActive,
       items: tier.items || []
     } as any);
@@ -102,31 +99,20 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (readOnly) return;
-    if (!formData.title || !formData.description || !formData.amount || !formData.maxClaims) {
+    if (!formData.title || !formData.description || formData.minPercentage === undefined || formData.maxPercentage === undefined) {
       alert('Por favor completa todos los campos requeridos (*)');
       return;
     }
 
-    if (financialProgress && formData.isActive !== false) {
-      const currentOtherTiersValue = tiers
-        .filter(t => t.isActive && t.id !== isEditing)
-        .reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0);
-      
-      const newTierValue = formData.amount * formData.maxClaims;
-      
-      if (currentOtherTiersValue + newTierValue > financialProgress.goalAmount) {
-        alert(`El valor acumulado en recompensas no puede superar la meta de la campaña (${formatCampaignCurrency(financialProgress.goalAmount, currency)}).`);
-        return;
-      }
+    if (formData.minPercentage < 0 || formData.maxPercentage > 100 || formData.minPercentage >= formData.maxPercentage) {
+      alert('Los porcentajes son inválidos.');
+      return;
     }
-    
+
     try {
       setSubmitting(true);
       
-      // Clean up maxClaims if empty string
       const payload: any = { ...formData };
-      if (payload.maxClaims === '' || payload.maxClaims === 0) payload.maxClaims = null;
-      if (typeof payload.maxClaims === 'string') payload.maxClaims = parseInt(payload.maxClaims, 10);
       
       if (isEditing === 'new') {
         const { isActive, ...createPayload } = payload;
@@ -179,29 +165,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
             <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Gestión de Recompensas</h3>
           </div>
           <p className="text-slate-500 text-[14px] font-medium mb-6">
-            Define niveles de aportación y los beneficios que ofrecerás a tus inversores. El valor total de las recompensas no puede superar la meta.
+            Define niveles de beneficios automáticos basados en el porcentaje de contribución de los inversores.
           </p>
-          
-          {financialProgress && (
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Valor Asignado</span>
-                <span className="text-[13px] font-black text-[#1c2b1e]">
-                  {formatCampaignCurrency(
-                    tiers.filter(t => t.isActive).reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0), 
-                    currency
-                  )} 
-                  <span className="text-slate-400 font-medium"> / {formatCampaignCurrency(financialProgress.goalAmount, currency)}</span>
-                </span>
-              </div>
-              <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-500 transition-all duration-500" 
-                  style={{ width: `${Math.min(100, (tiers.filter(t => t.isActive).reduce((sum, t) => sum + (t.amount * (t.maxClaims || 0)), 0) / financialProgress.goalAmount) * 100)}%` }}
-                />
-              </div>
-            </div>
-          )}
         </div>
         {!isEditing && !readOnly && (
           <button
@@ -234,15 +199,29 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                 />
               </div>
               <div>
-                <label className={labelClass}>Monto Mínimo ({currency}) *</label>
+                <label className={labelClass}>Porcentaje Mínimo (%) *</label>
                 <input 
                   type="number" 
                   required 
-                  min="1"
+                  min="0"
+                  max="100"
                   className={inputClass}
-                  value={formData.amount || ''}
-                  onChange={e => setFormData({...formData, amount: parseFloat(e.target.value)})}
-                  placeholder="Ej. 50"
+                  value={formData.minPercentage === undefined ? '' : formData.minPercentage}
+                  onChange={e => setFormData({...formData, minPercentage: parseFloat(e.target.value)})}
+                  placeholder="Ej. 1"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Porcentaje Máximo (%) *</label>
+                <input 
+                  type="number" 
+                  required 
+                  min="0"
+                  max="100"
+                  className={inputClass}
+                  value={formData.maxPercentage === undefined ? '' : formData.maxPercentage}
+                  onChange={e => setFormData({...formData, maxPercentage: parseFloat(e.target.value)})}
+                  placeholder="Ej. 10"
                 />
               </div>
               <div className="md:col-span-2">
@@ -256,27 +235,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                   placeholder="Describe qué incluye esta recompensa..."
                 />
               </div>
-              <div>
-                <label className={labelClass}>Stock Disponible (Personas) *</label>
-                <input 
-                  type="number" 
-                  required
-                  min="1"
-                  className={inputClass}
-                  value={formData.maxClaims === null ? '' : formData.maxClaims}
-                  onChange={e => setFormData({...formData, maxClaims: e.target.value ? parseInt(e.target.value) : null})}
-                  placeholder="Ej. 10"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Fecha de Entrega Estimada (Opcional)</label>
-                <input 
-                  type="datetime-local" 
-                  className={inputClass}
-                  value={formData.estimatedDelivery || ''}
-                  onChange={e => setFormData({...formData, estimatedDelivery: e.target.value})}
-                />
-              </div>
+
               {isEditing !== 'new' && (
                 <div className="md:col-span-2 flex items-center gap-3 mt-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <input 
@@ -324,21 +283,11 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl font-black text-[#1c2b1e]">
-                    ${tier.amount.toLocaleString()}
+                    {tier.minPercentage}% - {tier.maxPercentage}%
                   </span>
                   {!tier.isActive && (
                     <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-widest">
                       Inactiva
-                    </span>
-                  )}
-                  {tier.isActive && tier.maxClaims !== null && tier.currentClaims >= tier.maxClaims && (
-                    <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-widest flex items-center gap-1">
-                      <Lock size={10} /> Agotada
-                    </span>
-                  )}
-                  {tier.isActive && tier.expiresAt && new Date(tier.expiresAt) < new Date() && (
-                    <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-widest flex items-center gap-1">
-                      <Calendar size={10} /> Expirada
                     </span>
                   )}
                 </div>
@@ -361,8 +310,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
               <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
                 <div className="flex items-center gap-1.5">
                   <Users size={14} strokeWidth={2.5} className="text-[#2e7d32]" />
-                  <span className="text-slate-700">{tier.currentClaims}</span>
-                  <span>/ {tier.maxClaims === null ? '∞' : tier.maxClaims} reclamos</span>
+                  <span className="text-slate-700">{tier.currentClaims || 0}</span>
+                  <span>inversores han alcanzado este nivel</span>
                 </div>
               </div>
             </div>

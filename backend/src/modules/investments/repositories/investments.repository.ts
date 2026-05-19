@@ -108,50 +108,38 @@ export class InvestmentsRepository extends BaseRepository {
       entrepreneurUserId = campaign.entrepreneur_user_id;
       isFunded = (currentAmount + dto.amount) >= goalAmount;
 
-      // 4. Validar reward tier si fue seleccionado o requerido
+      // 4. Asignación automática de reward tier por porcentaje
       let rewardTierId: string | null = null;
-      if (campaign.campaign_type === 'reward' && !dto.rewardTierId) {
-        throw new BadRequestException('Para campañas de tipo recompensa, es obligatorio seleccionar un nivel de recompensa.');
-      }
-
-      if (dto.rewardTierId) {
-        if (campaign.campaign_type !== 'reward') {
-          throw new BadRequestException('Esta campaña no admite niveles de recompensa.');
-        }
-
+      
+      if (goalAmount > 0) {
+        const percentage = (dto.amount / goalAmount) * 100;
+        
         const tierResult = await client.query(
-          `SELECT id, amount, max_claims, current_claims, is_active
+          `SELECT id, title, max_claims, current_claims, is_active
            FROM reward_tiers
-           WHERE id = $1 AND campaign_id = $2
+           WHERE campaign_id = $1 
+             AND is_active = true
+             AND min_percentage <= $2 
+             AND max_percentage >= $2
+           ORDER BY min_percentage DESC
+           LIMIT 1
            FOR UPDATE`,
-          [dto.rewardTierId, dto.campaignId]
+          [dto.campaignId, percentage]
         );
 
-        if (tierResult.rows.length === 0) {
-          throw new BadRequestException('La recompensa no existe o no pertenece a esta campaña.');
+        if (tierResult.rows.length > 0) {
+          const tier = tierResult.rows[0];
+          const tierMaxClaims = tier.max_claims !== null ? Number(tier.max_claims) : null;
+          const tierCurrentClaims = Number(tier.current_claims);
+
+          if (tierMaxClaims === null || tierCurrentClaims < tierMaxClaims) {
+            rewardTierId = tier.id;
+          } else {
+            console.log(`[RewardAssignment] Tier "${tier.title}" ha alcanzado su límite (${tierCurrentClaims}/${tierMaxClaims}). Inversión sin recompensa.`);
+          }
+        } else {
+          console.log(`[RewardAssignment] Sin tier activo para ${((dto.amount / goalAmount) * 100).toFixed(2)}% en campaña ${dto.campaignId}.`);
         }
-
-        const tier = tierResult.rows[0];
-
-        if (!tier.is_active) {
-          throw new BadRequestException('La recompensa seleccionada no está activa.');
-        }
-
-        const tierAmount = Number(tier.amount);
-        if (dto.amount !== tierAmount) {
-          throw new BadRequestException(
-            `El monto de inversión ($${dto.amount}) debe ser exactamente igual al valor de la recompensa ($${tierAmount}).`
-          );
-        }
-
-        const tierMaxClaims = tier.max_claims !== null ? Number(tier.max_claims) : null;
-        const tierCurrentClaims = Number(tier.current_claims);
-
-        if (tierMaxClaims !== null && tierCurrentClaims >= tierMaxClaims) {
-          throw new BadRequestException('Esta recompensa está agotada (Sold Out).');
-        }
-
-        rewardTierId = dto.rewardTierId;
       }
 
       // 5. Descontar el saldo del inversor

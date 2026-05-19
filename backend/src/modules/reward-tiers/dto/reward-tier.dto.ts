@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsUUID, IsBoolean, IsArray, IsPositive, Min, IsDateString } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsUUID, IsBoolean, IsArray, IsPositive, Min, Max, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRewardTierDto {
@@ -14,6 +14,18 @@ export class CreateRewardTierDto {
   @IsNumber()
   @IsPositive()
   amount: number;
+
+  @ApiProperty({ example: 0.0 })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  minPercentage: number;
+
+  @ApiProperty({ example: 10.0 })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  maxPercentage: number;
 
   @ApiPropertyOptional({ example: 'USD' })
   @IsOptional()

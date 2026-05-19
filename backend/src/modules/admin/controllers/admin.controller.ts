@@ -123,4 +123,27 @@ export class AdminController {
     const deleted = await this.adminService.hardDeleteCampaign(id, reviewerId);
     return new ApiSuccessResponse(deleted, 'Campaña eliminada o cancelada con éxito');
   }
+
+  @Get('campaigns/:id/documents')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener documentos de respaldo de una campaña' })
+  async getCampaignDocuments(@Param('id') id: string) {
+    const documents = await this.adminService.getCampaignDocuments(id);
+    return new ApiSuccessResponse(documents, 'Documentos obtenidos');
+  }
+
+  @Patch('campaigns/:id/documents/:docId/review')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Revisar (aprobar/rechazar) un documento de respaldo' })
+  async reviewCampaignDocument(
+    @Param('id') campaignId: string,
+    @Param('docId') docId: string,
+    @Body('status') status: string,
+    @Body('reviewerNotes') reviewerNotes: string,
+    @Req() req: any,
+  ) {
+    const reviewerId = req.user.id;
+    const updated = await this.adminService.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
+    return new ApiSuccessResponse(updated, 'Documento revisado con éxito');
+  }
 }

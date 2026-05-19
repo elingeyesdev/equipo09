@@ -3,7 +3,9 @@ export interface RewardTier {
   campaignId: string;
   title: string;
   description: string;
-  amount: number;
+  amount?: number;
+  minPercentage: number;
+  maxPercentage: number;
   currency: string;
   maxClaims: number | null;
   currentClaims: number;
@@ -25,7 +27,9 @@ export function mapRowToRewardTier(row: any): RewardTier {
     campaignId: row.campaign_id,
     title: row.title,
     description: row.description,
-    amount: Number(row.amount),
+    amount: row.amount ? Number(row.amount) : undefined,
+    minPercentage: Number(row.min_percentage) || 0,
+    maxPercentage: Number(row.max_percentage) || 100,
     currency: row.currency,
     maxClaims: row.max_claims !== null ? Number(row.max_claims) : null,
     currentClaims: Number(row.current_claims),

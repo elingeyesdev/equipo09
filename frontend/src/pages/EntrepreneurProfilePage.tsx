@@ -82,11 +82,11 @@ export function EntrepreneurProfilePage() {
     }
   }, [profileLoading, profile, onboardingTriggered]);
 
-  const handleSave = async (type: string, data: any, file?: File) => {
+  const handleSave = async (type: string, data: any, file?: File, documents?: { file: File; justification: string }[]) => {
     if (type === 'new-campaign') {
-      await addCampaign(data, file);
+      await addCampaign(data, file, documents);
     } else if (type === 'edit-campaign' && selectedCampaign) {
-      await updateCampaign(selectedCampaign.id, data, file);
+      await updateCampaign(selectedCampaign.id, data, file, documents);
     } else {
       // Filtrar el payload para enviar solo campos permitidos por el DTO
       const baseData = { ...profile, ...data };
@@ -348,7 +348,7 @@ export function EntrepreneurProfilePage() {
           <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <CampaignForm
               initialData={modalType === 'edit-campaign' ? selectedCampaign : null}
-              onSuccess={(dto, file) => handleSave(modalType, dto, file).then(() => true)}
+              onSuccess={(dto, file, documents) => handleSave(modalType, dto, file, documents).then(() => true)}
               onCancel={() => setModalType(null)}
               saving={adding}
               saveError={addError}

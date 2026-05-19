@@ -216,3 +216,35 @@ export async function finalizeCampaign(campaignId: string): Promise<Entrepreneur
   );
   return data.data;
 }
+
+export async function uploadCampaignDocument(
+  campaignId: string,
+  file: File,
+  justification: string,
+): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('justification', justification);
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/documents`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}
+
+export async function getCampaignDocuments(
+  campaignId: string,
+): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/documents`,
+  );
+  return data.data;
+}
+
+export async function deleteCampaignDocument(
+  campaignId: string,
+  docId: string,
+): Promise<void> {
+  await api.delete(`/entrepreneurs/me/campaigns/${campaignId}/documents/${docId}`);
+}

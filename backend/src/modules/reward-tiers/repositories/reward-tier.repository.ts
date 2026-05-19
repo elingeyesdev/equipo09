@@ -8,17 +8,18 @@ export class RewardTierRepository extends BaseRepository {
   async create(campaignId: string, dto: CreateRewardTierDto): Promise<RewardTier> {
     const query = `
       INSERT INTO reward_tiers (
-        campaign_id, title, description, amount, currency, max_claims,
+        campaign_id, title, description, amount, min_percentage, max_percentage, currency, max_claims,
         estimated_delivery, includes_shipping, shipping_details, image_url,
         expires_at, items, sort_order
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
     const values = [
-      campaignId,
       dto.title,
       dto.description,
-      dto.amount,
+      dto.amount || null,
+      dto.minPercentage || 0,
+      dto.maxPercentage || 100,
       dto.currency || 'USD',
       dto.maxClaims ?? null,
       dto.estimatedDelivery || null,
@@ -38,7 +39,7 @@ export class RewardTierRepository extends BaseRepository {
     const query = `
       SELECT * FROM reward_tiers 
       WHERE campaign_id = $1 ${onlyActive ? 'AND is_active = true' : ''}
-      ORDER BY sort_order ASC, amount ASC;
+      ORDER BY sort_order ASC, min_percentage ASC;
     `;
     const rows = await this.queryMany(query, [campaignId]);
     return rows.map(mapRowToRewardTier);
@@ -54,8 +55,10 @@ export class RewardTierRepository extends BaseRepository {
       title: dto.title,
       description: dto.description,
       amount: dto.amount,
+      min_percentage: dto.minPercentage,
+      max_percentage: dto.maxPercentage,
       currency: dto.currency,
-      maxClaims: dto.maxClaims,
+      max_claims: dto.maxClaims,
       estimatedDelivery: dto.estimatedDelivery,
       includesShipping: dto.includesShipping,
       shippingDetails: dto.shippingDetails,

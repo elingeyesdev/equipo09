@@ -19,27 +19,18 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     const slug = `${baseSlug}-${randomSuffix}`;
 
-    let categoryId = dto.categoryId;
-    if (!categoryId) {
-      const cat = await this.queryOne(`SELECT id FROM categories LIMIT 1`);
-      if (!cat) throw new Error('No categories found in database to assign to campaign');
-      categoryId = cat.id;
-    }
-
     return this.transaction(async (client) => {
       const result = await client.query(
         `INSERT INTO campaigns (
-          creator_id, category_id, title, slug, short_description, description,
+          creator_id, title, slug, short_description, description,
           campaign_type, goal_amount, end_date, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft') RETURNING id`,
+        ) VALUES ($1, $2, $3, $4, $5, 'reward', $6, $7, 'draft') RETURNING id`,
         [
           creatorId,
-          categoryId,
           dto.title,
           slug,
           dto.shortDescription || null,
           dto.description,
-          dto.campaignType,
           dto.goalAmount,
           dto.endDate || null
         ]
@@ -47,19 +38,28 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
 
       const campaignId = result.rows[0].id;
 
+      if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
+        for (const catId of dto.categoryIds) {
+          await client.query(
+            `INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [campaignId, catId]
+          );
+        }
+      }
+
       // Si se enviaron recompensas en la creación, guardarlas
       if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
         for (const reward of dto.rewards) {
           await client.query(
             `INSERT INTO reward_tiers (
-              campaign_id, title, description, amount, max_claims, is_active
+              campaign_id, title, description, min_percentage, max_percentage, is_active
             ) VALUES ($1, $2, $3, $4, $5, true)`,
             [
               campaignId,
               reward.title,
               reward.description,
-              reward.amount,
-              reward.maxClaims || null
+              reward.minPercentage || 0,
+              reward.maxPercentage || 100
             ]
           );
         }
@@ -175,12 +175,8 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        cat.display_name AS category_name,
-        cat.slug AS category_slug,
-        c.category_id,
         c.description
        FROM campaigns c
-       JOIN categories cat ON c.category_id = cat.id
        WHERE ${whereClause}
        ORDER BY c.${sortBy} ${sortOrder}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
@@ -206,12 +202,8 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        cat.display_name AS category_name,
-        cat.slug AS category_slug,
-        c.category_id,
         c.description
        FROM campaigns c
-       JOIN categories cat ON c.category_id = cat.id
        WHERE c.id = $1 AND c.creator_id = $2`,
       [campaignId, creatorId],
     );
@@ -219,12 +211,18 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     if (!row) return null;
 
     const rewardTiers = await executor.queryMany(
-      'SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY amount ASC',
+      'SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY min_percentage ASC',
+      [campaignId]
+    );
+
+    const categories = await executor.queryMany(
+      'SELECT c.id, c.display_name as "displayName", c.slug FROM categories c JOIN campaign_categories cc ON c.id = cc.category_id WHERE cc.campaign_id = $1',
       [campaignId]
     );
 
     const campaign = mapRowToEntrepreneurCampaign(row);
     campaign.rewardTiers = rewardTiers.map(mapRowToRewardTier);
+    campaign.categories = categories;
     return campaign;
   }
 
@@ -358,47 +356,48 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       updates.push(`goal_amount = $${paramIndex++}`);
       values.push(dto.goalAmount);
     }
-    if (dto.categoryId !== undefined) {
-      updates.push(`category_id = $${paramIndex++}`);
-      values.push(dto.categoryId);
-    }
     if (dto.endDate !== undefined) {
       updates.push(`end_date = $${paramIndex++}`);
       values.push(dto.endDate || null);
     }
-    if (dto.campaignType !== undefined) {
-      updates.push(`campaign_type = $${paramIndex++}`);
-      values.push(dto.campaignType);
-    }
 
     return this.transaction(async (client) => {
-      const query = `
-        UPDATE campaigns
-        SET ${updates.join(', ')}
-        WHERE id = $1 AND creator_id = $2
-        RETURNING id
-      `;
+      if (updates.length > 1) {
+        const query = `
+          UPDATE campaigns
+          SET ${updates.join(', ')}
+          WHERE id = $1 AND creator_id = $2
+          RETURNING id
+        `;
+        const result = await client.query(query, values);
+        if (result.rowCount === 0) return null;
+      }
 
-      const result = await client.query(query, values);
-      if (result.rowCount === 0) return null;
+      if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
+        await client.query('DELETE FROM campaign_categories WHERE campaign_id = $1', [campaignId]);
+        for (const catId of dto.categoryIds) {
+          await client.query(
+            `INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [campaignId, catId]
+          );
+        }
+      }
 
       // Si se enviaron recompensas, reemplazar las existentes
       if (dto.rewards && Array.isArray(dto.rewards)) {
-        // Opcional: Verificar si hay inversiones antes de borrar
-        // Por ahora, asumimos que si está editando puede resetearlas
         await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);
         
         for (const reward of dto.rewards) {
           await client.query(
             `INSERT INTO reward_tiers (
-              campaign_id, title, description, amount, max_claims, is_active
+              campaign_id, title, description, min_percentage, max_percentage, is_active
             ) VALUES ($1, $2, $3, $4, $5, true)`,
             [
               campaignId,
               reward.title,
               reward.description,
-              reward.amount,
-              reward.maxClaims || null
+              reward.minPercentage || 0,
+              reward.maxPercentage || 100
             ]
           );
         }

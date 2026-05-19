@@ -520,4 +520,65 @@ export class EntrepreneurService {
     }
     return updated;
   }
+
+  // =========================================================================
+  // DOCUMENTACIÓN DE RESPALDO
+  // =========================================================================
+
+  async uploadCampaignDocument(userId: string, campaignId: string, file: Express.Multer.File, documentUrl: string, justification: string) {
+    await this.ensureEntrepreneurProfile(userId);
+    const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+    if (!campaign) {
+      throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+    }
+
+    const row = await this.campaignRepo.queryOne(
+      `INSERT INTO campaign_documents (campaign_id, file_url, original_name, mime_type, file_size_bytes, justification)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [campaignId, documentUrl, file.originalname, file.mimetype, file.size, justification]
+    );
+
+    return row;
+  }
+
+  async getCampaignDocuments(userId: string, campaignId: string) {
+    await this.ensureEntrepreneurProfile(userId);
+    const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+    if (!campaign) {
+      throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+    }
+
+    return this.campaignRepo.queryMany(
+      `SELECT * FROM campaign_documents WHERE campaign_id = $1 ORDER BY created_at DESC`,
+      [campaignId]
+    );
+  }
+
+  async deleteCampaignDocument(userId: string, campaignId: string, docId: string) {
+    await this.ensureEntrepreneurProfile(userId);
+    const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+    if (!campaign) {
+      throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+    }
+
+    const doc = await this.campaignRepo.queryOne(`SELECT id, file_url FROM campaign_documents WHERE id = $1 AND campaign_id = $2`, [docId, campaignId]);
+    if (!doc) {
+      throw new NotFoundException('Documento no encontrado en esta campaña');
+    }
+
+    // Borrar archivo físico del disco
+    if (doc.file_url) {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), doc.file_url);
+      try {
+        await fs.unlink(filePath);
+      } catch (e) {
+        // Si el archivo ya no existe, no es un error fatal
+        console.warn(`No se pudo eliminar el archivo físico: ${filePath}`, e);
+      }
+    }
+
+    await this.campaignRepo.queryOne(`DELETE FROM campaign_documents WHERE id = $1`, [docId]);
+  }
 }

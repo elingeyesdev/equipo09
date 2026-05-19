@@ -34,7 +34,8 @@ export interface AdminUser {
 
 export interface RewardTier {
   title: string;
-  min_amount: number;
+  min_percentage: number;
+  max_percentage: number;
   description: string;
   delivery_date: string;
 }
