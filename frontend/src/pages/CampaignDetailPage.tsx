@@ -8,6 +8,7 @@ import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
 import { createInvestment } from '../api/investor.api';
+import { getOrCreateConversation } from '../api/chat.api';
 import {
   ArrowLeft,
   TrendingUp,
@@ -28,6 +29,7 @@ import {
   LogIn,
   Sparkles,
   Flame,
+  MessageCircle,
 } from 'lucide-react';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
@@ -396,6 +398,33 @@ export function CampaignDetailPage() {
                   <p className="text-[15px] text-slate-500 leading-[1.8] whitespace-pre-wrap">
                     {campaign.entrepreneurBio || 'Este emprendedor aún no ha agregado su biografía.'}
                   </p>
+
+                  {/* Botón para iniciar chat */}
+                  {localStorage.getItem('userId') !== campaign.entrepreneurUserId && (
+                    <button
+                      onClick={async () => {
+                        const token = localStorage.getItem('accessToken');
+                        if (!token) {
+                          navigate('/login', { state: { from: location.pathname } });
+                          return;
+                        }
+                        try {
+                          await getOrCreateConversation(
+                            campaign.entrepreneurUserId,
+                            campaign.id,
+                            `Consulta sobre: ${campaign.title}`
+                          );
+                          navigate('/chat');
+                        } catch (err) {
+                          console.error('Error al iniciar conversación:', err);
+                        }
+                      }}
+                      className="mt-5 flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black text-[13px] uppercase tracking-wider border-none transition-all active:scale-95 cursor-pointer shadow-sm"
+                    >
+                      <MessageCircle size={16} strokeWidth={2.5} />
+                      Contactar Emprendedor
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

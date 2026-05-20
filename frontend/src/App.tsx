@@ -7,6 +7,7 @@ import { EntrepreneurProfilePage } from './pages/EntrepreneurProfilePage';
 import { MyCampaignsPage } from './pages/MyCampaignsPage';
 import { ExploreCampaignsPage } from './pages/ExploreCampaignsPage';
 import { CampaignDetailPage } from './pages/CampaignDetailPage';
+import { ChatPage } from './pages/ChatPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
@@ -25,6 +26,14 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/explore" element={<ExploreCampaignsPage />} />
         <Route path="/campaign/:id" element={<CampaignDetailPage />} />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <ChatPage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={

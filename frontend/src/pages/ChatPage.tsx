@@ -1,0 +1,220 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Navbar } from '../components/Navbar';
+import { ConversationsSidebar } from '../components/chat/ConversationsSidebar';
+import { ChatWindow } from '../components/chat/ChatWindow';
+import { useChat } from '../hooks/useChat';
+import {
+  getMyConversations,
+  markAsRead,
+  type Conversation,
+  type Message,
+} from '../api/chat.api';
+import { MessageCircle } from 'lucide-react';
+
+export function ChatPage() {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loadingConvs, setLoadingConvs] = useState(true);
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [search, setSearch] = useState('');
+  const [showSidebar, setShowSidebar] = useState(true);
+
+  // Último mensaje recibido por WebSocket para pasarlo al ChatWindow
+  const [lastIncoming, setLastIncoming] = useState<Message | null>(null);
+
+  const currentUserId = localStorage.getItem('userId') ?? '';
+
+  // ── Cargar conversaciones via REST ────────────────────────
+  const loadConversations = useCallback(async () => {
+    try {
+      const convs = await getMyConversations();
+      setConversations(convs);
+    } catch (err) {
+      console.error('Error cargando conversaciones:', err);
+    } finally {
+      setLoadingConvs(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  // ── Callback para nuevo mensaje recibido por WS ───────────
+  const handleNewMessage = useCallback((msg: Message) => {
+    setLastIncoming(msg);
+
+    // Actualizar la conversación en el sidebar
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== msg.conversationId) return c;
+        const isActive = msg.conversationId === activeConversation?.id;
+        return {
+          ...c,
+          lastMessage: {
+            content: msg.content,
+            createdAt: msg.createdAt,
+            senderId: msg.senderId,
+          },
+          lastMessageAt: msg.createdAt,
+          unreadCount: isActive ? 0 : c.unreadCount + 1,
+        };
+      }),
+    );
+  }, [activeConversation?.id]);
+
+  // ── Callback para actualización de conversación ───────────
+  const handleConversationUpdated = useCallback(
+    (data: { conversationId: string; lastMessage: Message }) => {
+      setConversations((prev) =>
+        prev
+          .map((c) => {
+            if (c.id !== data.conversationId) return c;
+            const isActive = data.conversationId === activeConversation?.id;
+            return {
+              ...c,
+              lastMessage: {
+                content: data.lastMessage.content,
+                createdAt: data.lastMessage.createdAt,
+                senderId: data.lastMessage.senderId,
+              },
+              lastMessageAt: data.lastMessage.createdAt,
+              unreadCount: isActive ? 0 : c.unreadCount + (data.lastMessage.senderId !== currentUserId ? 1 : 0),
+            };
+          })
+          .sort(
+            (a, b) =>
+              new Date(b.lastMessageAt ?? 0).getTime() -
+              new Date(a.lastMessageAt ?? 0).getTime(),
+          ),
+      );
+    },
+    [activeConversation?.id, currentUserId],
+  );
+
+  // ── WebSocket hook ────────────────────────────────────────
+  const { connected, typingUsers, sendMessage, emitTyping, emitMarkAsRead } = useChat({
+    conversationId: activeConversation?.id ?? null,
+    onNewMessage: handleNewMessage,
+    onConversationUpdated: handleConversationUpdated,
+  });
+
+  // ── Seleccionar conversación ──────────────────────────────
+  const handleSelectConversation = useCallback(
+    (conv: Conversation) => {
+      setActiveConversation(conv);
+      setLastIncoming(null);
+      // En móvil ocultamos el sidebar al abrir una conversación
+      setShowSidebar(false);
+      // Marcar como leído
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)),
+      );
+    },
+    [],
+  );
+
+  const handleBack = useCallback(() => {
+    setActiveConversation(null);
+    setShowSidebar(true);
+    setLastIncoming(null);
+    loadConversations(); // Refresca para sincronizar unread
+  }, [loadConversations]);
+
+  const handleMarkAsRead = useCallback(
+    async (convId: string) => {
+      emitMarkAsRead(convId);
+      await markAsRead(convId).catch(() => {});
+      setConversations((prev) =>
+        prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)),
+      );
+    },
+    [emitMarkAsRead],
+  );
+
+  const totalUnread = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
+
+  return (
+    <div className="flex flex-col h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+      <Navbar />
+
+      {/* Banner título */}
+      <div className="bg-[#1c2b1e] px-6 py-4 border-b border-emerald-900/40 shrink-0">
+        <div className="max-w-[1200px] mx-auto flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-emerald-400 border border-white/10">
+            <MessageCircle size={18} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h1 className="text-[17px] font-black text-white tracking-tight leading-none">
+              Mensajes
+            </h1>
+            <p className="text-[11px] text-emerald-300/70 font-medium mt-0.5">
+              {totalUnread > 0
+                ? `${totalUnread} mensaje${totalUnread > 1 ? 's' : ''} sin leer`
+                : 'Conversaciones con emprendedores e inversores'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido principal */}
+      <div className="flex-1 overflow-hidden max-w-[1200px] w-full mx-auto flex">
+        {/* Sidebar — visible siempre en md+, toggle en móvil */}
+        <div
+          className={`${
+            showSidebar ? 'flex' : 'hidden'
+          } md:flex border-r border-slate-200 h-full`}
+          style={{ width: '340px', minWidth: '340px' }}
+        >
+          <ConversationsSidebar
+            conversations={conversations}
+            activeId={activeConversation?.id ?? null}
+            onSelect={handleSelectConversation}
+            loading={loadingConvs}
+            connected={connected}
+            search={search}
+            onSearchChange={setSearch}
+            currentUserId={currentUserId}
+          />
+        </div>
+
+        {/* Chat window */}
+        <div
+          className={`${
+            !showSidebar || activeConversation ? 'flex' : 'hidden'
+          } md:flex flex-1 flex-col h-full overflow-hidden`}
+        >
+          {activeConversation ? (
+            <ChatWindow
+              conversation={activeConversation}
+              currentUserId={currentUserId}
+              typingUsers={typingUsers}
+              onBack={handleBack}
+              onSend={sendMessage}
+              onTyping={emitTyping}
+              onMarkAsRead={handleMarkAsRead}
+              newIncomingMessage={lastIncoming}
+            />
+          ) : (
+            /* Pantalla vacía cuando no hay conversación seleccionada */
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 bg-[#f4f7f4]">
+              <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-emerald-200 shadow-sm border border-emerald-100">
+                <MessageCircle size={40} strokeWidth={1.5} />
+              </div>
+              <div className="text-center">
+                <p className="text-[16px] font-black text-slate-600 tracking-tight">
+                  Selecciona una conversación
+                </p>
+                <p className="text-[13px] text-slate-400 font-medium mt-1">
+                  Elige un chat de la lista para comenzar
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[12px] font-medium px-5 py-2.5 rounded-full">
+                💡 Puedes iniciar un chat desde el detalle de cualquier campaña
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

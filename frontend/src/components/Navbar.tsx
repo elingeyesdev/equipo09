@@ -1,17 +1,34 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Rocket, User, LogOut } from 'lucide-react';
+import { Rocket, User, LogOut, MessageCircle } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
+import { useEffect, useState } from 'react';
+import { getMyConversations } from '../api/chat.api';
 
 export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const userRole = localStorage.getItem('userRole');
   const userEmail = localStorage.getItem('userEmail');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Cargar count inicial de mensajes no leídos
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    getMyConversations()
+      .then((convs) => {
+        const total = convs.reduce((acc, c) => acc + c.unreadCount, 0);
+        setUnreadCount(total);
+      })
+      .catch(() => {});
+  }, [location.pathname]); // Refrescar al cambiar de página
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('adminAccessLevel');
     navigate('/login');
   };
 
@@ -54,6 +71,17 @@ export function Navbar() {
               >
                 Perfil Emprendedor
               </Link>
+              <Link to="/chat" className={`${navLinkClass('/chat')} relative`}>
+                <span className="flex items-center gap-1.5">
+                  <MessageCircle size={15} strokeWidth={2.5} />
+                  Mensajes
+                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
             </>
           ) : (
             <>
@@ -68,6 +96,17 @@ export function Navbar() {
                 className={navLinkClass('/profile')}
               >
                 Configurar Perfil
+              </Link>
+              <Link to="/chat" className={`${navLinkClass('/chat')} relative`}>
+                <span className="flex items-center gap-1.5">
+                  <MessageCircle size={15} strokeWidth={2.5} />
+                  Mensajes
+                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
             </>
           )}

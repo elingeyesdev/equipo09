@@ -34,6 +34,7 @@ export function LoginPage() {
       // Guardar token y redirigir
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('userEmail', response.user?.email ?? email);
+      if (response.user?.id) localStorage.setItem('userId', response.user.id);
 
       // Funcionalidad Recordar Usuario
       if (rememberMe) {

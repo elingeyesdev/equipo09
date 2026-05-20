@@ -15,6 +15,7 @@ export interface PublicCampaign {
   coverImageUrl: string | null;
   endDate: string | null;
   createdAt: string;
+  entrepreneurUserId: string;
   entrepreneurName: string;
   entrepreneurDisplayName: string | null;
   entrepreneurAvatar: string | null;
