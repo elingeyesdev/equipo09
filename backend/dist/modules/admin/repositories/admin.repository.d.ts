@@ -27,4 +27,6 @@ export declare class AdminRepository extends BaseRepository {
         };
     }>;
     getCampaignDetailAdmin(id: string): Promise<any>;
+    getCampaignDocuments(campaignId: string): Promise<any[]>;
+    reviewCampaignDocument(campaignId: string, docId: string, status: string, reviewerNotes: string, reviewerId: string): Promise<any>;
 }

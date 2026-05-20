@@ -250,6 +250,45 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return updated;
     }
+    async uploadCampaignDocument(userId, campaignId, file, documentUrl, justification) {
+        await this.ensureEntrepreneurProfile(userId);
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign) {
+            throw new exceptions_1.NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+        }
+        return this.campaignRepo.insertCampaignDocument(campaignId, documentUrl, file.originalname, file.mimetype, file.size, justification);
+    }
+    async getCampaignDocuments(userId, campaignId) {
+        await this.ensureEntrepreneurProfile(userId);
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign) {
+            throw new exceptions_1.NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+        }
+        return this.campaignRepo.findCampaignDocuments(campaignId);
+    }
+    async deleteCampaignDocument(userId, campaignId, docId) {
+        await this.ensureEntrepreneurProfile(userId);
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign) {
+            throw new exceptions_1.NotFoundException('Campaña no encontrada o no pertenece a este usuario');
+        }
+        const doc = await this.campaignRepo.findCampaignDocumentById(campaignId, docId);
+        if (!doc) {
+            throw new exceptions_1.NotFoundException('Documento no encontrado en esta campaña');
+        }
+        if (doc.file_url) {
+            const fs = await Promise.resolve().then(() => require('fs/promises'));
+            const path = await Promise.resolve().then(() => require('path'));
+            const filePath = path.join(process.cwd(), doc.file_url);
+            try {
+                await fs.unlink(filePath);
+            }
+            catch (e) {
+                console.warn(`No se pudo eliminar el archivo físico: ${filePath}`, e);
+            }
+        }
+        await this.campaignRepo.deleteCampaignDocument(docId);
+    }
 };
 exports.EntrepreneurService = EntrepreneurService;
 exports.EntrepreneurService = EntrepreneurService = EntrepreneurService_1 = __decorate([

@@ -112,6 +112,16 @@ let AdminService = class AdminService {
             throw err;
         }
     }
+    async getCampaignDocuments(campaignId) {
+        return this.adminRepo.getCampaignDocuments(campaignId);
+    }
+    async reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId) {
+        const updated = await this.adminRepo.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
+        if (!updated) {
+            throw new common_1.NotFoundException('Documento no encontrado o no pertenece a la campaña');
+        }
+        return updated;
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([

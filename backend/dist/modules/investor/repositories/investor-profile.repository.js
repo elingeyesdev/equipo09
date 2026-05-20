@@ -143,8 +143,6 @@ let InvestorProfileRepository = class InvestorProfileRepository extends database
             await client.query(`UPDATE investor_profiles
          SET max_investment = $2
          WHERE user_id = $1`, [userId, newMax]);
-            await client.query(`INSERT INTO capital_transactions (user_id, amount, type, previous_max, new_max, notes)
-         VALUES ($1, $2, 'deposit', $3, $4, $5)`, [userId, amount, previousMax, newMax, notes ?? null]);
             return {
                 newMax,
                 availableCapital: newMax - totalInvestedNum,

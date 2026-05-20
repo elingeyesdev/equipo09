@@ -15,6 +15,9 @@ export declare class EntrepreneurController {
     uploadAvatar(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     uploadCover(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     createCampaign(req: Request, dto: CreateCampaignDto): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
+    uploadCampaignDocument(req: Request, campaignId: string, file: Express.Multer.File, justification: string): Promise<ApiSuccessResponse<any>>;
+    getCampaignDocuments(req: Request, campaignId: string): Promise<ApiSuccessResponse<any[]>>;
+    deleteCampaignDocument(req: Request, campaignId: string, docId: string): Promise<ApiSuccessResponse<null>>;
     updateCampaign(req: Request, campaignId: string, dto: Partial<CreateCampaignDto>): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     getMyCampaigns(req: Request, query: QueryCampaignsDto): Promise<ApiSuccessResponse<PaginatedResponse<EntrepreneurCampaign>>>;
     submitCampaignForReview(req: Request, campaignId: string): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;

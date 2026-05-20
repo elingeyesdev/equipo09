@@ -27,4 +27,8 @@ export declare class EntrepreneurCampaignRepository extends BaseRepository {
     }>;
     delete(campaignId: string, creatorId: string): Promise<boolean>;
     finalize(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null>;
+    insertCampaignDocument(campaignId: string, documentUrl: string, originalName: string, mimeType: string, fileSizeBytes: number, justification: string): Promise<any>;
+    findCampaignDocuments(campaignId: string): Promise<any[]>;
+    findCampaignDocumentById(campaignId: string, docId: string): Promise<any>;
+    deleteCampaignDocument(docId: string): Promise<void>;
 }

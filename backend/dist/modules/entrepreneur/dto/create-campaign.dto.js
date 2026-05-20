@@ -9,21 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateCampaignDto = exports.CampaignType = void 0;
+exports.CreateCampaignDto = void 0;
 const class_validator_1 = require("class-validator");
-const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 function emptyToUndefined({ value }) {
     if (value === '' || value === null)
         return undefined;
     return value;
 }
-var CampaignType;
-(function (CampaignType) {
-    CampaignType["DONATION"] = "donation";
-    CampaignType["REWARD"] = "reward";
-    CampaignType["EQUITY"] = "equity";
-})(CampaignType || (exports.CampaignType = CampaignType = {}));
 class CreateCampaignDto {
 }
 exports.CreateCampaignDto = CreateCampaignDto;
@@ -54,23 +47,18 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCampaignDto.prototype, "goalAmount", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: CampaignType, example: CampaignType.REWARD }),
-    (0, class_validator_1.IsEnum)(CampaignType),
-    __metadata("design:type", String)
-], CreateCampaignDto.prototype, "campaignType", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '2026-12-31T23:59:59Z' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "endDate", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'uuid-string' }),
+    (0, swagger_1.ApiPropertyOptional)({ type: 'array', items: { type: 'string' }, example: ['uuid1', 'uuid2'] }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(emptyToUndefined),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], CreateCampaignDto.prototype, "categoryId", void 0);
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCampaignDto.prototype, "categoryIds", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: 'array', items: { type: 'object' } }),
     (0, class_validator_1.IsOptional)(),

@@ -76,6 +76,26 @@ let EntrepreneurController = class EntrepreneurController {
         const campaign = await this.entrepreneurService.createCampaign(userId, dto);
         return new dto_2.ApiSuccessResponse(campaign, 'Campaña creada exitosamente');
     }
+    async uploadCampaignDocument(req, campaignId, file, justification) {
+        const userId = req.user.id;
+        if (!file)
+            throw new Error('El archivo es obligatorio');
+        if (!justification)
+            throw new Error('La justificación es obligatoria');
+        const documentUrl = `/uploads/campaign-documents/${file.filename}`;
+        const result = await this.entrepreneurService.uploadCampaignDocument(userId, campaignId, file, documentUrl, justification);
+        return new dto_2.ApiSuccessResponse(result, 'Documento subido correctamente');
+    }
+    async getCampaignDocuments(req, campaignId) {
+        const userId = req.user.id;
+        const documents = await this.entrepreneurService.getCampaignDocuments(userId, campaignId);
+        return new dto_2.ApiSuccessResponse(documents);
+    }
+    async deleteCampaignDocument(req, campaignId, docId) {
+        const userId = req.user.id;
+        await this.entrepreneurService.deleteCampaignDocument(userId, campaignId, docId);
+        return new dto_2.ApiSuccessResponse(null, 'Documento eliminado');
+    }
     async updateCampaign(req, campaignId, dto) {
         const userId = req.user.id;
         const campaign = await this.entrepreneurService.updateCampaign(userId, campaignId, dto);
@@ -264,6 +284,51 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.CreateCampaignDto]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "createCampaign", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Post)('me/campaigns/:campaignId/documents'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/campaign-documents',
+            filename: (req, file, cb) => {
+                const randomName = Array(32)
+                    .fill(null)
+                    .map(() => Math.round(Math.random() * 16).toString(16))
+                    .join('');
+                return cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
+    (0, swagger_1.ApiOperation)({ summary: 'Subir documento de respaldo para una campaña' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __param(2, (0, common_1.UploadedFile)()),
+    __param(3, (0, common_1.Body)('justification')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "uploadCampaignDocument", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Get)('me/campaigns/:campaignId/documents'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener los documentos de respaldo de la campaña' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "getCampaignDocuments", null);
+__decorate([
+    (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
+    (0, common_1.Delete)('me/campaigns/:campaignId/documents/:docId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Eliminar un documento de respaldo' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('campaignId')),
+    __param(2, (0, common_1.Param)('docId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "deleteCampaignDocument", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Patch)('me/campaigns/:campaignId'),

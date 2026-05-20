@@ -532,13 +532,14 @@ export class EntrepreneurService {
       throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
     }
 
-    const row = await this.campaignRepo.queryOne(
-      `INSERT INTO campaign_documents (campaign_id, file_url, original_name, mime_type, file_size_bytes, justification)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [campaignId, documentUrl, file.originalname, file.mimetype, file.size, justification]
+    return this.campaignRepo.insertCampaignDocument(
+      campaignId,
+      documentUrl,
+      file.originalname,
+      file.mimetype,
+      file.size,
+      justification,
     );
-
-    return row;
   }
 
   async getCampaignDocuments(userId: string, campaignId: string) {
@@ -548,10 +549,7 @@ export class EntrepreneurService {
       throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
     }
 
-    return this.campaignRepo.queryMany(
-      `SELECT * FROM campaign_documents WHERE campaign_id = $1 ORDER BY created_at DESC`,
-      [campaignId]
-    );
+    return this.campaignRepo.findCampaignDocuments(campaignId);
   }
 
   async deleteCampaignDocument(userId: string, campaignId: string, docId: string) {
@@ -561,7 +559,7 @@ export class EntrepreneurService {
       throw new NotFoundException('Campaña no encontrada o no pertenece a este usuario');
     }
 
-    const doc = await this.campaignRepo.queryOne(`SELECT id, file_url FROM campaign_documents WHERE id = $1 AND campaign_id = $2`, [docId, campaignId]);
+    const doc = await this.campaignRepo.findCampaignDocumentById(campaignId, docId);
     if (!doc) {
       throw new NotFoundException('Documento no encontrado en esta campaña');
     }
@@ -579,6 +577,6 @@ export class EntrepreneurService {
       }
     }
 
-    await this.campaignRepo.queryOne(`DELETE FROM campaign_documents WHERE id = $1`, [docId]);
+    await this.campaignRepo.deleteCampaignDocument(docId);
   }
 }

@@ -696,4 +696,37 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     if (!res) return null;
     return this.findOneByCreatorId(campaignId, creatorId);
   }
+
+  async insertCampaignDocument(
+    campaignId: string,
+    documentUrl: string,
+    originalName: string,
+    mimeType: string,
+    fileSizeBytes: number,
+    justification: string,
+  ) {
+    return this.queryOne(
+      `INSERT INTO campaign_documents (campaign_id, file_url, original_name, mime_type, file_size_bytes, justification)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [campaignId, documentUrl, originalName, mimeType, fileSizeBytes, justification],
+    );
+  }
+
+  async findCampaignDocuments(campaignId: string) {
+    return this.queryMany(
+      `SELECT * FROM campaign_documents WHERE campaign_id = $1 ORDER BY created_at DESC`,
+      [campaignId],
+    );
+  }
+
+  async findCampaignDocumentById(campaignId: string, docId: string) {
+    return this.queryOne(
+      `SELECT id, file_url FROM campaign_documents WHERE id = $1 AND campaign_id = $2`,
+      [docId, campaignId],
+    );
+  }
+
+  async deleteCampaignDocument(docId: string): Promise<void> {
+    await this.queryOne(`DELETE FROM campaign_documents WHERE id = $1`, [docId]);
+  }
 }

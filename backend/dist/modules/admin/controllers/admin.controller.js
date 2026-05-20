@@ -78,6 +78,15 @@ let AdminController = class AdminController {
         const deleted = await this.adminService.hardDeleteCampaign(id, reviewerId);
         return new dto_1.ApiSuccessResponse(deleted, 'Campaña eliminada o cancelada con éxito');
     }
+    async getCampaignDocuments(id) {
+        const documents = await this.adminService.getCampaignDocuments(id);
+        return new dto_1.ApiSuccessResponse(documents, 'Documentos obtenidos');
+    }
+    async reviewCampaignDocument(campaignId, docId, status, reviewerNotes, req) {
+        const reviewerId = req.user.id;
+        const updated = await this.adminService.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
+        return new dto_1.ApiSuccessResponse(updated, 'Documento revisado con éxito');
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -191,6 +200,28 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "deleteCampaign", null);
+__decorate([
+    (0, common_1.Get)('campaigns/:id/documents'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener documentos de respaldo de una campaña' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getCampaignDocuments", null);
+__decorate([
+    (0, common_1.Patch)('campaigns/:id/documents/:docId/review'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Revisar (aprobar/rechazar) un documento de respaldo' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('docId')),
+    __param(2, (0, common_1.Body)('status')),
+    __param(3, (0, common_1.Body)('reviewerNotes')),
+    __param(4, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "reviewCampaignDocument", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('admin'),
     (0, swagger_1.ApiBearerAuth)(),

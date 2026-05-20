@@ -34,4 +34,7 @@ export declare class EntrepreneurService {
     private ensureProfileCompleteForNewCampaign;
     deleteCampaign(userId: string, campaignId: string): Promise<boolean>;
     finalizeCampaign(userId: string, campaignId: string): Promise<EntrepreneurCampaign>;
+    uploadCampaignDocument(userId: string, campaignId: string, file: Express.Multer.File, documentUrl: string, justification: string): Promise<any>;
+    getCampaignDocuments(userId: string, campaignId: string): Promise<any[]>;
+    deleteCampaignDocument(userId: string, campaignId: string, docId: string): Promise<void>;
 }

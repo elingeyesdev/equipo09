@@ -29,4 +29,6 @@ export declare class AdminController {
     getCampaignInvestors(id: string, page?: number, limit?: number): Promise<ApiSuccessResponse<import("../../../common/dto").PaginatedResponse<import("../../entrepreneur/models").CampaignInvestor>>>;
     getRewardClaims(id: string): Promise<ApiSuccessResponse<any[]>>;
     deleteCampaign(id: string, req: any): Promise<ApiSuccessResponse<any>>;
+    getCampaignDocuments(id: string): Promise<ApiSuccessResponse<any[]>>;
+    reviewCampaignDocument(campaignId: string, docId: string, status: string, reviewerNotes: string, req: any): Promise<ApiSuccessResponse<any>>;
 }

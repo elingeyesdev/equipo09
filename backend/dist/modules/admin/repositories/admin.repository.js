@@ -239,9 +239,20 @@ let AdminRepository = class AdminRepository extends database_1.BaseRepository {
             media: [],
             reward_tiers: rewardTiers.map(t => ({
                 ...t,
-                amount: parseFloat(t.amount || 0),
+                min_percentage: parseFloat(t.min_percentage || 0),
+                max_percentage: parseFloat(t.max_percentage || 100),
             })),
         };
+    }
+    async getCampaignDocuments(campaignId) {
+        return this.queryMany(`SELECT * FROM campaign_documents WHERE campaign_id = $1 ORDER BY created_at DESC`, [campaignId]);
+    }
+    async reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId) {
+        const res = await this.queryOne(`UPDATE campaign_documents 
+       SET status = $1, reviewer_notes = $2, reviewed_by = $3, reviewed_at = NOW() 
+       WHERE id = $4 AND campaign_id = $5 
+       RETURNING *`, [status, reviewerNotes || null, reviewerId, docId, campaignId]);
+        return res;
     }
 };
 exports.AdminRepository = AdminRepository;
