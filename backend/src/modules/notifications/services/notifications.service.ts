@@ -125,4 +125,76 @@ export class NotificationsService {
       });
     }
   }
+
+  /**
+   * Notifica al emprendedor que su campaña fue aprobada
+   */
+  async notifyCampaignApproved(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_approved',
+      title: '🎉 ¡Campaña aprobada!',
+      body: `Tu campaña "${params.campaignTitle}" fue aprobada. ¡Ya puedes publicarla!`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: `/my-campaigns`,
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
+    });
+  }
+
+  /**
+   * Notifica al emprendedor que su campaña fue rechazada
+   */
+  async notifyCampaignRejected(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+    feedback?: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_rejected',
+      title: '❌ Campaña requiere cambios',
+      body: params.feedback
+        ? `Tu campaña "${params.campaignTitle}" fue rechazada. Motivo: ${params.feedback}`
+        : `Tu campaña "${params.campaignTitle}" necesita cambios. Revisa el feedback del equipo.`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: `/my-campaigns`,
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId, feedback: params.feedback },
+    });
+  }
+
+  /**
+   * Notifica al receptor de un nuevo mensaje de chat
+   */
+  async notifyNewMessage(params: {
+    recipientUserId: string;
+    senderName: string;
+    senderId: string;
+    conversationId: string;
+    messagePreview: string;
+  }): Promise<void> {
+    const preview = params.messagePreview.length > 80
+      ? params.messagePreview.substring(0, 80) + '…'
+      : params.messagePreview;
+    await this.notificationsRepository.createNotification({
+      userId: params.recipientUserId,
+      typeCode: 'new_message',
+      title: `💬 Mensaje de ${params.senderName}`,
+      body: preview,
+      referenceType: 'conversation',
+      referenceId: params.conversationId,
+      actionUrl: `/chat/${params.conversationId}`,
+      data: {
+        sender_name: params.senderName,
+        sender_id: params.senderId,
+        conversation_id: params.conversationId,
+      },
+    });
+  }
 }

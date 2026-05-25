@@ -1,24 +1,44 @@
-// v2026-04-27-02: Fix for deleteCampaign ReferenceError and cache invalidation
-import { useState, useCallback, useEffect } from 'react';
+// v2026-05-24: Full social-feed redesign for MyCampaignsPage
+import { useState, useCallback } from 'react';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { Navbar } from '../components/Navbar';
 import { CampaignCard } from '../components/CampaignCard';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
-import type { EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
+import type { EntrepreneurCampaign } from '../types/campaign.types';
 import {
-  Rocket,
-  Plus,
-  Search,
-  Filter,
-  AlertCircle,
-  Loader2,
-  LayoutGrid,
-  List,
-  ChevronRight,
-  ArrowRight
+  Rocket, Plus, Search, AlertCircle, Loader2,
+  LayoutGrid, List, TrendingUp, Users, Star,
+  Zap
 } from 'lucide-react';
+
+/* ─── Small Summary Card ─── */
+function SummaryStat({
+  icon, label, value, accent,
+}: { icon: React.ReactNode; label: string; value: string | number; accent: string }) {
+  return (
+    <div className="flex-1 min-w-[130px] bg-white rounded-2xl px-5 py-4 flex items-center gap-3"
+      style={{ boxShadow: '0 1px 8px rgba(28,43,30,0.06)' }}>
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: accent + '20' }}>
+        <span style={{ color: accent }}>{icon}</span>
+      </div>
+      <div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
+        <p className="text-[18px] font-black text-[#1c2b1e] leading-none">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+const STATUS_TABS = [
+  { value: 'all',            label: 'Todas' },
+  { value: 'published',      label: 'Publicadas' },
+  { value: 'draft',          label: 'Borrador' },
+  { value: 'pending_review', label: 'En Revisión' },
+  { value: 'rejected',       label: 'Rechazadas' },
+];
 
 export function MyCampaignsPage() {
   const {
@@ -42,20 +62,15 @@ export function MyCampaignsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const handleModalPreview = useCallback((c: EntrepreneurCampaign) => {
-    setPreviewCampaign(c);
-  }, []);
+  const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
 
   const handleModalEdit = useCallback(async (c: EntrepreneurCampaign) => {
     setPreviewCampaign(null);
     try {
-      // Importante: Al editar, necesitamos el detalle completo (incluyendo recompensas)
       const { getMyCampaignById } = await import('../api/campaign.api');
       const fullCampaign = await getMyCampaignById(c.id);
       setEditingCampaign(fullCampaign);
-    } catch (err) {
-      console.error('Error fetching campaign detail for edit:', err);
-      // Fallback a los datos básicos si falla el detalle
+    } catch {
       setEditingCampaign(c);
     }
   }, []);
@@ -66,118 +81,188 @@ export function MyCampaignsPage() {
     return matchesSearch && matchesStatus;
   });
 
+  /* Calculated summary stats */
+  const totalRaised  = campaigns.reduce((s, c) => s + (c.currentAmount ?? 0), 0);
+  const totalInvestors = campaigns.reduce((s, c) => s + (c.investorCount ?? 0), 0);
+  const publishedCount = campaigns.filter(c => c.status === 'published').length;
+
+  const formatMoney = (n: number) =>
+    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000   ? `$${(n / 1_000).toFixed(1)}K`
+    : `$${n}`;
+
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="min-h-screen font-['Sora',sans-serif]" style={{ background: '#f0f2f5' }}>
       <Navbar />
 
-      <main className="max-w-[1200px] mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-4">
-          <div>
-            <div className="flex items-center gap-3 text-[#2e7d32] mb-3">
-              <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center">
-                <Rocket size={20} strokeWidth={2.5} />
+      {/* ── Hero / Cover Section (estilo portada de perfil FB) ── */}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #1c2b1e 0%, #2e7d32 55%, #00897b 100%)',
+          minHeight: '200px',
+        }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #aed581, transparent 70%)' }} />
+        <div className="absolute -bottom-10 -left-10 w-56 h-56 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #00897b, transparent 70%)' }} />
+
+        <div className="max-w-[1200px] mx-auto px-6 pt-10 pb-16 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              {/* Eyebrow */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-white/80 text-[11px] font-black uppercase tracking-widest">
+                  <Zap size={11} className="text-[#aed581]" />
+                  Centro de Operaciones
+                </span>
               </div>
-              <h2 className="text-[12px] font-black uppercase tracking-[0.2em]">Centro de Operaciones</h2>
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-3">
+                Mis Campañas
+              </h1>
+              <p className="text-white/60 font-medium text-[15px] max-w-lg">
+                Gestiona tus proyectos, monitorea el crecimiento y lanza nuevas iniciativas.
+              </p>
             </div>
-            <h1 className="text-4xl font-black text-[#1c2b1e] tracking-tighter leading-none mb-4">
-              Mis Campañas
-            </h1>
-            <p className="text-slate-500 font-medium text-[15px] max-w-xl">
-              Gestiona tus proyectos activos, revisa el estatus de tus borradores y monitorea el crecimiento de tu comunidad.
-            </p>
-          </div>
 
-          <button
-            onClick={() => setEditingCampaign({} as any)}
-            className="bg-[#1c2b1e] hover:bg-[#2e7d32] text-white px-8 py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-emerald-900/10"
-          >
-            <Plus size={20} strokeWidth={3} />
-            Lanzar Campaña
-          </button>
-        </div>
-
-        {/* Filters & View Toggle */}
-        <div className="bg-white rounded-3xl p-4 mb-5 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-4">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por título..."
-              className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 text-[14px] font-medium outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <Filter className="text-slate-400 mr-1" size={18} />
-            <select
-              className="bg-slate-50 border-none rounded-2xl py-3 px-4 text-[13px] font-black uppercase tracking-wider outline-none cursor-pointer focus:ring-2 focus:ring-emerald-500/20"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">Todos los Estados</option>
-              <option value="draft">Borrador</option>
-              <option value="pending_review">En Revisión</option>
-              <option value="published">Publicadas</option>
-              <option value="rejected">Rechazadas</option>
-            </select>
-          </div>
-
-          <div className="h-10 w-[1px] bg-slate-100 hidden md:block"></div>
-
-          <div className="flex bg-slate-50 p-1 rounded-xl">
+            {/* CTA principal */}
             <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              id="btn-launch-campaign"
+              onClick={() => setEditingCampaign({} as any)}
+              className="flex items-center gap-2.5 px-7 py-4 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all active:scale-95 hover:scale-105 shadow-xl bg-white text-[#1c2b1e] hover:bg-emerald-50 cursor-pointer"
+              style={{
+                boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+              }}
             >
-              <LayoutGrid size={18} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              <List size={18} />
+              <Plus size={18} strokeWidth={3} className="text-[#2e7d32]" />
+              Lanzar Campaña
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Main Content Area */}
+      {/* ── Stats strip (sale de la portada) ── */}
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="flex flex-wrap gap-3 -mt-6 relative z-20 mb-6">
+          <SummaryStat icon={<Rocket size={18} />}    label="Campañas" value={campaigns.length}   accent="#2e7d32" />
+          <SummaryStat icon={<TrendingUp size={18} />} label="Recaudado" value={formatMoney(totalRaised)} accent="#00897b" />
+          <SummaryStat icon={<Users size={18} />}     label="Inversores" value={totalInvestors}    accent="#f59e0b" />
+          <SummaryStat icon={<Star size={18} />}      label="Publicadas" value={publishedCount}    accent="#aed581" />
+        </div>
+
+        {/* ── Toolbar: tabs de estado + buscador + view toggle ── */}
+        <div className="bg-white rounded-2xl mb-6 overflow-hidden"
+          style={{ boxShadow: '0 1px 8px rgba(28,43,30,0.06)' }}>
+
+          {/* Status tabs */}
+          <div className="flex overflow-x-auto border-b border-slate-100 px-4 gap-0 scrollbar-hide">
+            {STATUS_TABS.map(tab => (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value)}
+                className="relative px-5 py-3.5 text-[13px] font-black transition-colors whitespace-nowrap flex-shrink-0"
+                style={{
+                  color: statusFilter === tab.value ? '#2e7d32' : '#94a3b8',
+                  borderBottom: statusFilter === tab.value ? '2.5px solid #2e7d32' : '2.5px solid transparent',
+                }}
+              >
+                {tab.label}
+                {tab.value !== 'all' && (
+                  <span className="ml-1.5 text-[10px] font-black opacity-60">
+                    ({campaigns.filter(c => c.status === tab.value || (tab.value === 'pending_review' && c.status === 'in_review')).length})
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Search row */}
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                id="input-search-campaigns"
+                type="text"
+                placeholder="Buscar campaña por título..."
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-200 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* View toggle */}
+            <div className="flex bg-slate-100 p-1 rounded-xl flex-shrink-0">
+              <button
+                id="btn-view-grid"
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <LayoutGrid size={16} />
+              </button>
+              <button
+                id="btn-view-list"
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <List size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main content ── */}
         {loading ? (
-          <div className="py-32 flex flex-col items-center justify-center gap-6">
-            <Loader2 className="w-12 h-12 text-[#2e7d32] animate-spin" strokeWidth={2.5} />
-            <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando con la red...</p>
+          <div className="py-28 flex flex-col items-center justify-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg">
+              <Loader2 className="text-[#2e7d32] animate-spin" size={28} strokeWidth={2.5} />
+            </div>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Cargando campañas…</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-100 rounded-3xl p-10 text-center">
-            <AlertCircle className="text-red-400 mx-auto mb-4" size={40} />
-            <p className="text-red-700 font-bold mb-4">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-3xl p-10 text-center mb-8">
+            <AlertCircle className="text-red-400 mx-auto mb-4" size={36} />
+            <p className="text-red-700 font-bold mb-4 text-[15px]">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="text-[#c62828] font-black uppercase text-[12px] tracking-widest hover:underline"
             >
-              Reintentar Conexión
+              Reintentar conexión
             </button>
           </div>
         ) : filteredCampaigns.length === 0 ? (
-          <div className="bg-white rounded-[40px] border-2 border-dashed border-slate-200 p-20 text-center">
-            <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-6">
-              <Rocket size={40} />
+          /* Empty state */
+          <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-slate-200 mb-8">
+            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <Rocket size={32} className="text-[#2e7d32]" strokeWidth={2} />
             </div>
-            <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3">No se encontraron campañas</h3>
-            <p className="text-slate-400 font-medium max-w-sm mx-auto mb-8">
-              Parece que no tienes campañas que coincidan con tu búsqueda actual. ¡Anímate a crear una nueva!
+            <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2">
+              {searchTerm || statusFilter !== 'all' ? 'Sin resultados' : 'Empieza tu primera campaña'}
+            </h3>
+            <p className="text-slate-400 font-medium max-w-sm mx-auto mb-6 text-[14px]">
+              {searchTerm || statusFilter !== 'all'
+                ? 'No encontramos campañas con ese filtro. Prueba con otros criterios.'
+                : 'Todavía no tienes campañas. ¡Lanza tu primer proyecto y comienza a recaudar!'}
             </p>
-            <button
-              onClick={() => setEditingCampaign({} as any)}
-              className="text-[#2e7d32] font-black uppercase text-[13px] tracking-[0.2em] flex items-center gap-2 mx-auto hover:gap-4 transition-all"
-            >
-              Crear mi primer proyecto <ArrowRight size={18} />
-            </button>
+            {!searchTerm && statusFilter === 'all' && (
+              <button
+                onClick={() => setEditingCampaign({} as any)}
+                className="flex items-center gap-2 mx-auto px-6 py-3 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-100"
+                style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)', color: '#fff' }}
+              >
+                <Plus size={16} strokeWidth={3} /> Crear campaña
+              </button>
+            )}
           </div>
         ) : (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "flex flex-col gap-4"}>
+          <div
+            className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10'
+                : 'flex flex-col gap-4 mb-10'
+            }
+          >
             {filteredCampaigns.map((c) => (
               <CampaignCard
                 key={c.id}
@@ -192,58 +277,66 @@ export function MyCampaignsPage() {
             ))}
           </div>
         )}
+      </div>
 
-        {/* Modals */}
-        {editingCampaign && (
-          <div className="fixed inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-              <CampaignForm
-                initialData={editingCampaign.id ? editingCampaign : null}
-                onSuccess={async (dto, file, documents) => {
-                  const success = editingCampaign.id
-                    ? await updateCampaign(editingCampaign.id, dto, file, documents)
-                    : await addCampaign(dto, file, documents);
-                  if (success) setEditingCampaign(null);
-                  return success;
-                }}
-                onCancel={() => setEditingCampaign(null)}
-                saving={loading}
-                saveError={null}
-              />
-            </div>
+      {/* ── Modals ── */}
+      {editingCampaign && (
+        <div className="fixed inset-0 bg-[#1c2b1e]/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <CampaignForm
+              initialData={editingCampaign.id ? editingCampaign : null}
+              onSuccess={async (dto, file, documents) => {
+                const success = editingCampaign.id
+                  ? await updateCampaign(editingCampaign.id, dto, file, documents)
+                  : await addCampaign(dto, file, documents);
+                if (success) setEditingCampaign(null);
+                return success;
+              }}
+              onCancel={() => setEditingCampaign(null)}
+              saving={loading}
+              saveError={null}
+            />
           </div>
-        )}
+        </div>
+      )}
 
-        {previewCampaign && (
-          <CampaignPreviewModal
-            open={!!previewCampaign}
-            campaign={previewCampaign}
-            onClose={() => setPreviewCampaign(null)}
-            onSubmitForReview={async () => {
-              if (previewCampaign) {
-                const ok = await submitForReview(previewCampaign.id);
-                if (ok) setPreviewCampaign(null);
-              }
-            }}
-            onPublish={async () => {
-              if (previewCampaign) {
-                const ok = await publishCampaign(previewCampaign.id);
-                if (ok) setPreviewCampaign(null);
-              }
-            }}
-            onEdit={handleModalEdit}
-            entrepreneur={profile ? {
-              firstName: profile.firstName,
-              lastName: profile.lastName,
-              email: profile.email || '',
-              avatar: profile.avatarUrl,
-              bio: profile.bio,
-              website: profile.website,
-              linkedin: profile.linkedinUrl
-            } : undefined}
-          />
-        )}
-      </main>
+      {previewCampaign && (
+        <CampaignPreviewModal
+          open={!!previewCampaign}
+          campaign={previewCampaign}
+          onClose={() => setPreviewCampaign(null)}
+          onSubmitForReview={async () => {
+            if (previewCampaign) {
+              const ok = await submitForReview(previewCampaign.id);
+              if (ok) setPreviewCampaign(null);
+            }
+          }}
+          onPublish={async () => {
+            if (previewCampaign) {
+              const ok = await publishCampaign(previewCampaign.id);
+              if (ok) setPreviewCampaign(null);
+            }
+          }}
+          onEdit={handleModalEdit}
+          entrepreneur={profile ? {
+            firstName: profile.firstName,
+            lastName:  profile.lastName,
+            email:     profile.displayName || '',
+            avatar:    profile.avatarUrl ?? undefined,
+            bio:       profile.bio ?? undefined,
+            website:   profile.website ?? undefined,
+            linkedin:  profile.linkedinUrl ?? undefined,
+          } : undefined}
+        />
+      )}
+
+      {/* Keyframe inline para animación del confirm */}
+      <style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

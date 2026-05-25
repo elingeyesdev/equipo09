@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, BellRing, Check, CheckCheck, ExternalLink, Loader2 } from 'lucide-react';
+import {
+  Bell, BellRing, Check, CheckCheck, ExternalLink, Loader2,
+  TrendingUp, MessageCircle, CheckCircle2, XCircle, Rocket, Star, Info
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   getMyNotifications,
@@ -8,7 +11,7 @@ import {
   type AppNotification,
 } from '../api/notifications.api';
 
-const POLL_INTERVAL_MS = 30_000; // 30 segundos
+const POLL_INTERVAL_MS = 15_000; // 15 segundos
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -21,6 +24,37 @@ function timeAgo(dateStr: string): string {
   return `Hace ${days}d`;
 }
 
+/* ── Ícono + color según tipo de notificación ── */
+function NotifIcon({ typeCode }: { typeCode?: string }) {
+  const base = 'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0';
+
+  if (!typeCode) return (
+    <div className={`${base} bg-slate-100`}><Info size={16} className="text-slate-500" /></div>
+  );
+
+  if (typeCode === 'investment_received' || typeCode === 'investment_confirmed') return (
+    <div className={`${base} bg-emerald-100`}><TrendingUp size={16} className="text-emerald-600" /></div>
+  );
+  if (typeCode === 'new_message') return (
+    <div className={`${base} bg-blue-100`}><MessageCircle size={16} className="text-blue-600" /></div>
+  );
+  if (typeCode === 'campaign_approved') return (
+    <div className={`${base} bg-green-100`}><CheckCircle2 size={16} className="text-green-600" /></div>
+  );
+  if (typeCode === 'campaign_rejected') return (
+    <div className={`${base} bg-red-100`}><XCircle size={16} className="text-red-500" /></div>
+  );
+  if (typeCode === 'campaign_funded') return (
+    <div className={`${base} bg-amber-100`}><Star size={16} className="text-amber-500" /></div>
+  );
+  if (typeCode?.startsWith('campaign_')) return (
+    <div className={`${base} bg-indigo-100`}><Rocket size={16} className="text-indigo-500" /></div>
+  );
+  return (
+    <div className={`${base} bg-slate-100`}><Info size={16} className="text-slate-500" /></div>
+  );
+}
+
 export function NotificationBell() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -28,11 +62,19 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const prevUnreadRef = useRef(0);
+  const [shake, setShake] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await getMyNotifications();
       setNotifications(res.notifications);
+      // Animar la campana si llegaron notificaciones nuevas
+      if (res.unreadCount > prevUnreadRef.current) {
+        setShake(true);
+        setTimeout(() => setShake(false), 800);
+      }
+      prevUnreadRef.current = res.unreadCount;
       setUnreadCount(res.unreadCount);
     } catch {
       // silently fail — user may not be logged in yet
@@ -92,9 +134,10 @@ export function NotificationBell() {
         onClick={() => setOpen((v) => !v)}
         className="relative flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-200 active:scale-95 cursor-pointer"
         aria-label="Notificaciones"
+        style={{ animation: shake ? 'bellShake 0.6s ease' : undefined }}
       >
         {hasUnread
-          ? <BellRing size={18} className="text-emerald-600 animate-bounce" strokeWidth={2.5} />
+          ? <BellRing size={18} className="text-emerald-600" strokeWidth={2.5} />
           : <Bell size={18} className="text-slate-500" strokeWidth={2.5} />
         }
         {hasUnread && (
@@ -107,16 +150,16 @@ export function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-[calc(100%+8px)] w-[360px] max-h-[480px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-emerald-900/10 z-50 overflow-hidden"
+          className="absolute right-0 top-[calc(100%+8px)] w-[380px] max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-emerald-900/10 z-50 overflow-hidden"
           style={{ animation: 'slideDownFade 0.18s ease-out' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
             <div className="flex items-center gap-2">
               <Bell size={15} className="text-emerald-600" strokeWidth={2.5} />
               <span className="text-[14px] font-black text-slate-800">Notificaciones</span>
               {hasUnread && (
-                <span className="bg-emerald-100 text-emerald-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
                   {unreadCount} nuevas
                 </span>
               )}
@@ -139,9 +182,12 @@ export function NotificationBell() {
           {/* List */}
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
-                <Bell size={32} strokeWidth={1.5} />
+              <div className="flex flex-col items-center justify-center py-14 gap-3 text-slate-400">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
+                  <Bell size={22} strokeWidth={1.5} />
+                </div>
                 <span className="text-[13px] font-semibold">Sin notificaciones</span>
+                <span className="text-[11px] text-slate-300">Cuando recibas actividad aparecerá aquí</span>
               </div>
             ) : (
               notifications.map((notif) => (
@@ -151,23 +197,24 @@ export function NotificationBell() {
                   className={`w-full text-left px-4 py-3 flex items-start gap-3 border-b border-slate-50 last:border-0 transition-colors cursor-pointer group ${
                     notif.isRead
                       ? 'bg-white hover:bg-slate-50'
-                      : 'bg-emerald-50/60 hover:bg-emerald-50'
+                      : 'bg-emerald-50/50 hover:bg-emerald-50'
                   }`}
                 >
-                  {/* Indicator dot */}
-                  <div className="mt-1.5 flex-shrink-0">
-                    {notif.isRead
-                      ? <div className="w-2 h-2 rounded-full bg-slate-200" />
-                      : <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-300" />
-                    }
-                  </div>
+                  {/* Ícono por tipo */}
+                  <NotifIcon typeCode={notif.typeCode ?? undefined} />
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-[13px] leading-snug mb-0.5 ${notif.isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-800'}`}>
-                      {notif.title}
-                    </p>
-                    <p className="text-[12px] text-slate-500 leading-relaxed line-clamp-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-[13px] leading-snug ${notif.isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-800'}`}>
+                        {notif.title}
+                      </p>
+                      {/* Dot no leído */}
+                      {!notif.isRead && (
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-1" />
+                      )}
+                    </div>
+                    <p className="text-[12px] text-slate-500 leading-relaxed line-clamp-2 mt-0.5">
                       {notif.body}
                     </p>
                     <p className="text-[11px] text-slate-400 mt-1 font-medium">
@@ -193,6 +240,14 @@ export function NotificationBell() {
         @keyframes slideDownFade {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes bellShake {
+          0%, 100% { transform: rotate(0deg); }
+          15%  { transform: rotate(15deg); }
+          30%  { transform: rotate(-12deg); }
+          45%  { transform: rotate(10deg); }
+          60%  { transform: rotate(-8deg); }
+          75%  { transform: rotate(5deg); }
         }
       `}</style>
     </div>

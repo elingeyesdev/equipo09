@@ -5,6 +5,7 @@ import { UserRepository } from '../../users/repositories';
 import { EntrepreneurCampaignRepository } from '../../entrepreneur/repositories';
 import { RewardTierRepository } from '../../reward-tiers/repositories/reward-tier.repository';
 import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
+import { NotificationsService } from '../../notifications/services/notifications.service';
 
 @Injectable()
 export class AdminService {
@@ -13,6 +14,7 @@ export class AdminService {
     private readonly userRepo: UserRepository,
     private readonly campaignRepo: EntrepreneurCampaignRepository,
     private readonly rewardRepo: RewardTierRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getDashboardStats() {
@@ -47,6 +49,32 @@ export class AdminService {
     if (!updated) {
       throw new NotFoundException('Campaña no encontrada');
     }
+
+    // Disparar notificación al emprendedor si la campaña fue aprobada o rechazada
+    if (status === 'approved' || status === 'rejected') {
+      try {
+        const entrepreneurUserId: string = updated.creator_id;
+        const campaignTitle: string = updated.title;
+        if (status === 'approved') {
+          await this.notificationsService.notifyCampaignApproved({
+            entrepreneurUserId,
+            campaignTitle,
+            campaignId,
+          });
+        } else {
+          await this.notificationsService.notifyCampaignRejected({
+            entrepreneurUserId,
+            campaignTitle,
+            campaignId,
+            feedback,
+          });
+        }
+      } catch (notifErr) {
+        // No bloquear la respuesta si la notificación falla
+        console.error('Error sending campaign status notification:', notifErr);
+      }
+    }
+
     return updated;
   }
 

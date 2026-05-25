@@ -6,9 +6,10 @@ import { AdminRepository } from './repositories/admin.repository';
 import { UsersModule } from '../users/user.module';
 import { EntrepreneurModule } from '../entrepreneur/entrepreneur.module';
 import { RewardTiersModule } from '../reward-tiers/reward-tiers.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [UsersModule, EntrepreneurModule, RewardTiersModule],
+  imports: [UsersModule, EntrepreneurModule, RewardTiersModule, NotificationsModule],
   controllers: [AdminController, SuperAdminController],
   providers: [AdminService, AdminRepository],
 })

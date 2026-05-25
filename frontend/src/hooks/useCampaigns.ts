@@ -220,7 +220,6 @@ export function useCampaigns() {
   };
 
   const deleteCampaign = async (campaignId: string): Promise<boolean> => {
-    if (!confirm('¿Estás seguro de eliminar esta campaña permanentemente?')) return false;
     try {
       setError(null);
       setActionCampaignId(campaignId);
@@ -237,7 +236,6 @@ export function useCampaigns() {
   };
 
   const finalizeCampaign = async (campaignId: string): Promise<boolean> => {
-    if (!confirm('¿Deseas finalizar esta campaña? Ya no podrá recibir más inversiones.')) return false;
     try {
       setError(null);
       setActionCampaignId(campaignId);

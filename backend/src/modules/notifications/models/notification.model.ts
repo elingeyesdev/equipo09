@@ -4,6 +4,7 @@ export interface Notification {
   id: string;
   userId: string;
   typeId: string;
+  typeCode: string | null;
   title: string;
   body: string;
   channel: NotificationChannel;
@@ -23,6 +24,7 @@ export function mapRowToNotification(row: any): Notification {
     id: row.id,
     userId: row.user_id,
     typeId: row.type_id,
+    typeCode: row.type_code ?? null,
     title: row.title,
     body: row.body,
     channel: row.channel,

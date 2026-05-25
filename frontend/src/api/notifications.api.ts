@@ -4,6 +4,7 @@ export interface AppNotification {
   id: string;
   userId: string;
   typeId: string;
+  typeCode: string | null;
   title: string;
   body: string;
   channel: string;

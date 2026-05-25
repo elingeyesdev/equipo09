@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ChatService } from '../services/chat.service';
+import { NotificationsService } from '../../notifications/services/notifications.service';
 
 interface AuthenticatedSocket extends Socket {
   data: {
@@ -38,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly chatService: ChatService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ─────────────────────────────────────────────────────────
@@ -161,19 +163,40 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .to(`conv:${data.conversationId}`)
         .emit('new_message', message);
 
-      // Notificar también a los participantes que no están en la sala
-      // (para actualizar el badge de no leídos en el sidebar)
+      // Obtener el otro participante
       const otherParticipant = await this.chatService.getOtherParticipant(
         data.conversationId,
         userId,
       );
       if (otherParticipant) {
+        // Notificar via WebSocket para badge de no leídos
         this.server
           .to(`user:${otherParticipant.id}`)
           .emit('conversation_updated', {
             conversationId: data.conversationId,
             lastMessage: message,
           });
+
+        // Notificar en el sistema de notificaciones (campana) si el receptor
+        // no está actualmente dentro de la sala de la conversación
+        const recipientSockets = this.onlineUsers.get(otherParticipant.id);
+        const isInRoom = recipientSockets
+          ? [...recipientSockets].some((sid) => {
+              const s = this.server.sockets.sockets.get(sid) as any;
+              return s?.rooms?.has(`conv:${data.conversationId}`);
+            })
+          : false;
+
+        if (!isInRoom) {
+          const senderName = message.sender?.fullName || message.sender?.email || 'Alguien';
+          this.notificationsService.notifyNewMessage({
+            recipientUserId: otherParticipant.id,
+            senderName,
+            senderId: userId,
+            conversationId: data.conversationId,
+            messagePreview: data.content,
+          }).catch((err) => console.error('Error sending message notification:', err));
+        }
       }
     } catch (err: any) {
       socket.emit('error', { message: err.message || 'Error al enviar mensaje' });
