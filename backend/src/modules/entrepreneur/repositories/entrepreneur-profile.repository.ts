@@ -168,6 +168,20 @@ export class EntrepreneurProfileRepository extends BaseRepository {
     return result !== null;
   }
 
+  /**
+   * Actualiza el estado y los documentos de KYC.
+   */
+  async updateKycDocuments(userId: string, documents: any[], kycStatus: string): Promise<EntrepreneurProfile | null> {
+    const row = await this.queryOne(
+      `UPDATE entrepreneur_profiles
+       SET verification_documents = $1, kyc_status = $2, kyc_rejection_reason = NULL
+       WHERE user_id = $3
+       RETURNING *`,
+      [JSON.stringify(documents), kycStatus, userId],
+    );
+    return row ? mapRowToEntrepreneurProfile(row) : null;
+  }
+
   /** Campañas donde el usuario es creador (bloquea borrar perfil si > 0). */
   async countCampaignsAsCreator(userId: string): Promise<number> {
     const row = await this.queryOne<{ c: string }>(

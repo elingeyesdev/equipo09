@@ -164,6 +164,9 @@ CREATE TABLE entrepreneur_profiles (
     cover_url                       VARCHAR(512),
     identity_verified               BOOLEAN        NOT NULL DEFAULT false,
     identity_verified_at            TIMESTAMPTZ,
+    kyc_status                      VARCHAR(20)    NOT NULL DEFAULT 'unverified'
+                                    CHECK (kyc_status IN ('unverified', 'pending', 'approved', 'rejected')),
+    kyc_rejection_reason            TEXT,
     verification_documents          JSONB          DEFAULT '[]',
     total_campaigns                 INTEGER        NOT NULL DEFAULT 0,
     total_raised                    NUMERIC(15,2)  NOT NULL DEFAULT 0,

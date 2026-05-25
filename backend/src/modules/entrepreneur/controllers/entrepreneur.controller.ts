@@ -14,8 +14,9 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import {
@@ -183,6 +184,44 @@ export class EntrepreneurController {
     } as any);
     return new ApiSuccessResponse(profile, 'Portada actualizada');
   }
+  @Post('me/kyc')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'idDocument', maxCount: 1 },
+      { name: 'faceVideo', maxCount: 1 },
+    ], {
+      storage: diskStorage({
+        destination: './uploads/kyc',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiOperation({ summary: 'Subir documentos para verificación KYC' })
+  async uploadKycDocuments(
+    @Req() req: Request,
+    @UploadedFiles() files: { idDocument?: Express.Multer.File[], faceVideo?: Express.Multer.File[] },
+  ): Promise<ApiSuccessResponse<EntrepreneurProfile>> {
+    const userId = (req as any).user.id;
+    if (!files.idDocument || !files.idDocument[0]) {
+      throw new Error('El documento de identidad es requerido');
+    }
+    if (!files.faceVideo || !files.faceVideo[0]) {
+      throw new Error('La validación facial es requerida');
+    }
+    
+    const idDocumentUrl = `/uploads/kyc/${files.idDocument[0].filename}`;
+    const faceVideoUrl = `/uploads/kyc/${files.faceVideo[0].filename}`;
+    
+    const profile = await this.entrepreneurService.submitKyc(userId, idDocumentUrl, faceVideoUrl);
+    return new ApiSuccessResponse(profile, 'Documentos KYC enviados para revisión');
+  }
+
   @ApiTags('entrepreneur-campaigns')
   @Post('me/campaigns')
   @HttpCode(HttpStatus.CREATED)

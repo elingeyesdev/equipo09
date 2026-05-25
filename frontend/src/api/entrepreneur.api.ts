@@ -78,3 +78,16 @@ export async function uploadCover(file: File): Promise<EntrepreneurProfile> {
   );
   return data.data;
 }
+
+export async function submitKycDocuments(idDocument: File, faceVideo: File): Promise<EntrepreneurProfile> {
+  const formData = new FormData();
+  formData.append('idDocument', idDocument);
+  formData.append('faceVideo', faceVideo);
+  
+  const { data } = await api.post<ApiSuccessResponse<EntrepreneurProfile>>(
+    '/entrepreneurs/me/kyc',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return data.data;
+}

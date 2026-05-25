@@ -23,6 +23,8 @@ export interface EntrepreneurProfile {
   coverUrl: string | null;
   identityVerified: boolean;
   identityVerifiedAt: Date | null;
+  kycStatus: string;
+  kycRejectionReason: string | null;
   verificationDocuments: any[];
   totalCampaigns: number;
   totalRaised: number;
@@ -57,6 +59,8 @@ export function mapRowToEntrepreneurProfile(row: any): EntrepreneurProfile {
     coverUrl: row.cover_url,
     identityVerified: row.identity_verified,
     identityVerifiedAt: row.identity_verified_at,
+    kycStatus: row.kyc_status,
+    kycRejectionReason: row.kyc_rejection_reason || null,
     verificationDocuments: row.verification_documents ?? [],
     totalCampaigns: Number(row.total_campaigns),
     totalRaised: Number(row.total_raised),

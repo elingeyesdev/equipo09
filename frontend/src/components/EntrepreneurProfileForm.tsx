@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { EntrepreneurProfile, CreateEntrepreneurProfileDto } from '../types/entrepreneur.types';
+import { KYCUploadModal } from './KYCUploadModal';
 
 interface Props {
   profile: EntrepreneurProfile | null;
@@ -20,6 +21,7 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
 
   // Track edit mode per section
   const [editSection, setEditSection] = useState<string | null>(isNew ? 'basic' : null);
+  const [showKycModal, setShowKycModal] = useState(false);
   
   useEffect(() => {
     if (profile) {
@@ -353,12 +355,23 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
             </p>
           </div>
           
-          {!profile?.identityVerified && (
+          {!profile?.identityVerified && profile?.kycStatus !== 'pending' && profile?.kycStatus !== 'approved' && (
             <div className="sm:ml-auto shrink-0">
-               <button className="px-6 py-3 text-sm font-bold text-gray-800 bg-yellow-400 hover:bg-yellow-500 rounded-xl transition-all duration-300 shadow-[0_8px_20px_rgb(250,204,21,0.3)] hover:-translate-y-0.5 active:translate-y-0 focus:ring-4 focus:ring-yellow-400/20">
+               <button 
+                 onClick={() => setShowKycModal(true)}
+                 className="px-6 py-3 text-sm font-bold text-gray-800 bg-yellow-400 hover:bg-yellow-500 rounded-xl transition-all duration-300 shadow-[0_8px_20px_rgb(250,204,21,0.3)] hover:-translate-y-0.5 active:translate-y-0 focus:ring-4 focus:ring-yellow-400/20"
+               >
                  Iniciar Proceso
                </button>
             </div>
+          )}
+          
+          {profile?.kycStatus === 'pending' && (
+             <div className="sm:ml-auto shrink-0">
+               <span className="px-6 py-3 text-sm font-bold text-yellow-800 bg-yellow-100 rounded-xl border border-yellow-200">
+                 En Revisión...
+               </span>
+             </div>
           )}
         </div>
       </div>
@@ -372,6 +385,16 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
        {activeSection === 'location' && renderLocation()}
        {activeSection === 'banking' && renderBanking()}
        {activeSection === 'verification' && renderVerification()}
+
+       {showKycModal && (
+         <KYCUploadModal 
+           onClose={() => setShowKycModal(false)}
+           onSuccess={(updatedProfile) => {
+             setShowKycModal(false);
+             window.location.reload(); // Simple way to refresh for now
+           }}
+         />
+       )}
     </div>
   );
 }

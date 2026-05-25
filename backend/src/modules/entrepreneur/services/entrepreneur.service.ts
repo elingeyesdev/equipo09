@@ -202,6 +202,38 @@ export class EntrepreneurService {
     return updated;
   }
 
+  /**
+   * Envía los documentos KYC a revisión.
+   */
+  async submitKyc(
+    userId: string,
+    idDocumentUrl: string,
+    faceVideoUrl: string,
+  ): Promise<EntrepreneurProfile> {
+    await this.ensureEntrepreneurProfile(userId);
+
+    const profile = await this.profileRepo.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil de emprendedor');
+    }
+
+    if (profile.kycStatus === 'pending') {
+      throw new BadRequestException('El KYC ya está en revisión');
+    }
+
+    const docs = [
+      { type: 'idDocument', url: idDocumentUrl, uploadedAt: new Date().toISOString() },
+      { type: 'faceValidation', url: faceVideoUrl, uploadedAt: new Date().toISOString() }
+    ];
+
+    const updated = await this.profileRepo.updateKycDocuments(userId, docs, 'pending');
+    if (!updated) {
+      throw new BadRequestException('No se pudo enviar el KYC');
+    }
+
+    return updated;
+  }
+
   // =========================================================================
   // EDT 1.3 — CAMPAÑAS DEL EMPRENDEDOR
   // =========================================================================

@@ -38,6 +38,10 @@ export function getCampaignCreationBlockers(profile: EntrepreneurProfile): strin
     missing.push('país');
   }
 
+  if (!profile.identityVerified) {
+    missing.push('verificación de identidad (KYC) aprobada');
+  }
+
   return missing;
 }
 
