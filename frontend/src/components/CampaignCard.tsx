@@ -3,8 +3,9 @@ import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { formatCampaignCurrency, computeFundingPercent, clampPercentForBar } from '../utils/campaignFunding';
 import {
   Eye, Send, Rocket, Trash2, CheckCircle2, Users, Calendar, TrendingUp,
-  AlertTriangle, X, ChevronRight, MoreHorizontal, Flag
+  AlertTriangle, X, ChevronRight, MoreHorizontal, Flag, Share2
 } from 'lucide-react';
+import { shareCampaignUrl } from '../utils/share.utils';
 
 interface Props {
   campaign: EntrepreneurCampaign;
@@ -116,6 +117,14 @@ export function CampaignCard({
                   onClick={() => { setShowMenu(false); onPreview(campaign); }}
                 >
                   <Eye size={14} className="text-slate-400" /> Vista previa
+                </button>
+              )}
+              {campaign.status === 'published' && (
+                <button
+                  className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                  onClick={() => { setShowMenu(false); shareCampaignUrl(campaign.id, campaign.title); }}
+                >
+                  <Share2 size={14} className="text-slate-400" /> Compartir
                 </button>
               )}
               {canDelete && onDelete && (
@@ -259,6 +268,17 @@ export function CampaignCard({
                 onClick={() => setShowFinalizeConfirm(true)}
               >
                 <Flag size={15} /> {busy ? 'Finalizando…' : 'Finalizar Campaña'}
+              </button>
+            )}
+
+            {/* Compartir campaña activa */}
+            {campaign.status === 'published' && (
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:opacity-90 cursor-pointer"
+                onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
+                style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)' }}
+              >
+                <Share2 size={14} /> Compartir Campaña
               </button>
             )}
           </div>

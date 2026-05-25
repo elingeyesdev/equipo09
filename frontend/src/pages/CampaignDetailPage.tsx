@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
@@ -30,7 +29,9 @@ import {
   Sparkles,
   Flame,
   MessageCircle,
+  Share2,
 } from 'lucide-react';
+import { shareCampaignUrl } from '../utils/share.utils';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
@@ -208,14 +209,25 @@ export function CampaignDetailPage() {
       <Navbar />
 
       <div className="max-w-[1200px] mx-auto px-6 py-8">
-        {/* ── Back button ── */}
-        <button
-          onClick={handleGoBack}
-          className="flex items-center gap-2 text-slate-500 hover:text-[#2e7d32] font-bold text-[13px] uppercase tracking-widest mb-8 transition-colors cursor-pointer bg-transparent border-none group"
-        >
-          <ArrowLeft size={18} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform" />
-          Regresar al Portal
-        </button>
+        {/* ── Back & Share bar ── */}
+        <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center gap-2 text-slate-500 hover:text-[#2e7d32] font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-none group"
+          >
+            <ArrowLeft size={18} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform" />
+            Regresar al Portal
+          </button>
+
+          <button
+            type="button"
+            onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
+            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-emerald-500 hover:text-[#2e7d32] text-slate-500 px-4 py-2.5 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
+          >
+            <Share2 size={15} strokeWidth={2.5} />
+            Compartir Campaña
+          </button>
+        </div>
 
         {/* ── Hero Image ── */}
         <div className="relative h-[320px] md:h-[440px] rounded-[28px] overflow-hidden shadow-xl shadow-black/5 mb-10">
@@ -641,28 +653,6 @@ export function CampaignDetailPage() {
                     setShowConfirmModal(true);
                   };
 
-                  // Called only when user confirms inside the modal
-                  const handleConfirmInvest = async () => {
-                    setInvestmentLoading(true);
-                    setInvestmentError(null);
-                    try {
-                      await createInvestment({
-                        campaignId: campaign.id,
-                        amount: parsedAmount,
-                        rewardTierId: selectedTierId || undefined,
-                      });
-                      setShowConfirmModal(false);
-                      setInvestmentSuccess(true);
-                      // Recargar datos de la campaña en tiempo real
-                      refetch();
-                    } catch (err: any) {
-                      const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
-                      setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
-                      setShowConfirmModal(false);
-                    } finally {
-                      setInvestmentLoading(false);
-                    }
-                  };
 
                   if (isExpired) {
                     return (
@@ -878,12 +868,12 @@ export function CampaignDetailPage() {
             title: campaign.title,
             campaignType: campaign.campaignType,
             entrepreneurName: campaign.entrepreneurName,
-            coverImageUrl: campaign.coverImageUrl,
+            coverImageUrl: campaign.coverImageUrl ?? undefined,
             currency: campaign.currency,
             status: campaign.status,
-            location: campaign.location,
-            endDate: campaign.endDate,
-            shortDescription: campaign.shortDescription,
+            location: undefined,
+            endDate: campaign.endDate ?? undefined,
+            shortDescription: campaign.shortDescription ?? undefined,
           }}
           amount={parseFloat(customAmount)}
           selectedTier={

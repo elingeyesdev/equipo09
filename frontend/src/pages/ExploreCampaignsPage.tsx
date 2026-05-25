@@ -27,8 +27,9 @@ import {
   ChevronDown,
   Check,
   Flame,
-  Clock,
+  Share2,
 } from 'lucide-react';
+import { shareCampaignUrl } from '../utils/share.utils';
 
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
@@ -98,6 +99,19 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
             {daysRemaining === 1 ? '¡Último día!' : `${daysRemaining} días`}
           </div>
         )}
+
+        {/* Botón de Compartir Flotante */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            shareCampaignUrl(campaign.id, campaign.title);
+          }}
+          className="absolute bottom-4 right-4 w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-slate-700 hover:bg-[#2e7d32] hover:text-white transition-all shadow-lg shadow-black/10 active:scale-90 border-none cursor-pointer group/share"
+          title="Compartir Campaña"
+        >
+          <Share2 size={14} strokeWidth={2.5} className="group-hover/share:rotate-12 transition-transform" />
+        </button>
 
         {/* Progress overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/20">
