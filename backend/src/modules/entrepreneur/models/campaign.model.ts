@@ -28,6 +28,7 @@ export interface EntrepreneurCampaign {
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
+  videoUrl: string | null;
   categories?: any[];
   rewardTiers?: RewardTier[];
 }
@@ -141,6 +142,7 @@ export function mapRowToEntrepreneurCampaign(row: any): EntrepreneurCampaign {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     publishedAt: row.published_at,
+    videoUrl: row.video_url,
   };
 
   if (row.reward_tiers) {

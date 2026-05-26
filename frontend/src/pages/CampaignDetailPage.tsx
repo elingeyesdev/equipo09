@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
@@ -118,6 +119,9 @@ export function CampaignDetailPage() {
   const location = useLocation();
 
   const { campaign, loading, error, retry, refetch } = useCampaignDetail(id);
+
+  // ── Pitch video state ──
+  const [showPitch, setShowPitch] = useState(false);
 
   // ── Investment state ──
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
@@ -247,7 +251,7 @@ export function CampaignDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {/* Badges */}
-          <div className="absolute top-6 left-6 flex gap-3">
+          <div className="absolute top-6 left-6 flex gap-3 flex-wrap">
             <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl text-[11px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
               {campaign.categoryName}
             </span>
@@ -259,6 +263,25 @@ export function CampaignDetailPage() {
               {typeInfo.label}
             </span>
           </div>
+
+          {/* DonaTok pitch button */}
+          {(campaign as any).videoUrl && (
+            <button
+              onClick={() => setShowPitch(p => !p)}
+              className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
+              style={{
+                background: showPitch
+                  ? 'rgba(255,255,255,0.95)'
+                  : 'linear-gradient(135deg, #2e7d32, #00897b)',
+                color: showPitch ? '#2e7d32' : '#fff',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <span>🎬</span>
+              {showPitch ? 'Ocultar Pitch' : 'Ver Pitch'}
+            </button>
+          )}
 
           {/* Progress bar at bottom of hero */}
           <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/30">
@@ -273,6 +296,25 @@ export function CampaignDetailPage() {
             />
           </div>
         </div>
+
+        {/* ── Inline Video Pitch Player ── */}
+        {showPitch && (campaign as any).videoUrl && (
+          <div
+            className="mb-10 rounded-[28px] overflow-hidden shadow-2xl"
+            style={{
+              background: '#0a140c',
+              maxWidth: '360px',
+              margin: '0 auto 2.5rem',
+              aspectRatio: '9/16',
+              position: 'relative',
+            }}
+          >
+            <PitchVideoPlayer
+              videoUrl={(campaign as any).videoUrl}
+              isActive={showPitch}
+            />
+          </div>
+        )}
 
         {/* ── Content + Sidebar ── */}
         <div className="flex flex-col lg:flex-row gap-10">

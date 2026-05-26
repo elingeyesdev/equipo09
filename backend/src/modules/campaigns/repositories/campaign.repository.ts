@@ -41,6 +41,7 @@ export class CampaignRepository {
       metadata: row.metadata,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      videoUrl: row.video_url,
     };
   }
 
@@ -143,7 +144,8 @@ export class CampaignRepository {
       ep.display_name AS entrepreneur_display_name,
       ep.avatar_url AS entrepreneur_avatar,
       cat.display_name AS category_name,
-      cat.slug AS category_slug
+      cat.slug AS category_slug,
+      c.video_url
     FROM campaigns c
     JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
     JOIN categories cat ON c.category_id = cat.id
@@ -169,6 +171,7 @@ export class CampaignRepository {
       entrepreneurAvatar: row.entrepreneur_avatar,
       categoryName: row.category_name,
       categorySlug: row.category_slug,
+      videoUrl: row.video_url,
     };
   }
 
@@ -256,7 +259,8 @@ export class CampaignRepository {
         ep.avatar_url AS entrepreneur_avatar,
         ep.bio AS entrepreneur_bio,
         cat.display_name AS category_name,
-        cat.slug AS category_slug
+        cat.slug AS category_slug,
+        c.video_url
       FROM campaigns c
       JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
       JOIN categories cat ON c.category_id = cat.id

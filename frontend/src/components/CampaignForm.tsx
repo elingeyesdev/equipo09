@@ -19,6 +19,10 @@ const schema = z.object({
     .refine((val) => !val || isFutureDate(val), {
       message: 'La fecha de cierre debe ser posterior a hoy',
     }),
+  videoUrl: z.string().optional().or(z.literal(''))
+    .refine((val) => !val || /(youtube\.com|youtu\.be|tiktok\.com)/i.test(val), {
+      message: 'El enlace debe ser un video válido de YouTube o TikTok',
+    }),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -49,6 +53,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       goalAmount: initialData?.goalAmount || 1000,
       categoryIds: initialData?.categoryIds || (initialData?.categoryId ? [initialData.categoryId] : []),
       endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
+      videoUrl: initialData?.videoUrl || '',
     },
   });
 
@@ -125,6 +130,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         goalAmount: initialData.goalAmount || 1000,
         categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
         endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
+        videoUrl: initialData.videoUrl || '',
       });
     }
   }, [loadingCats, initialData, reset]);
@@ -197,7 +203,8 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       categoryIds: data.categoryIds,
       goalAmount: data.goalAmount,
       endDate: data.endDate || undefined,
-      rewards: rewards
+      rewards: rewards,
+      videoUrl: data.videoUrl || undefined
     };
 
     const success = await onSuccess(dto, coverFile || undefined, documents);
@@ -334,6 +341,26 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
               {...register('endDate')}
             />
             {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
+          </div>
+
+          <div className="flex flex-col md:col-span-3">
+            <label htmlFor="videoUrl" className={labelClass}>URL de Video Pitch (YouTube / TikTok - Opcional)</label>
+            <input
+              id="videoUrl"
+              type="text"
+              placeholder="Ej: https://www.youtube.com/watch?v=dQw4w9WgXcQ o https://www.tiktok.com/@usuario/video/123456789"
+              className={`${inputClass} ${errors.videoUrl ? errorClass : ''}`}
+              {...register('videoUrl')}
+            />
+            {errors.videoUrl ? (
+              <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.videoUrl.message}</span>
+            ) : (
+              <span className="text-[11px] text-slate-400 mt-2 ml-1 leading-relaxed">
+                Agrega un enlace para mostrar el pitch de tu proyecto en <strong>DonaTok</strong>. 
+                Soporta videos estándar de YouTube, Shorts de YouTube y videos de TikTok. 
+                <em> Usa la URL directa del navegador.</em>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col md:col-span-3">

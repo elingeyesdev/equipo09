@@ -9,6 +9,7 @@ import {
   MaxLength,
   IsDateString,
   IsArray,
+  Matches,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -59,4 +60,13 @@ export class CreateCampaignDto {
   @ApiPropertyOptional({ type: 'array', items: { type: 'object' } })
   @IsOptional()
   rewards?: any[];
+
+  @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' })
+  @IsOptional()
+  @IsString()
+  @Matches(/(youtube\.com|youtu\.be|tiktok\.com)/, {
+    message: 'El video debe ser un enlace válido de YouTube o TikTok',
+  })
+  videoUrl?: string;
 }
+

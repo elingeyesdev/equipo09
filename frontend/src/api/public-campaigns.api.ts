@@ -21,6 +21,7 @@ export interface PublicCampaign {
   entrepreneurAvatar: string | null;
   categoryName: string;
   categorySlug: string;
+  videoUrl: string | null;
 }
 
 export interface RewardTier {

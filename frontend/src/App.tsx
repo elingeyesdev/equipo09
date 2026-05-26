@@ -11,6 +11,7 @@ import { ChatPage } from './pages/ChatPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
+import { PitchFeedPage } from './pages/PitchFeedPage';
 
 // Guard simple: si no hay token, redirige a login
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/explore" element={<ExploreCampaignsPage />} />
+        <Route path="/donatok" element={<PitchFeedPage />} />
         <Route path="/campaign/:id" element={<CampaignDetailPage />} />
         <Route
           path="/chat"

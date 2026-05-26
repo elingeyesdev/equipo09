@@ -23,8 +23,8 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       const result = await client.query(
         `INSERT INTO campaigns (
           creator_id, title, slug, short_description, description,
-          campaign_type, goal_amount, end_date, status
-        ) VALUES ($1, $2, $3, $4, $5, 'reward', $6, $7, 'draft') RETURNING id`,
+          campaign_type, goal_amount, end_date, status, video_url
+        ) VALUES ($1, $2, $3, $4, $5, 'reward', $6, $7, 'draft', $8) RETURNING id`,
         [
           creatorId,
           dto.title,
@@ -32,7 +32,8 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
           dto.shortDescription || null,
           dto.description,
           dto.goalAmount,
-          dto.endDate || null
+          dto.endDate || null,
+          dto.videoUrl || null
         ]
       );
 
@@ -175,7 +176,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        c.description
+        c.description, c.video_url
        FROM campaigns c
        WHERE ${whereClause}
        ORDER BY c.${sortBy} ${sortOrder}
@@ -202,7 +203,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        c.description
+        c.description, c.video_url
        FROM campaigns c
        WHERE c.id = $1 AND c.creator_id = $2`,
       [campaignId, creatorId],
@@ -359,6 +360,10 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     if (dto.endDate !== undefined) {
       updates.push(`end_date = $${paramIndex++}`);
       values.push(dto.endDate || null);
+    }
+    if (dto.videoUrl !== undefined) {
+      updates.push(`video_url = $${paramIndex++}`);
+      values.push(dto.videoUrl || null);
     }
 
     return this.transaction(async (client) => {

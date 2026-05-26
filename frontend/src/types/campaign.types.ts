@@ -40,6 +40,7 @@ export interface EntrepreneurCampaign {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
+  videoUrl?: string | null;
   rewardTiers?: RewardTier[];
 }
 
@@ -51,6 +52,7 @@ export interface CreateCampaignDto {
   endDate?: string;
   categoryIds?: string[];
   rewards?: CreateRewardTierDto[];
+  videoUrl?: string;
 }
 
 export type CampaignFilterPreset =

@@ -21,6 +21,7 @@ export interface EntrepreneurCampaign {
   metadata: any;
   createdAt: Date;
   updatedAt: Date;
+  videoUrl: string | null;
 }
 
 export interface CreateCampaignDto {
@@ -75,6 +76,7 @@ export interface PublicCampaign {
   // Categoría (JOIN)
   categoryName: string;
   categorySlug: string;
+  videoUrl: string | null;
 }
 
 export interface PublicCampaignDetail extends PublicCampaign {
