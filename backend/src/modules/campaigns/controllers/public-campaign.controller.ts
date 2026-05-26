@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param } from '@nestjs/common'; 
+import { Controller, Get, Post, Query, Param, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { CampaignService } from '../services';
 
@@ -52,6 +52,19 @@ export class PublicCampaignController {
       statusCode: 200,
       message: 'Campaign details retrieved successfully',
       data: campaign,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Post(':id/view')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Increment video view count for a campaign. No auth required.' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  async recordView(@Param('id') id: string) {
+    await this.campaignService.incrementViewCount(id);
+    return {
+      statusCode: 200,
+      message: 'View recorded',
       timestamp: new Date().toISOString(),
     };
   }

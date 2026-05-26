@@ -42,6 +42,7 @@ export interface EntrepreneurCampaign {
   publishedAt: string | null;
   videoUrl?: string | null;
   rewardTiers?: RewardTier[];
+  campaignType: CampaignType;
 }
 
 export interface CreateCampaignDto {

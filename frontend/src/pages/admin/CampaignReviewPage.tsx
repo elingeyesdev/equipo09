@@ -8,12 +8,13 @@ import {
   Clock,
   CheckCircle2,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Video,
+  PlayCircle
 } from 'lucide-react';
 import { getPendingCampaigns, updateCampaignStatus, getCampaignDetail } from '../../api/admin.api';
 import type { PendingCampaign, PendingCampaignDetail } from '../../types/admin.types';
 import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
-
 import { AdminLayout } from '../../components/admin/AdminLayout';
 
 export const CampaignReviewPage: React.FC = () => {
@@ -29,6 +30,7 @@ export const CampaignReviewPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [videoFilter, setVideoFilter] = useState(false);
 
   useEffect(() => {
     loadCampaigns();
@@ -153,7 +155,7 @@ export const CampaignReviewPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Info Cards / Stats quick look */}
+          {/* Info Cards */}
           <div className="flex gap-4">
             <div className="px-5 py-3 bg-white border border-emerald-50 rounded-2xl flex items-center gap-4 shadow-sm">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
@@ -162,6 +164,17 @@ export const CampaignReviewPage: React.FC = () => {
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase">Pendientes</p>
                 <p className="text-xl font-black text-[#1c2b1e]">{total}</p>
+              </div>
+            </div>
+            <div className="px-5 py-3 bg-white border border-emerald-50 rounded-2xl flex items-center gap-4 shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                <Video size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Con Video</p>
+                <p className="text-xl font-black text-[#1c2b1e]">
+                  {campaigns.filter(c => (c as any).video_url).length}
+                </p>
               </div>
             </div>
           </div>
@@ -196,6 +209,19 @@ export const CampaignReviewPage: React.FC = () => {
                 <option value="reward">Recompensa</option>
               </select>
             </div>
+
+            {/* Video filter toggle */}
+            <button
+              onClick={() => setVideoFilter(v => !v)}
+              className={`flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-[13px] transition-all border ${
+                videoFilter
+                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-lg shadow-emerald-500/20'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300'
+              }`}
+            >
+              <PlayCircle size={16} strokeWidth={2.5} />
+              Solo con Video
+            </button>
             
             <button 
               onClick={loadCampaigns}
@@ -243,7 +269,9 @@ export const CampaignReviewPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {campaigns.map((campaign) => (
+                  {campaigns
+                    .filter(c => !videoFilter || (c as any).video_url)
+                    .map((campaign) => (
                     <tr key={campaign.id} className="hover:bg-slate-50/80 transition-all group">
                       <td className="px-8 py-7">
                         <div className="flex items-center gap-4">
@@ -256,6 +284,14 @@ export const CampaignReviewPage: React.FC = () => {
                               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{campaign.category_name}</span>
                               <div className="w-1 h-1 rounded-full bg-slate-200"></div>
                               <span className="text-[10px] text-slate-400 font-bold">Ref: {campaign.id.substring(0, 8)}</span>
+                              {(campaign as any).video_url && (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100"
+                                  title="Tiene video pitch en DonaTok"
+                                >
+                                  <PlayCircle size={9} strokeWidth={2.5} /> DonaTok
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

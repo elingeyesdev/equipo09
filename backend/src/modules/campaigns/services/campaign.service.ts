@@ -67,4 +67,11 @@ export class CampaignService {
     }
     return campaign;
   }
+
+  async incrementViewCount(campaignId: string): Promise<void> {
+    // Fire-and-forget: silently ignore if campaign not found
+    try {
+      await this.campaignRepo.incrementViewCount(campaignId);
+    } catch (_) {}
+  }
 }

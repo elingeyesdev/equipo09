@@ -309,4 +309,11 @@ export class CampaignRepository {
       rewardTiers,
     };
   }
+
+  async incrementViewCount(campaignId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE campaigns SET view_count = COALESCE(view_count, 0) + 1 WHERE id = $1`,
+      [campaignId],
+    );
+  }
 }

@@ -4,6 +4,7 @@ import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaig
 import { Navbar } from '../components/Navbar';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { getImageUrl } from '../utils/image.utils';
+import axios from 'axios';
 import {
   Rocket, TrendingUp, Users, ArrowRight,
   Loader2, AlertCircle, RefreshCw, Play,
@@ -223,6 +224,17 @@ export function PitchFeedPage() {
     if (campaigns.length > 0) setupObserver();
     return () => observerRef.current?.disconnect();
   }, [campaigns, setupObserver]);
+
+  // ── Track view when active campaign changes (debounced 2s to avoid accidental counts) ──
+  useEffect(() => {
+    if (campaigns.length === 0) return;
+    const campaign = campaigns[activeIndex];
+    if (!campaign) return;
+    const t = setTimeout(() => {
+      axios.post(`/api/v1/campaigns/public/${campaign.id}/view`).catch(() => {});
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [activeIndex, campaigns]);
 
   // ── Render states ──
   if (loading) {
