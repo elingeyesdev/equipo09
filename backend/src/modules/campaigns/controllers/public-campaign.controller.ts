@@ -71,17 +71,17 @@ export class PublicCampaignController {
     const seeded = [];
     const sampleStories = [
       {
-        title: '🚀 Lanzamiento Oficial!',
-        content: '¡Acabamos de lanzar nuestra campaña de fondeo! Únete hoy y sé parte de este cambio ecológico.',
-        attachments: [{ type: 'text', text: '¡Bienvenidos a nuestra campaña!' }]
+        title: 'Lanzamiento Oficial',
+        content: '¡Acabamos de lanzar nuestra campaña de fondeo! Únete hoy y sé parte de este cambio.',
+        attachments: [{ type: 'text', text: 'Bienvenidos a nuestra campaña.' }]
       },
       {
-        title: '📸 Prototipo Finalizado',
-        content: 'Les mostramos el primer lote impreso en 3D de nuestro envase 100% biodegradable. ¡Se ve increíble!',
+        title: 'Prototipo Finalizado',
+        content: 'Les mostramos el primer lote impreso en 3D de nuestro envase 100% biodegradable.',
         attachments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1536939459926-301728717817?q=80&w=2570&auto=format&fit=crop' }]
       },
       {
-        title: '🎥 Video de Pitch en Camino',
+        title: 'Video de Pitch en Camino',
         content: 'Estamos editando el video pitch con nuestro equipo de desarrollo. Estará disponible muy pronto.',
         attachments: [{ type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4' }]
       }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
-import { getRecentStories, seedTestStories, type CampaignStoryGroup, type StoryItem } from '../api/public-campaigns.api';
+import { getRecentStories, type CampaignStoryGroup, type StoryItem } from '../api/public-campaigns.api';
 import { getImageUrl } from '../utils/image.utils';
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ function isUnseen(campaignId: string, latestAt: string): boolean {
   return new Date(latestAt).getTime() > new Date(seen).getTime();
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Avatar ───────────────────────────────────────────────────────────────────
 
 interface AvatarProps {
   group: CampaignStoryGroup;
@@ -50,9 +50,8 @@ function StoryAvatar({ group, unseen, onClick }: AvatarProps) {
       id={`story-avatar-${group.campaignId}`}
       title={group.campaignTitle}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
-      className="flex flex-col items-center gap-2 group"
+      className="flex flex-col items-center gap-2"
     >
-      {/* Ring wrapper */}
       <div
         style={{
           padding: '3px',
@@ -106,7 +105,6 @@ function StoryAvatar({ group, unseen, onClick }: AvatarProps) {
           )}
         </div>
       </div>
-      {/* Campaign name label */}
       <span
         style={{
           fontSize: 10,
@@ -164,7 +162,6 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
     }
   };
 
-  // Auto-advance progress bar
   useEffect(() => {
     setProgress(0);
     intervalRef.current = setInterval(() => {
@@ -180,7 +177,6 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
     return () => clearInterval(intervalRef.current!);
   }, [currentIdx, next]);
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
@@ -206,7 +202,6 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
         WebkitBackdropFilter: 'blur(8px)',
       }}
     >
-      {/* Card */}
       <div
         style={{
           position: 'relative',
@@ -222,18 +217,12 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
           flexDirection: 'column',
         }}
       >
-        {/* Progress bars row */}
+        {/* Progress bars */}
         <div style={{ display: 'flex', gap: 4, padding: '14px 14px 0', zIndex: 10, position: 'relative' }}>
           {group.stories.map((_, i) => (
             <div
               key={i}
-              style={{
-                flex: 1,
-                height: 3,
-                borderRadius: 4,
-                background: 'rgba(255,255,255,0.25)',
-                overflow: 'hidden',
-              }}
+              style={{ flex: 1, height: 3, borderRadius: 4, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}
             >
               <div
                 style={{
@@ -248,7 +237,7 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
           ))}
         </div>
 
-        {/* Header: avatar + name + close */}
+        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', zIndex: 10, position: 'relative' }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
             {imgSrc ? (
@@ -272,33 +261,18 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
           </button>
         </div>
 
-        {/* Story content area */}
+        {/* Content */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          {/* Background fill */}
           {attachment?.type === 'image' && getImageUrl(attachment.url) ? (
-            <img
-              src={getImageUrl(attachment.url)}
-              alt={story.title}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <img src={getImageUrl(attachment.url)} alt={story.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : attachment?.type === 'video' && attachment.url ? (
-            <video
-              key={attachment.url}
-              src={attachment.url}
-              autoPlay
-              muted
-              playsInline
-              loop
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <video key={attachment.url} src={attachment.url} autoPlay muted playsInline loop style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, #0d1f10, #1c3a1e, #0a2e2e)' }} />
           )}
 
-          {/* Gradient overlay at bottom */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%)' }} />
 
-          {/* Text content */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 20px 28px' }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 900, color: '#fff', lineHeight: 1.2, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
               {story.title}
@@ -314,35 +288,18 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
           </div>
         </div>
 
-        {/* Left / Right tap zones */}
-        <button
-          onClick={prev}
-          style={{ position: 'absolute', left: 0, top: 0, width: '35%', height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 5 }}
-          aria-label="Historia anterior"
-        />
-        <button
-          onClick={next}
-          style={{ position: 'absolute', right: 0, top: 0, width: '35%', height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 5 }}
-          aria-label="Historia siguiente"
-        />
+        {/* Tap zones */}
+        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, width: '35%', height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 5 }} aria-label="Historia anterior" />
+        <button onClick={next} style={{ position: 'absolute', right: 0, top: 0, width: '35%', height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 5 }} aria-label="Historia siguiente" />
       </div>
 
-      {/* Prev / Next campaign arrows */}
       {onPrevGroup && (
-        <button
-          id="story-prev-campaign"
-          onClick={onPrevGroup}
-          style={{ position: 'absolute', left: 'max(12px, calc(50% - 252px))', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}
-        >
+        <button id="story-prev-campaign" onClick={onPrevGroup} style={{ position: 'absolute', left: 'max(12px, calc(50% - 252px))', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}>
           <ChevronLeft size={20} />
         </button>
       )}
       {onNextGroup && (
-        <button
-          id="story-next-campaign"
-          onClick={onNextGroup}
-          style={{ position: 'absolute', right: 'max(12px, calc(50% - 252px))', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}
-        >
+        <button id="story-next-campaign" onClick={onNextGroup} style={{ position: 'absolute', right: 'max(12px, calc(50% - 252px))', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}>
           <ChevronRight size={20} />
         </button>
       )}
@@ -357,19 +314,15 @@ export function StoriesAvatarBar() {
   const [loading, setLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [unseenMap, setUnseenMap] = useState<Record<string, boolean>>({});
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getRecentStories();
-      // Limit to 8 most recent campaigns (already sorted by backend)
       const limited = data.slice(0, 8);
       setGroups(limited);
 
-      // Compute unseen map
       const map: Record<string, boolean> = {};
       for (const g of limited) {
         const latest = g.stories[g.stories.length - 1].createdAt;
@@ -377,7 +330,7 @@ export function StoriesAvatarBar() {
       }
       setUnseenMap(map);
     } catch {
-      // Silently fail — stories are optional
+      // Stories are optional — fail silently
     } finally {
       setLoading(false);
     }
@@ -398,22 +351,6 @@ export function StoriesAvatarBar() {
     else setActiveIdx(null);
   };
 
-  const handleSeed = async () => {
-    try {
-      setSeeding(true);
-      setSeedMsg('');
-      const res = await seedTestStories();
-      setSeedMsg(res.message || 'Historias creadas!');
-      await load();
-    } catch {
-      setSeedMsg('Error al crear historias de prueba.');
-    } finally {
-      setSeeding(false);
-      setTimeout(() => setSeedMsg(''), 4000);
-    }
-  };
-
-  // Nothing to show while loading
   if (loading) {
     return (
       <div style={{ display: 'flex', gap: 16, padding: '0 4px', overflowX: 'auto' }}>
@@ -427,51 +364,7 @@ export function StoriesAvatarBar() {
     );
   }
 
-  if (groups.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '16px 20px',
-          background: 'linear-gradient(135deg, rgba(46,125,50,0.05), rgba(0,188,212,0.05))',
-          borderRadius: 20,
-          border: '1.5px dashed rgba(46,125,50,0.25)',
-        }}
-      >
-        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(46,125,50,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={20} color="#2e7d32" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#1c2b1e' }}>No hay historias recientes</p>
-          <p style={{ margin: 0, fontSize: 12, color: '#6b7280' }}>Las novedades de campañas de las últimas 24h aparecerán aquí.</p>
-        </div>
-        <button
-          id="story-seed-btn"
-          onClick={handleSeed}
-          disabled={seeding}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 12,
-            background: seeding ? '#e2e8f0' : 'linear-gradient(135deg, #2e7d32, #00897b)',
-            color: seeding ? '#9ca3af' : '#fff',
-            border: 'none',
-            fontSize: 12,
-            fontWeight: 800,
-            cursor: seeding ? 'not-allowed' : 'pointer',
-            whiteSpace: 'nowrap',
-            transition: 'all 0.2s',
-          }}
-        >
-          {seeding ? 'Generando...' : '⚡ Generar Prueba'}
-        </button>
-        {seedMsg && (
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#2e7d32' }}>{seedMsg}</span>
-        )}
-      </div>
-    );
-  }
+  if (groups.length === 0) return null;
 
   const hasUnseen = Object.values(unseenMap).some(Boolean);
 
@@ -487,54 +380,27 @@ export function StoriesAvatarBar() {
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #2e7d32, #00897b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={16} color="#fff" />
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#1c2b1e', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                Novedades
-                {hasUnseen && (
-                  <span style={{ marginLeft: 8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#00e676', verticalAlign: 'middle', boxShadow: '0 0 6px #00e676' }} />
-                )}
-              </p>
-              <p style={{ margin: 0, fontSize: 11, color: '#6b7280', fontWeight: 500 }}>
-                Actualizaciones de las últimas 24h · {groups.length} campaña{groups.length !== 1 ? 's' : ''}
-              </p>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #2e7d32, #00897b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Zap size={16} color="#fff" />
           </div>
-          <button
-            id="story-seed-header-btn"
-            onClick={handleSeed}
-            disabled={seeding}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 10,
-              background: 'rgba(46,125,50,0.08)',
-              border: '1px solid rgba(46,125,50,0.2)',
-              color: '#2e7d32',
-              fontSize: 11,
-              fontWeight: 800,
-              cursor: seeding ? 'not-allowed' : 'pointer',
-              opacity: seeding ? 0.5 : 1,
-              transition: 'all 0.2s',
-            }}
-          >
-            {seeding ? '...' : '+ Test'}
-          </button>
+          <div>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#1c2b1e', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+              Novedades
+              {hasUnseen && (
+                <span style={{ marginLeft: 8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#00e676', verticalAlign: 'middle', boxShadow: '0 0 6px #00e676' }} />
+              )}
+            </p>
+            <p style={{ margin: 0, fontSize: 11, color: '#6b7280', fontWeight: 500 }}>
+              Actualizaciones de las últimas 24h · {groups.length} campaña{groups.length !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
 
-        {/* Scroll bar */}
+        {/* Avatar scroll */}
         <div
           ref={scrollRef}
-          style={{
-            display: 'flex',
-            gap: 20,
-            overflowX: 'auto',
-            paddingBottom: 6,
-            scrollbarWidth: 'none',
-          }}
+          style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 6 }}
           className="hide-scrollbar"
         >
           {groups.map((g, idx) => (
@@ -548,7 +414,6 @@ export function StoriesAvatarBar() {
         </div>
       </div>
 
-      {/* Viewer modal */}
       {activeIdx !== null && groups[activeIdx] && (
         <StoryViewer
           group={groups[activeIdx]}

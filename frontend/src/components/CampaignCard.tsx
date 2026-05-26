@@ -14,6 +14,7 @@ interface Props {
   onPublish?: (campaignId: string) => void;
   onDelete?: (campaignId: string) => void;
   onFinalize?: (campaignId: string) => void;
+  onPublishUpdate?: (campaignId: string, campaignTitle: string) => void;
   actionCampaignId?: string | null;
 }
 
@@ -33,6 +34,7 @@ export function CampaignCard({
   onPublish,
   onDelete,
   onFinalize,
+  onPublishUpdate,
   actionCampaignId,
 }: Props) {
   const busy = actionCampaignId === campaign.id;
@@ -268,6 +270,16 @@ export function CampaignCard({
                 onClick={() => setShowFinalizeConfirm(true)}
               >
                 <Flag size={15} /> {busy ? 'Finalizando…' : 'Finalizar Campaña'}
+              </button>
+            )}
+
+            {/* Publicar Novedad */}
+            {campaign.status === 'published' && onPublishUpdate && (
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-emerald-100 cursor-pointer"
+                onClick={() => onPublishUpdate(campaign.id, campaign.title)}
+              >
+                <Send size={14} /> Publicar Novedad
               </button>
             )}
 

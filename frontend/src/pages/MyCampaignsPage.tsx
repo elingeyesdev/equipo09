@@ -6,6 +6,7 @@ import { Navbar } from '../components/Navbar';
 import { CampaignCard } from '../components/CampaignCard';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
+import { PublishUpdateModal } from '../components/PublishUpdateModal';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import {
   Rocket, Plus, Search, AlertCircle, Loader2,
@@ -61,6 +62,7 @@ export function MyCampaignsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [updateModalCampaign, setUpdateModalCampaign] = useState<{ id: string; title: string } | null>(null);
 
   const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
 
@@ -272,6 +274,7 @@ export function MyCampaignsPage() {
                 onPublish={publishCampaign}
                 onDelete={handleDelete}
                 onFinalize={handleFinalize}
+                onPublishUpdate={(id, title) => setUpdateModalCampaign({ id, title })}
                 actionCampaignId={actionCampaignId}
               />
             ))}
@@ -327,6 +330,18 @@ export function MyCampaignsPage() {
             website:   profile.website ?? undefined,
             linkedin:  profile.linkedinUrl ?? undefined,
           } : undefined}
+        />
+      )}
+
+      {updateModalCampaign && (
+        <PublishUpdateModal
+          campaignId={updateModalCampaign.id}
+          campaignTitle={updateModalCampaign.title}
+          open={!!updateModalCampaign}
+          onClose={() => setUpdateModalCampaign(null)}
+          onSuccess={() => {
+            // Can reload campaigns if needed, but stories are loaded on investor feed
+          }}
         />
       )}
 

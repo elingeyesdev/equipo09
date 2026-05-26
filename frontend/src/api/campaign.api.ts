@@ -248,3 +248,20 @@ export async function deleteCampaignDocument(
 ): Promise<void> {
   await api.delete(`/entrepreneurs/me/campaigns/${campaignId}/documents/${docId}`);
 }
+
+export async function createCampaignUpdate(
+  campaignId: string,
+  dto: {
+    title: string;
+    content: string;
+    isPublic?: boolean;
+    attachments?: any[];
+  },
+): Promise<any> {
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/updates`,
+    dto,
+  );
+  return data.data;
+}
+
