@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Delete, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards, Delete, Query, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from '../services/admin.service';
 import { JwtAuthGuard } from '../../auth/guards';
@@ -145,5 +145,27 @@ export class AdminController {
     const reviewerId = req.user.id;
     const updated = await this.adminService.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
     return new ApiSuccessResponse(updated, 'Documento revisado con éxito');
+  }
+
+  @Get('kyc/pending')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Listar solicitudes KYC pendientes' })
+  async getPendingKyc() {
+    const pending = await this.adminService.getPendingKyc();
+    return new ApiSuccessResponse(pending, 'Solicitudes KYC pendientes obtenidas');
+  }
+
+  @Post('kyc/:id/review')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Aprobar o rechazar KYC' })
+  async reviewKyc(
+    @Param('id') entrepreneurId: string,
+    @Body('action') action: 'approve' | 'reject',
+    @Body('reason') reason: string | undefined,
+    @Req() req: any,
+  ) {
+    const reviewerId = req.user.id;
+    const updated = await this.adminService.reviewKyc(entrepreneurId, action, reviewerId, reason);
+    return new ApiSuccessResponse(updated, `KYC ${action === 'approve' ? 'aprobado' : 'rechazado'}`);
   }
 }

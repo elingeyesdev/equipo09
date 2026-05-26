@@ -14,7 +14,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | null;
+type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'kyc' | null;
 
 interface Props {
   profile: EntrepreneurProfile | null;
@@ -203,6 +203,18 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
               </span>
             </div>
           </div>
+        ) : profile?.kycStatus === 'pending' ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white border border-amber-100 rounded-2xl flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+                 <ShieldAlert size={24} strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0">
+                <div className="font-black text-slate-700 text-[14px] leading-tight mb-1 uppercase tracking-tight">Verificación en Proceso</div>
+                <div className="text-[11px] text-slate-400 font-bold leading-tight">Tus documentos están siendo revisados por el equipo.</div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
@@ -214,7 +226,16 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
                 <div className="text-[11px] text-slate-400 font-bold leading-tight">Envía tus documentos para proteger tu cuenta y habilitar recaudación.</div>
               </div>
             </div>
-            <button className="w-full mt-2 py-3.5 bg-[#f9a825] hover:bg-[#c62828] text-white font-black rounded-xl transition-all text-[12px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2">
+            {profile?.kycStatus === 'rejected' && profile?.kycRejectionReason && (
+              <div className="mt-2 p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-700">
+                <div className="font-bold uppercase mb-1">Motivo de rechazo:</div>
+                <div className="leading-snug">{profile.kycRejectionReason}</div>
+              </div>
+            )}
+            <button 
+              onClick={() => openModal('kyc')}
+              className="w-full mt-2 py-3.5 bg-[#f9a825] hover:bg-[#c62828] text-white font-black rounded-xl transition-all text-[12px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2"
+            >
               <ShieldAlert size={16} strokeWidth={3} />
               Iniciar Verificación
             </button>

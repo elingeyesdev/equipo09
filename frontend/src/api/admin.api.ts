@@ -217,3 +217,13 @@ export async function reviewAdminCampaignDocument(
   );
   return data.data;
 }
+
+export async function getPendingKyc(): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>('/admin/kyc/pending');
+  return data.data;
+}
+
+export async function reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reason?: string): Promise<any> {
+  const { data } = await api.post<ApiSuccessResponse<any>>(`/admin/kyc/${entrepreneurId}/review`, { action, reason });
+  return data.data;
+}

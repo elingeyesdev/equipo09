@@ -300,4 +300,36 @@ export class AdminRepository extends BaseRepository {
     );
     return res;
   }
+
+  async getPendingKyc() {
+    return this.queryMany(`
+      SELECT ep.id, ep.user_id, ep.first_name, ep.last_name, ep.company_name, ep.kyc_status, ep.verification_documents, ep.updated_at, u.email
+      FROM entrepreneur_profiles ep
+      JOIN users u ON ep.user_id = u.id
+      WHERE ep.kyc_status = 'pending'
+      ORDER BY ep.updated_at ASC
+    `);
+  }
+
+  async reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reviewerId: string, reason?: string) {
+    return this.transaction(async (client) => {
+      const kycStatus = action === 'approve' ? 'approved' : 'rejected';
+      const identityVerified = action === 'approve';
+      const rejectionReason = action === 'reject' ? reason || null : null;
+      
+      const updatedProfile = await client.query(`
+        UPDATE entrepreneur_profiles
+        SET kyc_status = $1,
+            identity_verified = $2,
+            identity_verified_at = CASE WHEN $2 = true THEN NOW() ELSE identity_verified_at END,
+            kyc_rejection_reason = $3,
+            updated_at = NOW()
+        WHERE id = $4
+        RETURNING *
+      `, [kycStatus, identityVerified, rejectionReason, entrepreneurId]);
+
+      // Podemos registrar la acción de revisión en audit_logs si existiera, o simplemente retornar.
+      return updatedProfile.rows[0];
+    });
+  }
 }

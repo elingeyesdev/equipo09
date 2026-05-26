@@ -11,6 +11,7 @@ import { EditProfileModal } from '../components/entrepreneur-profile/EditProfile
 import { NewCampaignFAB } from '../components/entrepreneur-profile/NewCampaignFAB';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
+import { KYCUploadModal } from '../components/KYCUploadModal';
 import {
   FolderOpen,
   AlertCircle,
@@ -27,7 +28,7 @@ import {
   Wallet
 } from 'lucide-react';
 
-type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'edit-campaign' | null;
+type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'edit-campaign' | 'kyc' | null;
 
 export function EntrepreneurProfilePage() {
   const {
@@ -181,6 +182,28 @@ export function EntrepreneurProfilePage() {
                       </button>
                     </div>
                   )}
+
+                  {profile?.kycStatus === 'rejected' && (
+                    <div className="bg-gradient-to-r from-red-600 to-red-800 text-white p-6 rounded-[32px] shadow-xl shadow-red-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
+                      <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30 shrink-0">
+                          <AlertCircle size={24} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                          <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-1">Verificación KYC Rechazada</h4>
+                          <p className="text-red-100/90 text-[13px] font-medium leading-tight">
+                            {profile.kycRejectionReason || 'Tus documentos no cumplen con los requisitos. Por favor, vuelve a intentar.'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setModalType('kyc')}
+                        className="bg-white text-red-700 px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-red-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer shrink-0 ml-4"
+                      >
+                        Reintentar KYC
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {activeTab === 'campaigns' ? (
@@ -331,11 +354,14 @@ export function EntrepreneurProfilePage() {
       </main>
 
       {/* Acciones Rápidas */}
-      <NewCampaignFAB openModal={(type: ModalType) => setModalType(type)} />
+      <NewCampaignFAB 
+        openModal={(type: ModalType) => setModalType(type)} 
+        disabled={!profile?.identityVerified}
+      />
 
       {/* Modales */}
       <EditProfileModal
-        type={modalType !== 'new-campaign' && modalType !== 'edit-campaign' ? modalType : null}
+        type={modalType !== 'new-campaign' && modalType !== 'edit-campaign' && modalType !== 'kyc' ? modalType : null}
         profile={profile}
         saving={saving}
         onClose={() => setModalType(null)}
@@ -355,6 +381,16 @@ export function EntrepreneurProfilePage() {
             />
           </div>
         </div>
+      )}
+
+      {modalType === 'kyc' && (
+        <KYCUploadModal 
+          onClose={() => setModalType(null)}
+          onSuccess={() => {
+            setModalType(null);
+            window.location.reload();
+          }}
+        />
       )}
 
       <CampaignPreviewModal

@@ -22,6 +22,8 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
+import { KYCReviewModal } from '../../components/admin/KYCReviewModal';
+import { getPendingKyc, reviewKyc } from '../../api/admin.api';
 
 export function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -34,7 +36,11 @@ export function AdminDashboardPage() {
   const [filterType, setFilterType] = useState<'all' | 'reward' | 'donation'>('all');
   const [page, setPage] = useState(1);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<'pending_review' | 'published'>('pending_review');
+  const [statusFilter, setStatusFilter] = useState<'pending_review' | 'published' | 'kyc'>('pending_review');
+
+  const [pendingKyc, setPendingKyc] = useState<any[]>([]);
+  const [selectedKyc, setSelectedKyc] = useState<any | null>(null);
+  const [isKycModalOpen, setIsKycModalOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -43,13 +49,22 @@ export function AdminDashboardPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [statsData, campaignsData] = await Promise.all([
-        getDashboardStats(),
-        getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType, status: statusFilter })
-      ]);
-      setStats(statsData);
-      setCampaigns(campaignsData.campaigns);
-      setTotalCampaigns(campaignsData.total);
+      if (statusFilter === 'kyc') {
+        const [statsData, kycData] = await Promise.all([
+          getDashboardStats(),
+          getPendingKyc()
+        ]);
+        setStats(statsData);
+        setPendingKyc(kycData);
+      } else {
+        const [statsData, campaignsData] = await Promise.all([
+          getDashboardStats(),
+          getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType, status: statusFilter })
+        ]);
+        setStats(statsData);
+        setCampaigns(campaignsData.campaigns);
+        setTotalCampaigns(campaignsData.total);
+      }
     } catch (error) {
       console.error('Error loading admin data:', error);
     } finally {
@@ -100,6 +115,10 @@ export function AdminDashboardPage() {
                  onClick={() => setStatusFilter('published')}
                  className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'published' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
                >Campañas Activas</button>
+               <button 
+                 onClick={() => setStatusFilter('kyc')}
+                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'kyc' ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-slate-600'}`}
+               >Verificaciones KYC</button>
             </div>
           </div>
         </div>
@@ -158,11 +177,13 @@ export function AdminDashboardPage() {
         <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/30">
             <div className="flex items-center gap-3">
-              {statusFilter === 'pending_review' ? <Clock size={20} className="text-indigo-600" /> : <Rocket size={20} className="text-emerald-600" />}
+              {statusFilter === 'pending_review' ? <Clock size={20} className="text-indigo-600" /> : statusFilter === 'kyc' ? <Users size={20} className="text-amber-600" /> : <Rocket size={20} className="text-emerald-600" />}
               <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
-                {statusFilter === 'pending_review' ? 'Revisión de Propuestas Técnicas' : 'Monitoreo de Capital Activo'}
+                {statusFilter === 'pending_review' ? 'Revisión de Propuestas Técnicas' : statusFilter === 'kyc' ? 'Verificaciones KYC Pendientes' : 'Monitoreo de Capital Activo'}
               </h2>
-              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] px-2 py-0.5 rounded-lg font-black`}>{totalCampaigns}</span>
+              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : statusFilter === 'kyc' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] px-2 py-0.5 rounded-lg font-black`}>
+                {statusFilter === 'kyc' ? pendingKyc.length : totalCampaigns}
+              </span>
             </div>
             
             <div className="flex flex-wrap items-center gap-3">
@@ -177,20 +198,22 @@ export function AdminDashboardPage() {
                     onKeyPress={(e) => e.key === 'Enter' && loadData()}
                   />
                </div>
-               <div className="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl">
-                  <button 
-                    onClick={() => setFilterType('all')}
-                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
-                  >Todas</button>
-                  <button 
-                    onClick={() => setFilterType('reward')}
-                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'reward' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
-                  >Reward</button>
-                  <button 
-                    onClick={() => setFilterType('donation')}
-                    className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'donation' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
-                  >Donation</button>
-               </div>
+               {statusFilter !== 'kyc' && (
+                 <div className="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl">
+                    <button 
+                      onClick={() => setFilterType('all')}
+                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >Todas</button>
+                    <button 
+                      onClick={() => setFilterType('reward')}
+                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'reward' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >Reward</button>
+                    <button 
+                      onClick={() => setFilterType('donation')}
+                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'donation' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >Donation</button>
+                 </div>
+               )}
             </div>
           </div>
 
@@ -198,55 +221,102 @@ export function AdminDashboardPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Propuesta / Emprendedor</th>
-                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta de Capital</th>
-                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
-                  <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
-                  <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+                  {statusFilter === 'kyc' ? (
+                    <>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Emprendedor</th>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Empresa</th>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
+                      <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+                    </>
+                  ) : (
+                    <>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Propuesta / Emprendedor</th>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta de Capital</th>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
+                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
+                      <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {campaigns.map((campaign) => (
-                  <tr key={campaign.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[14px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
-                        <div className="flex items-center gap-2">
-                           <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
-                              <Mail size={10} className="text-slate-400" />
-                           </div>
-                           <span className="text-[11px] font-bold text-slate-400">{campaign.entrepreneur_name}</span>
+                {statusFilter === 'kyc' ? (
+                  pendingKyc.map((kyc) => (
+                    <tr key={kyc.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[14px] font-black text-slate-900 group-hover:text-amber-600 transition-colors">{kyc.first_name} {kyc.last_name}</span>
+                          <div className="flex items-center gap-2">
+                             <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
+                                <Mail size={10} className="text-slate-400" />
+                             </div>
+                             <span className="text-[11px] font-bold text-slate-400">{kyc.email}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="text-[14px] font-black text-slate-900">
-                        ${parseFloat(campaign.goal_amount).toLocaleString()}
-                      </span>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">USD</div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm">
-                        {campaign.category_name}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
-                      {new Date(campaign.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <button 
-                        onClick={() => handleViewDetails(campaign.id)}
-                        className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
-                        title="Ver Perfil Corporativo"
-                      >
-                        <Eye size={18} />
-                        <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">
-                          {statusFilter === 'pending_review' ? 'Revisar' : 'Detalle'}
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="text-[13px] font-bold text-slate-600">{kyc.company_name || 'Sin especificar'}</span>
+                      </td>
+                      <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
+                        {new Date(kyc.updated_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <button 
+                          onClick={() => {
+                            setSelectedKyc(kyc);
+                            setIsKycModalOpen(true);
+                          }}
+                          className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-100 hover:bg-amber-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
+                        >
+                          <Eye size={18} />
+                          <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">Revisar</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  campaigns.map((campaign) => (
+                    <tr key={campaign.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[14px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
+                          <div className="flex items-center gap-2">
+                             <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
+                                <Mail size={10} className="text-slate-400" />
+                             </div>
+                             <span className="text-[11px] font-bold text-slate-400">{campaign.entrepreneur_name}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="text-[14px] font-black text-slate-900">
+                          ${parseFloat(campaign.goal_amount).toLocaleString()}
                         </span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">USD</div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm">
+                          {campaign.category_name}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
+                        {new Date(campaign.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <button 
+                          onClick={() => handleViewDetails(campaign.id)}
+                          className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
+                          title="Ver Perfil Corporativo"
+                        >
+                          <Eye size={18} />
+                          <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">
+                            {statusFilter === 'pending_review' ? 'Revisar' : 'Detalle'}
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -314,6 +384,23 @@ export function AdminDashboardPage() {
           socialLinks={selectedCampaignDetail.social_links}
         />
       )}
+
+      <KYCReviewModal 
+        isOpen={isKycModalOpen}
+        onClose={() => {
+          setIsKycModalOpen(false);
+          setSelectedKyc(null);
+        }}
+        kycData={selectedKyc}
+        onApprove={async (id) => {
+          await reviewKyc(id, 'approve');
+          loadData();
+        }}
+        onReject={async (id) => {
+          await reviewKyc(id, 'reject');
+          loadData();
+        }}
+      />
     </AdminLayout>
   );
 }

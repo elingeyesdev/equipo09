@@ -165,4 +165,16 @@ export class AdminService {
     }
     return updated;
   }
+
+  async getPendingKyc() {
+    return this.adminRepo.getPendingKyc();
+  }
+
+  async reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reviewerId: string, reason?: string) {
+    const updated = await this.adminRepo.reviewKyc(entrepreneurId, action, reviewerId, reason);
+    if (!updated) {
+      throw new NotFoundException('Emprendedor no encontrado');
+    }
+    return updated;
+  }
 }

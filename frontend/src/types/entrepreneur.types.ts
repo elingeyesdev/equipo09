@@ -17,6 +17,8 @@ export interface EntrepreneurProfile {
   bankName: string | null;
   identityVerified: boolean;
   identityVerifiedAt: string | null;
+  kycStatus?: string;
+  kycRejectionReason?: string | null;
   verificationDocuments: unknown[];
   totalCampaigns: number;
   totalRaised: number;
