@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Query, UseGuards, Request, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { CampaignService } from '../services';
-import { CreateCampaignDto, QueryCampaignsDto } from '../dto';
+import { CreateCampaignDto, QueryCampaignsDto, CreateCampaignUpdateDto } from '../dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('Entrepreneur Campaigns')
@@ -52,6 +52,24 @@ export class EntrepreneurCampaignsController {
       statusCode: 200,
       message: 'Campaign details retrieved successfully',
       data: campaign,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Post(':id/updates')
+  @ApiOperation({ summary: 'Create a new campaign update/story' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  async createUpdate(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: CreateCampaignUpdateDto,
+  ) {
+    const userId = req.user.sub || req.user.id;
+    const update = await this.campaignService.createCampaignUpdate(id, userId, dto);
+    return {
+      statusCode: 201,
+      message: 'Campaign update created successfully',
+      data: update,
       timestamp: new Date().toISOString(),
     };
   }

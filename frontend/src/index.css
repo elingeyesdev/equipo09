@@ -81,3 +81,18 @@
   background: var(--primary-green);
   opacity: 0.6;
 }
+
+/* Stories avatar bar — hide scrollbar while keeping scroll behaviour */
+.hide-scrollbar {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE / Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;                  /* Chrome / Safari */
+}
+
+/* Skeleton pulse animation for story loading state */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}

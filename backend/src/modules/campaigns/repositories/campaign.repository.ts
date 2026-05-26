@@ -1,6 +1,7 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { Pool } from 'pg';
 import { EntrepreneurCampaign, CreateCampaignDto } from '../models';
+import { CreateCampaignUpdateDto } from '../dto';
 
 export interface PaginatedCampaigns {
   data: EntrepreneurCampaign[];
@@ -315,5 +316,71 @@ export class CampaignRepository {
       `UPDATE campaigns SET view_count = COALESCE(view_count, 0) + 1 WHERE id = $1`,
       [campaignId],
     );
+  }
+
+  async createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any> {
+    const isPublic = dto.isPublic !== false;
+    const attachments = dto.attachments ? JSON.stringify(dto.attachments) : '[]';
+    
+    const query = `
+      INSERT INTO campaign_updates (campaign_id, author_id, title, content, is_public, attachments)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+    const values = [campaignId, authorId, dto.title, dto.content, isPublic, attachments];
+    const result = await this.pool.query(query, values);
+    return result.rows[0];
+  }
+
+  async getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]> {
+    const query = `
+      SELECT
+        cu.id,
+        cu.campaign_id AS "campaignId",
+        cu.title,
+        cu.content,
+        cu.attachments,
+        cu.created_at AS "createdAt",
+        c.title AS "campaignTitle",
+        c.cover_image_url AS "campaignCoverImageUrl",
+        ep.first_name || ' ' || ep.last_name AS "entrepreneurName",
+        ep.avatar_url AS "entrepreneurAvatar"
+      FROM campaign_updates cu
+      JOIN campaigns c ON cu.campaign_id = c.id
+      JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      WHERE cu.is_public = true
+        AND cu.created_at >= NOW() - INTERVAL '24 hours'
+        AND c.status = 'published'
+      ORDER BY cu.created_at ASC;
+    `;
+    const result = await this.pool.query(query);
+    
+    const groups: Record<string, any> = {};
+    for (const row of result.rows) {
+      const cid = row.campaignId;
+      if (!groups[cid]) {
+        groups[cid] = {
+          campaignId: cid,
+          campaignTitle: row.campaignTitle,
+          campaignCoverImageUrl: row.campaignCoverImageUrl,
+          entrepreneurName: row.entrepreneurName,
+          entrepreneurAvatar: row.entrepreneurAvatar,
+          stories: [],
+        };
+      }
+      groups[cid].stories.push({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        attachments: row.attachments || [],
+        createdAt: row.createdAt,
+      });
+    }
+    
+    return Object.values(groups).sort((a: any, b: any) => {
+      const latestA = new Date(a.stories[a.stories.length - 1].createdAt).getTime();
+      const latestB = new Date(b.stories[b.stories.length - 1].createdAt).getTime();
+      return latestB - latestA;
+    });
   }
 }

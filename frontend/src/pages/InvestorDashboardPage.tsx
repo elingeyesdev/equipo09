@@ -1,6 +1,7 @@
 import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { AddCapitalModal } from '../components/AddCapitalModal';
+import { StoriesAvatarBar } from '../components/StoriesAvatarBar';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
 import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
@@ -102,6 +103,9 @@ export function InvestorDashboardPage() {
 
         {data && (
           <div className="flex flex-col gap-16 animate-in fade-in duration-700">
+            {/* ─── Stories bar (Backlog R.2) ───────────────────────────────── */}
+            <StoriesAvatarBar />
+
             <InvestorDashboardOverview
               data={data}
               onAddCapital={() => setShowAddCapital(true)}

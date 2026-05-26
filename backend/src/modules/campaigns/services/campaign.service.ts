@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CampaignRepository, PaginatedCampaigns } from '../repositories';
 import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto } from '../models';
+import { CreateCampaignUpdateDto } from '../dto';
 
 @Injectable()
 export class CampaignService {
@@ -73,5 +74,13 @@ export class CampaignService {
     try {
       await this.campaignRepo.incrementViewCount(campaignId);
     } catch (_) {}
+  }
+
+  async createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any> {
+    return await this.campaignRepo.createCampaignUpdate(campaignId, authorId, dto);
+  }
+
+  async getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]> {
+    return await this.campaignRepo.getRecentPublicUpdatesGroupedByCampaign();
   }
 }

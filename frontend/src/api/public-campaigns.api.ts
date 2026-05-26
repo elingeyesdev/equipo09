@@ -91,3 +91,31 @@ export async function fetchPublicCampaignById(
   const res = await API.get(`/campaigns/public/${id}`);
   return res.data.data;
 }
+
+export interface StoryItem {
+  id: string;
+  title: string;
+  content: string;
+  attachments: any[];
+  createdAt: string;
+}
+
+export interface CampaignStoryGroup {
+  campaignId: string;
+  campaignTitle: string;
+  campaignCoverImageUrl: string | null;
+  entrepreneurName: string;
+  entrepreneurAvatar: string | null;
+  stories: StoryItem[];
+}
+
+export async function getRecentStories(): Promise<CampaignStoryGroup[]> {
+  const res = await API.get('/campaigns/public/updates/recent');
+  return res.data.data;
+}
+
+export async function seedTestStories(): Promise<any> {
+  const res = await API.post('/campaigns/public/updates/seed-test');
+  return res.data;
+}
+

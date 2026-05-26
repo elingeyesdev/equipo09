@@ -43,6 +43,72 @@ export class PublicCampaignController {
     };
   }
 
+  @Get('updates/recent')
+  @ApiOperation({ summary: 'Get recent public campaign updates (stories) from last 24h grouped by campaign' })
+  async getRecentUpdates() {
+    const data = await this.campaignService.getRecentPublicUpdatesGroupedByCampaign();
+    return {
+      statusCode: 200,
+      message: 'Recent public updates retrieved successfully',
+      data,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Post('updates/seed-test')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Seed test updates/stories for public campaigns for verification purposes' })
+  async seedTestUpdates() {
+    const campaignsResult = await this.campaignService.getPublicCampaigns({ page: '1', limit: '10' });
+    const campaigns = campaignsResult.data;
+    if (campaigns.length === 0) {
+      return {
+        statusCode: 400,
+        message: 'No active public campaigns found to seed stories for. Please publish a campaign first.',
+      };
+    }
+    
+    const seeded = [];
+    const sampleStories = [
+      {
+        title: '🚀 Lanzamiento Oficial!',
+        content: '¡Acabamos de lanzar nuestra campaña de fondeo! Únete hoy y sé parte de este cambio ecológico.',
+        attachments: [{ type: 'text', text: '¡Bienvenidos a nuestra campaña!' }]
+      },
+      {
+        title: '📸 Prototipo Finalizado',
+        content: 'Les mostramos el primer lote impreso en 3D de nuestro envase 100% biodegradable. ¡Se ve increíble!',
+        attachments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1536939459926-301728717817?q=80&w=2570&auto=format&fit=crop' }]
+      },
+      {
+        title: '🎥 Video de Pitch en Camino',
+        content: 'Estamos editando el video pitch con nuestro equipo de desarrollo. Estará disponible muy pronto.',
+        attachments: [{ type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4' }]
+      }
+    ];
+
+    for (let i = 0; i < Math.min(campaigns.length, 3); i++) {
+      const campaign = campaigns[i];
+      const story = sampleStories[i % sampleStories.length];
+      const authorId = (campaign as any).entrepreneurUserId || (campaign as any).creatorId;
+      
+      const created = await this.campaignService.createCampaignUpdate(campaign.id, authorId, {
+        title: story.title,
+        content: story.content,
+        isPublic: true,
+        attachments: story.attachments
+      });
+      seeded.push({ campaignId: campaign.id, updateId: created.id });
+    }
+
+    return {
+      statusCode: 200,
+      message: `Successfully seeded ${seeded.length} test stories!`,
+      data: seeded,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get public campaign details by ID. No auth required.' })
   @ApiParam({ name: 'id', description: 'Campaign UUID' })
