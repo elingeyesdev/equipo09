@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsUUID, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsUUID, IsDateString, Matches } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsAfterDate } from '../../../common/decorators/is-after-date.decorator';
@@ -54,6 +54,14 @@ export class CreateCampaignDto {
   @IsDateString({}, { message: 'endDate debe tener un formato de fecha válido (ISO 8601)' })
   @IsAfterDate('startDate', { message: 'La fecha de cierre debe ser estrictamente posterior a la fecha de inicio' })
   endDate?: string;
+
+  @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' })
+  @IsOptional()
+  @IsString()
+  @Matches(/(youtube\.com|youtu\.be|tiktok\.com)/, {
+    message: 'El video debe ser un enlace válido de YouTube o TikTok',
+  })
+  videoUrl?: string;
 }
 
 export class QueryCampaignsDto {

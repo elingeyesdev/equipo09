@@ -44,7 +44,10 @@ export class CreateCampaignDto {
   @Min(1)
   goalAmount: number;
 
-
+  @ApiPropertyOptional({ enum: ['donation', 'reward', 'equity'], example: 'donation' })
+  @IsOptional()
+  @IsEnum(['donation', 'reward', 'equity'])
+  campaignType?: 'donation' | 'reward' | 'equity';
 
   @ApiPropertyOptional({ example: '2026-12-31T23:59:59Z' })
   @IsOptional()

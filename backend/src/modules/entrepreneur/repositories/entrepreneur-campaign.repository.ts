@@ -24,13 +24,14 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         `INSERT INTO campaigns (
           creator_id, title, slug, short_description, description,
           campaign_type, goal_amount, end_date, status, video_url
-        ) VALUES ($1, $2, $3, $4, $5, 'reward', $6, $7, 'draft', $8) RETURNING id`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'draft', $9) RETURNING id`,
         [
           creatorId,
           dto.title,
           slug,
           dto.shortDescription || null,
           dto.description,
+          dto.campaignType || 'donation',
           dto.goalAmount,
           dto.endDate || null,
           dto.videoUrl || null
@@ -302,18 +303,9 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
   }
 
   async validateRewardsSum(campaignId: string): Promise<boolean> {
-    const campaign = await this.queryOne(`SELECT goal_amount, campaign_type FROM campaigns WHERE id = $1`, [campaignId]);
-    if (!campaign || campaign.campaign_type !== 'reward') return true;
-
-    const sumResult = await this.queryOne(
-      `SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true`,
-      [campaignId]
-    );
-
-    const totalValue = Number(sumResult?.total_value) || 0;
-    const goalAmount = Number(campaign.goal_amount) || 0;
-
-    return totalValue === goalAmount;
+    // Con la introducción de recompensas basadas en porcentajes logrados (min_percentage / max_percentage),
+    // la regla tradicional de que la sumatoria (monto * stock) sea igual a la meta ya no aplica.
+    return true;
   }
 
   async updateCoverImageUrl(

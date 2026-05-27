@@ -5,7 +5,7 @@ import { CampaignService } from '../services';
 @ApiTags('Public Campaigns')
 @Controller('campaigns/public')
 export class PublicCampaignController {
-  constructor(private readonly campaignService: CampaignService) {}
+  constructor(private readonly campaignService: CampaignService) { }
 
   @Get()
   @ApiOperation({ summary: 'List public campaigns (approved/published). No auth required.' })
@@ -67,7 +67,7 @@ export class PublicCampaignController {
         message: 'No active public campaigns found to seed stories for. Please publish a campaign first.',
       };
     }
-    
+
     const seeded = [];
     const sampleStories = [
       {
@@ -91,7 +91,7 @@ export class PublicCampaignController {
       const campaign = campaigns[i];
       const story = sampleStories[i % sampleStories.length];
       const authorId = (campaign as any).entrepreneurUserId || (campaign as any).creatorId;
-      
+
       const created = await this.campaignService.createCampaignUpdate(campaign.id, authorId, {
         title: story.title,
         content: story.content,

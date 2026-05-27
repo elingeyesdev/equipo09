@@ -7,13 +7,20 @@ import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, Camp
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
-import { formatNumberSpanish, parseNumberSpanish, isFutureDate } from '../utils/numberFormat';
+import { formatNumberSpanish, isFutureDate } from '../utils/numberFormat';
+
+const CAMPAIGN_TYPE_OPTIONS: { value: CampaignType; label: string; description: string }[] = [
+  { value: 'donation', label: 'Donación', description: 'Recibe contribuciones sin entregar nada a cambio.' },
+  { value: 'reward', label: 'Recompensa', description: 'Ofrece recompensas a tus patrocinadores por sus aportes.' },
+  { value: 'equity', label: 'Equity', description: 'Cede participación de tu empresa a los inversores.' },
+];
 
 const schema = z.object({
   title: z.string().min(5, 'El título debe tener entre 5 y 90 caracteres').max(90, 'El título debe tener entre 5 y 90 caracteres'),
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es $100'),
+  campaignType: z.enum(['donation', 'reward', 'equity']),
   categoryIds: z.array(z.string()).min(1, 'Debes seleccionar al menos una categoría'),
   endDate: z.string().optional().or(z.literal(''))
     .refine((val) => !val || isFutureDate(val), {
@@ -42,7 +49,6 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     reset,
     watch,
     control,
-    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -51,6 +57,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       description: initialData?.description || '',
       shortDescription: initialData?.shortDescription || '',
       goalAmount: initialData?.goalAmount || 1000,
+      campaignType: (initialData?.campaignType as CampaignType) || 'donation',
       categoryIds: initialData?.categoryIds || (initialData?.categoryId ? [initialData.categoryId] : []),
       endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
       videoUrl: initialData?.videoUrl || '',
@@ -58,7 +65,6 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   });
 
 
-  const goalAmount = watch('goalAmount') || 1000;
   const titleVal = watch('title') || '';
   const sloganVal = watch('shortDescription') || '';
   const descVal = watch('description') || '';
@@ -202,6 +208,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       shortDescription: data.shortDescription || undefined,
       categoryIds: data.categoryIds,
       goalAmount: data.goalAmount,
+      campaignType: data.campaignType,
       endDate: data.endDate || undefined,
       rewards: rewards,
       videoUrl: data.videoUrl || undefined
@@ -341,6 +348,22 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
               {...register('endDate')}
             />
             {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
+          </div>
+
+          <div className="flex flex-col md:col-span-3">
+            <label htmlFor="campaignType" className={labelClass}>Tipo de Campaña <span className="text-[#c62828] font-bold">*</span></label>
+            <select
+              id="campaignType"
+              className={`${inputClass} ${errors.campaignType ? errorClass : ''}`}
+              {...register('campaignType')}
+            >
+              {CAMPAIGN_TYPE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value} className="text-[#1c2b1e]">
+                  {opt.label} ({opt.description})
+                </option>
+              ))}
+            </select>
+            {errors.campaignType && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.campaignType.message}</span>}
           </div>
 
           <div className="flex flex-col md:col-span-3">

@@ -144,12 +144,24 @@ export class CampaignRepository {
       ep.first_name || ' ' || ep.last_name AS entrepreneur_name,
       ep.display_name AS entrepreneur_display_name,
       ep.avatar_url AS entrepreneur_avatar,
-      cat.display_name AS category_name,
-      cat.slug AS category_slug,
+      COALESCE(cat.display_name, (
+        SELECT cat2.display_name 
+        FROM campaign_categories cc 
+        JOIN categories cat2 ON cc.category_id = cat2.id 
+        WHERE cc.campaign_id = c.id 
+        LIMIT 1
+      )) AS category_name,
+      COALESCE(cat.slug, (
+        SELECT cat2.slug 
+        FROM campaign_categories cc 
+        JOIN categories cat2 ON cc.category_id = cat2.id 
+        WHERE cc.campaign_id = c.id 
+        LIMIT 1
+      )) AS category_slug,
       c.video_url
     FROM campaigns c
     JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
-    JOIN categories cat ON c.category_id = cat.id
+    LEFT JOIN categories cat ON c.category_id = cat.id
   `;
 
   private mapRowToPublicCampaign(row: any): any {
@@ -248,7 +260,14 @@ export class CampaignRepository {
   async findPublicById(id: string): Promise<any | null> {
     const query = `
       SELECT
-        c.id, c.category_id, c.title, c.slug, c.subtitle, c.short_description,
+        c.id,
+        COALESCE(c.category_id, (
+          SELECT cc.category_id 
+          FROM campaign_categories cc 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_id,
+        c.title, c.slug, c.subtitle, c.short_description,
         c.description, c.campaign_type, c.status,
         c.goal_amount, c.current_amount, c.investor_count,
         c.cover_image_url, c.currency,
@@ -259,12 +278,24 @@ export class CampaignRepository {
         ep.display_name AS entrepreneur_display_name,
         ep.avatar_url AS entrepreneur_avatar,
         ep.bio AS entrepreneur_bio,
-        cat.display_name AS category_name,
-        cat.slug AS category_slug,
+        COALESCE(cat.display_name, (
+          SELECT cat2.display_name 
+          FROM campaign_categories cc 
+          JOIN categories cat2 ON cc.category_id = cat2.id 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_name,
+        COALESCE(cat.slug, (
+          SELECT cat2.slug 
+          FROM campaign_categories cc 
+          JOIN categories cat2 ON cc.category_id = cat2.id 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_slug,
         c.video_url
       FROM campaigns c
       JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
-      JOIN categories cat ON c.category_id = cat.id
+      LEFT JOIN categories cat ON c.category_id = cat.id
       WHERE c.id = $1 AND c.status IN ('published', 'funded', 'partially_funded');
     `;
     const { rows } = await this.pool.query(query, [id]);

@@ -50,11 +50,13 @@ export interface CreateCampaignDto {
   description: string;
   shortDescription?: string;
   goalAmount: number;
+  campaignType?: CampaignType;
   endDate?: string;
   categoryIds?: string[];
   rewards?: CreateRewardTierDto[];
   videoUrl?: string;
 }
+
 
 export type CampaignFilterPreset =
   | 'all'
