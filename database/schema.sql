@@ -594,7 +594,7 @@ CREATE TABLE reward_tiers (
     campaign_id         UUID           NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     title               VARCHAR(200)   NOT NULL,
     description         TEXT           NOT NULL,
-    amount              NUMERIC(12,2)  NOT NULL CHECK (amount > 0),
+    amount              NUMERIC(12,2)  CHECK (amount > 0),
     currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
     max_claims          INTEGER,
     current_claims      INTEGER        NOT NULL DEFAULT 0 CHECK (current_claims >= 0),

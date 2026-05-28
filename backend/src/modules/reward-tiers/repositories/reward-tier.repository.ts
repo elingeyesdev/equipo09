@@ -15,6 +15,7 @@ export class RewardTierRepository extends BaseRepository {
       RETURNING *;
     `;
     const values = [
+      campaignId,
       dto.title,
       dto.description,
       dto.amount || null,
