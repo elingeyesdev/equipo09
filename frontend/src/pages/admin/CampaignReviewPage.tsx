@@ -32,6 +32,76 @@ export const CampaignReviewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [videoFilter, setVideoFilter] = useState(false);
 
+  // Custom modal dialog states
+  const [dialog, setDialog] = useState<{
+    isOpen: boolean;
+    type: 'alert' | 'confirm' | 'prompt';
+    title: string;
+    message: string;
+    placeholder?: string;
+    defaultValue?: string;
+    onConfirm: (val?: string) => void;
+    onCancel?: () => void;
+  } | null>(null);
+  const [dialogInput, setDialogInput] = useState('');
+
+  // Helper dialog methods returning promises
+  const showAlert = (title: string, message: string): Promise<void> => {
+    return new Promise((resolve) => {
+      setDialog({
+        isOpen: true,
+        type: 'alert',
+        title,
+        message,
+        onConfirm: () => {
+          setDialog(null);
+          resolve();
+        }
+      });
+    });
+  };
+
+  const showConfirm = (title: string, message: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setDialog({
+        isOpen: true,
+        type: 'confirm',
+        title,
+        message,
+        onConfirm: () => {
+          setDialog(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setDialog(null);
+          resolve(false);
+        }
+      });
+    });
+  };
+
+  const showPrompt = (title: string, message: string, placeholder = '', defaultValue = ''): Promise<string | null> => {
+    setDialogInput(defaultValue);
+    return new Promise((resolve) => {
+      setDialog({
+        isOpen: true,
+        type: 'prompt',
+        title,
+        message,
+        placeholder,
+        defaultValue,
+        onConfirm: (val) => {
+          setDialog(null);
+          resolve(val || '');
+        },
+        onCancel: () => {
+          setDialog(null);
+          resolve(null);
+        }
+      });
+    });
+  };
+
   useEffect(() => {
     loadCampaigns();
   }, [page, typeFilter]);
@@ -76,7 +146,7 @@ export const CampaignReviewPage: React.FC = () => {
       setIsModalOpen(true);
     } catch (err) {
       console.error('Error loading campaign detail:', err);
-      alert('Error al cargar el detalle de la campaña.');
+      await showAlert('Error', 'Error al cargar el detalle de la campaña.');
     } finally {
       setLoading(false);
     }
@@ -93,14 +163,15 @@ export const CampaignReviewPage: React.FC = () => {
       loadCampaigns();
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Error al actualizar el estado de la campaña.');
+      await showAlert('Error', 'Error al actualizar el estado de la campaña.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleQuickApprove = async (id: string, title: string) => {
-    if (!window.confirm(`¿Estás seguro de que deseas aprobar la campaña "${title}"?`)) return;
+    const ok = await showConfirm('Aprobar Campaña', `¿Estás seguro de que deseas aprobar la campaña "${title}"?`);
+    if (!ok) return;
     
     setLoading(true);
     try {
@@ -108,17 +179,17 @@ export const CampaignReviewPage: React.FC = () => {
       loadCampaigns();
     } catch (err) {
       console.error('Error approving campaign:', err);
-      alert('Error al aprobar la campaña.');
+      await showAlert('Error', 'Error al aprobar la campaña.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleQuickReject = async (id: string, title: string) => {
-    const feedback = window.prompt(`Indica el motivo del rechazo para "${title}":`);
+    const feedback = await showPrompt('Rechazar Campaña', `Indica el motivo del rechazo para "${title}":`);
     if (feedback === null) return; // Cancelled
     if (!feedback.trim()) {
-      alert('El motivo del rechazo es obligatorio.');
+      await showAlert('Rechazo Inválido', 'El motivo del rechazo es obligatorio.');
       return;
     }
 
@@ -128,7 +199,7 @@ export const CampaignReviewPage: React.FC = () => {
       loadCampaigns();
     } catch (err) {
       console.error('Error rejecting campaign:', err);
-      alert('Error al rechazar la campaña.');
+      await showAlert('Error', 'Error al rechazar la campaña.');
     } finally {
       setLoading(false);
     }
@@ -472,6 +543,57 @@ export const CampaignReviewPage: React.FC = () => {
             tags={selectedCampaignDetail.tags}
             socialLinks={selectedCampaignDetail.social_links}
           />
+        )}
+
+        {/* Custom modal dialog */}
+        {dialog && dialog.isOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-['Sora',sans-serif] animate-in fade-in duration-200">
+            <div 
+              className="absolute inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm" 
+              onClick={() => dialog.onCancel ? dialog.onCancel() : dialog.onConfirm()} 
+            />
+            <div className="bg-white rounded-3xl w-full max-w-md p-6 relative z-10 shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-100">
+              <h3 className="text-lg font-black text-[#1c2b1e] mb-2">{dialog.title}</h3>
+              <p className="text-slate-500 font-medium text-sm mb-4 leading-relaxed">{dialog.message}</p>
+              
+              {dialog.type === 'prompt' && (
+                <input
+                  type="text"
+                  placeholder={dialog.placeholder || "Escribe aquí..."}
+                  value={dialogInput}
+                  onChange={(e) => setDialogInput(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium mb-5"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      dialog.onConfirm(dialogInput);
+                    }
+                  }}
+                />
+              )}
+              
+              <div className="flex justify-end gap-3">
+                {dialog.type !== 'alert' && (
+                  <button
+                    onClick={() => dialog.onCancel?.()}
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                )}
+                <button
+                  onClick={() => dialog.onConfirm(dialogInput)}
+                  className={`px-5 py-2.5 font-bold rounded-xl text-xs uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer text-white ${
+                    dialog.type === 'prompt' && dialog.title.toLowerCase().includes('rechaz')
+                      ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20'
+                      : 'bg-[#1c2b1e] hover:bg-[#2e7d32] shadow-lg shadow-emerald-950/20'
+                  }`}
+                >
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </AdminLayout>
