@@ -20,11 +20,14 @@ interface Props {
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; bg: string; text: string; border: string }> = {
   published:     { label: 'Publicada',  dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  funded:        { label: 'Activa',     dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  partially_funded:{ label: 'Activa',   dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
   approved:      { label: 'Aprobada',   dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
   draft:         { label: 'Borrador',   dot: '#94a3b8', bg: '#f8fafc', text: '#475569', border: '#e2e8f0' },
   pending_review:{ label: 'En Revisión',dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
   in_review:     { label: 'En Revisión',dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
   rejected:      { label: 'Rechazada', dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+  completed:     { label: 'Finalizada', dot: '#6366f1', bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
 };
 
 export function CampaignCard({
@@ -61,10 +64,13 @@ export function CampaignCard({
   /* --- Banner color gradient by status --- */
   const bannerGradient =
     campaign.status === 'published'  ? 'linear-gradient(135deg, #1c2b1e 0%, #2e7d32 60%, #00897b 100%)' :
+    campaign.status === 'funded' || campaign.status === 'partially_funded'
+                                     ? 'linear-gradient(135deg, #14532d 0%, #16a34a 60%, #10b981 100%)' :
     campaign.status === 'draft'      ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' :
     campaign.status === 'pending_review' || campaign.status === 'in_review'
                                      ? 'linear-gradient(135deg, #78350f 0%, #d97706 100%)' :
     campaign.status === 'rejected'   ? 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%)' :
+    campaign.status === 'completed'  ? 'linear-gradient(135deg, #312e81 0%, #4f46e5 100%)' :
                                        'linear-gradient(135deg, #1e293b 0%, #2e7d32 100%)';
 
   return (

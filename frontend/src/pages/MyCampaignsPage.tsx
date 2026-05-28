@@ -35,10 +35,10 @@ function SummaryStat({
 
 const STATUS_TABS = [
   { value: 'all',            label: 'Todas' },
-  { value: 'published',      label: 'Publicadas' },
-  { value: 'draft',          label: 'Borrador' },
+  { value: 'active',         label: 'Activas' },
+  { value: 'draft',          label: 'Borradores' },
   { value: 'pending_review', label: 'En Revisión' },
-  { value: 'rejected',       label: 'Rechazadas' },
+  { value: 'completed',      label: 'Finalizadas' },
 ];
 
 export function MyCampaignsPage() {
@@ -79,14 +79,19 @@ export function MyCampaignsPage() {
 
   const filteredCampaigns = campaigns.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && (c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded')) ||
+      (statusFilter === 'pending_review' && (c.status === 'pending_review' || c.status === 'in_review')) ||
+      (statusFilter === 'completed' && c.status === 'completed') ||
+      c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   /* Calculated summary stats */
   const totalRaised  = campaigns.reduce((s, c) => s + (c.currentAmount ?? 0), 0);
   const totalInvestors = campaigns.reduce((s, c) => s + (c.investorCount ?? 0), 0);
-  const publishedCount = campaigns.filter(c => c.status === 'published').length;
+  const activeCount = campaigns.filter(c => c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded').length;
 
   const formatMoney = (n: number) =>
     n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M`
@@ -151,7 +156,7 @@ export function MyCampaignsPage() {
           <SummaryStat icon={<Rocket size={18} />}    label="Campañas" value={campaigns.length}   accent="#2e7d32" />
           <SummaryStat icon={<TrendingUp size={18} />} label="Recaudado" value={formatMoney(totalRaised)} accent="#00897b" />
           <SummaryStat icon={<Users size={18} />}     label="Inversores" value={totalInvestors}    accent="#f59e0b" />
-          <SummaryStat icon={<Star size={18} />}      label="Publicadas" value={publishedCount}    accent="#aed581" />
+          <SummaryStat icon={<Star size={18} />}      label="Activas" value={activeCount}    accent="#aed581" />
         </div>
 
         {/* ── Toolbar: tabs de estado + buscador + view toggle ── */}
@@ -173,7 +178,14 @@ export function MyCampaignsPage() {
                 {tab.label}
                 {tab.value !== 'all' && (
                   <span className="ml-1.5 text-[10px] font-black opacity-60">
-                    ({campaigns.filter(c => c.status === tab.value || (tab.value === 'pending_review' && c.status === 'in_review')).length})
+                    ({
+                      campaigns.filter(c =>
+                        (tab.value === 'active' && (c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded')) ||
+                        (tab.value === 'pending_review' && (c.status === 'pending_review' || c.status === 'in_review')) ||
+                        (tab.value === 'completed' && c.status === 'completed') ||
+                        c.status === tab.value
+                      ).length
+                    })
                   </span>
                 )}
               </button>
