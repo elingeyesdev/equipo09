@@ -48,6 +48,7 @@ INSERT INTO notification_types (code, name, description, template, category, def
     ('campaign_approved',           'Campaña Aprobada',                     'La campaña fue aprobada por un admin',                                 '¡Tu campaña "{{campaign_title}}" ha sido aprobada! Ya puedes publicarla.',                          'campaign',     '["in_app", "email", "push"]'),
     ('campaign_rejected',           'Campaña Rechazada',                    'La campaña fue rechazada por un admin',                                'Tu campaña "{{campaign_title}}" necesita cambios. Revisa el feedback del equipo.',                  'campaign',     '["in_app", "email"]'),
     ('campaign_published',          'Campaña Publicada',                    'La campaña fue publicada exitosamente',                                '¡Tu campaña "{{campaign_title}}" está en vivo! Compártela para alcanzar tu meta.',                  'campaign',     '["in_app", "email", "push"]'),
+    ('campaign_finalized',          'Campaña Finalizada',                   'La campaña fue finalizada por su creador o por vencimiento',           'Tu campaña "{{campaign_title}}" ha sido finalizada y ya no recibirá nuevas inversiones.',            'campaign',     '["in_app", "email"]'),
     ('campaign_funded',             'Campaña Financiada',                   'La campaña alcanzó su meta',                                           '🎉 ¡Felicidades! Tu campaña "{{campaign_title}}" alcanzó su meta de {{goal_amount}}.',              'campaign',     '["in_app", "email", "push"]'),
     ('campaign_failed',             'Campaña No Financiada',                'La campaña no alcanzó su meta',                                        'Tu campaña "{{campaign_title}}" no alcanzó su meta antes de la fecha límite.',                      'campaign',     '["in_app", "email"]'),
     ('campaign_update',             'Actualización de Campaña',             'El emprendedor publicó una actualización',                              'Nueva actualización en "{{campaign_title}}": {{update_title}}',                                     'campaign',     '["in_app", "push"]'),
@@ -65,6 +66,10 @@ INSERT INTO notification_types (code, name, description, template, category, def
     
     -- Message notifications
     ('new_message',                 'Nuevo Mensaje',                        'Se recibió un nuevo mensaje',                                          'Tienes un nuevo mensaje de {{sender_name}}.',                                                       'message',      '["in_app", "push"]'),
+
+    -- KYC notifications
+    ('kyc_approved',                'KYC Aprobado',                         'La verificación KYC fue aprobada',                                     'Tu verificación KYC fue aprobada. Ya puedes operar sin restricciones.',                              'kyc',          '["in_app", "email"]'),
+    ('kyc_rejected',                'KYC Rechazado',                        'La verificación KYC fue rechazada',                                    'Tu verificación KYC fue rechazada. Revisa los documentos y vuelve a intentar.',                     'kyc',          '["in_app", "email"]'),
     
     -- Admin notifications
     ('new_campaign_to_review',      'Nueva Campaña para Revisión',          'Una campaña necesita ser revisada',                                    'Hay una nueva campaña pendiente de revisión: "{{campaign_title}}".',                                'admin',        '["in_app", "email"]');

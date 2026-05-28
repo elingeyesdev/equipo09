@@ -6,9 +6,10 @@ import {
   EntrepreneurCampaignRepository,
 } from './repositories';
 import { UsersModule } from '../users/user.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, NotificationsModule],
   controllers: [EntrepreneurController],
   providers: [
     EntrepreneurService,

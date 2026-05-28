@@ -26,6 +26,7 @@ import {
   CampaignInvestor,
 } from '../models';
 import { getCampaignCreationBlockers } from '../utils/campaign-profile-eligibility';
+import { NotificationsService } from '../../notifications/services/notifications.service';
 
 /**
  * Service: Emprendedor
@@ -40,6 +41,7 @@ export class EntrepreneurService {
     private readonly profileRepo: EntrepreneurProfileRepository,
     private readonly campaignRepo: EntrepreneurCampaignRepository,
     private readonly userRepo: UserRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // =========================================================================
@@ -316,6 +318,11 @@ export class EntrepreneurService {
         'Solo las campañas en borrador pueden enviarse a revisión',
       );
     }
+    await this.notificationsService.notifyCampaignSubmittedForReview({
+      entrepreneurUserId: userId,
+      campaignTitle: updated.title,
+      campaignId: updated.id,
+    });
     return updated;
   }
 
@@ -342,6 +349,11 @@ export class EntrepreneurService {
         'No se puede publicar: la campaña debe estar en borrador o aprobada',
       );
     }
+    await this.notificationsService.notifyCampaignPublished({
+      entrepreneurUserId: userId,
+      campaignTitle: updated.title,
+      campaignId: updated.id,
+    });
     return updated;
   }
 
@@ -550,6 +562,11 @@ export class EntrepreneurService {
         'Solo se pueden finalizar campañas que estén publicadas (activas)'
       );
     }
+    await this.notificationsService.notifyCampaignFinalized({
+      entrepreneurUserId: userId,
+      campaignTitle: updated.title,
+      campaignId: updated.id,
+    });
     return updated;
   }
 

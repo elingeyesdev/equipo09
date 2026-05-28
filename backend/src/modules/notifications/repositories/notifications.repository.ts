@@ -20,10 +20,23 @@ export class NotificationsRepository extends BaseRepository {
   }): Promise<void> {
     await this.query(
       `INSERT INTO notifications (user_id, type_id, title, body, channel, reference_type, reference_id, action_url, data)
-       SELECT $1, nt.id, $3, $4, 'in_app', $5, $6, $7, $8
-       FROM notification_types nt
-       WHERE nt.code = $2
-       LIMIT 1`,
+       SELECT
+         $1,
+         nt.id,
+         $3,
+         $4,
+         'in_app',
+         $5,
+         $6,
+         $7,
+         $8
+       FROM (SELECT 1) AS one
+       LEFT JOIN LATERAL (
+         SELECT id
+         FROM notification_types
+         WHERE code = $2
+         LIMIT 1
+       ) AS nt ON true`,
       [
         params.userId,
         params.typeCode,

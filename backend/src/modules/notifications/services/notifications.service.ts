@@ -197,4 +197,75 @@ export class NotificationsService {
       },
     });
   }
+
+  async notifyCampaignSubmittedForReview(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_submitted',
+      title: 'Campaña enviada a revisión',
+      body: `Tu campaña "${params.campaignTitle}" fue enviada para revisión del equipo.`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: '/my-campaigns',
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
+    });
+  }
+
+  async notifyCampaignPublished(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_published',
+      title: 'Campaña publicada',
+      body: `Tu campaña "${params.campaignTitle}" ya está visible para inversores.`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: `/campaign/${params.campaignId}`,
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
+    });
+  }
+
+  async notifyCampaignFinalized(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_finalized',
+      title: 'Campaña finalizada',
+      body: `La campaña "${params.campaignTitle}" fue finalizada correctamente.`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: '/my-campaigns',
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
+    });
+  }
+
+  async notifyKycReviewed(params: {
+    entrepreneurUserId: string;
+    approved: boolean;
+    reason?: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: params.approved ? 'kyc_approved' : 'kyc_rejected',
+      title: params.approved ? 'KYC aprobado' : 'KYC rechazado',
+      body: params.approved
+        ? 'Tu verificación KYC fue aprobada. Ya puedes operar sin restricciones.'
+        : params.reason
+          ? `Tu verificación KYC fue rechazada. Motivo: ${params.reason}`
+          : 'Tu verificación KYC fue rechazada. Revisa los documentos y vuelve a intentar.',
+      referenceType: 'kyc',
+      actionUrl: '/entrepreneur-profile',
+      data: { approved: params.approved, reason: params.reason },
+    });
+  }
 }

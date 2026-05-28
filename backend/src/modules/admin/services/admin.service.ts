@@ -175,6 +175,15 @@ export class AdminService {
     if (!updated) {
       throw new NotFoundException('Emprendedor no encontrado');
     }
+    try {
+      await this.notificationsService.notifyKycReviewed({
+        entrepreneurUserId: updated.user_id,
+        approved: action === 'approve',
+        reason,
+      });
+    } catch (err) {
+      console.error('Error sending KYC review notification:', err);
+    }
     return updated;
   }
 }
