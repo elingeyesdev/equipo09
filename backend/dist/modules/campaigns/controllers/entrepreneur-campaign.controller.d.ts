@@ -21,7 +21,7 @@ export declare class EntrepreneurCampaignsController {
         data: import("../models").EntrepreneurCampaign;
         timestamp: string;
     }>;
-    createUpdate(req: any, id: string, dto: CreateCampaignUpdateDto): Promise<{
+    createUpdate(req: any, id: string, dto: CreateCampaignUpdateDto, file?: Express.Multer.File): Promise<{
         statusCode: number;
         message: string;
         data: any;

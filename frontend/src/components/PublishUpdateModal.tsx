@@ -15,11 +15,39 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
   const [content, setContent] = useState('');
   const [attachmentType, setAttachmentType] = useState<'text' | 'image' | 'video'>('text');
   const [attachmentValue, setAttachmentValue] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   if (!open) return null;
+
+  const handleTabChange = (type: 'text' | 'image' | 'video') => {
+    setAttachmentType(type);
+    setAttachmentValue('');
+    setSelectedFile(null);
+    setFilePreview(null);
+    setError(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setError(null);
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,32 +59,38 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
       setError('El contenido debe tener al menos 10 caracteres.');
       return;
     }
+    if (attachmentType !== 'text' && !selectedFile) {
+      setError(`Debes seleccionar un archivo de ${attachmentType === 'image' ? 'imagen' : 'video'} para continuar.`);
+      return;
+    }
 
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
 
     const attachments: any[] = [];
-    if (attachmentValue.trim()) {
-      if (attachmentType === 'text') {
-        attachments.push({ type: 'text', text: attachmentValue.trim() });
-      } else {
-        attachments.push({ type: attachmentType, url: attachmentValue.trim() });
-      }
+    if (attachmentType === 'text' && attachmentValue.trim()) {
+      attachments.push({ type: 'text', text: attachmentValue.trim() });
     }
 
     try {
-      await createCampaignUpdate(campaignId, {
-        title: title.trim(),
-        content: content.trim(),
-        isPublic: true,
-        attachments,
-      });
+      await createCampaignUpdate(
+        campaignId,
+        {
+          title: title.trim(),
+          content: content.trim(),
+          isPublic: true,
+          attachments,
+        },
+        attachmentType !== 'text' && selectedFile ? selectedFile : undefined
+      );
 
       setSuccessMsg('Novedad publicada exitosamente.');
       setTitle('');
       setContent('');
       setAttachmentValue('');
+      setSelectedFile(null);
+      setFilePreview(null);
       
       setTimeout(() => {
         if (onSuccess) onSuccess();
@@ -151,7 +185,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
             <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1 mb-3">
               <button
                 type="button"
-                onClick={() => { setAttachmentType('text'); setAttachmentValue(''); }}
+                onClick={() => handleTabChange('text')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
                   attachmentType === 'text' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
@@ -160,38 +194,80 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
               </button>
               <button
                 type="button"
-                onClick={() => { setAttachmentType('image'); setAttachmentValue(''); }}
+                onClick={() => handleTabChange('image')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
                   attachmentType === 'image' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                <Image size={14} /> Imagen (URL)
+                <Image size={14} /> Imagen (Local)
               </button>
               <button
                 type="button"
-                onClick={() => { setAttachmentType('video'); setAttachmentValue(''); }}
+                onClick={() => handleTabChange('video')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
                   attachmentType === 'video' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                <Video size={14} /> Video (URL)
+                <Video size={14} /> Video (Local)
               </button>
             </div>
 
-            <input
-              type={attachmentType === 'text' ? 'text' : 'url'}
-              disabled={loading}
-              placeholder={
-                attachmentType === 'text' 
-                  ? 'Texto descriptivo adicional o pie de foto...' 
-                  : attachmentType === 'image'
-                  ? 'https://ejemplo.com/imagen.jpg'
-                  : 'https://ejemplo.com/video.mp4'
-              }
-              value={attachmentValue}
-              onChange={(e) => setAttachmentValue(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-            />
+            {attachmentType === 'text' ? (
+              <input
+                type="text"
+                disabled={loading}
+                placeholder="Texto descriptivo adicional o pie de foto..."
+                value={attachmentValue}
+                onChange={(e) => setAttachmentValue(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              />
+            ) : (
+              <div 
+                className={`relative h-[160px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${
+                  filePreview ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-200 hover:border-emerald-400 hover:bg-slate-50/50'
+                }`}
+                onClick={() => document.getElementById('update-file-upload')?.click()}
+              >
+                {filePreview ? (
+                  attachmentType === 'image' ? (
+                    <img src={filePreview} className="w-full h-full object-cover" alt="Preview" />
+                  ) : (
+                    <video src={filePreview} className="w-full h-full object-cover" muted playsInline />
+                  )
+                ) : (
+                  <div className="flex flex-col items-center text-slate-400 px-4 text-center">
+                    <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-2 border border-slate-100">
+                      {attachmentType === 'image' ? <Image size={18} className="text-slate-400" /> : <Video size={18} className="text-slate-400" />}
+                    </div>
+                    <p className="text-[12px] font-bold text-slate-600">
+                      Seleccionar {attachmentType === 'image' ? 'imagen' : 'video'} local
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Soporta JPG, PNG, WEBP, MP4, WEBM
+                    </p>
+                  </div>
+                )}
+                <input 
+                  id="update-file-upload" 
+                  type="file" 
+                  accept={attachmentType === 'image' ? 'image/*' : 'video/*'} 
+                  className="hidden" 
+                  onChange={handleFileChange} 
+                />
+                {filePreview && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile();
+                    }}
+                    className="absolute top-2 right-2 p-1.5 bg-slate-900/60 hover:bg-slate-900/80 rounded-lg text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Action buttons */}

@@ -257,11 +257,28 @@ export async function createCampaignUpdate(
     isPublic?: boolean;
     attachments?: any[];
   },
+  file?: File,
 ): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>(
-    `/entrepreneurs/me/campaigns/${campaignId}/updates`,
-    dto,
-  );
-  return data.data;
+  if (file) {
+    const formData = new FormData();
+    formData.append('title', dto.title);
+    formData.append('content', dto.content);
+    if (dto.isPublic !== undefined) {
+      formData.append('isPublic', String(dto.isPublic));
+    }
+    formData.append('file', file);
+    const { data } = await api.post<ApiSuccessResponse<any>>(
+      `/entrepreneurs/me/campaigns/${campaignId}/updates`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+    return data.data;
+  } else {
+    const { data } = await api.post<ApiSuccessResponse<any>>(
+      `/entrepreneurs/me/campaigns/${campaignId}/updates`,
+      dto,
+    );
+    return data.data;
+  }
 }
 

@@ -1,5 +1,8 @@
-import { Controller, Post, Get, Body, Query, UseGuards, Request, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, UseGuards, Request, Param, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { CampaignService } from '../services';
 import { CreateCampaignDto, QueryCampaignsDto, CreateCampaignUpdateDto } from '../dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -57,14 +60,52 @@ export class EntrepreneurCampaignsController {
   }
 
   @Post(':id/updates')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/campaigns',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   @ApiOperation({ summary: 'Create a new campaign update/story' })
   @ApiParam({ name: 'id', description: 'Campaign UUID' })
   async createUpdate(
     @Request() req: any,
     @Param('id') id: string,
     @Body() dto: CreateCampaignUpdateDto,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     const userId = req.user.sub || req.user.id;
+    
+    // Si se subió un archivo, parsear el tipo e insertarlo en attachments
+    if (file) {
+      const mimeType = file.mimetype;
+      let type: 'image' | 'video' = 'image';
+      if (mimeType.startsWith('video/')) {
+        type = 'video';
+      }
+      
+      dto.attachments = [
+        {
+          type,
+          url: `/uploads/campaigns/${file.filename}`,
+        },
+      ];
+    } else if (typeof dto.attachments === 'string') {
+      try {
+        dto.attachments = JSON.parse(dto.attachments);
+      } catch {
+        dto.attachments = [];
+      }
+    }
+
     const update = await this.campaignService.createCampaignUpdate(id, userId, dto);
     return {
       statusCode: 201,

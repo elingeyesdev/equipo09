@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntrepreneurCampaignsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 const services_1 = require("../services");
 const dto_1 = require("../dto");
 const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
@@ -52,8 +55,29 @@ let EntrepreneurCampaignsController = class EntrepreneurCampaignsController {
             timestamp: new Date().toISOString(),
         };
     }
-    async createUpdate(req, id, dto) {
+    async createUpdate(req, id, dto, file) {
         const userId = req.user.sub || req.user.id;
+        if (file) {
+            const mimeType = file.mimetype;
+            let type = 'image';
+            if (mimeType.startsWith('video/')) {
+                type = 'video';
+            }
+            dto.attachments = [
+                {
+                    type,
+                    url: `/uploads/campaigns/${file.filename}`,
+                },
+            ];
+        }
+        else if (typeof dto.attachments === 'string') {
+            try {
+                dto.attachments = JSON.parse(dto.attachments);
+            }
+            catch {
+                dto.attachments = [];
+            }
+        }
         const update = await this.campaignService.createCampaignUpdate(id, userId, dto);
         return {
             statusCode: 201,
@@ -98,13 +122,26 @@ __decorate([
 ], EntrepreneurCampaignsController.prototype, "getCampaignById", null);
 __decorate([
     (0, common_1.Post)(':id/updates'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/campaigns',
+            filename: (req, file, cb) => {
+                const randomName = Array(32)
+                    .fill(null)
+                    .map(() => Math.round(Math.random() * 16).toString(16))
+                    .join('');
+                return cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new campaign update/story' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'Campaign UUID' }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Body)()),
+    __param(3, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, dto_1.CreateCampaignUpdateDto]),
+    __metadata("design:paramtypes", [Object, String, dto_1.CreateCampaignUpdateDto, Object]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurCampaignsController.prototype, "createUpdate", null);
 exports.EntrepreneurCampaignsController = EntrepreneurCampaignsController = __decorate([
