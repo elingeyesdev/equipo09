@@ -71,6 +71,19 @@ let EntrepreneurController = class EntrepreneurController {
         });
         return new dto_2.ApiSuccessResponse(profile, 'Portada actualizada');
     }
+    async uploadKycDocuments(req, files) {
+        const userId = req.user.id;
+        if (!files.idDocument || !files.idDocument[0]) {
+            throw new Error('El documento de identidad es requerido');
+        }
+        if (!files.faceVideo || !files.faceVideo[0]) {
+            throw new Error('La validación facial es requerida');
+        }
+        const idDocumentUrl = `/uploads/kyc/${files.idDocument[0].filename}`;
+        const faceVideoUrl = `/uploads/kyc/${files.faceVideo[0].filename}`;
+        const profile = await this.entrepreneurService.submitKyc(userId, idDocumentUrl, faceVideoUrl);
+        return new dto_2.ApiSuccessResponse(profile, 'Documentos KYC enviados para revisión');
+    }
     async createCampaign(req, dto) {
         const userId = req.user.id;
         const campaign = await this.entrepreneurService.createCampaign(userId, dto);
@@ -267,6 +280,30 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurController.prototype, "uploadCover", null);
+__decorate([
+    (0, common_1.Post)('me/kyc'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'idDocument', maxCount: 1 },
+        { name: 'faceVideo', maxCount: 1 },
+    ], {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/kyc',
+            filename: (req, file, cb) => {
+                const randomName = Array(32)
+                    .fill(null)
+                    .map(() => Math.round(Math.random() * 16).toString(16))
+                    .join('');
+                return cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+    })),
+    (0, swagger_1.ApiOperation)({ summary: 'Subir documentos para verificación KYC' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurController.prototype, "uploadKycDocuments", null);
 __decorate([
     (0, swagger_1.ApiTags)('entrepreneur-campaigns'),
     (0, common_1.Post)('me/campaigns'),

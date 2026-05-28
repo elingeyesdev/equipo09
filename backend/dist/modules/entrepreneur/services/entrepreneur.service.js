@@ -17,11 +17,13 @@ const dto_1 = require("../../../common/dto");
 const repositories_1 = require("../repositories");
 const repositories_2 = require("../../users/repositories");
 const campaign_profile_eligibility_1 = require("../utils/campaign-profile-eligibility");
+const notifications_service_1 = require("../../notifications/services/notifications.service");
 let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
-    constructor(profileRepo, campaignRepo, userRepo) {
+    constructor(profileRepo, campaignRepo, userRepo, notificationsService) {
         this.profileRepo = profileRepo;
         this.campaignRepo = campaignRepo;
         this.userRepo = userRepo;
+        this.notificationsService = notificationsService;
         this.logger = new common_1.Logger(EntrepreneurService_1.name);
     }
     async createProfile(userId, dto) {
@@ -112,6 +114,25 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         }
         return updated;
     }
+    async submitKyc(userId, idDocumentUrl, faceVideoUrl) {
+        await this.ensureEntrepreneurProfile(userId);
+        const profile = await this.profileRepo.findByUserId(userId);
+        if (!profile) {
+            throw new exceptions_1.NotFoundException('Perfil de emprendedor');
+        }
+        if (profile.kycStatus === 'pending') {
+            throw new exceptions_1.BadRequestException('El KYC ya está en revisión');
+        }
+        const docs = [
+            { type: 'idDocument', url: idDocumentUrl, uploadedAt: new Date().toISOString() },
+            { type: 'faceValidation', url: faceVideoUrl, uploadedAt: new Date().toISOString() }
+        ];
+        const updated = await this.profileRepo.updateKycDocuments(userId, docs, 'pending');
+        if (!updated) {
+            throw new exceptions_1.BadRequestException('No se pudo enviar el KYC');
+        }
+        return updated;
+    }
     async getMyCampaigns(userId, query) {
         await this.ensureEntrepreneurProfile(userId);
         const { campaigns, total } = await this.campaignRepo.findByCreatorId(userId, query);
@@ -141,6 +162,11 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         if (!updated) {
             throw new exceptions_1.BadRequestException('Solo las campañas en borrador pueden enviarse a revisión');
         }
+        await this.notificationsService.notifyCampaignSubmittedForReview({
+            entrepreneurUserId: userId,
+            campaignTitle: updated.title,
+            campaignId: updated.id,
+        });
         return updated;
     }
     async publishCampaign(userId, campaignId) {
@@ -153,6 +179,11 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         if (!updated) {
             throw new exceptions_1.BadRequestException('No se puede publicar: la campaña debe estar en borrador o aprobada');
         }
+        await this.notificationsService.notifyCampaignPublished({
+            entrepreneurUserId: userId,
+            campaignTitle: updated.title,
+            campaignId: updated.id,
+        });
         return updated;
     }
     async updateCampaignCover(userId, campaignId, coverUrl) {
@@ -248,6 +279,11 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
         if (!updated) {
             throw new exceptions_1.BadRequestException('Solo se pueden finalizar campañas que estén publicadas (activas)');
         }
+        await this.notificationsService.notifyCampaignFinalized({
+            entrepreneurUserId: userId,
+            campaignTitle: updated.title,
+            campaignId: updated.id,
+        });
         return updated;
     }
     async uploadCampaignDocument(userId, campaignId, file, documentUrl, justification) {
@@ -295,6 +331,7 @@ exports.EntrepreneurService = EntrepreneurService = EntrepreneurService_1 = __de
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [repositories_1.EntrepreneurProfileRepository,
         repositories_1.EntrepreneurCampaignRepository,
-        repositories_2.UserRepository])
+        repositories_2.UserRepository,
+        notifications_service_1.NotificationsService])
 ], EntrepreneurService);
 //# sourceMappingURL=entrepreneur.service.js.map

@@ -87,6 +87,15 @@ let AdminController = class AdminController {
         const updated = await this.adminService.reviewCampaignDocument(campaignId, docId, status, reviewerNotes, reviewerId);
         return new dto_1.ApiSuccessResponse(updated, 'Documento revisado con éxito');
     }
+    async getPendingKyc() {
+        const pending = await this.adminService.getPendingKyc();
+        return new dto_1.ApiSuccessResponse(pending, 'Solicitudes KYC pendientes obtenidas');
+    }
+    async reviewKyc(entrepreneurId, action, reason, req) {
+        const reviewerId = req.user.id;
+        const updated = await this.adminService.reviewKyc(entrepreneurId, action, reviewerId, reason);
+        return new dto_1.ApiSuccessResponse(updated, `KYC ${action === 'approve' ? 'aprobado' : 'rechazado'}`);
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -222,6 +231,26 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "reviewCampaignDocument", null);
+__decorate([
+    (0, common_1.Get)('kyc/pending'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Listar solicitudes KYC pendientes' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getPendingKyc", null);
+__decorate([
+    (0, common_1.Post)('kyc/:id/review'),
+    (0, roles_decorator_1.Roles)('admin', 'super_admin'),
+    (0, swagger_1.ApiOperation)({ summary: 'Aprobar o rechazar KYC' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('action')),
+    __param(2, (0, common_1.Body)('reason')),
+    __param(3, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "reviewKyc", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('admin'),
     (0, swagger_1.ApiBearerAuth)(),

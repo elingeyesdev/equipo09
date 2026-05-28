@@ -19,15 +19,17 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         return this.transaction(async (client) => {
             const result = await client.query(`INSERT INTO campaigns (
           creator_id, title, slug, short_description, description,
-          campaign_type, goal_amount, end_date, status
-        ) VALUES ($1, $2, $3, $4, $5, 'reward', $6, $7, 'draft') RETURNING id`, [
+          campaign_type, goal_amount, end_date, status, video_url
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'draft', $9) RETURNING id`, [
                 creatorId,
                 dto.title,
                 slug,
                 dto.shortDescription || null,
                 dto.description,
+                dto.campaignType || 'donation',
                 dto.goalAmount,
-                dto.endDate || null
+                dto.endDate || null,
+                dto.videoUrl || null
             ]);
             const campaignId = result.rows[0].id;
             if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
@@ -130,7 +132,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        c.description
+        c.description, c.video_url
        FROM campaigns c
        WHERE ${whereClause}
        ORDER BY c.${sortBy} ${sortOrder}
@@ -148,7 +150,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         c.currency, c.cover_image_url, c.start_date, c.end_date,
         c.funded_at, c.is_featured, c.view_count,
         c.created_at, c.updated_at, c.published_at,
-        c.description
+        c.description, c.video_url
        FROM campaigns c
        WHERE c.id = $1 AND c.creator_id = $2`, [campaignId, creatorId]);
         if (!row)
@@ -205,13 +207,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         });
     }
     async validateRewardsSum(campaignId) {
-        const campaign = await this.queryOne(`SELECT goal_amount, campaign_type FROM campaigns WHERE id = $1`, [campaignId]);
-        if (!campaign || campaign.campaign_type !== 'reward')
-            return true;
-        const sumResult = await this.queryOne(`SELECT SUM(amount * max_claims) as total_value FROM reward_tiers WHERE campaign_id = $1 AND is_active = true`, [campaignId]);
-        const totalValue = Number(sumResult?.total_value) || 0;
-        const goalAmount = Number(campaign.goal_amount) || 0;
-        return totalValue === goalAmount;
+        return true;
     }
     async updateCoverImageUrl(campaignId, creatorId, coverImageUrl) {
         const row = await this.queryOne(`UPDATE campaigns
@@ -245,6 +241,10 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         if (dto.endDate !== undefined) {
             updates.push(`end_date = $${paramIndex++}`);
             values.push(dto.endDate || null);
+        }
+        if (dto.videoUrl !== undefined) {
+            updates.push(`video_url = $${paramIndex++}`);
+            values.push(dto.videoUrl || null);
         }
         return this.transaction(async (client) => {
             if (updates.length > 1) {
@@ -498,7 +498,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
     }
     async finalize(campaignId, creatorId) {
         const res = await this.queryOne(`UPDATE campaigns 
-       SET status = 'finished', updated_at = NOW() 
+       SET status = 'completed', updated_at = NOW() 
        WHERE id = $1 AND creator_id = $2 AND status = 'published'
        RETURNING id`, [campaignId, creatorId]);
         if (!res)

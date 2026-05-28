@@ -3,18 +3,21 @@ import { EntrepreneurProfileRepository, EntrepreneurCampaignRepository } from '.
 import { UserRepository } from '../../users/repositories';
 import { CreateEntrepreneurProfileDto, UpdateEntrepreneurProfileDto, QueryCampaignsDto, CreateCampaignDto } from '../dto';
 import { EntrepreneurProfile, EntrepreneurCampaign, CampaignFinancialProgress, EntrepreneurFinancialSummary, CampaignCreationReadiness, CampaignInvestor } from '../models';
+import { NotificationsService } from '../../notifications/services/notifications.service';
 export declare class EntrepreneurService {
     private readonly profileRepo;
     private readonly campaignRepo;
     private readonly userRepo;
+    private readonly notificationsService;
     private readonly logger;
-    constructor(profileRepo: EntrepreneurProfileRepository, campaignRepo: EntrepreneurCampaignRepository, userRepo: UserRepository);
+    constructor(profileRepo: EntrepreneurProfileRepository, campaignRepo: EntrepreneurCampaignRepository, userRepo: UserRepository, notificationsService: NotificationsService);
     createProfile(userId: string, dto: CreateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
     deleteMyProfile(userId: string): Promise<void>;
     getMyProfile(userId: string): Promise<EntrepreneurProfile>;
     getProfileById(profileId: string): Promise<EntrepreneurProfile>;
     updateMyProfile(userId: string, dto: UpdateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
     updateProfile(profileId: string, requestingUserId: string, dto: UpdateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
+    submitKyc(userId: string, idDocumentUrl: string, faceVideoUrl: string): Promise<EntrepreneurProfile>;
     getMyCampaigns(userId: string, query: QueryCampaignsDto): Promise<PaginatedResponse<EntrepreneurCampaign>>;
     createCampaign(userId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign>;
     getMyCampaignById(userId: string, campaignId: string): Promise<EntrepreneurCampaign>;

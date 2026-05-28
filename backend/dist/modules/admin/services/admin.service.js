@@ -16,12 +16,14 @@ const admin_repository_1 = require("../repositories/admin.repository");
 const repositories_1 = require("../../users/repositories");
 const repositories_2 = require("../../entrepreneur/repositories");
 const reward_tier_repository_1 = require("../../reward-tiers/repositories/reward-tier.repository");
+const notifications_service_1 = require("../../notifications/services/notifications.service");
 let AdminService = class AdminService {
-    constructor(adminRepo, userRepo, campaignRepo, rewardRepo) {
+    constructor(adminRepo, userRepo, campaignRepo, rewardRepo, notificationsService) {
         this.adminRepo = adminRepo;
         this.userRepo = userRepo;
         this.campaignRepo = campaignRepo;
         this.rewardRepo = rewardRepo;
+        this.notificationsService = notificationsService;
     }
     async getDashboardStats() {
         return this.adminRepo.getDashboardStats();
@@ -49,6 +51,30 @@ let AdminService = class AdminService {
         const updated = await this.adminRepo.updateCampaignStatus(campaignId, status, reviewerId, feedback);
         if (!updated) {
             throw new common_1.NotFoundException('Campaña no encontrada');
+        }
+        if (status === 'approved' || status === 'rejected') {
+            try {
+                const entrepreneurUserId = updated.creator_id;
+                const campaignTitle = updated.title;
+                if (status === 'approved') {
+                    await this.notificationsService.notifyCampaignApproved({
+                        entrepreneurUserId,
+                        campaignTitle,
+                        campaignId,
+                    });
+                }
+                else {
+                    await this.notificationsService.notifyCampaignRejected({
+                        entrepreneurUserId,
+                        campaignTitle,
+                        campaignId,
+                        feedback,
+                    });
+                }
+            }
+            catch (notifErr) {
+                console.error('Error sending campaign status notification:', notifErr);
+            }
         }
         return updated;
     }
@@ -122,6 +148,26 @@ let AdminService = class AdminService {
         }
         return updated;
     }
+    async getPendingKyc() {
+        return this.adminRepo.getPendingKyc();
+    }
+    async reviewKyc(entrepreneurId, action, reviewerId, reason) {
+        const updated = await this.adminRepo.reviewKyc(entrepreneurId, action, reviewerId, reason);
+        if (!updated) {
+            throw new common_1.NotFoundException('Emprendedor no encontrado');
+        }
+        try {
+            await this.notificationsService.notifyKycReviewed({
+                entrepreneurUserId: updated.user_id,
+                approved: action === 'approve',
+                reason,
+            });
+        }
+        catch (err) {
+            console.error('Error sending KYC review notification:', err);
+        }
+        return updated;
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
@@ -129,6 +175,7 @@ exports.AdminService = AdminService = __decorate([
     __metadata("design:paramtypes", [admin_repository_1.AdminRepository,
         repositories_1.UserRepository,
         repositories_2.EntrepreneurCampaignRepository,
-        reward_tier_repository_1.RewardTierRepository])
+        reward_tier_repository_1.RewardTierRepository,
+        notifications_service_1.NotificationsService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

@@ -21,6 +21,7 @@ export interface EntrepreneurCampaign {
     metadata: any;
     createdAt: Date;
     updatedAt: Date;
+    videoUrl: string | null;
 }
 export interface CreateCampaignDto {
     title: string;
@@ -65,6 +66,7 @@ export interface PublicCampaign {
     entrepreneurAvatar: string | null;
     categoryName: string;
     categorySlug: string;
+    videoUrl: string | null;
 }
 export interface PublicCampaignDetail extends PublicCampaign {
     description: string;

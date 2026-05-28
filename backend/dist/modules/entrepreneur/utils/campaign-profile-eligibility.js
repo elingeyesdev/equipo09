@@ -31,6 +31,9 @@ function getCampaignCreationBlockers(profile) {
     if (!profile.country?.trim()) {
         missing.push('país');
     }
+    if (!profile.identityVerified) {
+        missing.push('verificación de identidad (KYC) aprobada');
+    }
     return missing;
 }
 function isProfileCompleteForCampaignCreation(profile) {

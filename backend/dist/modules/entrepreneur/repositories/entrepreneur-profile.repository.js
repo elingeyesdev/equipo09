@@ -97,6 +97,13 @@ let EntrepreneurProfileRepository = class EntrepreneurProfileRepository extends 
         const result = await this.queryOne(`SELECT 1 FROM entrepreneur_profiles WHERE user_id = $1`, [userId]);
         return result !== null;
     }
+    async updateKycDocuments(userId, documents, kycStatus) {
+        const row = await this.queryOne(`UPDATE entrepreneur_profiles
+       SET verification_documents = $1, kyc_status = $2, kyc_rejection_reason = NULL
+       WHERE user_id = $3
+       RETURNING *`, [JSON.stringify(documents), kycStatus, userId]);
+        return row ? (0, models_1.mapRowToEntrepreneurProfile)(row) : null;
+    }
     async countCampaignsAsCreator(userId) {
         const row = await this.queryOne(`SELECT COUNT(*)::text AS c FROM campaigns WHERE creator_id = $1`, [userId]);
         return row ? parseInt(row.c, 10) : 0;

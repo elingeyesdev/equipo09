@@ -15,4 +15,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./campaign.dto"), exports);
+__exportStar(require("./create-campaign-update.dto"), exports);
 //# sourceMappingURL=index.js.map

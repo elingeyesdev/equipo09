@@ -23,6 +23,7 @@ export interface EntrepreneurCampaign {
     createdAt: Date;
     updatedAt: Date;
     publishedAt: Date | null;
+    videoUrl: string | null;
     categories?: any[];
     rewardTiers?: RewardTier[];
 }

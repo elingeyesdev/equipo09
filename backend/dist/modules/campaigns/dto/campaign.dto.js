@@ -75,6 +75,15 @@ __decorate([
     (0, is_after_date_decorator_1.IsAfterDate)('startDate', { message: 'La fecha de cierre debe ser estrictamente posterior a la fecha de inicio' }),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/(youtube\.com|youtu\.be|tiktok\.com)/, {
+        message: 'El video debe ser un enlace válido de YouTube o TikTok',
+    }),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "videoUrl", void 0);
 class QueryCampaignsDto {
 }
 exports.QueryCampaignsDto = QueryCampaignsDto;

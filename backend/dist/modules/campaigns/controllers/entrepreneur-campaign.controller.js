@@ -52,6 +52,16 @@ let EntrepreneurCampaignsController = class EntrepreneurCampaignsController {
             timestamp: new Date().toISOString(),
         };
     }
+    async createUpdate(req, id, dto) {
+        const userId = req.user.sub || req.user.id;
+        const update = await this.campaignService.createCampaignUpdate(id, userId, dto);
+        return {
+            statusCode: 201,
+            message: 'Campaign update created successfully',
+            data: update,
+            timestamp: new Date().toISOString(),
+        };
+    }
 };
 exports.EntrepreneurCampaignsController = EntrepreneurCampaignsController;
 __decorate([
@@ -86,6 +96,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], EntrepreneurCampaignsController.prototype, "getCampaignById", null);
+__decorate([
+    (0, common_1.Post)(':id/updates'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new campaign update/story' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Campaign UUID' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, dto_1.CreateCampaignUpdateDto]),
+    __metadata("design:returntype", Promise)
+], EntrepreneurCampaignsController.prototype, "createUpdate", null);
 exports.EntrepreneurCampaignsController = EntrepreneurCampaignsController = __decorate([
     (0, swagger_1.ApiTags)('Entrepreneur Campaigns'),
     (0, swagger_1.ApiBearerAuth)(),

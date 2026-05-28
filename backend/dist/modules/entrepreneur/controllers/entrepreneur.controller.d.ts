@@ -14,6 +14,10 @@ export declare class EntrepreneurController {
     getProfileById(id: string): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     uploadAvatar(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     uploadCover(req: Request, file: Express.Multer.File): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
+    uploadKycDocuments(req: Request, files: {
+        idDocument?: Express.Multer.File[];
+        faceVideo?: Express.Multer.File[];
+    }): Promise<ApiSuccessResponse<EntrepreneurProfile>>;
     createCampaign(req: Request, dto: CreateCampaignDto): Promise<ApiSuccessResponse<EntrepreneurCampaign>>;
     uploadCampaignDocument(req: Request, campaignId: string, file: Express.Multer.File, justification: string): Promise<ApiSuccessResponse<any>>;
     getCampaignDocuments(req: Request, campaignId: string): Promise<ApiSuccessResponse<any[]>>;

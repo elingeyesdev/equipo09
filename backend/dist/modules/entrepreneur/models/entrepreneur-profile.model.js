@@ -23,6 +23,8 @@ function mapRowToEntrepreneurProfile(row) {
         coverUrl: row.cover_url,
         identityVerified: row.identity_verified,
         identityVerifiedAt: row.identity_verified_at,
+        kycStatus: row.kyc_status,
+        kycRejectionReason: row.kyc_rejection_reason || null,
         verificationDocuments: row.verification_documents ?? [],
         totalCampaigns: Number(row.total_campaigns),
         totalRaised: Number(row.total_raised),

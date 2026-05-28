@@ -8,6 +8,7 @@ export declare class EntrepreneurProfileRepository extends BaseRepository {
     create(userId: string, dto: CreateEntrepreneurProfileDto): Promise<EntrepreneurProfile>;
     update(userId: string, dto: UpdateEntrepreneurProfileDto): Promise<EntrepreneurProfile | null>;
     existsByUserId(userId: string): Promise<boolean>;
+    updateKycDocuments(userId: string, documents: any[], kycStatus: string): Promise<EntrepreneurProfile | null>;
     countCampaignsAsCreator(userId: string): Promise<number>;
     deleteByUserId(userId: string): Promise<boolean>;
     incrementCampaignCount(userId: string): Promise<void>;

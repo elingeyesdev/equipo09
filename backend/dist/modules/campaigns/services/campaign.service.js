@@ -50,6 +50,18 @@ let CampaignService = class CampaignService {
         }
         return campaign;
     }
+    async incrementViewCount(campaignId) {
+        try {
+            await this.campaignRepo.incrementViewCount(campaignId);
+        }
+        catch (_) { }
+    }
+    async createCampaignUpdate(campaignId, authorId, dto) {
+        return await this.campaignRepo.createCampaignUpdate(campaignId, authorId, dto);
+    }
+    async getRecentPublicUpdatesGroupedByCampaign() {
+        return await this.campaignRepo.getRecentPublicUpdatesGroupedByCampaign();
+    }
 };
 exports.CampaignService = CampaignService;
 exports.CampaignService = CampaignService = __decorate([

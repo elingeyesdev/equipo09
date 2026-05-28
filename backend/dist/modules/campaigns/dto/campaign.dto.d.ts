@@ -7,6 +7,7 @@ export declare class CreateCampaignDto {
     campaignType: 'donation' | 'reward' | 'equity';
     startDate?: string;
     endDate?: string;
+    videoUrl?: string;
 }
 export declare class QueryCampaignsDto {
     page?: string;

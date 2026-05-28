@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { EntrepreneurCampaign, CreateCampaignDto } from '../models';
+import { CreateCampaignUpdateDto } from '../dto';
 export interface PaginatedCampaigns {
     data: EntrepreneurCampaign[];
     meta: {
@@ -22,4 +23,7 @@ export declare class CampaignRepository {
     private mapRowToPublicCampaign;
     findPublicCampaigns(page?: number, limit?: number, sortBy?: string, sortOrder?: string, categoryId?: string, campaignType?: string, search?: string): Promise<PaginatedCampaigns>;
     findPublicById(id: string): Promise<any | null>;
+    incrementViewCount(campaignId: string): Promise<void>;
+    createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any>;
+    getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]>;
 }

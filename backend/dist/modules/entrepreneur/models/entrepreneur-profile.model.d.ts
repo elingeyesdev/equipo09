@@ -19,6 +19,8 @@ export interface EntrepreneurProfile {
     coverUrl: string | null;
     identityVerified: boolean;
     identityVerifiedAt: Date | null;
+    kycStatus: string;
+    kycRejectionReason: string | null;
     verificationDocuments: any[];
     totalCampaigns: number;
     totalRaised: number;

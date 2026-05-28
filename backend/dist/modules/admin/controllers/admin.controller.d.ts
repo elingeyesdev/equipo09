@@ -31,4 +31,6 @@ export declare class AdminController {
     deleteCampaign(id: string, req: any): Promise<ApiSuccessResponse<any>>;
     getCampaignDocuments(id: string): Promise<ApiSuccessResponse<any[]>>;
     reviewCampaignDocument(campaignId: string, docId: string, status: string, reviewerNotes: string, req: any): Promise<ApiSuccessResponse<any>>;
+    getPendingKyc(): Promise<ApiSuccessResponse<any[]>>;
+    reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reason: string | undefined, req: any): Promise<ApiSuccessResponse<any>>;
 }

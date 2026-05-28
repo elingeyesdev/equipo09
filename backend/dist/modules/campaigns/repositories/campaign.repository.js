@@ -29,11 +29,24 @@ let CampaignRepository = class CampaignRepository {
       ep.first_name || ' ' || ep.last_name AS entrepreneur_name,
       ep.display_name AS entrepreneur_display_name,
       ep.avatar_url AS entrepreneur_avatar,
-      cat.display_name AS category_name,
-      cat.slug AS category_slug
+      COALESCE(cat.display_name, (
+        SELECT cat2.display_name 
+        FROM campaign_categories cc 
+        JOIN categories cat2 ON cc.category_id = cat2.id 
+        WHERE cc.campaign_id = c.id 
+        LIMIT 1
+      )) AS category_name,
+      COALESCE(cat.slug, (
+        SELECT cat2.slug 
+        FROM campaign_categories cc 
+        JOIN categories cat2 ON cc.category_id = cat2.id 
+        WHERE cc.campaign_id = c.id 
+        LIMIT 1
+      )) AS category_slug,
+      c.video_url
     FROM campaigns c
     JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
-    JOIN categories cat ON c.category_id = cat.id
+    LEFT JOIN categories cat ON c.category_id = cat.id
   `;
     }
     mapRowToCampaign(row) {
@@ -60,6 +73,7 @@ let CampaignRepository = class CampaignRepository {
             metadata: row.metadata,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
+            videoUrl: row.video_url,
         };
     }
     async create(userId, dto) {
@@ -148,6 +162,7 @@ let CampaignRepository = class CampaignRepository {
             entrepreneurAvatar: row.entrepreneur_avatar,
             categoryName: row.category_name,
             categorySlug: row.category_slug,
+            videoUrl: row.video_url,
         };
     }
     async findPublicCampaigns(page = 1, limit = 12, sortBy = 'created_at', sortOrder = 'DESC', categoryId, campaignType, search) {
@@ -199,7 +214,14 @@ let CampaignRepository = class CampaignRepository {
     async findPublicById(id) {
         const query = `
       SELECT
-        c.id, c.category_id, c.title, c.slug, c.subtitle, c.short_description,
+        c.id,
+        COALESCE(c.category_id, (
+          SELECT cc.category_id 
+          FROM campaign_categories cc 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_id,
+        c.title, c.slug, c.subtitle, c.short_description,
         c.description, c.campaign_type, c.status,
         c.goal_amount, c.current_amount, c.investor_count,
         c.cover_image_url, c.currency,
@@ -210,11 +232,24 @@ let CampaignRepository = class CampaignRepository {
         ep.display_name AS entrepreneur_display_name,
         ep.avatar_url AS entrepreneur_avatar,
         ep.bio AS entrepreneur_bio,
-        cat.display_name AS category_name,
-        cat.slug AS category_slug
+        COALESCE(cat.display_name, (
+          SELECT cat2.display_name 
+          FROM campaign_categories cc 
+          JOIN categories cat2 ON cc.category_id = cat2.id 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_name,
+        COALESCE(cat.slug, (
+          SELECT cat2.slug 
+          FROM campaign_categories cc 
+          JOIN categories cat2 ON cc.category_id = cat2.id 
+          WHERE cc.campaign_id = c.id 
+          LIMIT 1
+        )) AS category_slug,
+        c.video_url
       FROM campaigns c
       JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
-      JOIN categories cat ON c.category_id = cat.id
+      LEFT JOIN categories cat ON c.category_id = cat.id
       WHERE c.id = $1 AND c.status IN ('published', 'funded', 'partially_funded');
     `;
         const { rows } = await this.pool.query(query, [id]);
@@ -255,6 +290,70 @@ let CampaignRepository = class CampaignRepository {
             entrepreneurBio: row.entrepreneur_bio,
             rewardTiers,
         };
+    }
+    async incrementViewCount(campaignId) {
+        await this.pool.query(`UPDATE campaigns SET view_count = COALESCE(view_count, 0) + 1 WHERE id = $1`, [campaignId]);
+    }
+    async createCampaignUpdate(campaignId, authorId, dto) {
+        const isPublic = dto.isPublic !== false;
+        const attachments = dto.attachments ? JSON.stringify(dto.attachments) : '[]';
+        const query = `
+      INSERT INTO campaign_updates (campaign_id, author_id, title, content, is_public, attachments)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+        const values = [campaignId, authorId, dto.title, dto.content, isPublic, attachments];
+        const result = await this.pool.query(query, values);
+        return result.rows[0];
+    }
+    async getRecentPublicUpdatesGroupedByCampaign() {
+        const query = `
+      SELECT
+        cu.id,
+        cu.campaign_id AS "campaignId",
+        cu.title,
+        cu.content,
+        cu.attachments,
+        cu.created_at AS "createdAt",
+        c.title AS "campaignTitle",
+        c.cover_image_url AS "campaignCoverImageUrl",
+        ep.first_name || ' ' || ep.last_name AS "entrepreneurName",
+        ep.avatar_url AS "entrepreneurAvatar"
+      FROM campaign_updates cu
+      JOIN campaigns c ON cu.campaign_id = c.id
+      JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+      WHERE cu.is_public = true
+        AND cu.created_at >= NOW() - INTERVAL '24 hours'
+        AND c.status = 'published'
+      ORDER BY cu.created_at ASC;
+    `;
+        const result = await this.pool.query(query);
+        const groups = {};
+        for (const row of result.rows) {
+            const cid = row.campaignId;
+            if (!groups[cid]) {
+                groups[cid] = {
+                    campaignId: cid,
+                    campaignTitle: row.campaignTitle,
+                    campaignCoverImageUrl: row.campaignCoverImageUrl,
+                    entrepreneurName: row.entrepreneurName,
+                    entrepreneurAvatar: row.entrepreneurAvatar,
+                    stories: [],
+                };
+            }
+            groups[cid].stories.push({
+                id: row.id,
+                title: row.title,
+                content: row.content,
+                attachments: row.attachments || [],
+                createdAt: row.createdAt,
+            });
+        }
+        return Object.values(groups).sort((a, b) => {
+            const latestA = new Date(a.stories[a.stories.length - 1].createdAt).getTime();
+            const latestB = new Date(b.stories[b.stories.length - 1].createdAt).getTime();
+            return latestB - latestA;
+        });
     }
 };
 exports.CampaignRepository = CampaignRepository;

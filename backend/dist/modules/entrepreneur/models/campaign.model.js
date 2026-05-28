@@ -27,6 +27,7 @@ function mapRowToEntrepreneurCampaign(row) {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         publishedAt: row.published_at,
+        videoUrl: row.video_url,
     };
     if (row.reward_tiers) {
         campaign.rewardTiers = row.reward_tiers.map(reward_tier_model_1.mapRowToRewardTier);

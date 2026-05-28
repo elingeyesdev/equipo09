@@ -1,5 +1,5 @@
 import { CampaignService } from '../services';
-import { CreateCampaignDto, QueryCampaignsDto } from '../dto';
+import { CreateCampaignDto, QueryCampaignsDto, CreateCampaignUpdateDto } from '../dto';
 export declare class EntrepreneurCampaignsController {
     private readonly campaignService;
     constructor(campaignService: CampaignService);
@@ -19,6 +19,12 @@ export declare class EntrepreneurCampaignsController {
         statusCode: number;
         message: string;
         data: import("../models").EntrepreneurCampaign;
+        timestamp: string;
+    }>;
+    createUpdate(req: any, id: string, dto: CreateCampaignUpdateDto): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
         timestamp: string;
     }>;
 }
