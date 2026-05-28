@@ -15,7 +15,6 @@ import { KYCUploadModal } from '../components/KYCUploadModal';
 import {
   FolderOpen,
   AlertCircle,
-  CheckCircle2,
   Loader2,
   MessageSquare,
   User,
@@ -35,8 +34,6 @@ export function EntrepreneurProfilePage() {
     profile,
     loading: profileLoading,
     saving,
-    error: profileError,
-    successMessage,
     submitProfile,
     uploadAvatarPhoto,
     uploadCoverPhoto,
@@ -56,7 +53,6 @@ export function EntrepreneurProfilePage() {
   const {
     campaigns,
     loading: campaignsLoading,
-    error: campaignsError,
     addCampaign,
     updateCampaign,
     submitForReview,
@@ -118,8 +114,6 @@ export function EntrepreneurProfilePage() {
     }
     setModalType(null);
   };
-
-  const error = profileError || campaignsError;
 
   return (
     <div className="min-h-screen font-sans bg-[#f4f7f4] flex flex-col font-['Sora',sans-serif]">
@@ -429,9 +423,9 @@ export function EntrepreneurProfilePage() {
           firstName: profile.firstName,
           lastName: profile.lastName,
           email: userEmail,
-          avatar: profile.avatarUrl,
-          website: profile.website,
-          linkedin: profile.linkedinUrl
+          avatar: profile.avatarUrl ?? undefined,
+          website: profile.website ?? undefined,
+          linkedin: profile.linkedinUrl ?? undefined
         } : undefined}
       />
 

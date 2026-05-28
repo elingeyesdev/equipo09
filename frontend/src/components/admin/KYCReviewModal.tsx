@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Check, Eye } from 'lucide-react';
 
 interface KYCReviewModalProps {
@@ -6,7 +6,7 @@ interface KYCReviewModalProps {
   onClose: () => void;
   kycData: any;
   onApprove: (id: string) => Promise<void>;
-  onReject: (id: string) => Promise<void>;
+  onReject: (id: string, reason: string) => Promise<void>;
 }
 
 export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }: KYCReviewModalProps) {

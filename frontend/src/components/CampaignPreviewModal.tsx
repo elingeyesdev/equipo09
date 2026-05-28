@@ -53,16 +53,6 @@ function statusLabel(status: string): string {
   return map[status] ?? status;
 }
 
-function investmentStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    completed: 'Confirmado',
-    pending: 'Pendiente',
-    failed: 'Fallido',
-    refunded: 'Reembolsado',
-  };
-  return map[status] ?? status;
-}
-
 function formatShortDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('es', {
     day: 'numeric',
@@ -132,7 +122,6 @@ export function CampaignPreviewModal({
   isAdmin,
   onApprove,
   onReject,
-  media,
   minInvestment,
   maxInvestment,
   subtitle,
@@ -143,7 +132,6 @@ export function CampaignPreviewModal({
   auditScore,
 }: Props) {
   const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
-  const [financeLoading, setFinanceLoading] = useState(false);
   const [history, setHistory] = useState<CampaignHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -176,7 +164,6 @@ export function CampaignPreviewModal({
   const loadFinance = async () => {
     if (!campaign) return;
     try {
-      setFinanceLoading(true);
       const data = isAdmin
         ? await getAdminFinancialProgress(campaign.id)
         : await getCampaignFinancialProgress(campaign.id);
@@ -184,7 +171,6 @@ export function CampaignPreviewModal({
     } catch (err) {
       console.error('Error loading finance:', err);
     } finally {
-      setFinanceLoading(false);
     }
   };
 
@@ -570,7 +556,7 @@ export function CampaignPreviewModal({
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <CircularFundingRing currentAmount={cur} goalAmount={goal} size={180} strokeWidth={12} />
+                    <CircularFundingRing currentAmount={cur} goalAmount={goal} />
                     <div className="mt-6 text-center">
                       <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 block mb-1">Recaudado</span>
                       <span className="text-4xl font-black text-[#1c2b1e] tracking-tight">

@@ -389,7 +389,7 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
        {showKycModal && (
          <KYCUploadModal 
            onClose={() => setShowKycModal(false)}
-           onSuccess={(updatedProfile) => {
+           onSuccess={() => {
              setShowKycModal(false);
              window.location.reload(); // Simple way to refresh for now
            }}

@@ -48,7 +48,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
     const fetchInvestments = async () => {
       try {
         setInvestmentsLoading(true);
-        const data = await getMyInvestments(50, 0);
+        const data = await getMyInvestments();
         setInvestments(data);
       } catch {
         // silently fail — will show empty state
@@ -149,7 +149,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
             {investments.map((inv) => {
               const typeConfig = CAMPAIGN_TYPE_CONFIG[inv.campaignType] || CAMPAIGN_TYPE_CONFIG.donation;
               const TypeIcon = typeConfig.icon;
-              const statusConfig = STATUS_CONFIG[inv.status] || STATUS_CONFIG.completed;
+              const statusConfig = STATUS_CONFIG[inv.investmentStatus] || STATUS_CONFIG.completed;
               const StatusIcon = statusConfig.icon;
 
               return (
@@ -161,8 +161,8 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                   <div className="flex items-center gap-4">
                     {/* Campaign thumbnail */}
                     <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm">
-                      {getImageUrl(inv.campaignCover) ? (
-                        <img src={getImageUrl(inv.campaignCover)} alt="" className="w-full h-full object-cover" />
+                      {getImageUrl(inv.campaignCoverImage) ? (
+                        <img src={getImageUrl(inv.campaignCoverImage)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div
                           className="w-full h-full flex items-center justify-center"

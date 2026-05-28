@@ -8,6 +8,7 @@ import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
 import { formatNumberSpanish, isFutureDate } from '../utils/numberFormat';
+import { InfoHint } from './InfoHint';
 
 const CAMPAIGN_TYPE_OPTIONS: { value: CampaignType; label: string; description: string }[] = [
   { value: 'donation', label: 'Donación', description: 'Recibe contribuciones sin entregar nada a cambio.' },
@@ -247,7 +248,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="flex flex-col">
           <div className="flex justify-between items-end mb-2">
-            <label htmlFor="title" className={labelClass + " mb-0"}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span></label>
+            <label htmlFor="title" className={labelClass + " mb-0 flex items-center gap-2"}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span><InfoHint text="Nombre principal de tu campaña. Debe ser claro y memorable." /></label>
             <span className={`text-[10px] font-bold ${titleVal.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
               {titleVal.length}/90
             </span>
@@ -265,7 +266,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="flex flex-col md:col-span-2">
-            <label className={labelClass}>Etiquetas de Categoría <span className="text-[#c62828] font-bold">*</span></label>
+            <label className={`${labelClass} flex items-center gap-2`}>Etiquetas de Categoría <span className="text-[#c62828] font-bold">*</span><InfoHint text="Selecciona sectores relacionados al proyecto." /></label>
             <div className="flex flex-wrap gap-2 mt-2">
               {loadingCats ? (
                 <div className="text-sm text-slate-500">Cargando categorías...</div>
@@ -289,7 +290,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col">
-            <label htmlFor="goalAmount" className={labelClass}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span></label>
+            <label htmlFor="goalAmount" className={`${labelClass} flex items-center gap-2`}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span><InfoHint text="Monto total que quieres alcanzar con la campaña." /></label>
             <Controller
               name="goalAmount"
               control={control}
@@ -314,7 +315,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
           <div className="flex flex-col md:col-span-2">
             <div className="flex justify-between items-end mb-2">
-              <label htmlFor="shortDescription" className={labelClass + " mb-0"}>Eslogan / Frase corta <span className="text-[#c62828] font-bold">*</span></label>
+              <label htmlFor="shortDescription" className={labelClass + " mb-0 flex items-center gap-2"}>Eslogan / Frase corta <span className="text-[#c62828] font-bold">*</span><InfoHint text="Resumen breve para captar atención inmediata." /></label>
               <span className={`text-[10px] font-bold ${sloganVal.length > 50 ? 'text-red-500' : 'text-slate-400'}`}>
                 {sloganVal.length}/50
               </span>
@@ -331,7 +332,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col">
-            <label htmlFor="endDate" className={labelClass}>Fecha de Cierre (Opcional)</label>
+            <label htmlFor="endDate" className={`${labelClass} flex items-center gap-2`}>Fecha de Cierre (Opcional)<InfoHint text="Fecha límite para recibir aportes." /></label>
             <input
               id="endDate"
               type="datetime-local"
@@ -351,7 +352,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col md:col-span-3">
-            <label htmlFor="campaignType" className={labelClass}>Tipo de Campaña <span className="text-[#c62828] font-bold">*</span></label>
+            <label htmlFor="campaignType" className={`${labelClass} flex items-center gap-2`}>Tipo de Campaña <span className="text-[#c62828] font-bold">*</span><InfoHint text="Elige si tu campaña es donación, recompensa o equity." /></label>
             <select
               id="campaignType"
               className={`${inputClass} ${errors.campaignType ? errorClass : ''}`}
@@ -367,7 +368,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col md:col-span-3">
-            <label htmlFor="videoUrl" className={labelClass}>URL de Video Pitch (YouTube / TikTok - Opcional)</label>
+            <label htmlFor="videoUrl" className={`${labelClass} flex items-center gap-2`}>URL de Video Pitch (YouTube / TikTok - Opcional)<InfoHint text="Enlace de video para presentar el proyecto." /></label>
             <input
               id="videoUrl"
               type="text"
@@ -387,7 +388,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col md:col-span-3">
-            <label className={labelClass}>Imagen de Portada</label>
+            <label className={`${labelClass} flex items-center gap-2`}>Imagen de Portada <InfoHint text="Sube una imagen horizontal de buena calidad (JPG/PNG)." /></label>
             <div 
               className={`relative h-[200px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${coverPreview ? 'border-[#2e7d32] bg-emerald-50/10' : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30'}`}
               onClick={() => document.getElementById('cover-upload')?.click()}
@@ -420,7 +421,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
 
           <div className="flex flex-col md:col-span-3">
             <div className="flex justify-between items-end mb-2">
-              <label htmlFor="description" className={labelClass + " mb-0"}>Propuesta de Valor en Detalle <span className="text-[#c62828] font-bold">*</span></label>
+              <label htmlFor="description" className={labelClass + " mb-0 flex items-center gap-2"}>Propuesta de Valor en Detalle <span className="text-[#c62828] font-bold">*</span><InfoHint text="Explica problema, solución y uso de fondos." /></label>
               <span className={`text-[10px] font-bold ${descVal.length > 800 ? 'text-red-500' : 'text-slate-400'}`}>
                 {descVal.length}/800
               </span>
@@ -515,7 +516,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                   
                   <div className="space-y-5">
                     <div>
-                      <label className={labelClass}>Título *</label>
+                      <label className={`${labelClass} flex items-center gap-2`}>Título * <InfoHint text="Nombre del nivel de recompensa." /></label>
                       <input 
                         type="text" 
                         className={inputClass}
@@ -526,7 +527,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Descripción *</label>
+                      <label className={`${labelClass} flex items-center gap-2`}>Descripción * <InfoHint text="Beneficios concretos que recibirá el inversor." /></label>
                       <textarea 
                         className={`${inputClass} resize-none`}
                         rows={3}
@@ -538,7 +539,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={labelClass}>Porcentaje Mínimo (%) *</label>
+                        <label className={`${labelClass} flex items-center gap-2`}>Porcentaje Mínimo (%) * <InfoHint text="Aporte mínimo para desbloquear este nivel." /></label>
                         <input 
                           type="number" 
                           className={inputClass}
@@ -552,7 +553,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                         />
                       </div>
                       <div>
-                        <label className={labelClass}>Porcentaje Máximo (%) *</label>
+                        <label className={`${labelClass} flex items-center gap-2`}>Porcentaje Máximo (%) * <InfoHint text="Tope de aporte para este nivel." /></label>
                         <input 
                           type="number" 
                           className={inputClass}
@@ -626,7 +627,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <div className="bg-white p-6 rounded-2xl border border-slate-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Archivo *</label>
+                <label className={`${labelClass} flex items-center gap-2`}>Archivo * <InfoHint text="Documento de respaldo: permisos, cotizaciones, evidencias, etc." /></label>
                 <input
                   type="file"
                   className={inputClass}
@@ -634,7 +635,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                 />
               </div>
               <div>
-                <label className={labelClass}>Justificación *</label>
+                <label className={`${labelClass} flex items-center gap-2`}>Justificación * <InfoHint text="Describe por qué este documento valida tu campaña." /></label>
                 <input
                   type="text"
                   placeholder="Ej. Cotización oficial del proveedor"

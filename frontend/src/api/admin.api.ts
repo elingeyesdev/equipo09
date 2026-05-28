@@ -6,7 +6,6 @@ import type {
   AdminUser,
   PendingCampaign,
   PendingCampaignDetail,
-  RewardTier,
   CampaignHistoryItem,
 } from '../types/admin.types';
 

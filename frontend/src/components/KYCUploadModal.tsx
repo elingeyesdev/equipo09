@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { submitKycDocuments } from '../api/entrepreneur.api';
 import type { EntrepreneurProfile } from '../types/entrepreneur.types';
+import { InfoHint } from './InfoHint';
 
 interface KYCUploadModalProps {
   onClose: () => void;
@@ -11,18 +12,71 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
   const [step, setStep] = useState(1);
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const [faceVideo, setFaceVideo] = useState<File | null>(null);
+  const [cameraError, setCameraError] = useState('');
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const idInputRef = useRef<HTMLInputElement>(null);
-  const faceInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+  };
+
+  const startCamera = async () => {
+    try {
+      setIsStartingCamera(true);
+      setCameraError('');
+      stopCamera();
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setIsCameraActive(true);
+    } catch {
+      setCameraError('No se pudo acceder a la cámara. Verifica permisos del navegador.');
+    } finally {
+      setIsStartingCamera(false);
+    }
+  };
+
+  useEffect(() => {
+    if (step === 2 && !faceVideo) startCamera();
+    return () => stopCamera();
+  }, [step]);
+
+  const captureFromCamera = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const width = video.videoWidth || 1280;
+    const height = video.videoHeight || 720;
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, width, height);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      setFaceVideo(new File([blob], `kyc-selfie-${Date.now()}.jpg`, { type: 'image/jpeg' }));
+      setCapturedPreview(URL.createObjectURL(blob));
+      stopCamera();
+    }, 'image/jpeg', 0.92);
+  };
 
   const handleSubmit = async () => {
-    if (!idDocument || !faceVideo) {
-      setError('Por favor adjunta ambos documentos requeridos.');
-      return;
-    }
-
+    if (!idDocument || !faceVideo) return setError('Por favor adjunta ambos documentos requeridos.');
     try {
       setIsSubmitting(true);
       setError('');
@@ -36,150 +90,57 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <div>
             <h3 className="text-xl font-bold text-gray-900">Verificación de Identidad (KYC)</h3>
             <p className="text-sm text-gray-500 mt-1">Paso {step} de 2: {step === 1 ? 'Documento de Identidad' : 'Validación Facial'}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">✕</button>
         </div>
-
         <div className="p-6">
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
-              {error}
+          {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">{error}</div>}
+          {step === 1 && (
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Sube tu Documento Oficial <InfoHint text="Formato imagen o PDF, legible y vigente." /></label>
+              <div onClick={() => idInputRef.current?.click()} className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer ${idDocument ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}>
+                <p className="font-semibold">{idDocument ? idDocument.name : 'Haz clic para seleccionar archivo'}</p>
+                <input ref={idInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => setIdDocument(e.target.files?.[0] || null)} />
+              </div>
             </div>
           )}
-
-          <div className="space-y-6">
-            {/* ProgressBar */}
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${(step / 2) * 100}%` }}
-              ></div>
-            </div>
-
-            {step === 1 && (
-              <div className="animate-in slide-in-from-right-4 duration-300">
-                <label className="block text-sm font-bold text-gray-700 mb-2">Sube tu Documento Oficial (ID, Pasaporte, Licencia)</label>
-                <div 
-                  onClick={() => idInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${idDocument ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}
-                >
-                  {idDocument ? (
-                    <div className="text-green-600 flex flex-col items-center">
-                      <svg className="w-12 h-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <span className="font-semibold text-lg">{idDocument.name}</span>
-                      <span className="text-sm mt-1 opacity-80">Documento adjuntado correctamente</span>
-                    </div>
-                  ) : (
-                    <div className="text-gray-500 flex flex-col items-center">
-                      <svg className="w-12 h-12 mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                      <span className="text-base font-medium">Haz clic aquí o arrastra tu archivo</span>
-                      <span className="text-xs text-gray-400 mt-2">Formatos aceptados: JPG, PNG, PDF (Máx. 10MB)</span>
-                    </div>
-                  )}
-                  <input 
-                    type="file" 
-                    ref={idInputRef} 
-                    className="hidden" 
-                    accept="image/*,.pdf" 
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) setIdDocument(e.target.files[0]);
-                    }}
-                  />
+          {step === 2 && (
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Selfie con documento <InfoHint text="Toma la foto en vivo con tu cámara." /></label>
+              {!faceVideo ? (
+                <div className="border-2 border-dashed rounded-xl p-4 bg-gray-50">
+                  <div className="rounded-lg overflow-hidden bg-black mb-3 min-h-[220px] relative">
+                    <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay onLoadedMetadata={() => { videoRef.current?.play().catch(() => {}); }} />
+                    {!isCameraActive && <div className="absolute inset-0 flex items-center justify-center text-gray-200 bg-black/50">Activa tu cámara para tomar la foto</div>}
+                  </div>
+                  {cameraError && <p className="text-sm text-red-600 font-medium mb-3">{cameraError}</p>}
+                  <div className="flex gap-2">
+                    <button type="button" onClick={startCamera} disabled={isStartingCamera || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg disabled:opacity-50">{isStartingCamera ? 'Iniciando...' : 'Activar cámara'}</button>
+                    <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg disabled:opacity-50">Tomar foto</button>
+                  </div>
+                  <canvas ref={canvasRef} className="hidden" />
                 </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="animate-in slide-in-from-right-4 duration-300">
-                <label className="block text-sm font-bold text-gray-700 mb-2">Validación Facial (Selfie sosteniendo el documento)</label>
-                <div 
-                  onClick={() => faceInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${faceVideo ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}
-                >
-                  {faceVideo ? (
-                    <div className="text-green-600 flex flex-col items-center">
-                      <svg className="w-12 h-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <span className="font-semibold text-lg">{faceVideo.name}</span>
-                      <span className="text-sm mt-1 opacity-80">Validación adjuntada correctamente</span>
-                    </div>
-                  ) : (
-                    <div className="text-gray-500 flex flex-col items-center">
-                      <svg className="w-12 h-12 mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                      <span className="text-base font-medium">Haz clic aquí o arrastra tu archivo</span>
-                      <span className="text-xs text-gray-400 mt-2">Asegúrate de que tu rostro y el documento sean legibles</span>
-                    </div>
-                  )}
-                  <input 
-                    type="file" 
-                    ref={faceInputRef} 
-                    className="hidden" 
-                    accept="image/*,video/*" 
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) setFaceVideo(e.target.files[0]);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-between pt-6 border-t border-gray-100 mt-6">
-              <button
-                type="button"
-                onClick={() => {
-                  if (step > 1) {
-                    setStep(step - 1);
-                  } else {
-                    onClose();
-                  }
-                }}
-                className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all"
-                disabled={isSubmitting}
-              >
-                {step > 1 ? 'Atrás' : 'Cancelar'}
-              </button>
-              
-              {step < 2 ? (
-                <button
-                  type="button"
-                  onClick={() => setStep(step + 1)}
-                  disabled={!idDocument}
-                  className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all disabled:opacity-50 flex items-center"
-                >
-                  Siguiente
-                  <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!idDocument || !faceVideo || isSubmitting}
-                  className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all disabled:opacity-50 flex items-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Enviando...
-                    </>
-                  ) : 'Enviar a Revisión'}
-                </button>
+                <div className="border-2 border-green-400 bg-green-50 rounded-xl p-4 text-green-700">
+                  {capturedPreview && <img src={capturedPreview} alt="Captura KYC" className="w-full max-h-64 object-cover rounded-lg mb-3" />}
+                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="px-4 py-2 text-sm font-bold text-emerald-700 bg-emerald-100 rounded-lg">Tomar otra foto</button>
+                </div>
               )}
             </div>
+          )}
+          <div className="flex justify-between pt-6 border-t border-gray-100 mt-6">
+            <button type="button" onClick={() => (step > 1 ? setStep(step - 1) : onClose())} className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl" disabled={isSubmitting}>{step > 1 ? 'Atrás' : 'Cancelar'}</button>
+            {step < 2 ? (
+              <button type="button" onClick={() => setStep(2)} disabled={!idDocument} className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl disabled:opacity-50">Siguiente</button>
+            ) : (
+              <button type="button" onClick={handleSubmit} disabled={!idDocument || !faceVideo || isSubmitting} className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl disabled:opacity-50">{isSubmitting ? 'Enviando...' : 'Enviar a Revisión'}</button>
+            )}
           </div>
         </div>
       </div>

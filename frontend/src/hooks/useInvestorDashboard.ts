@@ -15,7 +15,7 @@ export function useInvestorDashboard() {
       setError(null);
       const [capitalRes, investmentsRes] = await Promise.all([
         getCapitalOverview(),
-        getMyInvestments(10, 0),
+        getMyInvestments(),
       ]);
       setData(capitalRes);
       setInvestments(investmentsRes);

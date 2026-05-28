@@ -6,7 +6,6 @@ import {
   Globe,
   Camera,
   Pencil,
-  Settings,
   CheckCircle2
 } from 'lucide-react';
 import { getImageUrl } from '../../utils/image.utils';

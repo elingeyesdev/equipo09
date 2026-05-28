@@ -12,14 +12,10 @@ import {
   Rocket, 
   BarChart3, 
   Clock, 
-  CheckCircle2, 
-  XCircle, 
   ChevronRight,
   Search,
-  Filter,
   Eye,
-  Mail,
-  MoreVertical
+  Mail
 } from 'lucide-react';
 import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
 import { KYCReviewModal } from '../../components/admin/KYCReviewModal';
@@ -28,13 +24,11 @@ import { getPendingKyc, reviewKyc } from '../../api/admin.api';
 export function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [campaigns, setCampaigns] = useState<PendingCampaign[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCampaignDetail, setSelectedCampaignDetail] = useState<PendingCampaignDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'reward' | 'donation'>('all');
-  const [page, setPage] = useState(1);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
   const [statusFilter, setStatusFilter] = useState<'pending_review' | 'published' | 'kyc'>('pending_review');
 
@@ -44,11 +38,10 @@ export function AdminDashboardPage() {
 
   useEffect(() => {
     loadData();
-  }, [page, filterType, statusFilter]);
+  }, [filterType, statusFilter]);
 
   const loadData = async () => {
     try {
-      setLoading(true);
       if (statusFilter === 'kyc') {
         const [statsData, kycData] = await Promise.all([
           getDashboardStats(),
@@ -59,7 +52,7 @@ export function AdminDashboardPage() {
       } else {
         const [statsData, campaignsData] = await Promise.all([
           getDashboardStats(),
-          getPendingCampaigns({ page, limit: 5, search: searchTerm, type: filterType, status: statusFilter })
+          getPendingCampaigns({ page: 1, limit: 5, search: searchTerm, type: filterType, status: statusFilter })
         ]);
         setStats(statsData);
         setCampaigns(campaignsData.campaigns);
@@ -68,7 +61,6 @@ export function AdminDashboardPage() {
     } catch (error) {
       console.error('Error loading admin data:', error);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -369,7 +361,9 @@ export function AdminDashboardPage() {
           rewardTiers={selectedCampaignDetail.reward_tiers?.map(t => ({
             title: t.title,
             description: t.description,
-            amount: t.min_amount || 0
+            amount: t.min_percentage || 0,
+            minPercentage: t.min_percentage || 0,
+            maxPercentage: t.max_percentage || 100
           })) || []}
           onApprove={() => handleStatusUpdate(selectedCampaignDetail.id, 'published')}
           onReject={(feedback) => handleStatusUpdate(selectedCampaignDetail.id, 'rejected', feedback)}
@@ -396,8 +390,8 @@ export function AdminDashboardPage() {
           await reviewKyc(id, 'approve');
           loadData();
         }}
-        onReject={async (id) => {
-          await reviewKyc(id, 'reject');
+        onReject={async (id, reason) => {
+          await reviewKyc(id, 'reject', reason);
           loadData();
         }}
       />

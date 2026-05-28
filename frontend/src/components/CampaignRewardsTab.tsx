@@ -8,12 +8,8 @@ import {
   Edit2, 
   Trash2, 
   Users, 
-  Calendar, 
   Save, 
-  X,
-  AlertCircle,
   Loader2,
-  Lock,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -29,12 +25,12 @@ interface Props {
 export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isAdmin = false }: Props) {
   const [tiers, setTiers] = useState<RewardTier[]>([]);
   const [claims, setClaims] = useState<RewardClaim[]>([]);
-  const [financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
+  const [_financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isEditing, setIsEditing] = useState<string | null>(null); // 'new' for new tier, or tier.id
-  const [formData, setFormData] = useState<Partial<CreateRewardTierDto>>({});
+  const [formData, setFormData] = useState<Partial<UpdateRewardTierDto>>({});
   const [submitting, setSubmitting] = useState(false);
   const [showClaims, setShowClaims] = useState(false);
 

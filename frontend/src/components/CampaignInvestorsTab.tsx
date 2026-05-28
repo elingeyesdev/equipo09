@@ -7,14 +7,11 @@ import {
   Mail, 
   MapPin, 
   Calendar, 
-  TrendingUp, 
   MessageSquare, 
   Heart,
   Loader2,
   ChevronRight,
   ExternalLink,
-  Search,
-  Filter,
   X
 } from 'lucide-react';
 import { getImageUrl } from '../utils/image.utils';
@@ -298,4 +295,3 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
     </div>
   );
 }
-

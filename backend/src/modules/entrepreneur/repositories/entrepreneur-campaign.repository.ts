@@ -685,7 +685,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
   async finalize(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null> {
     const res = await this.queryOne(
       `UPDATE campaigns 
-       SET status = 'finished', updated_at = NOW() 
+       SET status = 'completed', updated_at = NOW() 
        WHERE id = $1 AND creator_id = $2 AND status = 'published'
        RETURNING id`,
       [campaignId, creatorId]
