@@ -3,7 +3,7 @@ import { Volume2, VolumeX, Play } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
    URL PARSING UTILS
-───────────────────────────────────────────── */
+   ───────────────────────────────────────────── */
 
 type VideoProvider = 'youtube' | 'tiktok' | 'unknown';
 
@@ -20,7 +20,8 @@ function parseVideoUrl(url: string): ParsedVideo {
   if (ytMatch) {
     return {
       provider: 'youtube',
-      embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}&controls=0&modestbranding=1&rel=0&playsinline=1`,
+      // enablejsapi=1 is required to accept postMessage commands
+      embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`,
     };
   }
 
@@ -29,16 +30,21 @@ function parseVideoUrl(url: string): ParsedVideo {
   if (ytShortsMatch) {
     return {
       provider: 'youtube',
-      embedUrl: `https://www.youtube.com/embed/${ytShortsMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytShortsMatch[1]}&controls=0&modestbranding=1&rel=0&playsinline=1`,
+      embedUrl: `https://www.youtube.com/embed/${ytShortsMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytShortsMatch[1]}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`,
     };
   }
 
   // TikTok: tiktok.com/@user/video/ID
+  // IMPORTANT: Must use player/v1/ (NOT embed/v2/) for the postMessage API to work.
+  // IMPORTANT: Do NOT use muted=1. Per official TikTok docs, muted=1 "prevents the user
+  //            from changing the volume" which disables the unMute postMessage command.
+  //            We use autoplay=1 which starts muted per browser policy; we then control
+  //            audio via postMessage once the user clicks the button.
   const ttMatch = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
   if (ttMatch) {
     return {
       provider: 'tiktok',
-      embedUrl: `https://www.tiktok.com/embed/v2/${ttMatch[1]}`,
+      embedUrl: `https://www.tiktok.com/player/v1/${ttMatch[1]}?autoplay=1&loop=1&controls=0&music_info=0&description=0&rel=0`,
     };
   }
 
@@ -46,8 +52,27 @@ function parseVideoUrl(url: string): ParsedVideo {
 }
 
 /* ─────────────────────────────────────────────
+   HELPERS
+   ───────────────────────────────────────────── */
+
+function sendYouTubeMessage(iframe: HTMLIFrameElement, func: string) {
+  iframe.contentWindow?.postMessage(
+    JSON.stringify({ event: 'command', func, args: [] }),
+    '*'
+  );
+}
+
+function sendTikTokMessage(iframe: HTMLIFrameElement, type: string) {
+  // TikTok official postMessage spec: { 'x-tiktok-player': true, type, value }
+  iframe.contentWindow?.postMessage(
+    { 'x-tiktok-player': true, type, value: null },
+    '*'
+  );
+}
+
+/* ─────────────────────────────────────────────
    COMPONENT
-───────────────────────────────────────────── */
+   ───────────────────────────────────────────── */
 
 interface PitchVideoPlayerProps {
   videoUrl: string;
@@ -60,37 +85,49 @@ export function PitchVideoPlayer({ videoUrl, isActive }: PitchVideoPlayerProps) 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { provider, embedUrl } = parseVideoUrl(videoUrl);
 
-  // Build embed URL with current mute state
-  const buildUrl = (base: string, isMuted: boolean) => {
-    if (provider === 'youtube') {
-      return base.replace(/&mute=\d/, `&mute=${isMuted ? 1 : 0}`);
-    }
-    return base;
-  };
-
   // Lazy-load: only set iframe src when active; clear when inactive to save memory
   useEffect(() => {
     if (!iframeRef.current || !embedUrl) return;
     if (isActive) {
-      setLoaded(true);
-      iframeRef.current.src = buildUrl(embedUrl, muted);
+      iframeRef.current.src = embedUrl;
     } else {
-      // Small delay so scroll-snap settles before clearing
       const t = setTimeout(() => {
         if (iframeRef.current) iframeRef.current.src = '';
         setLoaded(false);
+        setMuted(true); // reset mute state when leaving slide
       }, 400);
       return () => clearTimeout(t);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, embedUrl]);
 
-  // Reload iframe with updated mute when toggled while active
+  // Send mute/unmute command via postMessage whenever muted state changes
   useEffect(() => {
-    if (!iframeRef.current || !embedUrl || !isActive) return;
-    iframeRef.current.src = buildUrl(embedUrl, muted);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [muted]);
+    if (!iframeRef.current || !embedUrl || !isActive || !loaded) return;
+
+    const cmd = muted ? 'mute' : 'unMute';
+
+    if (provider === 'youtube') {
+      sendYouTubeMessage(iframeRef.current, muted ? 'mute' : 'unMute');
+    } else if (provider === 'tiktok') {
+      sendTikTokMessage(iframeRef.current, cmd);
+    }
+  }, [muted, provider, isActive, embedUrl, loaded]);
+
+  // When iframe finishes loading, wait briefly then sync the current muted state
+  const handleLoad = () => {
+    setLoaded(true);
+    // Give the player SDK ~1s to fully initialize before sending commands
+    setTimeout(() => {
+      if (!iframeRef.current) return;
+      const cmd = muted ? 'mute' : 'unMute';
+      if (provider === 'youtube') {
+        sendYouTubeMessage(iframeRef.current, muted ? 'mute' : 'unMute');
+      } else if (provider === 'tiktok') {
+        sendTikTokMessage(iframeRef.current, cmd);
+      }
+    }, 1200);
+  };
 
   if (!embedUrl) {
     return (
@@ -120,7 +157,7 @@ export function PitchVideoPlayer({ videoUrl, isActive }: PitchVideoPlayerProps) 
         allowFullScreen
         className="absolute inset-0 w-full h-full border-none"
         style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
-        onLoad={() => setLoaded(true)}
+        onLoad={handleLoad}
       />
 
       {/* Mute / Unmute button */}
