@@ -173,7 +173,25 @@ export class ChatRepository extends BaseRepository {
       [conversationId],
     );
 
-    return msg;
+    // Fetch message with sender profile data so fullName is available
+    const row = await this.queryOne(
+      `SELECT m.*,
+              ep.first_name  AS sender_first_name,
+              ep.last_name   AS sender_last_name,
+              ep.avatar_url  AS sender_avatar,
+              ip.first_name  AS sender_first_name_inv,
+              ip.last_name   AS sender_last_name_inv,
+              ip.avatar_url  AS sender_avatar_inv,
+              u.email        AS sender_email
+       FROM messages m
+       INNER JOIN users u ON u.id = m.sender_id
+       LEFT JOIN entrepreneur_profiles ep ON ep.user_id = m.sender_id
+       LEFT JOIN investor_profiles ip ON ip.user_id = m.sender_id
+       WHERE m.id = $1`,
+      [msg!.id],
+    );
+
+    return row ?? msg;
   }
 
   /**

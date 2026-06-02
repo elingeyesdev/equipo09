@@ -31,7 +31,7 @@ export class NotificationsRepository extends BaseRepository {
          $7,
          $8
        FROM (SELECT 1) AS one
-       LEFT JOIN LATERAL (
+       JOIN LATERAL (
          SELECT id
          FROM notification_types
          WHERE code = $2

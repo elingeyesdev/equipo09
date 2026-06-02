@@ -137,7 +137,7 @@ export class NotificationsService {
     await this.notificationsRepository.createNotification({
       userId: params.entrepreneurUserId,
       typeCode: 'campaign_approved',
-      title: '🎉 ¡Campaña aprobada!',
+      title: '¡Campaña aprobada!',
       body: `Tu campaña "${params.campaignTitle}" fue aprobada. ¡Ya puedes publicarla!`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
@@ -158,7 +158,7 @@ export class NotificationsService {
     await this.notificationsRepository.createNotification({
       userId: params.entrepreneurUserId,
       typeCode: 'campaign_rejected',
-      title: '❌ Campaña requiere cambios',
+      title: 'Campaña requiere cambios',
       body: params.feedback
         ? `Tu campaña "${params.campaignTitle}" fue rechazada. Motivo: ${params.feedback}`
         : `Tu campaña "${params.campaignTitle}" necesita cambios. Revisa el feedback del equipo.`,
@@ -185,7 +185,7 @@ export class NotificationsService {
     await this.notificationsRepository.createNotification({
       userId: params.recipientUserId,
       typeCode: 'new_message',
-      title: `💬 Mensaje de ${params.senderName}`,
+      title: `Mensaje de ${params.senderName}`,
       body: preview,
       referenceType: 'conversation',
       referenceId: params.conversationId,

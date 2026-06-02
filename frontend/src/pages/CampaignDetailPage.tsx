@@ -278,7 +278,6 @@ export function CampaignDetailPage() {
                 backdropFilter: 'blur(8px)',
               }}
             >
-              <span>🎬</span>
               {showPitch ? 'Ocultar Pitch' : 'Ver Pitch'}
             </button>
           )}
