@@ -101,6 +101,8 @@ export function EntrepreneurProfilePage() {
         coverUrl,
         identityVerified,
         identityVerifiedAt,
+        kycStatus,
+        kycRejectionReason,
         verificationDocuments,
         totalCampaigns,
         totalRaised,
@@ -348,8 +350,8 @@ export function EntrepreneurProfilePage() {
       </main>
 
       {/* Acciones Rápidas */}
-      <NewCampaignFAB 
-        openModal={(type: ModalType) => setModalType(type)} 
+      <NewCampaignFAB
+        openModal={(type: ModalType) => setModalType(type)}
         disabled={!profile?.identityVerified}
       />
 
@@ -378,7 +380,7 @@ export function EntrepreneurProfilePage() {
       )}
 
       {modalType === 'kyc' && (
-        <KYCUploadModal 
+        <KYCUploadModal
           onClose={() => setModalType(null)}
           onSuccess={() => {
             setModalType(null);
