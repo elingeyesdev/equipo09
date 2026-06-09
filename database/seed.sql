@@ -68,8 +68,8 @@ INSERT INTO notification_types (code, name, description, template, category, def
     ('new_message',                 'Nuevo Mensaje',                        'Se recibió un nuevo mensaje',                                          'Tienes un nuevo mensaje de {{sender_name}}.',                                                       'message',      '["in_app", "push"]'),
 
     -- KYC notifications
-    ('kyc_approved',                'KYC Aprobado',                         'La verificación KYC fue aprobada',                                     'Tu verificación KYC fue aprobada. Ya puedes operar sin restricciones.',                              'kyc',          '["in_app", "email"]'),
-    ('kyc_rejected',                'KYC Rechazado',                        'La verificación KYC fue rechazada',                                    'Tu verificación KYC fue rechazada. Revisa los documentos y vuelve a intentar.',                     'kyc',          '["in_app", "email"]'),
+    ('kyc_approved',                'KYC Aprobado',                         'La verificación KYC fue aprobada',                                     'Tu verificación KYC fue aprobada. Ya puedes operar sin restricciones.',                              'system',       '["in_app", "email"]'),
+    ('kyc_rejected',                'KYC Rechazado',                        'La verificación KYC fue rechazada',                                    'Tu verificación KYC fue rechazada. Revisa los documentos y vuelve a intentar.',                     'system',       '["in_app", "email"]'),
     
     -- Admin notifications
     ('new_campaign_to_review',      'Nueva Campaña para Revisión',          'Una campaña necesita ser revisada',                                    'Hay una nueva campaña pendiente de revisión: "{{campaign_title}}".',                                'admin',        '["in_app", "email"]');
