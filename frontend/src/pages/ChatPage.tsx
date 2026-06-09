@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { ConversationsSidebar } from '../components/chat/ConversationsSidebar';
 import { ChatWindow } from '../components/chat/ChatWindow';
@@ -12,6 +13,8 @@ import {
 import { MessageCircle } from 'lucide-react';
 
 export function ChatPage() {
+  const navigate = useNavigate();
+  const { conversationId } = useParams<{ conversationId?: string }>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
@@ -38,6 +41,35 @@ export function ChatPage() {
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
+
+  // Synchronize URL conversationId with activeConversation state
+  useEffect(() => {
+    if (loadingConvs) return;
+
+    if (conversationId) {
+      const found = conversations.find((c) => c.id === conversationId);
+      if (found) {
+        if (activeConversation?.id !== found.id) {
+          setActiveConversation(found);
+          setLastIncoming(null);
+          setShowSidebar(false);
+          // Mark as read locally in sidebar list
+          setConversations((prev) =>
+            prev.map((c) => (c.id === found.id ? { ...c, unreadCount: 0 } : c))
+          );
+        }
+      } else {
+        // If the ID in URL is invalid or not in the user's conversation list, fallback to /chat
+        setActiveConversation(null);
+      }
+    } else {
+      // No conversationId in URL, clear active conversation and show sidebar
+      if (activeConversation) {
+        setActiveConversation(null);
+        setShowSidebar(true);
+      }
+    }
+  }, [conversationId, conversations, loadingConvs, activeConversation]);
 
   // ── Callback para nuevo mensaje recibido por WS ───────────
   const handleNewMessage = useCallback((msg: Message) => {
@@ -101,24 +133,15 @@ export function ChatPage() {
   // ── Seleccionar conversación ──────────────────────────────
   const handleSelectConversation = useCallback(
     (conv: Conversation) => {
-      setActiveConversation(conv);
-      setLastIncoming(null);
-      // En móvil ocultamos el sidebar al abrir una conversación
-      setShowSidebar(false);
-      // Marcar como leído
-      setConversations((prev) =>
-        prev.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)),
-      );
+      navigate(`/chat/${conv.id}`);
     },
-    [],
+    [navigate],
   );
 
   const handleBack = useCallback(() => {
-    setActiveConversation(null);
-    setShowSidebar(true);
-    setLastIncoming(null);
+    navigate('/chat');
     loadConversations(); // Refresca para sincronizar unread
-  }, [loadConversations]);
+  }, [navigate, loadConversations]);
 
   const handleMarkAsRead = useCallback(
     async (convId: string) => {

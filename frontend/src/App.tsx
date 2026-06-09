@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';
@@ -13,10 +13,11 @@ import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
 
-// Guard simple: si no hay token, redirige a login
+// Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('accessToken');
-  return token ? <>{children}</> : <Navigate to="/login" replace />;
+  const location = useLocation();
+  return token ? <>{children}</> : <Navigate to="/login" replace state={{ from: location.pathname }} />;
 }
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
         <Route path="/campaign/:id" element={<CampaignDetailPage />} />
         <Route
           path="/chat"
+          element={
+            <PrivateRoute>
+              <ChatPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat/:conversationId"
           element={
             <PrivateRoute>
               <ChatPage />

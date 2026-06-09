@@ -462,12 +462,12 @@ export function CampaignDetailPage() {
                           return;
                         }
                         try {
-                          await getOrCreateConversation(
+                          const result = await getOrCreateConversation(
                             campaign.entrepreneurUserId,
                             campaign.id,
                             `Consulta sobre: ${campaign.title}`
                           );
-                          navigate('/chat');
+                          navigate(`/chat/${result.id}`);
                         } catch (err) {
                           console.error('Error al iniciar conversación:', err);
                         }
