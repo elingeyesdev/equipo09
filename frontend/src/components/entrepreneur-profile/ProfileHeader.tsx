@@ -45,7 +45,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
   const avatarUrl = getImageUrl(profile?.avatarUrl);
 
   return (
-    <div className="relative mb-8 font-['Sora',sans-serif]">
+    <div className="relative mb-8 font-['Plus Jakarta Sans',sans-serif]">
       {/* Inputs ocultos para subida */}
       <input
         type="file"

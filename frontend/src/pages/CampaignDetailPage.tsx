@@ -46,7 +46,7 @@ const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: st
 
 function DetailSkeleton() {
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="min-h-screen bg-[#f4f7f4] font-['Plus Jakarta Sans',sans-serif]">
       <Navbar />
       <div className="max-w-[1200px] mx-auto px-6 py-8 animate-pulse">
         {/* Back button skeleton */}
@@ -156,7 +156,7 @@ export function CampaignDetailPage() {
   /* ── Error ── */
   if (error || !campaign) {
     return (
-      <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+      <div className="min-h-screen bg-[#f4f7f4] font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="max-w-[600px] mx-auto px-6 py-32 text-center">
           <div className="bg-white rounded-[28px] p-10 shadow-sm border border-red-100">
@@ -209,7 +209,7 @@ export function CampaignDetailPage() {
   const coverUrl = getImageUrl(campaign.coverImageUrl);
 
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="min-h-screen bg-[#f4f7f4] font-['Plus Jakarta Sans',sans-serif]">
       <Navbar />
 
       <div className="max-w-[1200px] mx-auto px-6 py-8">

@@ -117,7 +117,7 @@ export function CampaignFilters({ query, onChange }: Props) {
 
   return (
     <section
-      className="mb-8 font-['Sora',sans-serif] animate-in fade-in duration-500"
+      className="mb-8 font-['Plus Jakarta Sans',sans-serif] animate-in fade-in duration-500"
       aria-label="Filtros de campañas"
     >
       {!filtersOpen ? (

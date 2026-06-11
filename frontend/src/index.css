@@ -1,42 +1,52 @@
 @import "tailwindcss";
 
 /* 
-   Tailwind v4 Base Configuration - Green Financial Identity
+   Plus Jakarta Sans — Design System
+   Inspired by GoFundMe's clean, human visual language
 */
 
 :root {
-  /* Core brand palette */
-  --primary-green: #2e7d32;
-  --accent-emerald: #00897b;
-  --lime-deco: #aed581;
-  --dark-green: #1c2b1e;
-
-  /* Alerts */
-  --alert-amber: #f9a825;
-  --alert-red: #c62828;
+  /* Core brand palette — brighter, friendlier green */
+  --primary:        #02A95C;
+  --primary-dark:   #017A42;
+  --primary-light:  #E6F9F0;
+  --primary-mid:    #00875A;
 
   /* Neutrals */
-  --font-main: 'Sora', sans-serif;
-  --bg-app: #f4f7f4;
-  /* Subtly greenish light background */
-  --text-main: #1c2b1e;
-  /* Using dark-green for primary text instead of black/slate */
+  --text-heading:   #111827;
+  --text-body:      #374151;
+  --text-muted:     #6B7280;
+  --text-subtle:    #9CA3AF;
+
+  /* Backgrounds */
+  --bg-app:         #F9FAFB;
+  --bg-white:       #FFFFFF;
+  --bg-surface:     #F3F4F6;
+
+  /* Borders */
+  --border:         #E5E7EB;
+  --border-light:   #F3F4F6;
+
+  /* Alerts */
+  --alert-amber:    #D97706;
+  --alert-red:      #DC2626;
+  --alert-red-bg:   #FEF2F2;
+
+  /* Font */
+  --font-main: 'Plus Jakarta Sans', sans-serif;
 }
 
 @theme {
-  --font-sans: 'Sora', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
 
-  /* Adding these to the theme to use standard tailwind color names */
-  --color-primary-green: var(--primary-green);
-  --color-accent-emerald: var(--accent-emerald);
-  --color-lime-deco: var(--lime-deco);
-  --color-dark-green: var(--dark-green);
-  --color-alert-amber: var(--alert-amber);
-  --color-alert-red: var(--alert-red);
+  --color-primary:       var(--primary);
+  --color-primary-dark:  var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-bg-app:        var(--bg-app);
+  --color-border:        var(--border);
 }
 
 @layer base {
-
   *,
   ::before,
   ::after {
@@ -51,21 +61,26 @@
     padding: 0;
     font-family: var(--font-main);
     background-color: var(--bg-app);
-    color: var(--text-main);
+    color: var(--text-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Standardizing links and interactions */
   a {
-    color: var(--primary-green);
-    transition: color 0.2s ease;
+    color: var(--primary);
+    transition: color 0.15s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+    font-weight: 700;
   }
 }
 
+/* Scrollbar — subtle */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -73,26 +88,35 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5c1;
+  background: #D1D5DB;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-green);
-  opacity: 0.6;
+  background: #9CA3AF;
 }
 
 /* Stories avatar bar — hide scrollbar while keeping scroll behaviour */
 .hide-scrollbar {
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE / Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;                  /* Chrome / Safari */
+  display: none;
 }
 
-/* Skeleton pulse animation for story loading state */
+/* Skeleton pulse animation */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
-}
+  50%       { opacity: 0.45; }
+}
+
+/* Gentle fade-up for cards */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.35s ease forwards;
+}

@@ -75,12 +75,12 @@ export function CampaignCard({
 
   return (
     <article
-      className="group relative bg-white rounded-[20px] overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
-      style={{ boxShadow: '0 2px 12px rgba(28,43,30,0.07), 0 1px 3px rgba(28,43,30,0.05)' }}
+      className="group relative bg-white rounded-xl overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md"
+      style={{ border: '1px solid #E5E7EB', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* ── Banner superior estilo "cover photo" ── */}
       <div
-        className="relative h-[100px] flex-shrink-0 overflow-hidden"
+        className="relative h-[88px] flex-shrink-0 overflow-hidden"
         style={{ background: bannerGradient }}
       >
         {/* Patrón decorativo */}
@@ -154,10 +154,10 @@ export function CampaignCard({
 
         {/* Título + descripción */}
         <div>
-          <h3 className="text-[16px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 group-hover:text-[#2e7d32] transition-colors line-clamp-2">
+          <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-1 group-hover:text-[#02A95C] transition-colors line-clamp-2">
             {campaign.title}
           </h3>
-          <p className="text-[13px] text-slate-400 font-medium leading-relaxed line-clamp-2">
+          <p className="text-[13px] text-gray-400 leading-relaxed line-clamp-2">
             {campaign.shortDescription || 'Sin descripción breve disponible para esta campaña.'}
           </p>
         </div>
@@ -192,20 +192,18 @@ export function CampaignCard({
           </div>
         </div>
 
-        {/* ── Barra de progreso premium ── */}
+        {/* Barra de progreso */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Progreso</span>
-            <span className="text-[12px] font-black text-[#2e7d32]">{pct}%</span>
+            <span className="text-[12px] text-gray-400">Progreso</span>
+            <span className="text-[12px] font-semibold" style={{ color: '#02A95C' }}>{pct}%</span>
           </div>
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${barWidth}%`,
-                background: pct >= 100
-                  ? 'linear-gradient(90deg, #00897b, #2e7d32)'
-                  : 'linear-gradient(90deg, #2e7d32, #4ade80)',
+                background: pct >= 100 ? '#F59E0B' : '#02A95C',
               }}
             />
           </div>

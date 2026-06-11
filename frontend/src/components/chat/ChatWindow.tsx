@@ -4,6 +4,7 @@ import type { Conversation, Message } from '../../api/chat.api';
 import { getMessages } from '../../api/chat.api';
 import { getImageUrl } from '../../utils/image.utils';
 import { Link } from 'react-router-dom';
+import { ConversationAvatar } from './ConversationsSidebar';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -16,22 +17,7 @@ interface ChatWindowProps {
   newIncomingMessage: Message | null; // mensaje nuevo llegado por WS
 }
 
-function AvatarFallback({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
-  const initials = name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0] ?? '')
-    .join('')
-    .toUpperCase();
-  const cls = size === 'sm' ? 'w-8 h-8 text-[11px]' : 'w-10 h-10 text-[13px]';
-  return (
-    <div
-      className={`rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-black shrink-0 ${cls}`}
-    >
-      {initials || '?'}
-    </div>
-  );
-}
+// Avatar fallback is handled by ConversationAvatar imported above
 
 function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
@@ -204,26 +190,22 @@ export function ChatWindow({
           <ArrowLeft size={20} />
         </button>
 
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={otherUser.fullName}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <AvatarFallback name={otherUser.fullName} />
-        )}
+        <ConversationAvatar
+          name={otherUser.fullName}
+          url={avatarUrl}
+          className="w-10 h-10"
+        />
 
         <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-black text-slate-800 truncate leading-tight">
+          <p className="text-[14px] font-bold text-gray-900 truncate leading-tight">
             {otherUser.fullName}
           </p>
           {isTypingIndicatorVisible ? (
-            <p className="text-[12px] text-emerald-600 font-semibold animate-pulse">
+            <p className="text-[11px] text-emerald-600 font-semibold animate-pulse mt-0.5">
               Escribiendo...
             </p>
           ) : (
-            <p className="text-[12px] text-slate-400 font-medium">
+            <p className="text-[11px] text-gray-500 font-medium mt-0.5">
               {otherUser.email}
             </p>
           )}
@@ -232,9 +214,9 @@ export function ChatWindow({
         {conversation.campaignId && (
           <Link
             to={`/campaign/${conversation.campaignId}`}
-            className="hidden sm:flex items-center gap-1.5 text-[12px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl no-underline transition-colors max-w-[160px] truncate"
+            className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg no-underline transition-colors max-w-[160px] truncate"
           >
-            <Rocket size={13} strokeWidth={2.5} />
+            <Rocket size={12} />
             <span className="truncate">{conversation.campaignTitle ?? 'Ver campaña'}</span>
           </Link>
         )}
@@ -298,39 +280,35 @@ export function ChatWindow({
                 return (
                   <div
                     key={msg.id}
-                    className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} ${isSameSender ? 'mt-1' : 'mt-4'}`}
+                    className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} ${isSameSender ? 'mt-0.5' : 'mt-3'}`}
                   >
                     {/* Avatar del otro */}
                     {!isMe && (
                       <div className="shrink-0 w-8">
                         {showAvatar ? (
-                          avatarUrl ? (
-                            <img
-                              src={avatarUrl}
-                              alt=""
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <AvatarFallback name={otherUser.fullName} size="sm" />
-                          )
+                          <ConversationAvatar
+                            name={otherUser.fullName}
+                            url={avatarUrl}
+                            className="w-8 h-8"
+                          />
                         ) : null}
                       </div>
                     )}
 
                     {/* Burbuja */}
                     <div
-                      className={`max-w-[72%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                      className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                     >
                       <div
-                        className={`px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap break-words
+                        className={`px-3 py-1.5 text-[13.5px] leading-relaxed whitespace-pre-wrap break-words shadow-sm
                           ${isMe
-                            ? 'bg-gradient-to-br from-[#2e7d32] to-[#1b5e20] text-white rounded-[18px] rounded-br-[4px] shadow-md shadow-emerald-900/10'
-                            : 'bg-white text-slate-800 rounded-[18px] rounded-bl-[4px] shadow-sm border border-slate-100'
+                            ? 'bg-[#E6F9F0] text-[#017A42] rounded-lg rounded-tr-none border border-emerald-100/50'
+                            : 'bg-white text-gray-800 rounded-lg rounded-tl-none border border-gray-100'
                           }`}
                       >
                         {msg.content}
                       </div>
-                      <span className="text-[10px] text-slate-400 mt-1 px-1 font-medium">
+                      <span className="text-[9px] text-gray-400 mt-0.5 px-1 font-medium">
                         {formatTime(msg.createdAt)}
                         {msg.isEdited && ' · editado'}
                       </span>
@@ -344,19 +322,19 @@ export function ChatWindow({
 
         {/* Indicador de escritura */}
         {isTypingIndicatorVisible && (
-          <div className="flex items-end gap-2 mt-4">
+          <div className="flex items-end gap-2 mt-3">
             <div className="shrink-0 w-8">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
-              ) : (
-                <AvatarFallback name={otherUser.fullName} size="sm" />
-              )}
+              <ConversationAvatar
+                name={otherUser.fullName}
+                url={avatarUrl}
+                className="w-8 h-8"
+              />
             </div>
-            <div className="bg-white rounded-[18px] rounded-bl-[4px] px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-1.5">
+            <div className="bg-white rounded-lg rounded-tl-none px-3 py-2 shadow-sm border border-gray-100 flex items-center gap-1">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="w-2 h-2 rounded-full bg-slate-400 inline-block animate-bounce"
+                  className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block animate-bounce"
                   style={{ animationDelay: `${i * 150}ms` }}
                 />
               ))}
@@ -368,28 +346,25 @@ export function ChatWindow({
       </div>
 
       {/* ── Input ────────────────────────────────────────── */}
-      <div className="shrink-0 bg-white border-t border-slate-100 px-4 py-3">
-        <div className="flex items-end gap-3 bg-slate-50 rounded-2xl px-4 py-2 border border-slate-200 focus-within:border-emerald-300 transition-colors">
+      <div className="shrink-0 bg-white border-t border-gray-200 px-4 py-3">
+        <div className="flex items-end gap-3 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-200 focus-within:bg-white focus-within:border-indigo-500 transition-colors">
           <textarea
             value={text}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
             placeholder={`Escríbele a ${otherUser.firstName ?? 'este contacto'}...`}
             rows={1}
-            className="flex-1 bg-transparent resize-none outline-none text-[14px] text-slate-800 placeholder:text-slate-400 font-medium max-h-[140px] py-1 leading-relaxed"
+            className="flex-1 bg-transparent resize-none outline-none text-[13.5px] text-gray-800 placeholder:text-gray-400 font-medium max-h-[120px] py-1 leading-relaxed"
             style={{ scrollbarWidth: 'none' }}
           />
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="shrink-0 w-9 h-9 rounded-xl bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer border-none shadow-md shadow-emerald-900/20"
+            className="shrink-0 w-8 h-8 rounded bg-[#02A95C] hover:bg-[#017A42] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer border-none shadow-sm"
           >
-            <Send size={16} strokeWidth={2.5} />
+            <Send size={14} />
           </button>
         </div>
-        <p className="text-[10px] text-slate-400 font-medium mt-1.5 ml-1">
-          Enter para enviar · Shift+Enter para nueva línea
-        </p>
       </div>
     </div>
   );

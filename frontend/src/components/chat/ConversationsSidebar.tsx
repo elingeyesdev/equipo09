@@ -34,12 +34,29 @@ function AvatarFallback({ name, className }: { name: string; className?: string 
     .toUpperCase();
   return (
     <div
-      className={`rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-black select-none ${className}`}
+      className={`rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-bold select-none ${className}`}
     >
       {initials || '?'}
     </div>
   );
 }
+
+export function ConversationAvatar({ name, url, className }: { name: string; url: string | null; className?: string }) {
+  const [error, setError] = useState(false);
+  if (!url || error) {
+    return <AvatarFallback name={name} className={className} />;
+  }
+  return (
+    <img
+      src={url}
+      alt=""
+      onError={() => setError(true)}
+      className={`${className} rounded-full object-cover`}
+    />
+  );
+}
+
+import { useState } from 'react';
 
 export function ConversationsSidebar({
   conversations,
@@ -57,7 +74,7 @@ export function ConversationsSidebar({
   );
 
   return (
-    <aside className="w-full md:w-[340px] shrink-0 flex flex-col bg-white border-r border-slate-100 h-full">
+    <aside className="w-full h-full flex flex-col bg-white">
       {/* Header */}
       <div className="p-5 border-b border-slate-100">
         <div className="flex items-center justify-between mb-4">
@@ -80,13 +97,13 @@ export function ConversationsSidebar({
 
         {/* Búsqueda */}
         <div className="relative">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar conversación..."
-            className="w-full bg-slate-50 rounded-2xl pl-9 pr-4 py-2.5 text-[13px] font-medium text-slate-700 outline-none border border-transparent focus:border-emerald-300 transition-colors placeholder:text-slate-400"
+            className="w-full bg-gray-50 rounded-lg pl-8 pr-4 py-2 text-[13px] font-medium text-gray-700 outline-none border border-gray-200 focus:bg-white focus:border-indigo-500 transition-colors placeholder:text-gray-400"
           />
         </div>
       </div>
@@ -120,7 +137,7 @@ export function ConversationsSidebar({
             )}
           </div>
         ) : (
-          <ul className="p-2 space-y-0.5">
+          <ul className="p-2 space-y-1">
             {filtered.map((conv) => {
               const isActive = conv.id === activeId;
               const hasUnread = conv.unreadCount > 0;
@@ -132,26 +149,19 @@ export function ConversationsSidebar({
                 <li key={conv.id}>
                   <button
                     onClick={() => onSelect(conv)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-left cursor-pointer border-none
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left cursor-pointer border-none
                       ${isActive
-                        ? 'bg-emerald-50 shadow-sm'
-                        : 'hover:bg-slate-50'
+                        ? 'bg-gray-100'
+                        : 'hover:bg-gray-50'
                       }`}
                   >
                     {/* Avatar */}
                     <div className="relative shrink-0">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt={conv.otherUser.fullName}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <AvatarFallback
-                          name={conv.otherUser.fullName}
-                          className="w-12 h-12 text-[15px]"
-                        />
-                      )}
+                      <ConversationAvatar
+                        name={conv.otherUser.fullName}
+                        url={avatarUrl}
+                        className="w-11 h-11"
+                      />
                       {hasUnread && (
                         <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-emerald-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1">
                           {conv.unreadCount > 9 ? '9+' : conv.unreadCount}

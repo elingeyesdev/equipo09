@@ -1,7 +1,7 @@
 import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { AddCapitalModal } from '../components/AddCapitalModal';
-import { StoriesAvatarBar } from '../components/StoriesAvatarBar';
+
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
 import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
@@ -51,36 +51,31 @@ export function InvestorDashboardPage() {
   }, [data]);
 
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif] pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Navbar />
 
       {/* HERO SECTION */}
-      <div className="bg-[#1c2b1e] pt-16 pb-32 px-6 relative overflow-hidden border-b border-emerald-900/50">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
-           <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-[#2e7d32] blur-[120px] rounded-full mix-blend-screen animate-pulse duration-[10000ms]" />
-           <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-[#00897b] blur-[100px] rounded-full mix-blend-screen" />
-        </div>
-        
-        <div className="max-w-[1100px] mx-auto relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex items-center gap-5 mb-5">
-             <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-emerald-400 border border-white/10 shadow-lg">
-               <LayoutDashboard size={28} strokeWidth={2.5} />
-             </div>
-             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-none drop-shadow-md">
-               Panel de Inversor
-             </h1>
+      <div className="bg-white border-b border-gray-200 pt-10 pb-28 px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#E6F9F0' }}>
+              <LayoutDashboard size={22} strokeWidth={2} style={{ color: '#02A95C' }} />
+            </div>
+            <h1 className="text-[32px] font-bold text-gray-900 tracking-tight">
+              Panel de Inversor
+            </h1>
           </div>
-          <p className="text-[16px] font-medium text-emerald-100/70 max-w-xl leading-relaxed">
-            Monitorea tu capital, gestiona tus inversiones activas y descubre nuevas oportunidades de alto impacto financiero.
+          <p className="text-[15px] text-gray-500 max-w-xl leading-relaxed">
+            Monitorea tu capital, gestiona tus inversiones activas y descubre nuevas oportunidades.
           </p>
         </div>
       </div>
 
-      <main className="max-w-[1100px] mx-auto px-6 -mt-20 relative z-20">
+      <main className="max-w-[1100px] mx-auto px-6 -mt-20 relative z-20" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         {loading && (
-          <div className="py-20 flex flex-col items-center justify-center gap-6 bg-white/80 backdrop-blur-xl rounded-[32px] border border-white shadow-xl">
-            <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
-            <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Métricas...</span>
+          <div className="py-20 flex flex-col items-center justify-center gap-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="w-10 h-10 border-3 border-gray-200 border-t-[#02A95C] rounded-full animate-spin" />
+            <span className="text-[13px] text-gray-400">Cargando tu panel...</span>
           </div>
         )}
 
@@ -103,42 +98,40 @@ export function InvestorDashboardPage() {
 
         {data && (
           <div className="flex flex-col gap-16 animate-in fade-in duration-700">
-            {/* ─── Stories bar (Backlog R.2) ───────────────────────────────── */}
-            <StoriesAvatarBar />
-
             <InvestorDashboardOverview
               data={data}
               onAddCapital={() => setShowAddCapital(true)}
             />
             
             <div className="flex flex-col gap-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-emerald-100 pb-6 gap-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-4">
                  <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-[#2e7d32]">
-                     <TrendingUp size={20} strokeWidth={2.5} />
+                   <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#E6F9F0' }}>
+                     <TrendingUp size={18} strokeWidth={2} style={{ color: '#02A95C' }} />
                    </div>
-                   <h2 className="text-[22px] font-black text-[#1c2b1e] tracking-tight uppercase">Operaciones Recientes</h2>
+                   <h2 className="text-[18px] font-bold text-gray-900">Operaciones Recientes</h2>
                  </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                   <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-emerald-100 overflow-x-auto w-full sm:w-auto">
-                      {(['all', 'donation', 'equity', 'reward'] as const).map(type => (
-                        <button
-                          key={type}
-                          onClick={() => setFilterType(type)}
-                          className={`px-5 py-2 rounded-xl text-[13px] font-black tracking-wide transition-all whitespace-nowrap cursor-pointer border-none ${
-                            filterType === type 
-                              ? 'bg-[#2e7d32] text-white shadow-md shadow-emerald-900/10' 
-                              : 'bg-transparent text-slate-500 hover:text-[#1c2b1e] hover:bg-slate-50'
-                          }`}
-                        >
-                          {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : type === 'equity' ? 'Equity' : 'Recompensa'}
-                        </button>
-                      ))}
+                   <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto w-full sm:w-auto">
+                       {(['all', 'donation', 'equity', 'reward'] as const).map(type => (
+                         <button
+                           key={type}
+                           onClick={() => setFilterType(type)}
+                           className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap cursor-pointer border-none ${
+                             filterType === type 
+                               ? 'bg-white text-gray-900 shadow-sm' 
+                               : 'bg-transparent text-gray-500 hover:text-gray-700'
+                           }`}
+                           style={{ fontFamily: "'Inter', sans-serif" }}
+                         >
+                           {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : type === 'equity' ? 'Equity' : 'Recompensa'}
+                         </button>
+                       ))}
                    </div>
                    <select 
                      value={sortType} 
                      onChange={(e) => setSortType(e.target.value)}
-                     className="px-4 py-2.5 rounded-2xl bg-white border border-emerald-100 text-[#1c2b1e] text-[13px] font-black shadow-sm outline-none cursor-pointer hover:border-[#2e7d32] transition-colors appearance-none w-full sm:w-auto"
+                     className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-[13px] font-medium shadow-sm outline-none cursor-pointer hover:border-[#02A95C] transition-colors appearance-none w-full sm:w-auto"
                    >
                      <option value="newest">Más recientes</option>
                      <option value="oldest">Más antiguas</option>
@@ -168,7 +161,7 @@ export function InvestorDashboardPage() {
               ) : (
                 <div className="grid gap-6">
                   {filteredInvestments.map((inv) => (
-                    <div key={inv.id} className="group bg-white rounded-[28px] p-5 shadow-sm border border-emerald-50 flex flex-col md:flex-row items-center gap-6 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1 transition-all duration-300">
+                    <div key={inv.id} className="group bg-white rounded-xl p-5 border border-gray-200 flex flex-col md:flex-row items-center gap-6 hover:shadow-md hover:border-gray-300 transition-all duration-200">
                       <div className="w-full md:w-36 h-36 rounded-2xl bg-slate-100 overflow-hidden shrink-0 relative">
                         {getImageUrl(inv.campaignCoverImage) ? (
                           <img src={getImageUrl(inv.campaignCoverImage)} alt={inv.campaignTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

@@ -146,7 +146,7 @@ export function ChatPage() {
   const handleMarkAsRead = useCallback(
     async (convId: string) => {
       emitMarkAsRead(convId);
-      await markAsRead(convId).catch(() => {});
+      await markAsRead(convId).catch(() => { });
       setConversations((prev) =>
         prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)),
       );
@@ -157,36 +157,16 @@ export function ChatPage() {
   const totalUnread = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
   return (
-    <div className="flex flex-col h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="flex flex-col h-screen bg-white font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
       <Navbar />
 
-      {/* Banner título */}
-      <div className="bg-[#1c2b1e] px-6 py-4 border-b border-emerald-900/40 shrink-0">
-        <div className="max-w-[1200px] mx-auto flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-emerald-400 border border-white/10">
-            <MessageCircle size={18} strokeWidth={2.5} />
-          </div>
-          <div>
-            <h1 className="text-[17px] font-black text-white tracking-tight leading-none">
-              Mensajes
-            </h1>
-            <p className="text-[11px] text-emerald-300/70 font-medium mt-0.5">
-              {totalUnread > 0
-                ? `${totalUnread} mensaje${totalUnread > 1 ? 's' : ''} sin leer`
-                : 'Conversaciones con emprendedores e inversores'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenido principal */}
-      <div className="flex-1 overflow-hidden max-w-[1200px] w-full mx-auto flex">
+      {/* Contenido principal - Fluido de pantalla completa */}
+      <div className="flex-1 flex overflow-hidden w-full bg-[#f8f9fa]">
         {/* Sidebar — visible siempre en md+, toggle en móvil */}
         <div
           className={`${
             showSidebar ? 'flex' : 'hidden'
-          } md:flex border-r border-slate-200 h-full`}
-          style={{ width: '340px', minWidth: '340px' }}
+          } md:flex border-r border-gray-200 h-full w-full md:w-[350px] md:min-w-[350px]`}
         >
           <ConversationsSidebar
             conversations={conversations}
@@ -219,20 +199,20 @@ export function ChatPage() {
             />
           ) : (
             /* Pantalla vacía cuando no hay conversación seleccionada */
-            <div className="flex-1 flex flex-col items-center justify-center gap-5 bg-[#f4f7f4]">
-              <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-emerald-200 shadow-sm border border-emerald-100">
-                <MessageCircle size={40} strokeWidth={1.5} />
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 bg-gray-50">
+              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-gray-100">
+                <MessageCircle size={36} strokeWidth={1.5} />
               </div>
               <div className="text-center">
-                <p className="text-[16px] font-black text-slate-600 tracking-tight">
+                <p className="text-[16px] font-bold text-gray-700 tracking-tight">
                   Selecciona una conversación
                 </p>
-                <p className="text-[13px] text-slate-400 font-medium mt-1">
+                <p className="text-[13px] text-gray-400 font-medium mt-1">
                   Elige un chat de la lista para comenzar
                 </p>
               </div>
-              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[12px] font-medium px-5 py-2.5 rounded-full">
-                💡 Puedes iniciar un chat desde el detalle de cualquier campaña
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[12px] font-medium px-5 py-2 rounded-lg">
+                Puedes iniciar un chat desde el detalle de cualquier campaña
               </div>
             </div>
           )}

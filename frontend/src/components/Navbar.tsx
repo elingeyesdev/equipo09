@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Rocket, User, LogOut, MessageCircle } from 'lucide-react';
+import { User, LogOut, MessageCircle, Menu, X } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { useEffect, useState } from 'react';
 import { getMyConversations } from '../api/chat.api';
@@ -10,8 +10,8 @@ export function Navbar() {
   const userRole = localStorage.getItem('userRole');
   const userEmail = localStorage.getItem('userEmail');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Cargar count inicial de mensajes no leídos
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
@@ -21,7 +21,7 @@ export function Navbar() {
         setUnreadCount(total);
       })
       .catch(() => { });
-  }, [location.pathname]); // Refrescar al cambiar de página
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -34,67 +34,182 @@ export function Navbar() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navLinkClass = (path: string) => `
-    text-[14px] font-bold px-3 py-2 rounded-lg transition-all duration-200 relative
-    ${isActive(path)
-      ? 'text-[#2e7d32] bg-emerald-50'
-      : 'text-slate-500 hover:text-slate-900 hover:bg-emerald-50/50'
-    }
-  `;
+  const navLinkClass = (path: string) =>
+    `text-[14px] font-medium px-3 py-1.5 rounded-md transition-colors duration-150 ${
+      isActive(path)
+        ? 'text-[#02A95C] font-semibold'
+        : 'text-gray-600 hover:text-gray-900'
+    }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-emerald-100/50 px-6 py-4 flex items-center justify-between shadow-sm shadow-emerald-900/5 animate-in slide-in-from-top-4 duration-300 font-['Sora',sans-serif]">
-      <div className="flex items-center gap-10">
-        <Link to="/" className="text-[18px] font-black text-[#1c2b1e] tracking-tighter hover:scale-105 transition-transform flex items-center gap-2 no-underline group">
-          <Rocket className="w-6 h-6 text-[#2e7d32] group-hover:animate-bounce" strokeWidth={2.5} />
-          CROWD<span className="text-[#2e7d32]">FUNDING</span>
-        </Link>
+    <>
+      <nav
+        className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between"
+        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      >
+        {/* Left: Logo */}
+        <div className="flex items-center gap-8">
+          <Link
+            to="/"
+            className="flex items-center no-underline group"
+            style={{ textDecoration: 'none' }}
+          >
+            <img
+              src="/logocrowd.jpg"
+              alt="Unifundme"
+              className="h-10 sm:h-14 w-auto object-contain"
+            />
+          </Link>
 
-        <div className="hidden md:flex items-center gap-2">
+          {/* Nav links (Desktop) */}
+          <div className="hidden md:flex items-center gap-1">
+            <Link to="/explore" className={navLinkClass('/explore')} style={{ textDecoration: 'none' }}>
+              Explorar
+            </Link>
+            <Link
+              to="/donatok"
+              className={`text-[14px] font-medium px-3 py-1.5 rounded-md transition-colors duration-150 ${
+                isActive('/donatok') ? 'text-[#02A95C] font-semibold' : 'text-gray-600 hover:text-gray-900'
+              }`}
+              style={{ textDecoration: 'none' }}
+            >
+              DonaTok
+            </Link>
+            {userRole === 'entrepreneur' ? (
+              <>
+                <Link to="/entrepreneur-campaigns" className={navLinkClass('/entrepreneur-campaigns')} style={{ textDecoration: 'none' }}>
+                  Mis Campañas
+                </Link>
+                <Link to="/entrepreneur-profile" className={navLinkClass('/entrepreneur-profile')} style={{ textDecoration: 'none' }}>
+                  Mi Perfil
+                </Link>
+                <Link to="/chat" className={`${navLinkClass('/chat')} relative`} style={{ textDecoration: 'none' }}>
+                  <span className="flex items-center gap-1.5">
+                    <MessageCircle size={15} strokeWidth={2} />
+                    Mensajes
+                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#02A95C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/dashboard" className={navLinkClass('/dashboard')} style={{ textDecoration: 'none' }}>
+                  Mi Panel
+                </Link>
+                <Link to="/profile" className={navLinkClass('/profile')} style={{ textDecoration: 'none' }}>
+                  Mi Perfil
+                </Link>
+                <Link to="/chat" className={`${navLinkClass('/chat')} relative`} style={{ textDecoration: 'none' }}>
+                  <span className="flex items-center gap-1.5">
+                    <MessageCircle size={15} strokeWidth={2} />
+                    Mensajes
+                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#02A95C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right side (Desktop + Mobile) */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* User Email (Desktop) */}
+          {userEmail && (
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200">
+              <div className="w-6 h-6 rounded-full bg-[#02A95C]/10 flex items-center justify-center">
+                <User size={13} className="text-[#02A95C]" strokeWidth={2} />
+              </div>
+              <span className="text-[13px] font-medium text-gray-700 truncate max-w-[140px]">
+                {userEmail}
+              </span>
+            </div>
+          )}
+
+          {userEmail && <NotificationBell />}
+
+          {/* Logout (Desktop) */}
+          <button
+            className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-[13px] font-medium cursor-pointer transition-colors"
+            onClick={handleLogout}
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            <LogOut size={15} strokeWidth={2} />
+            Salir
+          </button>
+
+          {/* Hamburger Menu Button (Mobile) */}
+          <button
+            className="md:hidden flex items-center justify-center p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Links Dropdown */}
+      {isMenuOpen && (
+        <div
+          className="md:hidden bg-white border-b border-gray-200 px-4 py-4 flex flex-col gap-2.5 z-40 sticky top-[69px]"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
           <Link
             to="/explore"
-            className={navLinkClass('/explore')}
+            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/explore') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+            onClick={() => setIsMenuOpen(false)}
+            style={{ textDecoration: 'none' }}
           >
             Explorar
           </Link>
           <Link
             to="/donatok"
-            className={`text-[14px] font-black px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${isActive('/donatok')
-                ? 'text-white'
-                : 'text-white hover:opacity-90'
-              }`}
-            style={{
-              background: isActive('/donatok')
-                ? 'linear-gradient(135deg, #1c2b1e, #2e7d32)'
-                : 'linear-gradient(135deg, #2e7d32, #00897b)',
-              boxShadow: '0 2px 8px rgba(46,125,50,0.35)',
-            }}
+            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/donatok') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+            onClick={() => setIsMenuOpen(false)}
+            style={{ textDecoration: 'none' }}
           >
-            <span style={{ fontSize: '13px' }}></span>
             DonaTok
           </Link>
+
           {userRole === 'entrepreneur' ? (
             <>
               <Link
                 to="/entrepreneur-campaigns"
-                className={navLinkClass('/entrepreneur-campaigns')}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-campaigns') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
               >
                 Mis Campañas
               </Link>
               <Link
                 to="/entrepreneur-profile"
-                className={navLinkClass('/entrepreneur-profile')}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-profile') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
               >
-                Perfil Emprendedor
+                Mi Perfil
               </Link>
-              <Link to="/chat" className={`${navLinkClass('/chat')} relative`}>
-                <span className="flex items-center gap-1.5">
-                  <MessageCircle size={15} strokeWidth={2.5} />
+              <Link
+                to="/chat"
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                <span className="flex items-center gap-2">
+                  <MessageCircle size={17} strokeWidth={2} />
                   Mensajes
                 </span>
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                  <span className="min-w-[18px] h-[18px] bg-[#02A95C] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount}
                   </span>
                 )}
               </Link>
@@ -103,48 +218,59 @@ export function Navbar() {
             <>
               <Link
                 to="/dashboard"
-                className={navLinkClass('/dashboard')}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
               >
-                Dashboard
+                Mi Panel
               </Link>
               <Link
                 to="/profile"
-                className={navLinkClass('/profile')}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/profile') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
               >
-                Configurar Perfil
+                Mi Perfil
               </Link>
-              <Link to="/chat" className={`${navLinkClass('/chat')} relative`}>
-                <span className="flex items-center gap-1.5">
-                  <MessageCircle size={15} strokeWidth={2.5} />
+              <Link
+                to="/chat"
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                <span className="flex items-center gap-2">
+                  <MessageCircle size={17} strokeWidth={2} />
                   Mensajes
                 </span>
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                  <span className="min-w-[18px] h-[18px] bg-[#02A95C] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount}
                   </span>
                 )}
               </Link>
             </>
           )}
-        </div>
-      </div>
 
-      <div className="flex items-center gap-3">
-        {userEmail && (
-          <div className="hidden sm:flex items-center gap-2 bg-emerald-50/80 px-4 py-2 rounded-full border border-emerald-100/50">
-            <User size={14} className="text-[#2e7d32]" strokeWidth={3} />
-            <span className="text-[12px] font-bold text-emerald-900 truncate max-w-[150px]">{userEmail}</span>
-          </div>
-        )}
-        {userEmail && <NotificationBell />}
-        <button
-          className="bg-white hover:bg-red-50 text-slate-500 hover:text-red-700 border border-slate-200 hover:border-red-100 rounded-xl px-4 py-2 text-[13px] font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-2"
-          onClick={handleLogout}
-        >
-          <LogOut size={16} strokeWidth={2.5} />
-          Cerrar Sesión
-        </button>
-      </div>
-    </nav>
+          {userEmail && (
+            <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
+              <div className="flex items-center gap-2 px-2.5 py-2">
+                <User size={16} className="text-gray-400" />
+                <span className="text-[13px] text-gray-500 truncate">{userEmail}</span>
+              </div>
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:text-gray-900 text-[14px] font-medium cursor-pointer"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                <LogOut size={16} />
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }

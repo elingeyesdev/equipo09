@@ -78,7 +78,7 @@ export function ContributionConfirmModal({
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ fontFamily: "'Sora', sans-serif" }}
+      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* ── Backdrop ── */}
       <div

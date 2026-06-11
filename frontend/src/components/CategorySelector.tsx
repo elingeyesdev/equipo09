@@ -84,7 +84,7 @@ export function CategorySelector({ selected, onChange }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4 font-['Sora',sans-serif]">
+    <div className="flex flex-col gap-4 font-['Plus Jakarta Sans',sans-serif]">
       {/* Contador de seleccionados */}
       <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight ml-1">
         {selected.length === 0

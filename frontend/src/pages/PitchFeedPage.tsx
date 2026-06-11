@@ -239,7 +239,7 @@ export function PitchFeedPage() {
   // ── Render states ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Sora',sans-serif]">
+      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5">
           <div
@@ -258,7 +258,7 @@ export function PitchFeedPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Sora',sans-serif]">
+      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5 px-6 text-center">
           <AlertCircle size={48} className="text-red-400" strokeWidth={1.5} />
@@ -278,7 +278,7 @@ export function PitchFeedPage() {
 
   if (campaigns.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Sora',sans-serif]">
+      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5 px-8 text-center">
           <div
@@ -297,7 +297,7 @@ export function PitchFeedPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a140c] font-['Sora',sans-serif] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#0a140c] font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
       {/* Navbar */}
       <Navbar />
 

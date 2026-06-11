@@ -309,7 +309,7 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
 
 // ─── Main StoriesAvatarBar ────────────────────────────────────────────────────
 
-export function StoriesAvatarBar() {
+export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
   const [groups, setGroups] = useState<CampaignStoryGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
@@ -353,7 +353,7 @@ export function StoriesAvatarBar() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', gap: 16, padding: '0 4px', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', gap: 16, padding: '0 4px', overflowX: 'auto', ...style }}>
         {[1, 2, 3, 4].map(i => (
           <div key={i} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 62, height: 62, borderRadius: '50%', background: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', animation: 'pulse 1.5s infinite' }} />
@@ -377,6 +377,7 @@ export function StoriesAvatarBar() {
           border: '1px solid #e8f5e9',
           boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
           padding: '18px 20px',
+          ...style,
         }}
       >
         {/* Header */}

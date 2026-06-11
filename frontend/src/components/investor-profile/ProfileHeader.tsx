@@ -45,7 +45,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
   };
 
   return (
-    <div className="relative mb-8 font-['Sora',sans-serif]">
+    <div className="relative mb-8 font-['Plus Jakarta Sans',sans-serif]">
       <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
       <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 

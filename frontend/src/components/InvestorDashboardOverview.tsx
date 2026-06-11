@@ -34,7 +34,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
   const valueClass = "text-4xl font-black tracking-tighter mt-4 mb-2";
 
   return (
-    <div className="flex flex-col gap-6 font-['Sora',sans-serif]">
+    <div className="flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif]">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         
         {/* Capital Disponible */}

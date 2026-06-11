@@ -50,7 +50,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
   const editBtn = "w-9 h-9 bg-slate-50 hover:bg-emerald-100 text-slate-400 hover:text-[#2e7d32] rounded-xl flex items-center justify-center cursor-pointer transition-all border-none active:scale-95";
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Sora',sans-serif]">
+    <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif]">
       
       {/* Profile completeness */}
       <div className={`${cardClass} border-l-[6px] border-l-[#2e7d32]`}>

@@ -151,7 +151,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
   const labelClass = "text-[11px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-['Sora',sans-serif]">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-['Plus Jakarta Sans',sans-serif]">
       
       {/* Header y Progreso */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

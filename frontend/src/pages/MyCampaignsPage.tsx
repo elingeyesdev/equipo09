@@ -19,15 +19,14 @@ function SummaryStat({
   icon, label, value, accent,
 }: { icon: React.ReactNode; label: string; value: string | number; accent: string }) {
   return (
-    <div className="flex-1 min-w-[130px] bg-white rounded-2xl px-5 py-4 flex items-center gap-3"
-      style={{ boxShadow: '0 1px 8px rgba(28,43,30,0.06)' }}>
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: accent + '20' }}>
+    <div className="flex-1 min-w-[130px] bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center gap-3 shadow-sm">
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: accent + '15' }}>
         <span style={{ color: accent }}>{icon}</span>
       </div>
       <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-        <p className="text-[18px] font-black text-[#1c2b1e] leading-none">{value}</p>
+        <p className="text-[11px] font-semibold text-gray-400 mb-0.5">{label}</p>
+        <p className="text-[18px] font-bold text-gray-900 leading-none">{value}</p>
       </div>
     </div>
   );
@@ -99,37 +98,21 @@ export function MyCampaignsPage() {
     : `$${n}`;
 
   return (
-    <div className="min-h-screen font-['Sora',sans-serif]" style={{ background: '#f0f2f5' }}>
+    <div className="min-h-screen bg-gray-50 pb-16" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Navbar />
 
-      {/* ── Hero / Cover Section (estilo portada de perfil FB) ── */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #1c2b1e 0%, #2e7d32 55%, #00897b 100%)',
-          minHeight: '200px',
-        }}
-      >
-        {/* Decorative circles */}
-        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #aed581, transparent 70%)' }} />
-        <div className="absolute -bottom-10 -left-10 w-56 h-56 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #00897b, transparent 70%)' }} />
-
-        <div className="max-w-[1200px] mx-auto px-6 pt-10 pb-16 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      {/* Hero / Cover Section */}
+      <div className="bg-white border-b border-gray-200 py-10 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              {/* Eyebrow */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-white/80 text-[11px] font-black uppercase tracking-widest">
-                  <Zap size={11} className="text-[#aed581]" />
-                  Centro de Operaciones
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-3">
+              <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#E6F9F0] text-[#017A42] mb-3">
+                Centro de Operaciones
+              </span>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-2">
                 Mis Campañas
               </h1>
-              <p className="text-white/60 font-medium text-[15px] max-w-lg">
+              <p className="text-[15px] text-gray-500 max-w-lg leading-relaxed">
                 Gestiona tus proyectos, monitorea el crecimiento y lanza nuevas iniciativas.
               </p>
             </div>
@@ -138,46 +121,47 @@ export function MyCampaignsPage() {
             <button
               id="btn-launch-campaign"
               onClick={() => setEditingCampaign({} as any)}
-              className="flex items-center gap-2.5 px-7 py-4 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all active:scale-95 hover:scale-105 shadow-xl bg-white text-[#1c2b1e] hover:bg-emerald-50 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14px] text-white border-none cursor-pointer transition-all active:scale-95"
               style={{
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+                background: '#02A95C',
+                fontFamily: "'Plus Jakarta Sans', sans-serif"
               }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#017A42')}
+              onMouseLeave={e => (e.currentTarget.style.background = '#02A95C')}
             >
-              <Plus size={18} strokeWidth={3} className="text-[#2e7d32]" />
+              <Plus size={18} strokeWidth={2.5} />
               Lanzar Campaña
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── Stats strip (sale de la portada) ── */}
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="flex flex-wrap gap-3 -mt-6 relative z-20 mb-6">
+      {/* Main Container */}
+      <div className="max-w-[1200px] mx-auto px-6 pt-8">
+        <div className="flex flex-wrap gap-4 mb-8">
           <SummaryStat icon={<Rocket size={18} />}    label="Campañas" value={campaigns.length}   accent="#2e7d32" />
           <SummaryStat icon={<TrendingUp size={18} />} label="Recaudado" value={formatMoney(totalRaised)} accent="#00897b" />
           <SummaryStat icon={<Users size={18} />}     label="Inversores" value={totalInvestors}    accent="#f59e0b" />
           <SummaryStat icon={<Star size={18} />}      label="Activas" value={activeCount}    accent="#aed581" />
         </div>
 
-        {/* ── Toolbar: tabs de estado + buscador + view toggle ── */}
-        <div className="bg-white rounded-2xl mb-6 overflow-hidden"
-          style={{ boxShadow: '0 1px 8px rgba(28,43,30,0.06)' }}>
-
+        <div className="bg-white rounded-xl border border-gray-200 mb-6 overflow-hidden shadow-sm">
           {/* Status tabs */}
-          <div className="flex overflow-x-auto border-b border-slate-100 px-4 gap-0 scrollbar-hide">
+          <div className="flex overflow-x-auto border-b border-gray-100 px-4 gap-0 scrollbar-hide">
             {STATUS_TABS.map(tab => (
               <button
                 key={tab.value}
                 onClick={() => setStatusFilter(tab.value)}
-                className="relative px-5 py-3.5 text-[13px] font-black transition-colors whitespace-nowrap flex-shrink-0"
+                className="relative px-5 py-3.5 text-[13px] font-semibold transition-colors whitespace-nowrap flex-shrink-0 cursor-pointer border-none bg-transparent"
                 style={{
-                  color: statusFilter === tab.value ? '#2e7d32' : '#94a3b8',
-                  borderBottom: statusFilter === tab.value ? '2.5px solid #2e7d32' : '2.5px solid transparent',
+                  color: statusFilter === tab.value ? '#02A95C' : '#6b7280',
+                  borderBottom: statusFilter === tab.value ? '2px solid #02A95C' : '2px solid transparent',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif"
                 }}
               >
                 {tab.label}
                 {tab.value !== 'all' && (
-                  <span className="ml-1.5 text-[10px] font-black opacity-60">
+                  <span className="ml-1.5 text-[11px] font-medium text-gray-400">
                     ({
                       campaigns.filter(c =>
                         (tab.value === 'active' && (c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded')) ||
@@ -193,32 +177,33 @@ export function MyCampaignsPage() {
           </div>
 
           {/* Search row */}
-          <div className="flex items-center gap-3 px-4 py-3">
+          <div className="flex items-center gap-3 px-4 py-3 bg-white">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input
                 id="input-search-campaigns"
                 type="text"
                 placeholder="Buscar campaña por título..."
-                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-200 transition-all"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 pl-10 pr-4 text-[13px] font-medium outline-none focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10 transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               />
             </div>
 
             {/* View toggle */}
-            <div className="flex bg-slate-100 p-1 rounded-xl flex-shrink-0">
+            <div className="flex bg-gray-100 p-1 rounded-lg flex-shrink-0">
               <button
                 id="btn-view-grid"
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`p-2 rounded-md transition-all cursor-pointer border-none ${viewMode === 'grid' ? 'bg-white text-[#02A95C] shadow-sm' : 'text-gray-400 hover:text-gray-600 bg-transparent'}`}
               >
                 <LayoutGrid size={16} />
               </button>
               <button
                 id="btn-view-list"
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-[#2e7d32] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`p-2 rounded-md transition-all cursor-pointer border-none ${viewMode === 'list' ? 'bg-white text-[#02A95C] shadow-sm' : 'text-gray-400 hover:text-gray-600 bg-transparent'}`}
               >
                 <List size={16} />
               </button>
@@ -228,33 +213,33 @@ export function MyCampaignsPage() {
 
         {/* ── Main content ── */}
         {loading ? (
-          <div className="py-28 flex flex-col items-center justify-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-              <Loader2 className="text-[#2e7d32] animate-spin" size={28} strokeWidth={2.5} />
+          <div className="py-28 flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm border border-gray-200">
+              <Loader2 className="text-[#02A95C] animate-spin" size={24} strokeWidth={2} />
             </div>
-            <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Cargando campañas…</p>
+            <p className="text-gray-400 text-xs font-semibold">Cargando campañas…</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-100 rounded-3xl p-10 text-center mb-8">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-10 text-center mb-8">
             <AlertCircle className="text-red-400 mx-auto mb-4" size={36} />
             <p className="text-red-700 font-bold mb-4 text-[15px]">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="text-[#c62828] font-black uppercase text-[12px] tracking-widest hover:underline"
+              className="text-[#c62828] font-bold text-[12px] tracking-wide hover:underline cursor-pointer border-none bg-transparent"
             >
               Reintentar conexión
             </button>
           </div>
         ) : filteredCampaigns.length === 0 ? (
           /* Empty state */
-          <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-slate-200 mb-8">
-            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-              <Rocket size={32} className="text-[#2e7d32]" strokeWidth={2} />
+          <div className="bg-white rounded-xl p-16 text-center border-2 border-dashed border-gray-300 mb-8">
+            <div className="w-16 h-16 bg-[#E6F9F0] rounded-xl flex items-center justify-center mx-auto mb-5">
+              <Rocket size={32} className="text-[#02A95C]" strokeWidth={2} />
             </div>
-            <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2">
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
               {searchTerm || statusFilter !== 'all' ? 'Sin resultados' : 'Empieza tu primera campaña'}
             </h3>
-            <p className="text-slate-400 font-medium max-w-sm mx-auto mb-6 text-[14px]">
+            <p className="text-gray-400 font-medium max-w-sm mx-auto mb-6 text-[14px]">
               {searchTerm || statusFilter !== 'all'
                 ? 'No encontramos campañas con ese filtro. Prueba con otros criterios.'
                 : 'Todavía no tienes campañas. ¡Lanza tu primer proyecto y comienza a recaudar!'}
@@ -262,10 +247,10 @@ export function MyCampaignsPage() {
             {!searchTerm && statusFilter === 'all' && (
               <button
                 onClick={() => setEditingCampaign({} as any)}
-                className="flex items-center gap-2 mx-auto px-6 py-3 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-100"
-                style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)', color: '#fff' }}
+                className="flex items-center gap-2 mx-auto px-5 py-3 rounded-xl font-semibold text-[13px] text-white border-none cursor-pointer transition-all hover:bg-[#017A42]"
+                style={{ background: '#02A95C', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                <Plus size={16} strokeWidth={3} /> Crear campaña
+                <Plus size={16} strokeWidth={2.5} /> Crear campaña
               </button>
             )}
           </div>

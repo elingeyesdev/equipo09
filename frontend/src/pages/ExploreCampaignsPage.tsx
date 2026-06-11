@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
 import { getImageUrl } from '../utils/image.utils';
+import { StoriesAvatarBar } from '../components/StoriesAvatarBar';
 import { getCategories } from '../api/categories.api';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import type { Category } from '../types/category.types';
@@ -58,7 +59,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-[28px] shadow-sm border border-emerald-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer">
+      className="bg-white rounded-xl border border-gray-200 overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col cursor-pointer">
 
       {/* Cover Image */}
       <div className="relative h-48 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
@@ -79,16 +80,16 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         )}
 
         {/* Category Badge */}
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[10px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
+        <div className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 shadow-sm">
           {campaign.categoryName}
         </div>
 
         {/* Type Badge */}
         <div
-          className="absolute top-4 right-4 px-3 py-1.5 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm flex items-center gap-1.5"
+          className="absolute top-3 right-3 px-2.5 py-1 rounded-md text-[11px] font-semibold text-white flex items-center gap-1"
           style={{ backgroundColor: typeInfo.color }}
         >
-          <TypeIcon size={12} strokeWidth={3} />
+          <TypeIcon size={11} strokeWidth={2.5} />
           {typeInfo.label}
         </div>
 
@@ -123,15 +124,15 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
       </div>
 
       {/* Content */}
-      <div className="p-6 flex-1 flex flex-col gap-4">
+      <div className="p-4 flex-1 flex flex-col gap-3">
         {/* Entrepreneur info */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[10px] font-black overflow-hidden shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-[#02A95C]/10 flex items-center justify-center text-[#02A95C] text-[10px] font-bold overflow-hidden shrink-0">
             {avatarUrl ? (
-              <img 
-                src={avatarUrl} 
-                alt="" 
-                className="w-full h-full object-cover" 
+              <img
+                src={avatarUrl}
+                alt=""
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).onerror = null;
                   (e.target as HTMLImageElement).src = '/default-avatar.png';
@@ -151,7 +152,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         </div>
 
         {/* Title */}
-        <h3 className="text-[16px] font-black text-[#1c2b1e] leading-tight line-clamp-2 group-hover:text-[#2e7d32] transition-colors">
+        <h3 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-[#02A95C] transition-colors">
           {campaign.title}
         </h3>
 
@@ -164,40 +165,38 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
 
         {/* Progress bar */}
         <div>
-          <div className="flex justify-between items-baseline mb-2">
-            <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight">
+          <div className="flex justify-between items-baseline mb-1.5">
+            <span className="text-[18px] font-bold text-gray-900">
               ${campaign.currentAmount.toLocaleString()}
             </span>
-            <span className="text-[12px] font-bold text-slate-400">
+            <span className="text-[12px] text-gray-400">
               de ${campaign.goalAmount.toLocaleString()}
             </span>
           </div>
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_6px_rgba(46,125,50,0.3)]"
+              className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${progress}%`,
-                background: progress >= 100
-                  ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-                  : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
+                background: progress >= 100 ? '#F59E0B' : '#02A95C',
               }}
             />
           </div>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-[12px] text-slate-400 font-bold pt-2 border-t border-slate-50">
-          <div className="flex items-center gap-1.5">
-            <Target size={13} strokeWidth={2.5} className="text-[#2e7d32]" />
-            <span className="text-[#2e7d32] font-black">{progress}%</span>
+        <div className="flex items-center justify-between text-[12px] text-gray-400 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1">
+            <Target size={12} strokeWidth={2} style={{ color: '#02A95C' }} />
+            <span className="font-semibold" style={{ color: '#02A95C' }}>{progress}%</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Users size={13} strokeWidth={2.5} />
+          <div className="flex items-center gap-1">
+            <Users size={12} strokeWidth={2} />
             <span>{campaign.investorCount} inversores</span>
           </div>
           {daysRemaining !== null && (
-            <div className="flex items-center gap-1.5">
-              <Calendar size={13} strokeWidth={2.5} />
+            <div className="flex items-center gap-1">
+              <Calendar size={12} strokeWidth={2} />
               <span>{daysRemaining > 0 ? `${daysRemaining} días` : 'Finalizada'}</span>
             </div>
           )}
@@ -230,7 +229,7 @@ export function ExploreCampaignsPage() {
   useEffect(() => {
     getCategories()
       .then(setCategories)
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setCategoriesLoading(false));
   }, []);
 
@@ -337,22 +336,20 @@ export function ExploreCampaignsPage() {
   const currentSort = `${filters.sortBy || 'created_at'}:${filters.sortOrder || 'DESC'}`;
 
   return (
-    <div className="min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Navbar />
 
       {/* Hero Section */}
-      <div className={`bg-gradient-to-br from-[#1c2b1e] via-[#2e7d32] to-[#1c2b1e] relative transition-[z-index] ${showSuggestions ? 'z-40' : 'z-0'}`}>
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[60%] bg-[#a5d6a7] rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-20%] right-[-10%] w-[30%] h-[50%] bg-[#00897b] rounded-full blur-[100px]"></div>
-        </div>
-
-        <div className="max-w-[1200px] mx-auto px-6 py-16 relative z-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-none">
-            Descubre Campañas con Impacto
+      <div className={`bg-white border-b border-gray-200 relative transition-[z-index] ${showSuggestions ? 'z-40' : 'z-0'}`}>
+        <div className="max-w-[1200px] mx-auto px-6 py-12 relative z-10 text-center">
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#E6F9F0] text-[#017A42] mb-4">
+            Proyectos verificados
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
+            Descubre campañas con impacto real
           </h1>
-          <p className="text-emerald-100/80 text-[16px] font-medium max-w-[600px] mx-auto mb-10 leading-relaxed">
-            Explora proyectos innovadores de emprendedores bolivianos. Invierte en ideas que transforman comunidades.
+          <p className="text-gray-500 text-[16px] max-w-[560px] mx-auto mb-10 leading-relaxed">
+            Explora proyectos de emprendedores e invierte en ideas que transforman comunidades.
           </p>
 
           {/* Search Bar with Autocomplete */}
@@ -375,17 +372,21 @@ export function ExploreCampaignsPage() {
                     if (suggestions.length > 0 && searchInput.trim().length >= 2) setShowSuggestions(true);
                   }}
                   onKeyDown={handleSearchKeyDown}
-                  placeholder="Buscar campañas por nombre, descripción..."
-                  className="w-full pl-12 pr-10 py-4 rounded-2xl bg-white/95 backdrop-blur-md border-none text-[15px] font-medium outline-none focus:ring-4 focus:ring-emerald-500/20 shadow-xl shadow-black/10 placeholder:text-slate-400"
+                  placeholder="Buscar campañas por nombre o descripción..."
+                  className="w-full pl-12 pr-10 py-4 rounded-xl bg-white border border-gray-300 text-[15px] outline-none focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10 placeholder:text-gray-400 shadow-sm"
                   autoComplete="off"
                   role="combobox"
                   aria-expanded={showSuggestions}
                   aria-haspopup="listbox"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 />
               </div>
               <button
                 type="submit"
-                className="bg-white text-[#2e7d32] px-8 py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-black/10 border-none cursor-pointer"
+                className="px-7 py-4 rounded-xl font-semibold text-[15px] text-white border-none cursor-pointer transition-all active:scale-95"
+                style={{ background: '#02A95C', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#017A42')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#02A95C')}
               >
                 Buscar
               </button>
@@ -426,11 +427,10 @@ export function ExploreCampaignsPage() {
                           type="button"
                           role="option"
                           aria-selected={isSelected}
-                          className={`w-full flex items-center gap-3.5 px-4 py-3 text-left transition-all cursor-pointer border-none ${
-                            isSelected
-                              ? 'bg-emerald-50/80'
-                              : 'bg-transparent hover:bg-slate-50/80'
-                          }`}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 text-left transition-all cursor-pointer border-none ${isSelected
+                            ? 'bg-emerald-50/80'
+                            : 'bg-transparent hover:bg-slate-50/80'
+                            }`}
                           onClick={() => handleSuggestionClick(s.id)}
                           onMouseEnter={() => setSelectedIndex(idx)}
                         >
@@ -478,9 +478,8 @@ export function ExploreCampaignsPage() {
                           </div>
 
                           {/* Arrow indicator */}
-                          <ArrowRight size={14} strokeWidth={2.5} className={`shrink-0 transition-all ${
-                            isSelected ? 'text-[#2e7d32] translate-x-0.5' : 'text-slate-300'
-                          }`} />
+                          <ArrowRight size={14} strokeWidth={2.5} className={`shrink-0 transition-all ${isSelected ? 'text-[#2e7d32] translate-x-0.5' : 'text-slate-300'
+                            }`} />
                         </button>
                       );
                     })}
@@ -506,7 +505,7 @@ export function ExploreCampaignsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white border-b border-emerald-50 shadow-sm sticky top-0 z-30">
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
         <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col sm:flex-row items-center gap-4">
           {/* Type filters */}
           <div className="flex items-center gap-2 flex-1 overflow-x-auto">
@@ -515,11 +514,10 @@ export function ExploreCampaignsPage() {
               <button
                 key={tf.value}
                 onClick={() => updateFilters({ campaignType: tf.value || undefined })}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
-                  (filters.campaignType || '') === tf.value
-                    ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                    : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-                }`}
+                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${(filters.campaignType || '') === tf.value
+                  ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                  }`}
               >
                 {tf.label}
               </button>
@@ -537,11 +535,10 @@ export function ExploreCampaignsPage() {
                 updateFilters({ sortBy: 'end_date', sortOrder: 'ASC' });
               }
             }}
-            className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
-              filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
-                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/20'
-                : 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600'
-            }`}
+            className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
+              ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/20'
+              : 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600'
+              }`}
           >
             <Flame size={14} strokeWidth={2.5} />
             Terminan pronto
@@ -552,11 +549,10 @@ export function ExploreCampaignsPage() {
             <button
               type="button"
               onClick={() => setShowCategoryDropdown(prev => !prev)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${
-                filters.categoryId
-                  ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${filters.categoryId
+                ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                }`}
             >
               <LayoutGrid size={14} strokeWidth={2.5} />
               {filters.categoryId
@@ -575,11 +571,10 @@ export function ExploreCampaignsPage() {
                       updateFilters({ categoryId: undefined });
                       setShowCategoryDropdown(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${
-                      !filters.categoryId
-                        ? 'bg-emerald-50 text-[#2e7d32] font-black'
-                        : 'bg-transparent text-slate-600 hover:bg-slate-50'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${!filters.categoryId
+                      ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                      : 'bg-transparent text-slate-600 hover:bg-slate-50'
+                      }`}
                   >
                     <span className="flex-1">Todos los sectores</span>
                     {!filters.categoryId && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
@@ -599,11 +594,10 @@ export function ExploreCampaignsPage() {
                           updateFilters({ categoryId: isActive ? undefined : cat.id });
                           setShowCategoryDropdown(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${
-                          isActive
-                            ? 'bg-emerald-50 text-[#2e7d32] font-black'
-                            : 'bg-transparent text-slate-600 hover:bg-slate-50'
-                        }`}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${isActive
+                          ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                          : 'bg-transparent text-slate-600 hover:bg-slate-50'
+                          }`}
                       >
                         <span className="flex-1">{cat.displayName}</span>
                         {isActive && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
@@ -643,6 +637,9 @@ export function ExploreCampaignsPage() {
 
       {/* Campaign Grid */}
       <div className="max-w-[1200px] mx-auto px-6 py-10">
+
+        {/* Novedades / Stories bar */}
+        <StoriesAvatarBar style={{ marginBottom: '32px' }} />
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -751,11 +748,10 @@ export function ExploreCampaignsPage() {
                       )}
                       <button
                         onClick={() => goToPage(page)}
-                        className={`w-12 h-12 rounded-xl font-black text-[14px] transition-all active:scale-95 cursor-pointer border-none ${
-                          page === meta.currentPage
-                            ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                            : 'bg-white text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32] shadow-sm'
-                        }`}
+                        className={`w-12 h-12 rounded-xl font-black text-[14px] transition-all active:scale-95 cursor-pointer border-none ${page === meta.currentPage
+                          ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
+                          : 'bg-white text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32] shadow-sm'
+                          }`}
                       >
                         {page}
                       </button>

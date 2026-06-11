@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function CampaignStats({ currentAmount, goalAmount, currency, endDate, investorCount }: Props) {
-  const rowClass = "flex justify-between items-center py-1 font-['Sora',sans-serif]";
+  const rowClass = "flex justify-between items-center py-1 font-['Plus Jakarta Sans',sans-serif]";
   const labelClass = "text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5";
   const valueClass = "text-[13px] font-bold text-slate-900";
 

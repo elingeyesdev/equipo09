@@ -118,7 +118,7 @@ export function EntrepreneurProfilePage() {
   };
 
   return (
-    <div className="min-h-screen font-sans bg-[#f4f7f4] flex flex-col font-['Sora',sans-serif]">
+    <div className="min-h-screen font-sans bg-[#f4f7f4] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
       <Navbar />
 
       <main className="flex-1 w-full relative z-0 pb-20">

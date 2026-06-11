@@ -20,7 +20,7 @@ export function CircularFundingRing({ currentAmount, goalAmount }: Props) {
 
   return (
     <div
-      className="relative flex items-center justify-center w-36 h-36 font-['Sora',sans-serif]"
+      className="relative flex items-center justify-center w-36 h-36 font-['Plus Jakarta Sans',sans-serif]"
       role="img"
       aria-label={`Financiación al ${labelPct} por ciento de la meta`}
     >

@@ -77,7 +77,7 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
   ];
 
   return (
-    <div className="flex-1 min-w-[280px] flex flex-col gap-8 font-['Sora',sans-serif]">
+    <div className="flex-1 min-w-[280px] flex flex-col gap-8 font-['Plus Jakarta Sans',sans-serif]">
 
       {/* Tip card */}
       {!hasBanking && showTip && (

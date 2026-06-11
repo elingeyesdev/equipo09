@@ -316,7 +316,7 @@ export function CampaignPreviewModal({
 
 
   const node = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-['Sora',sans-serif] animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-['Plus Jakarta Sans',sans-serif] animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="preview-title">
       <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
 
       <div className="bg-[#f8fafc] rounded-[40px] w-full max-w-[1200px] max-h-[95vh] overflow-hidden relative z-10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-500 border border-white/20 flex flex-col">
@@ -926,7 +926,7 @@ export function CampaignPreviewModal({
 
         {/* Custom modal dialog */}
         {dialog && dialog.isOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-['Sora',sans-serif] animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-['Plus Jakarta Sans',sans-serif] animate-in fade-in duration-200">
             <div 
               className="absolute inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm" 
               onClick={() => dialog.onCancel ? dialog.onCancel() : dialog.onConfirm()} 

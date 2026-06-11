@@ -79,7 +79,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ fontFamily: "'Sora', sans-serif" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"

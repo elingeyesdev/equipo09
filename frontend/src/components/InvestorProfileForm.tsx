@@ -90,7 +90,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
   const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
 
   return (
-    <form className="flex flex-col gap-12 font-['Sora',sans-serif]" onSubmit={handleSubmit((data) => onSubmit({ ...data, preferredCategories: selectedCategories }))} noValidate>
+    <form className="flex flex-col gap-12 font-['Plus Jakarta Sans',sans-serif]" onSubmit={handleSubmit((data) => onSubmit({ ...data, preferredCategories: selectedCategories }))} noValidate>
 
       {/* ── DATOS PERSONALES ─────────────────────────────── */}
       <div className="flex flex-col">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
-import { Gem, AlertCircle, ArrowRight, CheckCircle2, Mail, Lock, Sparkles, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock } from 'lucide-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +14,6 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar email guardado si existe
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
@@ -72,64 +71,66 @@ export function LoginPage() {
     }
   };
 
-  const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-5 py-4 text-[15px] outline-none transition-all duration-300 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-400 font-medium text-slate-800";
-  const labelClass = "text-[13px] font-bold text-slate-700 mb-2 block tracking-wide ml-1";
-
   return (
-    <div className="min-h-screen bg-white flex font-['Sora',sans-serif]">
+    <div className="min-h-screen bg-white flex" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       
-      {/* ── Columna Izquierda: Formulario de Login ── */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-16 relative">
-        <div className="w-full max-w-[420px] animate-in fade-in slide-in-from-bottom-8 duration-500">
-          
-          {/* Brand/Logo */}
-          <div className="mb-10">
-            <Link to="/" className="inline-flex items-center gap-3 text-decoration-none group mb-8">
-              <div className="w-12 h-12 bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] rounded-[14px] flex items-center justify-center text-emerald-300 shadow-md group-hover:scale-105 transition-transform duration-300">
-                <Gem size={24} strokeWidth={2.5} />
-              </div>
-              <span className="text-xl font-black text-[#1c2b1e] tracking-tight">CrowdFunding</span>
-            </Link>
-            
-            <h1 className="text-3xl font-extrabold text-[#1c2b1e] tracking-tight mb-2">
-              Ingresa a tu cuenta
-            </h1>
-            <p className="text-[15px] font-medium text-slate-400">
-              Gestiona tus proyectos e inversiones desde un solo lugar.
-            </p>
-          </div>
+      {/* ── Columna Izquierda: Formulario ── */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-16 py-12">
+        <div className="w-full max-w-[400px] mx-auto">
 
-          {/* Error Alert */}
+          {/* Logo */}
+          <Link to="/" className="inline-flex items-center mb-10 no-underline" style={{ textDecoration: 'none' }}>
+            <img
+              src="/logocrowd.jpg"
+              alt="Unifundme"
+              className="h-12 w-auto object-contain"
+            />
+          </Link>
+
+          <h1 className="text-[28px] font-bold text-gray-900 mb-1.5 leading-tight">
+            Inicia sesión
+          </h1>
+          <p className="text-[15px] text-gray-500 mb-8">
+            Gestiona tus proyectos e inversiones.
+          </p>
+
+          {/* Error */}
           {error && (
-            <div className="bg-red-50 border border-red-100/50 text-[#c62828] p-4 rounded-2xl text-sm font-bold mb-6 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
-              <AlertCircle size={20} strokeWidth={2.5} className="shrink-0" />
-              <p className="leading-snug">{error}</p>
+            <div className="bg-red-50 border border-red-200 text-red-700 p-3.5 rounded-xl text-sm font-medium mb-6 flex items-center gap-2.5">
+              <AlertCircle size={18} strokeWidth={2} className="shrink-0 text-red-500" />
+              <p>{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
-            <div className="flex flex-col">
-              <label htmlFor="email" className={labelClass}>Correo electrónico</label>
-              <div className="relative flex items-center">
-                <Mail size={18} className="absolute left-4 text-slate-400 pointer-events-none" />
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+            
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-[13px] font-semibold text-gray-700">
+                Correo electrónico
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" strokeWidth={2} />
                 <input
                   id="email"
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder="tu@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className={inputClass}
                   autoComplete="email"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 />
               </div>
             </div>
 
-            <div className="flex flex-col">
-              <label htmlFor="password" className={labelClass}>Contraseña</label>
-              <div className="relative flex items-center">
-                <Lock size={18} className="absolute left-4 text-slate-400 pointer-events-none" />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className="text-[13px] font-semibold text-gray-700">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" strokeWidth={2} />
                 <input
                   id="password"
                   type="password"
@@ -137,24 +138,25 @@ export function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className={inputClass}
                   autoComplete="current-password"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ml-1 mt-1">
-              <div className="relative flex items-center justify-center">
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex items-center">
                 <input
                   id="rememberMe"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-5 h-5 appearance-none border-2 border-slate-300 rounded-md checked:bg-[#2e7d32] checked:border-[#2e7d32] transition-all duration-200 cursor-pointer peer focus:outline-none"
+                  className="w-4.5 h-4.5 appearance-none border-2 border-gray-300 rounded checked:border-[#02A95C] checked:bg-[#02A95C] transition-all cursor-pointer peer"
                 />
-                <CheckCircle2 size={14} strokeWidth={3} className="text-white absolute pointer-events-none opacity-0 peer-checked:opacity-100 transition-all duration-200 scale-50 peer-checked:scale-100" />
+                <CheckCircle2 size={12} strokeWidth={3} className="text-white absolute left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-all" />
               </div>
-              <label htmlFor="rememberMe" className="text-[14px] font-semibold text-slate-600 cursor-pointer select-none">
+              <label htmlFor="rememberMe" className="text-[13px] text-gray-600 cursor-pointer select-none">
                 Recordar mi correo
               </label>
             </div>
@@ -162,110 +164,119 @@ export function LoginPage() {
             <button
               id="btn-login"
               type="submit"
-              className="mt-2 bg-[#2e7d32] hover:bg-[#1b5e20] text-white border-none rounded-2xl py-4 px-6 text-[16px] font-bold cursor-pointer transition-all duration-200 active:scale-[0.98] shadow-lg shadow-emerald-700/10 flex items-center justify-center gap-3"
               disabled={loading}
+              className="w-full py-3.5 rounded-xl text-white text-[15px] font-semibold cursor-pointer transition-all flex items-center justify-center gap-2.5 border-none mt-1"
+              style={{
+                background: '#02A95C',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                opacity: loading ? 0.8 : 1,
+              }}
+              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#017A42'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#02A95C'; }}
             >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
-                  <span>Validando acceso...</span>
+                  <div className="w-4.5 h-4.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <span>Verificando...</span>
                 </>
               ) : (
                 <>
                   <span>Ingresar</span>
-                  <ArrowRight size={18} strokeWidth={2.5} />
+                  <ArrowRight size={17} strokeWidth={2.5} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Register Link */}
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center flex flex-col gap-4">
-            <span className="text-[14px] font-semibold text-slate-500">¿Eres nuevo en la plataforma?</span>
-            <Link 
-              to="/register" 
-              className="bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 px-6 rounded-2xl text-[15px] font-bold no-underline transition-all duration-250 active:scale-[0.98] inline-block"
+          {/* Register link */}
+          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            <span className="text-[14px] text-gray-500">¿Eres nuevo? </span>
+            <Link
+              to="/register"
+              className="text-[14px] font-semibold no-underline"
+              style={{ color: '#02A95C', textDecoration: 'none' }}
             >
-              Crear cuenta nueva
+              Crear una cuenta
             </Link>
           </div>
 
         </div>
       </div>
 
-      {/* ── Columna Derecha: UI Real de Campaña (0% IA, Puro Código Limpio) ── */}
-      <div className="hidden lg:flex w-1/2 bg-[#f4f7f4] items-center justify-center p-16 relative overflow-hidden border-l border-slate-200/50">
-        
-        {/* Patrón de fondo geométrico sutil */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#1c2b1e_1.5px,transparent_1.5px)] [background-size:24px_24px]"></div>
-        
-        <div className="w-full max-w-[440px] flex flex-col gap-8 relative z-10 animate-in fade-in slide-in-from-right-8 duration-700">
+      {/* ── Columna Derecha: Ilustración visual ── */}
+      <div
+        className="hidden lg:flex w-[55%] flex-col items-center justify-center p-16 relative overflow-hidden"
+        style={{ background: '#F0FDF8' }}
+      >
+        {/* Patrón de puntos sutil */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #02A95C22 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+
+        <div className="w-full max-w-[400px] relative z-10">
           
-          <div className="text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#2e7d32] font-bold text-xs uppercase tracking-wider mb-4">
-              <ShieldCheck size={14} /> Proyectos Verificados
-            </div>
-            <h2 className="text-3xl font-black text-[#1c2b1e] tracking-tight leading-tight mb-3">
-              Descubre proyectos reales.
+          {/* Headline */}
+          <div className="mb-8">
+            <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#02A95C]/10 text-[#017A42] mb-4">
+              ✓ Proyectos verificados
+            </span>
+            <h2 className="text-[32px] font-bold text-gray-900 leading-tight mb-3">
+              Descubre proyectos que generan impacto real.
             </h2>
-            <p className="text-[15px] font-medium text-slate-500 leading-relaxed">
-              Invierte en campañas con impacto tecnológico, social y ecológico verificadas por expertos.
+            <p className="text-[15px] text-gray-500 leading-relaxed">
+              Invierte en campañas de emprendedores bolivianos con propósito y respaldo comunitario.
             </p>
           </div>
 
-          {/* Tarjeta de Campaña Real de la Aplicación en CSS */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 p-5 shadow-xl shadow-slate-250/20 hover:scale-[1.02] transition-transform duration-300">
-            
-            {/* Header del proyecto mock */}
-            <div className="h-[180px] w-full rounded-2xl bg-gradient-to-br from-emerald-800 to-emerald-950 p-6 flex flex-col justify-between relative overflow-hidden text-white mb-4">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
-              <div className="flex justify-between items-start">
-                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-emerald-300 border border-white/10">
+          {/* Campaign mock card */}
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            {/* Cover */}
+            <div
+              className="h-[140px] relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, #064E3B 0%, #02A95C 100%)' }}
+            >
+              <div className="absolute top-3 left-3">
+                <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/20 text-white backdrop-blur-sm">
                   Energía Limpia
                 </span>
-                <span className="bg-emerald-500 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                  Activo
-                </span>
               </div>
-              <div>
-                <h3 className="text-xl font-bold tracking-tight mb-1">EcoVolt: Tejas Solares</h3>
-                <p className="text-xs text-emerald-200/80 font-medium">Por Sofía Rodríguez · CEO</p>
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-[18px] font-bold leading-tight">EcoVolt: Tejas Solares</p>
+                <p className="text-[12px] text-white/70 mt-0.5">por Sofía Rodríguez</p>
               </div>
             </div>
 
-            {/* Progreso */}
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-xs font-bold text-slate-400 mb-1.5">
-                  <span>Progreso de Recaudación</span>
-                  <span className="text-[#2e7d32]">72%</span>
-                </div>
-                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-[#2e7d32] rounded-full" style={{ width: '72%' }}></div>
-                </div>
+            {/* Stats */}
+            <div className="p-4">
+              <div className="flex justify-between text-[13px] mb-2">
+                <span className="font-bold text-gray-900">$72,400 USD</span>
+                <span className="text-gray-400">de $100,000 meta</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Recaudado</p>
-                  <p className="text-base font-black text-[#1c2b1e]">$72,400 USD</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Inversores</p>
-                  <p className="text-base font-black text-[#1c2b1e]">148 activos</p>
-                </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+                <div className="h-full rounded-full" style={{ width: '72%', background: '#02A95C' }} />
               </div>
-
-              {/* Botón de acción mock */}
-              <div className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 rounded-2xl text-center text-[#2e7d32] font-extrabold text-[13px] tracking-wide transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2">
-                <Sparkles size={14} /> Ver detalles de campaña
+              <div className="flex items-center justify-between text-[12px] text-gray-500">
+                <span><span className="font-semibold text-gray-700">148</span> inversores</span>
+                <span className="text-[#02A95C] font-semibold">72% completado</span>
               </div>
             </div>
+          </div>
 
+          {/* Trust badges */}
+          <div className="flex items-center gap-4 mt-6">
+            {['Seguro', 'Transparente', 'Verificado'].map(t => (
+              <div key={t} className="flex items-center gap-1.5 text-[12px] text-gray-500 font-medium">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#02A95C' }} />
+                {t}
+              </div>
+            ))}
           </div>
 
         </div>
-
       </div>
 
     </div>

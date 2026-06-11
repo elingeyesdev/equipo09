@@ -1,12 +1,13 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  ShieldCheck, 
   LayoutDashboard, 
   Users, 
   LogOut, 
   User, 
-  Rocket 
+  Rocket,
+  Menu,
+  ChevronRight
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -15,8 +16,10 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const role = localStorage.getItem('adminAccessLevel');
   const userEmail = localStorage.getItem('userEmail');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -27,84 +30,145 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const navItemClass = ({ isActive }: { isActive: boolean }) => `
-    flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-[14px]
+    flex items-center gap-3 px-4 py-3 text-[14px] font-medium transition-colors duration-150 rounded-md no-underline
     ${isActive 
-      ? 'bg-emerald-50 text-[#2e7d32] shadow-sm' 
-      : 'text-slate-400 hover:text-slate-600 hover:bg-emerald-50/30'
+      ? 'bg-[#3c4b64] text-white font-semibold' 
+      : 'text-gray-300 hover:text-white hover:bg-[#3c4b64]/50'
     }
   `;
 
+  const getBreadcrumbs = () => {
+    const paths = location.pathname.split('/').filter(p => p);
+    return ['admin', ...paths.slice(1)];
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#f4f7f4] font-['Sora',sans-serif]">
+    <div className="flex min-h-screen bg-[#f8f9fa] text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-emerald-100/50 flex flex-col p-6 sticky top-0 h-screen shrink-0 shadow-sm shadow-emerald-900/5">
-        <div className="flex items-center gap-3 mb-10 px-2">
-           <div className="w-10 h-10 rounded-xl bg-[#2e7d32] flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-              <ShieldCheck size={24} strokeWidth={2.5} />
-           </div>
-           <span className="text-[18px] font-black tracking-tighter text-[#1c2b1e]">
-              Admin<span className="text-[#2e7d32]">Zone</span>
-           </span>
+      <aside 
+        className={`bg-[#2f353a] flex flex-col transition-all duration-200 sticky top-0 h-screen shrink-0 z-50 ${
+          sidebarOpen ? 'w-64' : 'w-0 overflow-hidden md:w-16 md:px-2'
+        }`}
+      >
+        {/* Sidebar Header / Logo */}
+        <div className="h-14 flex items-center gap-3 px-4 border-b border-[#23282c] bg-[#24282c] overflow-hidden">
+          {sidebarOpen ? (
+            <div className="flex items-center gap-2">
+              <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-md object-cover" />
+              <span className="text-white text-base font-bold tracking-tight whitespace-nowrap">
+                Unifundme <span className="text-gray-400 font-normal text-xs">Admin</span>
+              </span>
+            </div>
+          ) : (
+            <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-md object-cover mx-auto" />
+          )}
         </div>
 
-        <nav className="flex flex-col gap-2 flex-1">
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Principal</div>
-          <NavLink to="/admin" className={navItemClass} end>
-            <LayoutDashboard size={18} strokeWidth={2.5} />
-            Estadísticas
+        {/* Sidebar Nav */}
+        <nav className="flex flex-col gap-1.5 p-3 flex-1 overflow-y-auto">
+          {sidebarOpen && (
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3 mt-3 mb-1">
+              Principal
+            </div>
+          )}
+          <NavLink to="/admin" className={navItemClass} end style={{ textDecoration: 'none' }}>
+            <LayoutDashboard size={18} />
+            {sidebarOpen && <span>Estadísticas</span>}
           </NavLink>
           
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Gestión de Contenido</div>
-          <NavLink to="/admin/campaigns/review" className={navItemClass}>
-             <Rocket size={18} strokeWidth={2.5} />
-             Revisión de Campañas
+          {sidebarOpen && (
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3 mt-3 mb-1">
+              Contenido
+            </div>
+          )}
+          <NavLink to="/admin/campaigns/review" className={navItemClass} style={{ textDecoration: 'none' }}>
+             <Rocket size={18} />
+             {sidebarOpen && <span>Revisión de Campañas</span>}
           </NavLink>
 
           {role === 'super_admin' && (
             <>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mt-4 mb-2">Sistema</div>
-              <NavLink to="/superadmin" className={navItemClass}>
-                <Users size={18} strokeWidth={2.5} />
-                Gestión de Admins
+              {sidebarOpen && (
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3 mt-3 mb-1">
+                  Sistema
+                </div>
+              )}
+              <NavLink to="/superadmin" className={navItemClass} style={{ textDecoration: 'none' }}>
+                <Users size={18} />
+                {sidebarOpen && <span>Gestión de Admins</span>}
               </NavLink>
             </>
           )}
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-emerald-50">
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-[#23282c] bg-[#24282c]">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-[#c62828] hover:bg-red-50 font-bold text-[14px] transition-all border-none bg-transparent cursor-pointer"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-400 hover:text-white hover:bg-red-600/80 text-[14px] font-medium transition-colors border-none bg-transparent cursor-pointer ${
+              !sidebarOpen && 'justify-center'
+            }`}
+            title="Cerrar Sesión"
           >
-            <LogOut size={18} strokeWidth={2.5} />
-            Cerrar Sesión
+            <LogOut size={18} />
+            {sidebarOpen && <span>Cerrar Sesión</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-emerald-50 px-8 flex items-center justify-between sticky top-0 z-40">
-           <div className="text-[12px] font-black text-slate-300 uppercase tracking-widest">
-              PANEL DE CONTROL ADMINISTRATIVO
-           </div>
-           
-           <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end">
-                 <span className="text-[13px] font-black text-[#1c2b1e] leading-none">{userEmail}</span>
-                 <span className="text-[10px] font-bold text-[#2e7d32] uppercase tracking-tighter mt-1">
-                    {role === 'super_admin' ? 'Super Administrador' : 'Administrador'}
-                 </span>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white shadow-inner">
-                 <User size={20} strokeWidth={2.5} />
-              </div>
-           </div>
+        {/* Header */}
+        <header className="h-14 bg-white border-b border-[#d8dbe0] px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 rounded hover:bg-gray-100 text-gray-600 border-none bg-transparent cursor-pointer"
+            >
+              <Menu size={20} />
+            </button>
+
+            <div className="hidden sm:flex items-center gap-4 text-sm font-medium text-gray-600">
+              <span className="text-gray-400">Dashboard</span>
+              <span className="text-gray-300">/</span>
+              <span className="text-gray-800 capitalize">{getBreadcrumbs().join(' / ')}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <div className="flex flex-col items-end">
+                <span className="text-[13px] font-semibold text-gray-800 leading-none">{userEmail}</span>
+                <span className="text-[10px] font-medium text-gray-500 mt-1">
+                   {role === 'super_admin' ? 'Super Administrador' : 'Administrador'}
+                </span>
+             </div>
+             <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
+                <User size={18} />
+             </div>
+          </div>
         </header>
 
-        <main className="p-8 md:p-10 animate-in fade-in duration-500">
+        {/* Sub-header Breadcrumb line */}
+        <div className="bg-white border-b border-[#d8dbe0] px-6 py-2.5 flex items-center gap-2 text-xs text-gray-500">
+          <span>Home</span>
+          <ChevronRight size={12} className="text-gray-400" />
+          <span className="text-gray-800 font-medium capitalize">{getBreadcrumbs().join(' / ')}</span>
+        </div>
+
+        {/* Page content */}
+        <main className="p-6 md:p-8 flex-1">
            {children}
         </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-[#d8dbe0] px-6 py-3 text-xs text-gray-500 flex justify-between">
+          <div>
+            <span className="font-semibold text-gray-700">UniFundMe Admin</span> &copy; 2026.
+          </div>
+          <div>
+            Desarrollado con <span className="text-gray-700 font-semibold">CoreUI Layout</span>
+          </div>
+        </footer>
       </div>
     </div>
   );

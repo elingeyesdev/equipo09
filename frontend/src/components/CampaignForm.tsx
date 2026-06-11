@@ -226,7 +226,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
 
   return (
-    <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-emerald-900/5 border border-emerald-50 animate-in fade-in zoom-in-95 duration-500 font-['Sora',sans-serif]">
+    <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-emerald-900/5 border border-emerald-50 animate-in fade-in zoom-in-95 duration-500 font-['Plus Jakarta Sans',sans-serif]">
       <div className="mb-10">
         <h2 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-2 leading-none">
           {initialData ? 'Actualizar campaña' : 'Lanzar nueva campaña'}

@@ -90,119 +90,119 @@ export function AdminDashboardPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-8 animate-in fade-in duration-500 font-['Sora',sans-serif]">
+      <div className="space-y-6 animate-in fade-in duration-500">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Panel de Control</h1>
-            <p className="text-slate-500 font-medium mt-1">Supervisión global de la plataforma y revisión de capital.</p>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Panel de Control</h1>
+            <p className="text-gray-500 text-[14px] mt-1">Supervisión global de la plataforma y revisión de capital.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-1 rounded-2xl shadow-sm border border-slate-100 flex">
+          <div className="flex items-center gap-2">
+            <div className="bg-white p-1 rounded-lg border border-gray-200 flex shadow-sm">
                <button 
                  onClick={() => setStatusFilter('pending_review')}
-                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'pending_review' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}
+                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer border-none bg-transparent ${statusFilter === 'pending_review' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-gray-500 hover:text-gray-700'}`}
                >En Revisión</button>
                <button 
                  onClick={() => setStatusFilter('published')}
-                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'published' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer border-none bg-transparent ${statusFilter === 'published' ? 'text-emerald-600 bg-emerald-50 font-bold' : 'text-gray-500 hover:text-gray-700'}`}
                >Campañas Activas</button>
                <button 
                  onClick={() => setStatusFilter('kyc')}
-                 className={`px-4 py-2 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${statusFilter === 'kyc' ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-slate-600'}`}
+                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer border-none bg-transparent ${statusFilter === 'kyc' ? 'text-amber-600 bg-amber-50 font-bold' : 'text-gray-500 hover:text-gray-700'}`}
                >Verificaciones KYC</button>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                <Users size={24} strokeWidth={2.5} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-4 border-t-indigo-600 shadow-sm transition-all group">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <Users size={20} />
               </div>
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Usuarios Totales</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Usuarios Totales</span>
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-4xl font-black text-slate-900 tracking-tighter">{stats?.totalUsers || 0}</span>
-              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
-                 <ChevronRight size={12} className="-rotate-90" /> +12%
+              <span className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</span>
+              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+                 <ChevronRight size={10} className="-rotate-90" /> +12%
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                <Rocket size={24} strokeWidth={2.5} />
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-4 border-t-emerald-500 shadow-sm transition-all group">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <Rocket size={20} />
               </div>
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Campañas Activas</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Campañas Activas</span>
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-4xl font-black text-slate-900 tracking-tighter">{stats?.totalCampaigns || 0}</span>
-              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
-                 <ChevronRight size={12} className="-rotate-90" /> +5%
+              <span className="text-2xl font-bold text-gray-900">{stats?.totalCampaigns || 0}</span>
+              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+                 <ChevronRight size={10} className="-rotate-90" /> +5%
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
-                <BarChart3 size={24} strokeWidth={2.5} />
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-4 border-t-amber-500 shadow-sm transition-all group">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                <BarChart3 size={20} />
               </div>
-              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Inversión Total</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Inversión Total</span>
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-4xl font-black text-slate-900 tracking-tighter">
+              <span className="text-2xl font-bold text-gray-900">
                 ${(stats?.totalFunded || 0).toLocaleString()}
               </span>
-              <div className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg flex items-center gap-1">
-                 <ChevronRight size={12} className="-rotate-90" /> +24%
+              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+                 <ChevronRight size={10} className="-rotate-90" /> +24%
               </div>
             </div>
           </div>
         </div>
 
         {/* Campaign Management Section */}
-        <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/30">
-            <div className="flex items-center gap-3">
-              {statusFilter === 'pending_review' ? <Clock size={20} className="text-indigo-600" /> : statusFilter === 'kyc' ? <Users size={20} className="text-amber-600" /> : <Rocket size={20} className="text-emerald-600" />}
-              <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+            <div className="flex items-center gap-2.5">
+              {statusFilter === 'pending_review' ? <Clock size={18} className="text-indigo-600" /> : statusFilter === 'kyc' ? <Users size={18} className="text-amber-600" /> : <Rocket size={18} className="text-emerald-600" />}
+              <h2 className="text-[14px] font-bold text-gray-800 uppercase tracking-wide">
                 {statusFilter === 'pending_review' ? 'Revisión de Propuestas Técnicas' : statusFilter === 'kyc' ? 'Verificaciones KYC Pendientes' : 'Monitoreo de Capital Activo'}
               </h2>
-              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : statusFilter === 'kyc' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] px-2 py-0.5 rounded-lg font-black`}>
+              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : statusFilter === 'kyc' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[11px] px-2 py-0.5 rounded font-bold`}>
                 {statusFilter === 'kyc' ? pendingKyc.length : totalCampaigns}
               </span>
             </div>
             
             <div className="flex flex-wrap items-center gap-3">
                <div className="relative">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input 
                     type="text" 
                     placeholder="Buscar por título o emprendedor..."
-                    className="pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-[13px] font-medium w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-[13px] font-medium w-full md:w-64 focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-500/10 transition-all"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && loadData()}
                   />
                </div>
                {statusFilter !== 'kyc' && (
-                 <div className="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl">
+                 <div className="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg">
                     <button 
                       onClick={() => setFilterType('all')}
-                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-all cursor-pointer border-none ${filterType === 'all' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:bg-gray-50 bg-transparent'}`}
                     >Todas</button>
                     <button 
                       onClick={() => setFilterType('reward')}
-                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'reward' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-all cursor-pointer border-none ${filterType === 'reward' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-50 bg-transparent'}`}
                     >Reward</button>
                     <button 
                       onClick={() => setFilterType('donation')}
-                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${filterType === 'donation' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-50'}`}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-all cursor-pointer border-none ${filterType === 'donation' ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-50 bg-transparent'}`}
                     >Donation</button>
                  </div>
                )}
@@ -212,96 +212,96 @@ export function AdminDashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-50/50">
+                <tr className="bg-gray-50/70">
                   {statusFilter === 'kyc' ? (
                     <>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Emprendedor</th>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Empresa</th>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
-                      <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Emprendedor</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Empresa</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha Envío</th>
+                      <th className="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
                     </>
                   ) : (
                     <>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Propuesta / Emprendedor</th>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta de Capital</th>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
-                      <th className="text-left px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Envío</th>
-                      <th className="text-right px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Propuesta / Emprendedor</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Meta de Capital</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Categoría</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha Envío</th>
+                      <th className="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
                     </>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-gray-100">
                 {statusFilter === 'kyc' ? (
                   pendingKyc.map((kyc) => (
-                    <tr key={kyc.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-8 py-6">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[14px] font-black text-slate-900 group-hover:text-amber-600 transition-colors">{kyc.first_name} {kyc.last_name}</span>
-                          <div className="flex items-center gap-2">
-                             <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
-                                <Mail size={10} className="text-slate-400" />
+                    <tr key={kyc.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[14px] font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">{kyc.first_name} {kyc.last_name}</span>
+                          <div className="flex items-center gap-1.5">
+                             <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                <Mail size={10} className="text-gray-400" />
                              </div>
-                             <span className="text-[11px] font-bold text-slate-400">{kyc.email}</span>
+                             <span className="text-[11px] text-gray-400 font-medium">{kyc.email}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="text-[13px] font-bold text-slate-600">{kyc.company_name || 'Sin especificar'}</span>
+                      <td className="px-6 py-4">
+                        <span className="text-[13px] font-medium text-gray-600">{kyc.company_name || 'Sin especificar'}</span>
                       </td>
-                      <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
+                      <td className="px-6 py-4 text-gray-500 font-medium text-[13px]">
                         {new Date(kyc.updated_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
                       </td>
-                      <td className="px-8 py-6 text-right">
+                      <td className="px-6 py-4 text-right">
                         <button 
                           onClick={() => {
                             setSelectedKyc(kyc);
                             setIsKycModalOpen(true);
                           }}
-                          className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-100 hover:bg-amber-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
+                          className="px-3 py-1.5 bg-white border border-gray-200 text-gray-500 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 rounded-lg transition-all active:scale-95 shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
                         >
-                          <Eye size={18} />
-                          <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">Revisar</span>
+                          <Eye size={15} />
+                          <span className="text-[11px] font-bold uppercase tracking-wider hidden md:inline">Revisar</span>
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   campaigns.map((campaign) => (
-                    <tr key={campaign.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-8 py-6">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[14px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
-                          <div className="flex items-center gap-2">
-                             <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center">
-                                <Mail size={10} className="text-slate-400" />
+                    <tr key={campaign.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[14px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{campaign.title}</span>
+                          <div className="flex items-center gap-1.5">
+                             <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                <Mail size={10} className="text-gray-400" />
                              </div>
-                             <span className="text-[11px] font-bold text-slate-400">{campaign.entrepreneur_name}</span>
+                             <span className="text-[11px] text-gray-400 font-medium">{campaign.entrepreneur_name}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="text-[14px] font-black text-slate-900">
+                      <td className="px-6 py-4">
+                        <span className="text-[14px] font-bold text-gray-900">
                           ${parseFloat(campaign.goal_amount).toLocaleString()}
                         </span>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">USD</div>
+                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide ml-1">USD</span>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm">
+                      <td className="px-6 py-4">
+                        <span className="px-2.5 py-0.5 bg-white border border-gray-200 rounded text-[11px] font-semibold text-gray-600 shadow-sm">
                           {campaign.category_name}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-slate-500 font-medium text-[13px]">
+                      <td className="px-6 py-4 text-gray-500 font-medium text-[13px]">
                         {new Date(campaign.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
                       </td>
-                      <td className="px-8 py-6 text-right">
+                      <td className="px-6 py-4 text-right">
                         <button 
                           onClick={() => handleViewDetails(campaign.id)}
-                          className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50 rounded-2xl transition-all active:scale-95 shadow-sm inline-flex items-center gap-2 group/btn"
+                          className="px-3 py-1.5 bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 rounded-lg transition-all active:scale-95 shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
                           title="Ver Perfil Corporativo"
                         >
-                          <Eye size={18} />
-                          <span className="text-[11px] font-black uppercase tracking-widest hidden md:inline">
+                          <Eye size={15} />
+                          <span className="text-[11px] font-bold uppercase tracking-wider hidden md:inline">
                             {statusFilter === 'pending_review' ? 'Revisar' : 'Detalle'}
                           </span>
                         </button>
