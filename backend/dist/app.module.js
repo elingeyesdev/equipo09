@@ -46,7 +46,7 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             chat_module_1.ChatModule,
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
+                rootPath: (0, path_1.join)(process.cwd(), 'uploads'),
                 serveRoot: '/uploads',
                 serveStaticOptions: {
                     index: false,
