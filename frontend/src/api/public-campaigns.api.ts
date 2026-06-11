@@ -34,6 +34,8 @@ export interface RewardTier {
   currentClaims: number;
   estimatedDelivery: string | null;
   imageUrl: string | null;
+  minPercentage?: number;
+  maxPercentage?: number;
 }
 
 export interface PublicCampaignDetail extends PublicCampaign {

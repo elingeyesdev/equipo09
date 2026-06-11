@@ -258,7 +258,8 @@ let CampaignRepository = class CampaignRepository {
         let rewardTiers = [];
         try {
             const tiersResult = await this.pool.query(`SELECT id, title, description, amount, currency, max_claims,
-                current_claims, estimated_delivery, image_url, sort_order
+                current_claims, estimated_delivery, image_url, sort_order,
+                min_percentage, max_percentage
          FROM reward_tiers
          WHERE campaign_id = $1 AND is_active = true
          ORDER BY amount ASC`, [id]);
@@ -272,6 +273,8 @@ let CampaignRepository = class CampaignRepository {
                 currentClaims: parseInt(t.current_claims || '0', 10),
                 estimatedDelivery: t.estimated_delivery,
                 imageUrl: t.image_url,
+                minPercentage: t.min_percentage ? parseFloat(t.min_percentage) : 0,
+                maxPercentage: t.max_percentage ? parseFloat(t.max_percentage) : 100,
             }));
         }
         catch (e) {
@@ -354,6 +357,129 @@ let CampaignRepository = class CampaignRepository {
             const latestB = new Date(b.stories[b.stories.length - 1].createdAt).getTime();
             return latestB - latestA;
         });
+    }
+    async getFinancialProgress(campaignId) {
+        const campaignResult = await this.pool.query(`SELECT
+        c.id, c.title, c.slug, c.status,
+        c.goal_amount, c.current_amount, c.investor_count,
+        c.currency, c.start_date, c.end_date, c.funded_at
+       FROM campaigns c
+       WHERE c.id = $1`, [campaignId]);
+        if (campaignResult.rows.length === 0)
+            return null;
+        const campaign = campaignResult.rows[0];
+        const investmentStatsResult = await this.pool.query(`SELECT
+        COUNT(*)::int                                                         AS total_investments,
+        COUNT(*) FILTER (WHERE status = 'completed')::int                     AS completed_investments,
+        COUNT(*) FILTER (WHERE status = 'pending')::int                       AS pending_investments,
+        COUNT(*) FILTER (WHERE status = 'failed')::int                        AS failed_investments,
+        COUNT(*) FILTER (WHERE status IN ('refunded','partially_refunded'))::int AS refunded_investments,
+        COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0)          AS confirmed_amount,
+        COALESCE(SUM(amount) FILTER (WHERE status = 'pending'), 0)            AS pending_amount,
+        COALESCE(SUM(refunded_amount) FILTER (WHERE status IN ('refunded','partially_refunded')), 0) AS refunded_amount,
+        COALESCE(AVG(amount) FILTER (WHERE status = 'completed'), 0)          AS avg_investment,
+        COALESCE(MAX(amount) FILTER (WHERE status = 'completed'), 0)          AS max_investment,
+        COALESCE(MIN(amount) FILTER (WHERE status = 'completed'), 0)          AS min_investment
+       FROM investments
+       WHERE campaign_id = $1`, [campaignId]);
+        const investmentStats = investmentStatsResult.rows[0];
+        const recentResult = await this.pool.query(`SELECT
+        i.id, i.amount, i.currency, i.status,
+        i.is_anonymous, i.created_at,
+        rt.title as reward_title,
+        CASE
+          WHEN i.is_anonymous THEN NULL
+          ELSE COALESCE(ip.display_name, ip.first_name || ' ' || ip.last_name)
+        END AS investor_display_name
+       FROM investments i
+       LEFT JOIN investor_profiles ip ON i.investor_id = ip.user_id
+       LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+       WHERE i.campaign_id = $1
+       ORDER BY i.created_at DESC
+       LIMIT 10`, [campaignId]);
+        const recentRows = recentResult.rows;
+        const dailyProgressResult = await this.pool.query(`WITH daily_investments AS (
+        SELECT 
+          created_at::date AS date,
+          SUM(amount) AS daily_amount
+        FROM investments
+        WHERE campaign_id = $1 AND status = 'completed'
+        GROUP BY created_at::date
+      )
+      SELECT 
+        date::text,
+        SUM(daily_amount) OVER (ORDER BY date)::numeric AS accumulated_amount
+      FROM daily_investments
+      ORDER BY date ASC`, [campaignId]);
+        const dailyProgress = dailyProgressResult.rows.map(r => ({
+            date: r.date,
+            accumulatedAmount: Number(r.accumulated_amount)
+        }));
+        const breakdownResult = await this.pool.query(`SELECT 
+        rt.id AS reward_tier_id,
+        COALESCE(rt.title, 'Aportes Directos') AS reward_title,
+        COALESCE(SUM(i.amount), 0)::numeric AS total_amount
+       FROM investments i
+       LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+       WHERE i.campaign_id = $1 AND i.status = 'completed'
+       GROUP BY rt.id, rt.title`, [campaignId]);
+        const fundingBreakdown = breakdownResult.rows.map(r => ({
+            rewardTierId: r.reward_tier_id,
+            rewardTitle: r.reward_title,
+            totalAmount: Number(r.total_amount)
+        }));
+        const goalAmount = Number(campaign.goal_amount);
+        const currentAmount = Number(campaign.current_amount);
+        let daysRemaining = null;
+        if (campaign.end_date) {
+            const msRemaining = new Date(campaign.end_date).getTime() - Date.now();
+            daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+        }
+        return {
+            campaignId: campaign.id,
+            title: campaign.title,
+            slug: campaign.slug,
+            status: campaign.status,
+            goalAmount,
+            currentAmount,
+            remainingAmount: Math.max(0, goalAmount - currentAmount),
+            fundingPercentage: goalAmount > 0
+                ? Math.round((currentAmount / goalAmount) * 10000) / 100
+                : 0,
+            investorCount: Number(campaign.investor_count),
+            currency: campaign.currency,
+            startDate: campaign.start_date,
+            endDate: campaign.end_date,
+            daysRemaining,
+            fundedAt: campaign.funded_at,
+            investments: {
+                total: investmentStats?.total_investments ?? 0,
+                completed: investmentStats?.completed_investments ?? 0,
+                pending: investmentStats?.pending_investments ?? 0,
+                failed: investmentStats?.failed_investments ?? 0,
+                refunded: investmentStats?.refunded_investments ?? 0,
+            },
+            amounts: {
+                confirmed: Number(investmentStats?.confirmed_amount ?? 0),
+                pending: Number(investmentStats?.pending_amount ?? 0),
+                refunded: Number(investmentStats?.refunded_amount ?? 0),
+            },
+            averageInvestment: Number(investmentStats?.avg_investment ?? 0),
+            largestInvestment: Number(investmentStats?.max_investment ?? 0),
+            smallestInvestment: Number(investmentStats?.min_investment ?? 0),
+            recentInvestments: recentRows.map((row) => ({
+                id: row.id,
+                amount: Number(row.amount),
+                currency: row.currency,
+                status: row.status,
+                isAnonymous: row.is_anonymous,
+                investorDisplayName: row.investor_display_name,
+                rewardTitle: row.reward_title,
+                createdAt: row.created_at,
+            })),
+            dailyProgress,
+            fundingBreakdown,
+        };
     }
 };
 exports.CampaignRepository = CampaignRepository;

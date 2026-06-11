@@ -42,11 +42,45 @@ export interface QueryCampaignsDto {
     categoryId?: string;
 }
 export interface CampaignFinancialProgress {
+    campaignId: string;
+    title: string;
+    slug: string;
+    status: string;
     goalAmount: number;
     currentAmount: number;
-    progressPercentage: number;
-    investorsCount: number;
+    remainingAmount: number;
+    fundingPercentage: number;
+    investorCount: number;
+    currency: string;
+    startDate: Date | null;
+    endDate: Date | null;
     daysRemaining: number | null;
+    fundedAt: Date | null;
+    investments: {
+        total: number;
+        completed: number;
+        pending: number;
+        failed: number;
+        refunded: number;
+    };
+    amounts: {
+        confirmed: number;
+        pending: number;
+        refunded: number;
+    };
+    averageInvestment: number;
+    largestInvestment: number;
+    smallestInvestment: number;
+    recentInvestments: any[];
+    dailyProgress?: {
+        date: string;
+        accumulatedAmount: number;
+    }[];
+    fundingBreakdown?: {
+        rewardTierId: string | null;
+        rewardTitle: string;
+        totalAmount: number;
+    }[];
 }
 export interface PublicCampaign {
     id: string;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { useCampaigns } from '../hooks/useCampaigns';
+import { getCampaignFinancialProgress, getMyCampaignById } from '../api/campaign.api';
 import { Navbar } from '../components/Navbar';
 
 import { ProfileHeader } from '../components/entrepreneur-profile/ProfileHeader';
@@ -12,6 +13,7 @@ import { NewCampaignFAB } from '../components/entrepreneur-profile/NewCampaignFA
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
 import { KYCUploadModal } from '../components/KYCUploadModal';
+import { CampaignAnalyticsDashboard } from '../components/CampaignAnalyticsDashboard';
 import {
   FolderOpen,
   AlertCircle,
@@ -65,6 +67,35 @@ export function EntrepreneurProfilePage() {
   const [modalType, setModalType] = useState<ModalType>(null);
   const [activeTab, setActiveTab] = useState('campaigns');
   const [onboardingTriggered, setOnboardingTriggered] = useState(false);
+
+  const [selectedFinanceCampaignId, setSelectedFinanceCampaignId] = useState<string>('');
+  const [campaignFinance, setCampaignFinance] = useState<any>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
+
+  useEffect(() => {
+    if (campaigns && campaigns.length > 0 && !selectedFinanceCampaignId) {
+      setSelectedFinanceCampaignId(campaigns[0].id);
+    }
+  }, [campaigns, selectedFinanceCampaignId]);
+
+  useEffect(() => {
+    if (selectedFinanceCampaignId) {
+      const loadFinanceData = async () => {
+        setFinanceLoading(true);
+        try {
+          const data = await getCampaignFinancialProgress(selectedFinanceCampaignId);
+          setCampaignFinance(data);
+        } catch (err) {
+          console.error('Error loading campaign finance details:', err);
+        } finally {
+          setFinanceLoading(false);
+        }
+      };
+      loadFinanceData();
+    } else {
+      setCampaignFinance(null);
+    }
+  }, [selectedFinanceCampaignId]);
 
   const userEmail = localStorage.getItem('userEmail') ?? '';
 
@@ -210,7 +241,6 @@ export function EntrepreneurProfilePage() {
                     loading={campaignsLoading}
                     onCampaignClick={async (campaign) => {
                       try {
-                        const { getMyCampaignById } = await import('../api/campaign.api');
                         const fullCampaign = await getMyCampaignById(campaign.id);
                         setSelectedCampaign(fullCampaign);
                       } catch (err) {
@@ -312,14 +342,69 @@ export function EntrepreneurProfilePage() {
                       </div>
                     </section>
                   </div>
+                ) : activeTab === 'finance' ? (
+                  <div className="space-y-6 w-full">
+                    {/* Header y Selector */}
+                    <div className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div>
+                        <h3 className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest mb-1">Metas Económicas</h3>
+                        <p className="text-slate-400 text-xs font-semibold">Análisis en tiempo real y proyecciones de recaudación</p>
+                      </div>
+                      
+                      {campaigns.length > 0 ? (
+                        <div className="relative min-w-[240px]">
+                          <select
+                            value={selectedFinanceCampaignId}
+                            onChange={(e) => setSelectedFinanceCampaignId(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-[13px] font-bold outline-none focus:border-[#2e7d32] transition-colors appearance-none cursor-pointer"
+                          >
+                            {campaigns.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.title}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                            ▼
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Sin campañas registradas</p>
+                      )}
+                    </div>
+
+                    {financeLoading ? (
+                      <div className="bg-white rounded-[32px] border border-emerald-50 p-12 text-center py-32 flex flex-col items-center justify-center gap-4">
+                        <Loader2 className="w-10 h-10 text-[#2e7d32] animate-spin" />
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Cargando métricas financieras...</p>
+                      </div>
+                    ) : campaignFinance ? (
+                      <CampaignAnalyticsDashboard
+                        finance={campaignFinance}
+                        campaignType={
+                          campaigns.find((c) => c.id === selectedFinanceCampaignId)?.campaignType || 'donation'
+                        }
+                        startDate={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.startDate}
+                        createdAt={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.createdAt}
+                      />
+                    ) : (
+                      <div className="bg-white rounded-[32px] border border-emerald-50 p-12 text-center text-slate-400 py-32">
+                        <Wallet size={80} strokeWidth={1} className="text-emerald-100 mb-6 mx-auto" />
+                        <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">
+                          Gestión Financiera
+                        </h3>
+                        <p className="max-w-md mx-auto text-[15px] font-medium leading-relaxed text-slate-500">
+                          Crea y publica tu primera campaña de financiamiento para visualizar estadísticas en tiempo real y proyecciones de recaudación.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="bg-white rounded-[50px] shadow-sm border border-emerald-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
                     <div className="text-emerald-100 mb-6 flex justify-center">
                       {activeTab === 'conversations' ? (
                         <MessageSquare size={80} strokeWidth={1} />
-                      ) : activeTab === 'finance' ? (
-                        <Wallet size={80} strokeWidth={1} />
                       ) : (
                         <FolderOpen size={80} strokeWidth={1} />
                       )}
@@ -327,17 +412,13 @@ export function EntrepreneurProfilePage() {
                     <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">
                       {activeTab === 'conversations'
                         ? 'Centro de Conversaciones'
-                        : activeTab === 'finance'
-                          ? 'Gestión Financiera'
-                          : 'Módulo en Desarrollo'
+                        : 'Módulo en Desarrollo'
                       }
                     </h3>
                     <p className="max-w-md mx-auto text-[15px] font-medium leading-relaxed text-slate-500">
                       {activeTab === 'conversations'
                         ? 'Módulo de comunicación directa con inversores encriptado. Se activará tras tu primera campaña publicada.'
-                        : activeTab === 'finance'
-                          ? 'Seguimiento de ingresos, retiros y reportes fiscales de tus campañas. Disponible próximamente.'
-                          : 'Este módulo estará disponible próximamente para fortalecer la transparencia de tu perfil corporativo.'
+                        : 'Este módulo estará disponible próximamente para fortalecer la transparencia de tu perfil corporativo.'
                       }
                     </p>
                   </div>
@@ -409,7 +490,6 @@ export function EntrepreneurProfilePage() {
         onEdit={async (campaign) => {
           setPreviewOpen(false);
           try {
-            const { getMyCampaignById } = await import('../api/campaign.api');
             const fullCampaign = await getMyCampaignById(campaign.id);
             setSelectedCampaign(fullCampaign);
             setModalType('edit-campaign');

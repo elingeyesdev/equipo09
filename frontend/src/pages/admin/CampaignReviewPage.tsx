@@ -7,7 +7,6 @@ import {
   ChevronRight, 
   Clock,
   CheckCircle2,
-  ShieldCheck,
   ShieldAlert,
   Video,
   PlayCircle

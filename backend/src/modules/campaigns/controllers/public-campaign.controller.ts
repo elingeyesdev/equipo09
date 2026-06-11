@@ -122,6 +122,19 @@ export class PublicCampaignController {
     };
   }
 
+  @Get(':id/financial-progress')
+  @ApiOperation({ summary: 'Get public campaign financial progress. No auth required.' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  async getPublicCampaignFinancialProgress(@Param('id') id: string) {
+    const progress = await this.campaignService.getPublicCampaignFinancialProgress(id);
+    return {
+      statusCode: 200,
+      message: 'Campaign financial progress retrieved successfully',
+      data: progress,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   @Post(':id/view')
   @HttpCode(200)
   @ApiOperation({ summary: 'Increment video view count for a campaign. No auth required.' })

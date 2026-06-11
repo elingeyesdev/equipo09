@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress } from '../api/campaign.api';
+import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress, updateRewardClaim } from '../api/campaign.api';
 import { getAdminRewardClaims, getCampaignFinancialProgress as getAdminFinancialProgress } from '../api/admin.api';
 import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim, CampaignFinancialProgress } from '../types/campaign.types';
 import { 
@@ -388,9 +388,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                               value={claim.claim_status || 'pending'}
                               onChange={async (e) => {
                                 try {
-                                  await import('../api/campaign.api').then(m => 
-                                    m.updateRewardClaim(campaignId, claim.claim_id, { status: e.target.value })
-                                  );
+                                  await updateRewardClaim(campaignId, claim.claim_id, { status: e.target.value });
                                   setClaims(claims.map(c => c.claim_id === claim.claim_id ? { ...c, claim_status: e.target.value } : c));
                                 } catch(err) {
                                   alert('Error al actualizar el estado.');

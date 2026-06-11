@@ -58,6 +58,15 @@ export interface CampaignFinancialProgress {
     largestInvestment: number;
     smallestInvestment: number;
     recentInvestments: RecentInvestment[];
+    dailyProgress?: {
+        date: string;
+        accumulatedAmount: number;
+    }[];
+    fundingBreakdown?: {
+        rewardTierId: string | null;
+        rewardTitle: string;
+        totalAmount: number;
+    }[];
 }
 export interface RecentInvestment {
     id: string;

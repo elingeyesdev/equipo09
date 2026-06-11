@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
@@ -7,8 +7,11 @@ import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaig
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
+import { ProgressBar } from '../components/ProgressBar';
+import { CampaignAnalyticsDashboard } from '../components/CampaignAnalyticsDashboard';
 import { createInvestment } from '../api/investor.api';
 import { getOrCreateConversation } from '../api/chat.api';
+import { getPublicCampaignFinancialProgress } from '../api/campaign.api';
 import {
   ArrowLeft,
   TrendingUp,
@@ -133,6 +136,37 @@ export function CampaignDetailPage() {
 
   // ── Related campaigns state ──
   const [relatedCampaigns, setRelatedCampaigns] = useState<PublicCampaign[]>([]);
+
+  const [finance, setFinance] = useState<any>(null);
+
+  const loadFinance = useCallback(async () => {
+    if (!id) return;
+    try {
+      const data = await getPublicCampaignFinancialProgress(id);
+      setFinance(data);
+    } catch (err) {
+      console.error('Error loading public financial progress:', err);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadFinance();
+  }, [loadFinance]);
+
+  const milestones = useMemo(() => {
+    if (campaign && campaign.rewardTiers && campaign.rewardTiers.length > 0) {
+      return campaign.rewardTiers.map(tier => ({
+        percentage: tier.minPercentage || 0,
+        label: tier.title
+      })).filter(m => m.percentage > 0 && m.percentage <= 100);
+    }
+    return [
+      { percentage: 25, label: 'Hito Inicial' },
+      { percentage: 50, label: 'Mitad del Camino' },
+      { percentage: 75, label: 'Meta Cercana' },
+      { percentage: 100, label: 'Objetivo Principal' }
+    ];
+  }, [campaign]);
 
   useEffect(() => {
     if (!campaign?.categoryId || !campaign?.id) return;
@@ -364,6 +398,24 @@ export function CampaignDetailPage() {
               </div>
             </div>
 
+            {/* ── Módulo de progreso de metas económicas ── */}
+            {finance && (
+              <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+                <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                    <TrendingUp size={20} strokeWidth={2.5} className="text-indigo-600" />
+                  </div>
+                  Análisis y Progreso Financiero
+                </h2>
+                <CampaignAnalyticsDashboard
+                  finance={finance}
+                  campaignType={campaign.campaignType}
+                  startDate={campaign.startDate}
+                  createdAt={(campaign as any).createdAt}
+                />
+              </div>
+            )}
+
             {/* ── Reward Tiers (only for reward campaigns) ── */}
             {campaign.campaignType === 'reward' && campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
               <RewardTierCards
@@ -504,18 +556,11 @@ export function CampaignDetailPage() {
 
                 {/* Progress bar */}
                 <div className="mb-6">
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{
-                        width: `${visualProgress}%`,
-                        background: exactProgress >= 100
-                          ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-                          : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
-                        boxShadow: '0 0 8px rgba(46,125,50,0.3)',
-                      }}
-                    />
-                  </div>
+                  <ProgressBar
+                    value={visualProgress}
+                    milestones={milestones}
+                    trackClassName="shadow-inner"
+                  />
                   <div className="flex justify-between mt-2">
                     <span className="text-[13px] font-black text-[#2e7d32]">
                       {exactProgress}%
@@ -938,6 +983,7 @@ export function CampaignDetailPage() {
               setInvestmentSuccess(true);
               // Recargar datos de la campaña en tiempo real
               refetch();
+              loadFinance();
             } catch (err: any) {
               const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
               setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');

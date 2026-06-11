@@ -1,5 +1,5 @@
 import { CampaignRepository, PaginatedCampaigns } from '../repositories';
-import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto } from '../models';
+import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto, CampaignFinancialProgress } from '../models';
 import { CreateCampaignUpdateDto } from '../dto';
 export declare class CampaignService {
     private readonly campaignRepo;
@@ -17,6 +17,7 @@ export declare class CampaignService {
         q?: string;
     }): Promise<PaginatedCampaigns>;
     getPublicCampaignById(campaignId: string): Promise<any>;
+    getPublicCampaignFinancialProgress(campaignId: string): Promise<CampaignFinancialProgress>;
     incrementViewCount(campaignId: string): Promise<void>;
     createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any>;
     getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]>;

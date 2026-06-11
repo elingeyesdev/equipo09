@@ -50,6 +50,13 @@ let CampaignService = class CampaignService {
         }
         return campaign;
     }
+    async getPublicCampaignFinancialProgress(campaignId) {
+        const progress = await this.campaignRepo.getFinancialProgress(campaignId);
+        if (!progress) {
+            throw new common_1.NotFoundException(`Campaña con ID ${campaignId} no encontrada`);
+        }
+        return progress;
+    }
     async incrementViewCount(campaignId) {
         try {
             await this.campaignRepo.incrementViewCount(campaignId);

@@ -70,6 +70,8 @@ export interface CampaignFinancialProgress {
   smallestInvestment: number;
   // Timeline reciente
   recentInvestments: RecentInvestment[];
+  dailyProgress?: { date: string; accumulatedAmount: number }[];
+  fundingBreakdown?: { rewardTierId: string | null; rewardTitle: string; totalAmount: number }[];
 }
 
 export interface RecentInvestment {

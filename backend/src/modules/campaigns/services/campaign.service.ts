@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CampaignRepository, PaginatedCampaigns } from '../repositories';
-import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto } from '../models';
+import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto, CampaignFinancialProgress } from '../models';
 import { CreateCampaignUpdateDto } from '../dto';
 
 @Injectable()
@@ -67,6 +67,14 @@ export class CampaignService {
       throw new NotFoundException(`Campaña con ID ${campaignId} no encontrada o no está publicada`);
     }
     return campaign;
+  }
+
+  async getPublicCampaignFinancialProgress(campaignId: string): Promise<CampaignFinancialProgress> {
+    const progress = await this.campaignRepo.getFinancialProgress(campaignId);
+    if (!progress) {
+      throw new NotFoundException(`Campaña con ID ${campaignId} no encontrada`);
+    }
+    return progress;
   }
 
   async incrementViewCount(campaignId: string): Promise<void> {

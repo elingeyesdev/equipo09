@@ -4,6 +4,7 @@ import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/c
 import { CircularFundingRing } from './CircularFundingRing';
 import { CampaignInvestorsTab } from './CampaignInvestorsTab';
 import { CampaignRewardsTab } from './CampaignRewardsTab';
+import { CampaignAnalyticsDashboard } from './CampaignAnalyticsDashboard';
 import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory, getCampaignDocuments as getEntrepreneurDocuments } from '../api/campaign.api';
 import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory, getAdminCampaignDocuments, reviewAdminCampaignDocument } from '../api/admin.api';
 import type { CampaignHistoryItem } from '../types/admin.types';
@@ -136,7 +137,7 @@ export function CampaignPreviewModal({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
-  const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards' | 'documents'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards' | 'documents' | 'analytics'>('details');
 
   const [documents, setDocuments] = useState<any[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
@@ -385,6 +386,16 @@ export function CampaignPreviewModal({
           >
             Detalles de Proyecto
           </button>
+          {(campaign.status === 'published' || campaign.status === 'funded' || isAdmin) && (
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'analytics' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+            >
+              <TrendingUp size={14} className={activeTab === 'analytics' ? 'text-emerald-500' : 'text-slate-400'} />
+              Progreso Económico
+            </button>
+          )}
           {(campaign.status === 'published' || campaign.status === 'funded') && (
             <button
               onClick={() => setActiveTab('investors')}
@@ -808,6 +819,15 @@ export function CampaignPreviewModal({
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
               <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} />
+            </div>
+          ) : activeTab === 'analytics' ? (
+            <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
+              <CampaignAnalyticsDashboard
+                finance={finance}
+                campaignType={campaign.campaignType}
+                startDate={campaign.startDate}
+                createdAt={campaign.createdAt}
+              />
             </div>
           ) : activeTab === 'documents' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">

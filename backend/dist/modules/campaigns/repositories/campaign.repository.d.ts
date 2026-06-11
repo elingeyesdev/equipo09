@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { EntrepreneurCampaign, CreateCampaignDto } from '../models';
+import { EntrepreneurCampaign, CreateCampaignDto, CampaignFinancialProgress } from '../models';
 import { CreateCampaignUpdateDto } from '../dto';
 export interface PaginatedCampaigns {
     data: EntrepreneurCampaign[];
@@ -26,4 +26,5 @@ export declare class CampaignRepository {
     incrementViewCount(campaignId: string): Promise<void>;
     createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any>;
     getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]>;
+    getFinancialProgress(campaignId: string): Promise<CampaignFinancialProgress | null>;
 }

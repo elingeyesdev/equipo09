@@ -8,10 +8,10 @@ import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
 import { PublishUpdateModal } from '../components/PublishUpdateModal';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
+import { getMyCampaignById } from '../api/campaign.api';
 import {
   Rocket, Plus, Search, AlertCircle, Loader2,
-  LayoutGrid, List, TrendingUp, Users, Star,
-  Zap
+  LayoutGrid, List, TrendingUp, Users, Star
 } from 'lucide-react';
 
 /* ─── Small Summary Card ─── */
@@ -68,7 +68,6 @@ export function MyCampaignsPage() {
   const handleModalEdit = useCallback(async (c: EntrepreneurCampaign) => {
     setPreviewCampaign(null);
     try {
-      const { getMyCampaignById } = await import('../api/campaign.api');
       const fullCampaign = await getMyCampaignById(c.id);
       setEditingCampaign(fullCampaign);
     } catch {

@@ -101,6 +101,8 @@ export interface CampaignFinancialProgress {
   investorCount: number;
   currency: string;
   recentInvestments: RecentInvestment[];
+  dailyProgress?: { date: string; accumulatedAmount: number }[];
+  fundingBreakdown?: { rewardTierId: string | null; rewardTitle: string; totalAmount: number }[];
 }
 
 export interface CampaignInvestor {

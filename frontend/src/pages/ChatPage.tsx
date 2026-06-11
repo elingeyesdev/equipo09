@@ -154,8 +154,6 @@ export function ChatPage() {
     [emitMarkAsRead],
   );
 
-  const totalUnread = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
-
   return (
     <div className="flex flex-col h-screen bg-white font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
       <Navbar />

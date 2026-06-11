@@ -330,6 +330,36 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
        WHERE i.campaign_id = $1
        ORDER BY i.created_at DESC
        LIMIT 10`, [campaignId]);
+        const dailyProgressRows = await this.queryMany(`WITH daily_investments AS (
+        SELECT 
+          created_at::date AS date,
+          SUM(amount) AS daily_amount
+        FROM investments
+        WHERE campaign_id = $1 AND status = 'completed'
+        GROUP BY created_at::date
+      )
+      SELECT 
+        date::text,
+        SUM(daily_amount) OVER (ORDER BY date)::numeric AS accumulated_amount
+      FROM daily_investments
+      ORDER BY date ASC`, [campaignId]);
+        const breakdownRows = await this.queryMany(`SELECT 
+        rt.id AS reward_tier_id,
+        COALESCE(rt.title, 'Aportes Directos') AS reward_title,
+        COALESCE(SUM(i.amount), 0)::numeric AS total_amount
+       FROM investments i
+       LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+       WHERE i.campaign_id = $1 AND i.status = 'completed'
+       GROUP BY rt.id, rt.title`, [campaignId]);
+        const dailyProgress = dailyProgressRows.map(r => ({
+            date: r.date,
+            accumulatedAmount: Number(r.accumulated_amount)
+        }));
+        const fundingBreakdown = breakdownRows.map(r => ({
+            rewardTierId: r.reward_tier_id,
+            rewardTitle: r.reward_title,
+            totalAmount: Number(r.total_amount)
+        }));
         const goalAmount = Number(campaign.goal_amount);
         const currentAmount = Number(campaign.current_amount);
         let daysRemaining = null;
@@ -379,6 +409,8 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 rewardTitle: row.reward_title,
                 createdAt: row.created_at,
             })),
+            dailyProgress,
+            fundingBreakdown,
         };
     }
     async getFinancialSummary(creatorId) {

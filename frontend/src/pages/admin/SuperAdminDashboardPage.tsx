@@ -3,7 +3,6 @@ import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getAllAdmins, createAdmin, deleteAdmin } from '../../api/admin.api';
 import type { AdminUser } from '../../types/admin.types';
 import { 
-  UserPlus, 
   ShieldCheck, 
   ShieldAlert, 
   Mail, 

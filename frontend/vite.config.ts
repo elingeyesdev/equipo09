@@ -4,6 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: [
+      { find: /^es-toolkit\/compat$/, replacement: 'lodash' },
+      { find: /^es-toolkit\/compat\/(.*)/, replacement: 'lodash/$1' }
+    ]
+  },
   server: {
     port: 5173,
     proxy: {

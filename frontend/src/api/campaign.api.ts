@@ -111,6 +111,15 @@ export async function getCampaignFinancialProgress(
   return data.data;
 }
 
+export async function getPublicCampaignFinancialProgress(
+  campaignId: string,
+): Promise<CampaignFinancialProgress> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignFinancialProgress>>(
+    `/campaigns/public/${campaignId}/financial-progress`,
+  );
+  return data.data;
+}
+
 export async function uploadCampaignImage(
   campaignId: string,
   file: File,
