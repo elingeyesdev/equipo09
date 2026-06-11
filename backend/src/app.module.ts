@@ -12,6 +12,8 @@ import { InvestmentsModule } from './modules/investments/investments.module';
 import { RewardTiersModule } from './modules/reward-tiers/reward-tiers.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { AiSupportModule } from './modules/ai-support/ai-support.module';
+import { AiCampaignModule } from './modules/ai-campaign/ai-campaign.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -33,6 +35,8 @@ import { join } from 'path';
     RewardTiersModule,
     NotificationsModule,
     ChatModule,
+    AiSupportModule,
+    AiCampaignModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',

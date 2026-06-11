@@ -19,7 +19,7 @@ export function CampaignProgress({ currentAmount, goalAmount }: Props) {
     <div className="flex flex-col gap-3 font-['Plus Jakarta Sans',sans-serif]">
       <ProgressBar value={barWidth} />
       <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest leading-none">
-        <span className="text-[#2e7d32]">{labelPercent}% Recaudado</span>
+        <span className="text-[#72B626]">{labelPercent}% Recaudado</span>
       </div>
     </div>
   );

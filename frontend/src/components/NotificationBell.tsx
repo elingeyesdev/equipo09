@@ -33,7 +33,7 @@ function NotifIcon({ typeCode }: { typeCode?: string }) {
   );
 
   if (typeCode === 'investment_received' || typeCode === 'investment_confirmed') return (
-    <div className={`${base} bg-emerald-100`}><TrendingUp size={16} className="text-emerald-600" /></div>
+    <div className={`${base} bg-[#f0f9e0]`}><TrendingUp size={16} className="text-[#72B626]" /></div>
   );
   if (typeCode === 'new_message') return (
     <div className={`${base} bg-blue-100`}><MessageCircle size={16} className="text-blue-600" /></div>
@@ -132,12 +132,12 @@ export function NotificationBell() {
       <button
         id="notification-bell-btn"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-200 active:scale-95 cursor-pointer"
+        className="relative flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 bg-white hover:bg-[#f0f9e0] hover:border-gray-100 transition-all duration-200 active:scale-95 cursor-pointer"
         aria-label="Notificaciones"
         style={{ animation: shake ? 'bellShake 0.6s ease' : undefined }}
       >
         {hasUnread
-          ? <BellRing size={18} className="text-emerald-600" strokeWidth={2.5} />
+          ? <BellRing size={18} className="text-[#72B626]" strokeWidth={2.5} />
           : <Bell size={18} className="text-slate-500" strokeWidth={2.5} />
         }
         {hasUnread && (
@@ -150,16 +150,16 @@ export function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-[calc(100%+8px)] w-[380px] max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-emerald-900/10 z-50 overflow-hidden"
+          className="absolute right-0 top-[calc(100%+8px)] w-[380px] max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-[#1c2b1e]/20/10 z-50 overflow-hidden"
           style={{ animation: 'slideDownFade 0.18s ease-out' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
             <div className="flex items-center gap-2">
-              <Bell size={15} className="text-emerald-600" strokeWidth={2.5} />
+              <Bell size={15} className="text-[#72B626]" strokeWidth={2.5} />
               <span className="text-[14px] font-black text-slate-800">Notificaciones</span>
               {hasUnread && (
-                <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                <span className="bg-[#f0f9e0] text-[#4a7f1a] text-[10px] font-black px-2 py-0.5 rounded-full">
                   {unreadCount} nuevas
                 </span>
               )}
@@ -168,7 +168,7 @@ export function NotificationBell() {
               <button
                 onClick={handleMarkAll}
                 disabled={loading}
-                className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-600 hover:text-emerald-800 transition-colors cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 text-[12px] font-bold text-[#72B626] hover:text-[#1c2b1e] transition-colors cursor-pointer disabled:opacity-50"
               >
                 {loading
                   ? <Loader2 size={12} className="animate-spin" />
@@ -197,7 +197,7 @@ export function NotificationBell() {
                   className={`w-full text-left px-4 py-3 flex items-start gap-3 border-b border-slate-50 last:border-0 transition-colors cursor-pointer group ${
                     notif.isRead
                       ? 'bg-white hover:bg-slate-50'
-                      : 'bg-emerald-50/50 hover:bg-emerald-50'
+                      : 'bg-[#f0f9e0]/50 hover:bg-[#f0f9e0]'
                   }`}
                 >
                   {/* Ícono por tipo */}
@@ -211,7 +211,7 @@ export function NotificationBell() {
                       </p>
                       {/* Dot no leído */}
                       {!notif.isRead && (
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-1" />
+                        <div className="w-2 h-2 rounded-full bg-[#72B626] flex-shrink-0 mt-1" />
                       )}
                     </div>
                     <p className="text-[12px] text-slate-500 leading-relaxed line-clamp-2 mt-0.5">
@@ -224,7 +224,7 @@ export function NotificationBell() {
 
                   {/* Action icon */}
                   {notif.actionUrl && (
-                    <ExternalLink size={13} className="flex-shrink-0 text-slate-300 group-hover:text-emerald-500 transition-colors mt-1" strokeWidth={2.5} />
+                    <ExternalLink size={13} className="flex-shrink-0 text-slate-300 group-hover:text-[#72B626] transition-colors mt-1" strokeWidth={2.5} />
                   )}
                   {notif.isRead && !notif.actionUrl && (
                     <Check size={13} className="flex-shrink-0 text-slate-300 mt-1" strokeWidth={2.5} />

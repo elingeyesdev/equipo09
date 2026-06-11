@@ -87,9 +87,9 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-[28px] w-full max-w-[480px] shadow-2xl shadow-emerald-900/10 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
+      <div className="relative bg-white rounded-[28px] w-full max-w-[480px] shadow-2xl shadow-[#1c2b1e]/20/10 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#1c2b1e] to-[#2e7d32] p-6 pb-8 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#1c2b1e] to-[#72B626] p-6 pb-8 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)',
           }} />
@@ -118,8 +118,8 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
         {/* Success State */}
         {success ? (
           <div className="p-10 text-center animate-in zoom-in-95 fade-in duration-300">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
-              <CheckCircle2 size={32} className="text-[#2e7d32]" strokeWidth={2.5} />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f0f9e0] flex items-center justify-center">
+              <CheckCircle2 size={32} className="text-[#72B626]" strokeWidth={2.5} />
             </div>
             <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2">
               ¡Capital Aumentado!
@@ -127,7 +127,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
             <p className="text-[14px] text-slate-500 font-medium mb-4">
               Tu nuevo capital disponible es
             </p>
-            <p className="text-3xl font-black text-[#2e7d32] tracking-tighter">
+            <p className="text-3xl font-black text-[#72B626] tracking-tighter">
               {formatCurrency(success.availableCapital)}
             </p>
           </div>
@@ -161,7 +161,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                   step={100}
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-[#2e7d32] focus:ring-2 focus:ring-emerald-100 text-[18px] font-black text-[#1c2b1e] tracking-tight transition-all outline-none disabled:opacity-50 bg-white"
+                  className="w-full pl-9 pr-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-[#72B626] focus:ring-2 focus:ring-[#f0f9e0] text-[18px] font-black text-[#1c2b1e] tracking-tight transition-all outline-none disabled:opacity-50 bg-white"
                   style={{ appearance: 'textfield' }}
                 />
               </div>
@@ -177,8 +177,8 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                   disabled={loading}
                   className={`flex-1 py-2 rounded-xl text-[12px] font-black tracking-tight transition-all border-2 cursor-pointer disabled:opacity-50 ${
                     parsedAmount === preset
-                      ? 'bg-[#2e7d32] text-white border-[#2e7d32]'
-                      : 'bg-white text-slate-500 border-slate-200 hover:border-[#2e7d32] hover:text-[#2e7d32]'
+                      ? 'bg-[#72B626] text-white border-[#72B626]'
+                      : 'bg-white text-slate-500 border-slate-200 hover:border-[#72B626] hover:text-[#72B626]'
                   }`}
                 >
                   {formatCurrency(preset)}
@@ -199,22 +199,22 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                 placeholder="Ej: Recarga para Q2 2026"
                 maxLength={500}
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[#2e7d32] focus:ring-2 focus:ring-emerald-100 text-[14px] font-medium text-[#1c2b1e] transition-all outline-none disabled:opacity-50 bg-white"
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[#72B626] focus:ring-2 focus:ring-[#f0f9e0] text-[14px] font-medium text-[#1c2b1e] transition-all outline-none disabled:opacity-50 bg-white"
               />
             </label>
 
             {/* Preview */}
             {parsedAmount >= 100 && (
-              <div className="bg-emerald-50 rounded-2xl p-4 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-[#f0f9e0] rounded-2xl p-4 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp size={14} className="text-[#2e7d32]" strokeWidth={3} />
-                  <span className="text-[11px] font-black text-[#2e7d32] uppercase tracking-widest">
+                  <TrendingUp size={14} className="text-[#72B626]" strokeWidth={3} />
+                  <span className="text-[11px] font-black text-[#72B626] uppercase tracking-widest">
                     Previsualización
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <div className="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest mb-1">
+                    <div className="text-[10px] font-bold text-[#72B626]/60 uppercase tracking-widest mb-1">
                       Nuevo Límite
                     </div>
                     <div className="text-[16px] font-black text-[#1c2b1e] tracking-tight">
@@ -222,10 +222,10 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest mb-1">
+                    <div className="text-[10px] font-bold text-[#72B626]/60 uppercase tracking-widest mb-1">
                       Nuevo Disponible
                     </div>
-                    <div className="text-[16px] font-black text-[#2e7d32] tracking-tight">
+                    <div className="text-[16px] font-black text-[#72B626] tracking-tight">
                       {formatCurrency(previewAvailable)}
                     </div>
                   </div>
@@ -245,7 +245,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
             <button
               type="submit"
               disabled={loading || parsedAmount < 100}
-              className="w-full py-4 rounded-2xl bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black text-[15px] tracking-tight transition-all shadow-lg shadow-emerald-500/20 border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black text-[15px] tracking-tight transition-all shadow-lg shadow-[#72B626]/20/20 border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

@@ -38,31 +38,31 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
   const percentage = Math.round((filledCount / fields.length) * 100) || 0;
   const nextStep = fields.find(f => !f.value);
 
-  const cardClass = "bg-white rounded-[28px] shadow-sm border border-emerald-50 p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 group transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden relative";
+  const cardClass = "bg-white rounded-[28px] shadow-sm border border-gray-100 p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 group transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden relative";
   const sectionTitle = "text-[15px] font-black text-[#1c2b1e] flex items-center justify-between gap-2 uppercase tracking-widest";
-  const iconBox = "w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center shrink-0 border border-emerald-100 transition-all group-hover:scale-110";
-  const editBtn = "w-9 h-9 bg-slate-50 hover:bg-emerald-100 text-slate-400 hover:text-[#2e7d32] rounded-xl flex items-center justify-center cursor-pointer transition-all border-none active:scale-95";
+  const iconBox = "w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center shrink-0 border border-gray-100 transition-all group-hover:scale-110";
+  const editBtn = "w-9 h-9 bg-slate-50 hover:bg-[#f0f9e0] text-slate-400 hover:text-[#72B626] rounded-xl flex items-center justify-center cursor-pointer transition-all border-none active:scale-95";
 
   return (
     <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif] lg:sticky lg:top-[140px] self-start">
       
       {/* Profile completeness */}
       {percentage < 100 && (
-        <div className={`${cardClass} border-l-[6px] border-l-[#2e7d32]`}>
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
+        <div className={`${cardClass} border-l-[6px] border-l-[#72B626]`}>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#f0f9e0] rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
           <div className={sectionTitle}>
              Proceso de Perfil
-            <span className="text-[14px] text-[#2e7d32] font-black">{percentage}%</span>
+            <span className="text-[14px] text-[#72B626] font-black">{percentage}%</span>
           </div>
           <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
             <div 
-              className="h-full bg-gradient-to-r from-[#aed581] to-[#2e7d32] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
+              className="h-full bg-gradient-to-r from-[#aed581] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
               style={{ width: `${percentage}%` }}
             ></div>
           </div>
           {nextStep && (
             <button 
-              className="mt-5 w-full text-center py-3 text-[13px] text-[#2e7d32] font-black bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-[#2e7d32] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10" 
+              className="mt-5 w-full text-center py-3 text-[13px] text-[#72B626] font-black bg-[#f0f9e0] border border-gray-100 rounded-xl hover:bg-[#72B626] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10" 
               onClick={() => openModal(nextStep.modal as any)}
             >
               Siguiente: {nextStep.label}
@@ -97,7 +97,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
           <div className="flex items-center gap-4 text-[#1c2b1e] text-[14px]">
             <div className={iconBox}><Link2 size={18} strokeWidth={2.5} /></div>
             {profile?.linkedinUrl ? (
-              <a href={profile.linkedinUrl} target="_blank" rel="noreferrer" className="text-[#2e7d32] font-black hover:underline truncate transition-colors no-underline">
+              <a href={profile.linkedinUrl} target="_blank" rel="noreferrer" className="text-[#72B626] font-black hover:underline truncate transition-colors no-underline">
                 {profile.linkedinUrl.replace(/https?:\/\/(www\.)?/, '')}
               </a>
             ) : (
@@ -122,7 +122,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
           <div className="min-w-0">
             <div className="font-black truncate text-slate-900">{profile?.companyName || 'Sin Empresa Vinculada'}</div>
             {profile?.website && (
-              <a href={profile.website} target="_blank" rel="noreferrer" className="text-[12px] text-[#2e7d32] font-black hover:underline truncate block no-underline mt-0.5">
+              <a href={profile.website} target="_blank" rel="noreferrer" className="text-[12px] text-[#72B626] font-black hover:underline truncate block no-underline mt-0.5">
                 {profile.website.replace(/https?:\/\/(www\.)?/, '')}
               </a>
             )}
@@ -176,7 +176,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       </div>
 
       {/* Identity verification */}
-      <div className={`rounded-[28px] p-6 shadow-sm ring-1 group transition-all hover:shadow-lg ${profile?.identityVerified ? 'bg-emerald-50/50 ring-emerald-100' : 'bg-slate-50/50 ring-slate-100 hover:ring-slate-200'}`}>
+      <div className={`rounded-[28px] p-6 shadow-sm ring-1 group transition-all hover:shadow-lg ${profile?.identityVerified ? 'bg-[#f0f9e0]/50 ring-[#f0f9e0]' : 'bg-slate-50/50 ring-slate-100 hover:ring-slate-200'}`}>
         <div className="flex justify-between items-center mb-5">
           <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Revisión</span>
         </div>
@@ -184,22 +184,22 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         {profile?.identityVerified ? (
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white border border-emerald-100 rounded-2xl flex items-center justify-center text-[#2e7d32] shadow-sm shrink-0">
+              <div className="w-12 h-12 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-[#72B626] shadow-sm shrink-0">
                  <ShieldCheck size={24} strokeWidth={2.5} />
               </div>
               <div className="min-w-0">
                 <div className="font-black text-[#1c2b1e] text-[14px] leading-tight mb-1 uppercase tracking-tight">Identidad Certificada</div>
                 {profile.identityVerifiedAt && (
-                  <div className="text-[11px] text-[#2e7d32] font-black uppercase tracking-tighter opacity-70">Sincronizado {new Date(profile.identityVerifiedAt).toLocaleDateString()}</div>
+                  <div className="text-[11px] text-[#72B626] font-black uppercase tracking-tighter opacity-70">Sincronizado {new Date(profile.identityVerifiedAt).toLocaleDateString()}</div>
                 )}
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <span className="bg-white border border-emerald-100 text-[#2e7d32] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-[#2e7d32] rounded-full animate-pulse"></div> Check KYC
+              <span className="bg-white border border-gray-100 text-[#72B626] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-[#72B626] rounded-full animate-pulse"></div> Check KYC
               </span>
-              <span className="bg-white border border-emerald-100 text-[#2e7d32] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-[#2e7d32] rounded-full animate-pulse"></div> Biometría
+              <span className="bg-white border border-gray-100 text-[#72B626] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-[#72B626] rounded-full animate-pulse"></div> Biometría
               </span>
             </div>
           </div>
@@ -261,8 +261,8 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       )}
 
       {userEmail && (
-        <div className="px-6 py-4 bg-white border border-emerald-50 rounded-[20px] shadow-sm flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-[#2e7d32]">
+        <div className="px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm flex items-center gap-3">
+           <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] flex items-center justify-center text-[#72B626]">
               <Link2 size={14} strokeWidth={2.5} />
            </div>
            <div className="min-w-0">

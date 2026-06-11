@@ -90,7 +90,7 @@ function StoryAvatar({ group, unseen, onClick }: AvatarProps) {
                 borderRadius: '50%',
                 background: unseen
                   ? 'linear-gradient(135deg, #00e676, #00bcd4)'
-                  : 'linear-gradient(135deg, #1c2b1e, #2e7d32)',
+                  : 'linear-gradient(135deg, #1c2b1e, #72B626)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -382,7 +382,7 @@ export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #2e7d32, #00897b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #72B626, #00897b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={16} color="#fff" />
           </div>
           <div>

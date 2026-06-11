@@ -84,9 +84,9 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
     }
   }, [profile, reset]);
 
-  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-[#72B626]/10 placeholder:text-gray-400 font-medium";
   const labelClass = "text-[12px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
-  const sectionTitle = "text-[14px] font-black text-[#1c2b1e] border-b border-emerald-50 pb-3 mb-6 uppercase tracking-widest flex items-center gap-2";
+  const sectionTitle = "text-[14px] font-black text-[#1c2b1e] border-b border-gray-100 pb-3 mb-6 uppercase tracking-widest flex items-center gap-2";
   const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
 
   return (
@@ -95,7 +95,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── DATOS PERSONALES ─────────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#2e7d32] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#72B626] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <User size={16} strokeWidth={2.5} />
            </span>
            Identidad & Trayectoria
@@ -161,7 +161,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── INFORMACIÓN FISCAL ───────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <Scale size={16} strokeWidth={2.5} />
            </span>
            Documentación de Capital
@@ -183,7 +183,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── DIRECCIÓN ────────────────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#1c2b1e] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#1c2b1e] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <Home size={16} strokeWidth={2.5} />
            </span>
            Residencia Operativa
@@ -236,7 +236,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── PREFERENCIAS DE INVERSIÓN ────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-[#aed581]/20 text-[#2e7d32] flex items-center justify-center text-sm shadow-sm border border-[#aed581]/50">
+           <span className="w-8 h-8 rounded-lg bg-[#aed581]/20 text-[#72B626] flex items-center justify-center text-sm shadow-sm border border-[#aed581]/50">
              <CircleDollarSign size={16} strokeWidth={2.5} />
            </span>
            Límites de Capital
@@ -273,7 +273,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── SECTORES DE INTERÉS ──────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-emerald-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <Target size={16} strokeWidth={2.5} />
            </span>
            Sectores de Interés Técnico
@@ -285,11 +285,11 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       </div>
 
       {/* ── ACCIONES ─────────────────────────────────────── */}
-      <div className="mt-4 pt-8 border-t border-emerald-50 flex justify-end">
+      <div className="mt-4 pt-8 border-t border-gray-100 flex justify-end">
         <button
           type="submit"
           id="btn-save-profile"
-          className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50"
+          className="bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-12 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-[#72B626]/20/20 border-none cursor-pointer flex items-center justify-center gap-3 disabled:opacity-50"
           disabled={saving}
         >
           {saving ? (

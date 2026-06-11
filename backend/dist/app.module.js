@@ -21,6 +21,8 @@ const investments_module_1 = require("./modules/investments/investments.module")
 const reward_tiers_module_1 = require("./modules/reward-tiers/reward-tiers.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const chat_module_1 = require("./modules/chat/chat.module");
+const ai_support_module_1 = require("./modules/ai-support/ai-support.module");
+const ai_campaign_module_1 = require("./modules/ai-campaign/ai-campaign.module");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 let AppModule = class AppModule {
@@ -45,6 +47,8 @@ exports.AppModule = AppModule = __decorate([
             reward_tiers_module_1.RewardTiersModule,
             notifications_module_1.NotificationsModule,
             chat_module_1.ChatModule,
+            ai_support_module_1.AiSupportModule,
+            ai_campaign_module_1.AiCampaignModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(process.cwd(), 'uploads'),
                 serveRoot: '/uploads',

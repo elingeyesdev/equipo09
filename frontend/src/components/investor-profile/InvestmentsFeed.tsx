@@ -27,11 +27,11 @@ interface Props {
 const CAMPAIGN_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
   donation: { icon: Heart, label: 'Donación', color: '#e91e63' },
   reward: { icon: Gem, label: 'Recompensa', color: '#f9a825' },
-  equity: { icon: TrendingUp, label: 'Equity', color: '#2e7d32' },
+  equity: { icon: TrendingUp, label: 'Equity', color: '#72B626' },
 };
 
 const STATUS_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
-  completed: { icon: CheckCircle2, color: '#2e7d32', bg: '#e8f5e9', label: 'Completada' },
+  completed: { icon: CheckCircle2, color: '#72B626', bg: '#e8f5e9', label: 'Completada' },
   pending: { icon: Clock, color: '#f9a825', bg: '#fff8e1', label: 'Pendiente' },
   processing: { icon: Clock, color: '#1976d2', bg: '#e3f2fd', label: 'Procesando' },
   failed: { icon: XCircle, color: '#c62828', bg: '#ffebee', label: 'Fallida' },
@@ -65,10 +65,10 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       {/* Capital Stats Grid */}
       {capitalData && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white rounded-[28px] border border-emerald-50 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
+          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-[#f0f9e0] rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
-              <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <TrendingUp size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Invertido</span>
@@ -78,10 +78,10 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
             </div>
           </div>
 
-          <div className="bg-white rounded-[28px] border border-emerald-50 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
+          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-[#f0f9e0] rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
-              <div className="w-10 h-10 bg-emerald-50 text-[#00897b] rounded-xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#f0f9e0] text-[#00897b] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <BarChart3 size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversiones</span>
@@ -94,7 +94,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
             </div>
           </div>
 
-          <div className="bg-white rounded-[28px] border border-emerald-50 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 bg-amber-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
               <div className="w-10 h-10 bg-amber-50 text-[#f9a825] rounded-xl flex items-center justify-center border border-amber-100 group-hover:scale-110 transition-transform">
@@ -117,7 +117,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       {capitalLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-[28px] border border-emerald-50 p-6 shadow-sm animate-pulse">
+            <div key={i} className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm animate-pulse">
               <div className="w-10 h-10 bg-slate-100 rounded-xl mb-4"></div>
               <div className="w-24 h-3 bg-slate-100 rounded-full mb-3"></div>
               <div className="w-32 h-7 bg-slate-100 rounded-full"></div>
@@ -127,7 +127,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       )}
 
       {/* Investments List Area */}
-      <div className="bg-white rounded-[40px] shadow-sm p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 border border-emerald-50">
+      <div className="bg-white rounded-[40px] shadow-sm p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 border border-gray-100">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-10">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-[#1c2b1e] text-white rounded-xl flex items-center justify-center">
@@ -141,7 +141,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
 
         {investmentsLoading ? (
           <div className="py-16 flex flex-col items-center justify-center gap-4">
-            <Loader2 size={32} strokeWidth={2} className="text-[#2e7d32] animate-spin" />
+            <Loader2 size={32} strokeWidth={2} className="text-[#72B626] animate-spin" />
             <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Cargando historial...</span>
           </div>
         ) : investments.length > 0 ? (
@@ -156,7 +156,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                 <div
                   key={inv.id}
                   onClick={() => navigate(`/campaign/${inv.campaignId}`)}
-                  className="rounded-2xl border border-slate-100 p-4 hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all cursor-pointer group"
+                  className="rounded-2xl border border-slate-100 p-4 hover:shadow-lg hover:border-gray-100 hover:-translate-y-0.5 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-4">
                     {/* Campaign thumbnail */}
@@ -175,7 +175,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 truncate group-hover:text-[#2e7d32] transition-colors">
+                      <p className="text-[13px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 truncate group-hover:text-[#72B626] transition-colors">
                         {inv.campaignTitle}
                       </p>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -222,8 +222,8 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
           </div>
         ) : (
           /* Empty state */
-          <div className="py-24 text-center bg-slate-50/20 border-[2px] border-dashed border-emerald-200 rounded-[40px] flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 bg-white rounded-[28px] shadow-sm flex items-center justify-center text-emerald-200 mb-6 group hover:scale-110 transition-transform">
+          <div className="py-24 text-center bg-slate-50/20 border-[2px] border-dashed border-gray-100 rounded-[40px] flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 bg-white rounded-[28px] shadow-sm flex items-center justify-center text-[#d4f0a0] mb-6 group hover:scale-110 transition-transform">
                <FolderOpen size={40} strokeWidth={1} />
             </div>
             <p className="text-[#1c2b1e] font-black text-[20px] mb-2 uppercase tracking-tight">Sin Inversiones Aún</p>

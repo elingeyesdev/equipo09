@@ -52,7 +52,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
       {/* COVER */}
       <div className="h-64 md:h-80 w-full bg-[#1c2b1e] relative overflow-hidden rounded-b-[40px] shadow-2xl flex items-center justify-center">
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#2e7d32] rounded-full blur-[120px]"></div>
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00897b] rounded-full blur-[120px]"></div>
         </div>
         
@@ -87,7 +87,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
                   }}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-4xl font-black text-white">
+                <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-4xl font-black text-white">
                   {initials}
                 </div>
               )}
@@ -105,7 +105,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
             {/* Verificado Badge */}
             {profile?.identityVerified && (
               <div className="absolute -right-2 -bottom-2 z-30 bg-white p-1.5 rounded-2xl shadow-lg">
-                <div className="bg-[#2e7d32] text-white p-1 rounded-lg">
+                <div className="bg-[#72B626] text-white p-1 rounded-lg">
                   <CheckCircle2 size={18} strokeWidth={3} />
                 </div>
               </div>
@@ -119,7 +119,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
                 {profile ? `${profile.firstName} ${profile.lastName}` : 'Cargando Perfil...'}
               </h1>
               {profile?.displayName && (
-                <span className="text-[14px] font-bold text-[#2e7d32] bg-emerald-50 px-3 py-1 rounded-lg">
+                <span className="text-[14px] font-bold text-[#72B626] bg-[#f0f9e0] px-3 py-1 rounded-lg">
                   @{profile.displayName}
                 </span>
               )}
@@ -128,8 +128,8 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-slate-500">
               {profile?.investorType && (
                 <div className="flex items-center gap-2 text-[13px] font-medium">
-                  <Shield size={14} className="text-[#2e7d32]" />
-                  <span className="text-[#2e7d32] font-bold">{INVESTOR_TYPE_LABELS[profile.investorType] || profile.investorType}</span>
+                  <Shield size={14} className="text-[#72B626]" />
+                  <span className="text-[#72B626] font-bold">{INVESTOR_TYPE_LABELS[profile.investorType] || profile.investorType}</span>
                 </div>
               )}
 
@@ -153,7 +153,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           <div className="flex gap-3 pb-2 w-full md:w-auto">
             <button
               onClick={() => onEdit('profile')}
-              className="flex-1 md:flex-none bg-white hover:bg-emerald-50 text-slate-600 font-bold px-6 py-3 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-[13px]"
+              className="flex-1 md:flex-none bg-white hover:bg-[#f0f9e0] text-slate-600 font-bold px-6 py-3 rounded-xl border border-gray-100 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-[13px]"
             >
               <Pencil size={16} strokeWidth={2.5} />
               Editar Perfil

@@ -23,7 +23,7 @@ function FundingBar({ current, goal }: { current: number; goal: number }) {
           width: `${pct}%`,
           background: pct >= 100
             ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-            : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
+            : 'linear-gradient(90deg, #a5d6a7, #72B626)',
         }}
       />
     </div>
@@ -106,7 +106,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
 
         {/* Entrepreneur row */}
         <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[11px] font-black overflow-hidden shrink-0 ring-2 ring-white/20">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-[11px] font-black overflow-hidden shrink-0 ring-2 ring-white/20">
             {getImageUrl(campaign.entrepreneurAvatar) ? (
               <img src={getImageUrl(campaign.entrepreneurAvatar)!} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -121,17 +121,17 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
         {/* Stats row */}
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5">
-            <TrendingUp size={14} className="text-emerald-400" strokeWidth={2.5} />
+            <TrendingUp size={14} className="text-[#72B626]" strokeWidth={2.5} />
             <span className="text-white font-black text-[14px]">{formatMoney(campaign.currentAmount)}</span>
             <span className="text-white/50 text-[12px] font-medium">/ {formatMoney(campaign.goalAmount)}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Users size={14} className="text-emerald-400" strokeWidth={2.5} />
+            <Users size={14} className="text-[#72B626]" strokeWidth={2.5} />
             <span className="text-white font-black text-[14px]">{campaign.investorCount}</span>
             <span className="text-white/50 text-[12px] font-medium">inversores</span>
           </div>
           <div
-            className="ml-auto text-[12px] font-black text-emerald-400"
+            className="ml-auto text-[12px] font-black text-[#72B626]"
             style={{ minWidth: '40px', textAlign: 'right' }}
           >
             {pct}%
@@ -148,7 +148,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
           onClick={() => navigate(`/campaign/${campaign.id}`)}
           className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-black text-[15px] uppercase tracking-wider transition-all active:scale-95 hover:brightness-110"
           style={{
-            background: 'linear-gradient(135deg, #2e7d32, #00897b)',
+            background: 'linear-gradient(135deg, #72B626, #00897b)',
             boxShadow: '0 6px 24px rgba(46,125,50,0.45)',
             color: '#fff',
           }}
@@ -244,7 +244,7 @@ export function PitchFeedPage() {
         <div className="flex-1 flex flex-col items-center justify-center gap-5">
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #1c2b1e, #2e7d32)' }}
+            style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
           >
             <Loader2 size={36} className="text-white animate-spin" />
           </div>
@@ -266,7 +266,7 @@ export function PitchFeedPage() {
           <button
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[13px] uppercase tracking-widest text-white transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)' }}
+            style={{ background: 'linear-gradient(135deg, #72B626, #00897b)' }}
           >
             <RefreshCw size={15} strokeWidth={2.5} />
             Reintentar
@@ -283,13 +283,13 @@ export function PitchFeedPage() {
         <div className="flex-1 flex flex-col items-center justify-center gap-5 px-8 text-center">
           <div
             className="w-24 h-24 rounded-3xl flex items-center justify-center mb-2"
-            style={{ background: 'linear-gradient(135deg, #1c2b1e, #2e7d32)' }}
+            style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
           >
             <Play size={44} strokeWidth={1.2} className="text-white/60" />
           </div>
           <h2 className="text-white text-2xl font-black tracking-tight">Sin pitches disponibles</h2>
           <p className="text-white/40 font-medium text-[15px] max-w-sm leading-relaxed">
-            Aún no hay campañas con video pitch publicado. ¡Sé el primero en subir el tuyo desde <strong className="text-emerald-400">Mis Campañas</strong>!
+            Aún no hay campañas con video pitch publicado. ¡Sé el primero en subir el tuyo desde <strong className="text-[#72B626]">Mis Campañas</strong>!
           </p>
         </div>
       </div>
@@ -314,7 +314,7 @@ export function PitchFeedPage() {
               width: activeIndex === i ? '8px' : '6px',
               height: activeIndex === i ? '24px' : '6px',
               background: activeIndex === i
-                ? 'linear-gradient(180deg, #a5d6a7, #2e7d32)'
+                ? 'linear-gradient(180deg, #a5d6a7, #72B626)'
                 : 'rgba(255,255,255,0.25)',
             }}
             title={`Pitch ${i + 1}`}

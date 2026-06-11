@@ -122,14 +122,14 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
                   {cameraError && <p className="text-sm text-red-600 font-medium mb-3">{cameraError}</p>}
                   <div className="flex gap-2">
                     <button type="button" onClick={startCamera} disabled={isStartingCamera || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg disabled:opacity-50">{isStartingCamera ? 'Iniciando...' : 'Activar cámara'}</button>
-                    <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg disabled:opacity-50">Tomar foto</button>
+                    <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-[#72B626] rounded-lg disabled:opacity-50">Tomar foto</button>
                   </div>
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
               ) : (
                 <div className="border-2 border-green-400 bg-green-50 rounded-xl p-4 text-green-700">
                   {capturedPreview && <img src={capturedPreview} alt="Captura KYC" className="w-full max-h-64 object-cover rounded-lg mb-3" />}
-                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="px-4 py-2 text-sm font-bold text-emerald-700 bg-emerald-100 rounded-lg">Tomar otra foto</button>
+                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="px-4 py-2 text-sm font-bold text-[#4a7f1a] bg-[#f0f9e0] rounded-lg">Tomar otra foto</button>
                 </div>
               )}
             </div>

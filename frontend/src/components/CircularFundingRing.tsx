@@ -27,7 +27,7 @@ export function CircularFundingRing({ currentAmount, goalAmount }: Props) {
       <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 140 140" aria-hidden>
         <defs>
           <linearGradient id="previewRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2e7d32" />
+            <stop offset="0%" stopColor="#72B626" />
             <stop offset="100%" stopColor="#aed581" />
           </linearGradient>
         </defs>

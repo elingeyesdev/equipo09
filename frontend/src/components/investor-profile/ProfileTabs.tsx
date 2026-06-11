@@ -31,7 +31,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
               className={`
                 whitespace-nowrap px-6 py-4 text-[14px] font-black transition-all duration-300 border-none bg-transparent cursor-pointer relative flex items-center gap-2 group
                 ${isActive 
-                  ? 'text-[#2e7d32]' 
+                  ? 'text-[#72B626]' 
                   : 'text-slate-400 hover:text-slate-900'
                 }
               `}
@@ -39,7 +39,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
               <Icon size={18} strokeWidth={isActive ? 3 : 2} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
               <span className="uppercase tracking-widest">{tab.label}</span>
               {isActive && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#2e7d32] rounded-t-full shadow-[0_-2px_8px_rgba(46,125,50,0.3)] animate-in fade-in slide-in-from-bottom-1 duration-500"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#72B626] rounded-t-full shadow-[0_-2px_8px_rgba(46,125,50,0.3)] animate-in fade-in slide-in-from-bottom-1 duration-500"></div>
               )}
             </button>
           );

@@ -24,7 +24,7 @@ export function CampaignStats({ currentAmount, goalAmount, currency, endDate, in
     <div className="flex flex-col gap-1">
       <div className={rowClass}>
         <span className={labelClass}>Recaudado</span>
-        <span className={`${valueClass} text-[#2e7d32]`}>{formatCampaignCurrency(currentAmount, currency)}</span>
+        <span className={`${valueClass} text-[#72B626]`}>{formatCampaignCurrency(currentAmount, currency)}</span>
       </div>
       <div className={rowClass}>
         <span className={labelClass}>Meta Objetivo</span>

@@ -145,7 +145,7 @@ export function PitchVideoPlayer({ videoUrl, isActive }: PitchVideoPlayerProps) 
       {/* Loading shimmer */}
       {!loaded && (
         <div className="absolute inset-0 bg-gradient-to-b from-[#1c2b1e] to-black flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-emerald-400 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-[#72B626] animate-spin" />
         </div>
       )}
 
@@ -173,7 +173,7 @@ export function PitchVideoPlayer({ videoUrl, isActive }: PitchVideoPlayerProps) 
       >
         {muted
           ? <VolumeX size={18} className="text-white" strokeWidth={2.5} />
-          : <Volume2 size={18} className="text-emerald-300" strokeWidth={2.5} />
+          : <Volume2 size={18} className="text-[#d4f0a0]" strokeWidth={2.5} />
         }
       </button>
 

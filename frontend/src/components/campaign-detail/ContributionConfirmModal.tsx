@@ -39,7 +39,7 @@ interface ContributionConfirmModalProps {
 const CAMPAIGN_LABELS: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
   donation:  { label: 'Donación',    icon: Heart,      color: '#e91e63', bgColor: '#fce4ec' },
   reward:    { label: 'Recompensa',  icon: Gem,        color: '#f9a825', bgColor: '#fff8e1' },
-  equity:    { label: 'Equity',      icon: TrendingUp, color: '#2e7d32', bgColor: '#e8f5e9' },
+  equity:    { label: 'Equity',      icon: TrendingUp, color: '#72B626', bgColor: '#e8f5e9' },
 };
 
 /* ───────────────────────────────────────────────── */
@@ -96,7 +96,7 @@ export function ContributionConfirmModal({
         <div
           className="relative px-8 pt-8 pb-6"
           style={{
-            background: 'linear-gradient(135deg, #1c2b1e 0%, #2e7d32 100%)',
+            background: 'linear-gradient(135deg, #1c2b1e 0%, #72B626 100%)',
           }}
         >
           {/* Close button */}
@@ -141,7 +141,7 @@ export function ContributionConfirmModal({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-[#1c2b1e] to-[#72B626] flex items-center justify-center">
                   <TypeIcon size={20} strokeWidth={1.5} className="text-white/30" />
                 </div>
               )}
@@ -151,7 +151,7 @@ export function ContributionConfirmModal({
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${
                     campaign.status === 'published' || campaign.status === 'approved'
-                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                      ? 'bg-[#f0f9e0] text-[#72B626] border-gray-100'
                       : 'bg-amber-50 text-amber-600 border-amber-100'
                   }`}
                 >
@@ -259,7 +259,7 @@ export function ContributionConfirmModal({
             style={{
               background: loading
                 ? '#64748b'
-                : 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
+                : 'linear-gradient(135deg, #72B626, #1c2b1e)',
               boxShadow: loading
                 ? 'none'
                 : '0 8px 24px rgba(46,125,50,0.3)',

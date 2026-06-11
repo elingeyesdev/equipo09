@@ -121,7 +121,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div>
             <h3 className="text-lg font-black text-slate-800 tracking-tight">Publicar Novedad</h3>
-            <p className="text-xs font-semibold text-emerald-600 line-clamp-1">{campaignTitle}</p>
+            <p className="text-xs font-semibold text-[#72B626] line-clamp-1">{campaignTitle}</p>
           </div>
           <button
             onClick={onClose}
@@ -140,7 +140,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
           )}
 
           {successMsg && (
-            <div className="p-3.5 bg-emerald-50 border border-emerald-100 rounded-2xl text-[12px] font-bold text-emerald-700">
+            <div className="p-3.5 bg-[#f0f9e0] border border-gray-100 rounded-2xl text-[12px] font-bold text-[#4a7f1a]">
               {successMsg}
             </div>
           )}
@@ -157,7 +157,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
               placeholder="Ej. ¡Llegamos al 50% de nuestra meta!"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-[#72B626]/20 focus:border-[#72B626] transition-all"
             />
           </div>
 
@@ -173,7 +173,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
               placeholder="Describe la actualización o avance reciente de tu proyecto..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-[#72B626]/20 focus:border-[#72B626] transition-all resize-none"
             />
           </div>
 
@@ -187,7 +187,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
                 type="button"
                 onClick={() => handleTabChange('text')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
-                  attachmentType === 'text' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  attachmentType === 'text' ? 'bg-white text-[#4a7f1a] shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <FileText size={14} /> Texto Extra
@@ -196,7 +196,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
                 type="button"
                 onClick={() => handleTabChange('image')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
-                  attachmentType === 'image' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  attachmentType === 'image' ? 'bg-white text-[#4a7f1a] shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <Image size={14} /> Imagen (Local)
@@ -205,7 +205,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
                 type="button"
                 onClick={() => handleTabChange('video')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all ${
-                  attachmentType === 'video' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  attachmentType === 'video' ? 'bg-white text-[#4a7f1a] shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <Video size={14} /> Video (Local)
@@ -219,12 +219,12 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
                 placeholder="Texto descriptivo adicional o pie de foto..."
                 value={attachmentValue}
                 onChange={(e) => setAttachmentValue(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-[#72B626]/20 focus:border-[#72B626] transition-all"
               />
             ) : (
               <div 
                 className={`relative h-[160px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${
-                  filePreview ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-200 hover:border-emerald-400 hover:bg-slate-50/50'
+                  filePreview ? 'border-[#72B626] bg-[#f0f9e0]/10' : 'border-slate-200 hover:border-[#d4f0a0] hover:bg-slate-50/50'
                 }`}
                 onClick={() => document.getElementById('update-file-upload')?.click()}
               >
@@ -283,7 +283,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] transition-all active:scale-95 shadow-lg shadow-emerald-100 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#72B626] hover:bg-[#4a7f1a] text-white font-bold text-[13px] transition-all active:scale-95 shadow-lg shadow-[#f0f9e0]/20 disabled:opacity-50"
             >
               {loading ? (
                 <>

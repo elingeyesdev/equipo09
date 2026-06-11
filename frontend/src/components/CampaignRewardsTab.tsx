@@ -130,7 +130,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#72B626] animate-spin" />
         <p className="text-slate-400 font-medium text-sm">Cargando niveles de recompensa...</p>
       </div>
     );
@@ -147,7 +147,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
     );
   }
 
-  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[14px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[14px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-[#72B626]/10 placeholder:text-gray-400 font-medium";
   const labelClass = "text-[11px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
 
   return (
@@ -167,7 +167,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
         {!isEditing && !readOnly && (
           <button
             onClick={handleAddNew}
-            className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-6 py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[13px] flex items-center justify-center gap-2"
+            className="bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-6 py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-[#72B626]/20/20 border-none cursor-pointer text-[13px] flex items-center justify-center gap-2"
           >
             <Plus size={16} strokeWidth={3} />
             Nuevo Nivel
@@ -177,7 +177,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
 
       {/* Formulario */}
       {isEditing && (
-        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-emerald-900/5 border border-emerald-50 relative animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-[#1c2b1e]/20/5 border border-gray-100 relative animate-in fade-in zoom-in-95 duration-300">
           <h3 className="text-xl font-black text-[#1c2b1e] mb-6">
             {isEditing === 'new' ? 'Crear Nivel de Recompensa' : 'Editar Nivel'}
           </h3>
@@ -239,7 +239,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                     id="isActive"
                     checked={formData.isActive}
                     onChange={e => setFormData({...formData, isActive: e.target.checked})}
-                    className="w-5 h-5 accent-[#2e7d32]"
+                    className="w-5 h-5 accent-[#72B626]"
                   />
                   <div>
                     <label htmlFor="isActive" className="text-[14px] font-black text-slate-800 cursor-pointer">Recompensa Activa</label>
@@ -260,7 +260,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
               </button>
               <button 
                 type="submit"
-                className="px-6 py-3 rounded-xl bg-[#2e7d32] text-white font-black hover:bg-[#1c2b1e] transition-colors flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-[#72B626] text-white font-black hover:bg-[#1c2b1e] transition-colors flex items-center gap-2"
                 disabled={submitting}
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} strokeWidth={2.5} />}
@@ -275,7 +275,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       {!isEditing && tiers.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tiers.map(tier => (
-            <div key={tier.id} className={`bg-white rounded-[28px] border-2 p-6 transition-all ${tier.isActive ? 'border-emerald-50 hover:border-emerald-200 shadow-sm hover:shadow-xl' : 'border-slate-100 opacity-60'}`}>
+            <div key={tier.id} className={`bg-white rounded-[28px] border-2 p-6 transition-all ${tier.isActive ? 'border-gray-100 hover:border-gray-100 shadow-sm hover:shadow-xl' : 'border-slate-100 opacity-60'}`}>
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl font-black text-[#1c2b1e]">
@@ -289,7 +289,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                 </div>
                 {!readOnly && (
                   <div className="flex gap-2">
-                    <button onClick={() => handleEdit(tier)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-100 text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-colors">
+                    <button onClick={() => handleEdit(tier)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-[#f0f9e0] text-slate-400 hover:text-[#72B626] flex items-center justify-center transition-colors">
                       <Edit2 size={14} strokeWidth={2.5} />
                     </button>
                     <button onClick={() => handleDelete(tier.id)} className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-100 text-slate-400 hover:text-red-600 flex items-center justify-center transition-colors">
@@ -305,7 +305,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
               
               <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
                 <div className="flex items-center gap-1.5">
-                  <Users size={14} strokeWidth={2.5} className="text-[#2e7d32]" />
+                  <Users size={14} strokeWidth={2.5} className="text-[#72B626]" />
                   <span className="text-slate-700">{tier.currentClaims || 0}</span>
                   <span>inversores han alcanzado este nivel</span>
                 </div>
@@ -316,7 +316,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       )}
 
       {!isEditing && tiers.length === 0 && (
-         <div className="col-span-full py-16 text-center bg-white border-2 border-dashed border-emerald-100 rounded-[32px]">
+         <div className="col-span-full py-16 text-center bg-white border-2 border-dashed border-gray-100 rounded-[32px]">
            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 mx-auto mb-4">
              <Gem size={32} />
            </div>
@@ -326,7 +326,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
            </p>
            <button
              onClick={handleAddNew}
-             className="bg-[#2e7d32] text-white font-black px-6 py-3 rounded-xl transition-all shadow-lg hover:bg-[#1c2b1e]"
+             className="bg-[#72B626] text-white font-black px-6 py-3 rounded-xl transition-all shadow-lg hover:bg-[#1c2b1e]"
            >
              Crear Primer Nivel
            </button>
@@ -338,10 +338,10 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
         <div className="mt-12 pt-8 border-t border-slate-200">
           <button 
             onClick={() => setShowClaims(!showClaims)}
-            className="w-full flex items-center justify-between bg-white border border-slate-200 p-6 rounded-[24px] hover:border-emerald-300 transition-colors"
+            className="w-full flex items-center justify-between bg-white border border-slate-200 p-6 rounded-[24px] hover:border-gray-100 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+              <div className="w-12 h-12 bg-[#f0f9e0] rounded-xl flex items-center justify-center text-[#72B626]">
                 <Users size={20} strokeWidth={2.5} />
               </div>
               <div className="text-left">
@@ -378,7 +378,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                             {claim.reward_title}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-black text-emerald-700">
+                        <td className="px-6 py-4 font-black text-[#4a7f1a]">
                           {formatCampaignCurrency(claim.amount, currency)}
                         </td>
                         <td className="px-6 py-4">

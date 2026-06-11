@@ -24,7 +24,7 @@ export function RewardTierCards({
   if (!tiers || tiers.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+    <div className="bg-white rounded-[28px] shadow-sm border border-gray-100 p-8 md:p-10 mb-8">
       <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
           <Gem size={20} strokeWidth={2.5} className="text-amber-500" />
@@ -53,15 +53,15 @@ export function RewardTierCards({
                 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99]'}
                 ${
                   isSelected
-                    ? 'border-[#2e7d32] bg-emerald-50/50 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-200'
-                    : 'border-slate-100 bg-white hover:border-emerald-200'
+                    ? 'border-[#72B626] bg-[#f0f9e0]/50 shadow-lg shadow-[#72B626]/20/10 ring-1 ring-[#d4f0a0]'
+                    : 'border-slate-100 bg-white hover:border-gray-100'
                 }
               `}
               style={{ outline: 'none' }}
             >
               {/* Selected checkmark */}
               {isSelected && (
-                <div className="absolute top-4 right-4 w-7 h-7 bg-[#2e7d32] rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-[scale-in_0.2s_ease-out]">
+                <div className="absolute top-4 right-4 w-7 h-7 bg-[#72B626] rounded-full flex items-center justify-center shadow-lg shadow-[#72B626]/20/30 animate-[scale-in_0.2s_ease-out]">
                   <Check size={14} strokeWidth={3} className="text-white" />
                 </div>
               )}
@@ -80,7 +80,7 @@ export function RewardTierCards({
               <div className="flex items-baseline gap-2 mb-3">
                 <span
                   className={`text-2xl font-black tracking-tighter ${
-                    isSelected ? 'text-[#2e7d32]' : 'text-[#1c2b1e]'
+                    isSelected ? 'text-[#72B626]' : 'text-[#1c2b1e]'
                   }`}
                 >
                   ${tier.amount.toLocaleString()}
@@ -93,7 +93,7 @@ export function RewardTierCards({
               {/* Title */}
               <h3
                 className={`text-[15px] font-black mb-2 tracking-tight ${
-                  isSelected ? 'text-[#2e7d32]' : 'text-[#1c2b1e]'
+                  isSelected ? 'text-[#72B626]' : 'text-[#1c2b1e]'
                 }`}
               >
                 <Gift

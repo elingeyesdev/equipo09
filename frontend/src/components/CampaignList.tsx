@@ -59,7 +59,7 @@ export function CampaignList({
   if (loading && campaigns.length === 0) {
     return (
       <div className="py-40 flex flex-col items-center justify-center gap-6">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#72B626] rounded-full animate-spin" />
         <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Sincronizando Campañas...</span>
       </div>
     );
@@ -79,8 +79,8 @@ export function CampaignList({
 
   if (!loading && campaigns.length === 0) {
     return (
-      <div className="bg-white rounded-[32px] border border-dashed border-emerald-200 p-16 text-center animate-in fade-in zoom-in-95 duration-500">
-        <div className="text-emerald-200 mb-6 flex justify-center" aria-hidden>
+      <div className="bg-white rounded-[32px] border border-dashed border-gray-100 p-16 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="text-[#d4f0a0] mb-6 flex justify-center" aria-hidden>
            {hasFilterApplied ? <Search size={64} strokeWidth={1.5} /> : <FolderOpen size={64} strokeWidth={1.5} />}
         </div>
         <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-3">
@@ -93,7 +93,7 @@ export function CampaignList({
         </p>
         {!hasFilterApplied && (
           <button
-            className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-3 mx-auto"
+            className="bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-[#72B626]/20/20 border-none cursor-pointer flex items-center justify-center gap-3 mx-auto"
             type="button"
             onClick={canCreateCampaign ? onOpenForm : onGoToProfile}
           >
@@ -132,10 +132,10 @@ export function CampaignList({
       </div>
 
       {meta && meta.totalPages > 1 && (
-        <nav className="flex items-center justify-between bg-white border border-emerald-50 px-6 py-4 rounded-2xl shadow-sm" aria-label="Paginación">
+        <nav className="flex items-center justify-between bg-white border border-gray-100 px-6 py-4 rounded-2xl shadow-sm" aria-label="Paginación">
           <button
             type="button"
-            className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
+            className="bg-[#f0f9e0] hover:bg-[#f0f9e0] text-[#72B626] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
             disabled={meta.currentPage <= 1 || loading}
             onClick={() => onPageChange(meta.currentPage - 1)}
           >
@@ -148,7 +148,7 @@ export function CampaignList({
           </div>
           <button
             type="button"
-            className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
+            className="bg-[#f0f9e0] hover:bg-[#f0f9e0] text-[#72B626] font-bold px-5 py-2.5 rounded-xl border-none disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 text-[13px] flex items-center gap-2 cursor-pointer"
             disabled={meta.currentPage >= meta.totalPages || loading}
             onClick={() => onPageChange(meta.currentPage + 1)}
           >

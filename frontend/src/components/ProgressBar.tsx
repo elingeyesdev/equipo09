@@ -28,9 +28,9 @@ export function ProgressBar({ value, tone = 'auto', className, trackClassName, m
 
   const toneClasses = {
     low: 'bg-gradient-to-r from-slate-300 to-slate-400',
-    mid: 'bg-gradient-to-r from-[#aed581] to-[#2e7d32]', // Lima a Verde
-    high: 'bg-gradient-to-r from-[#2e7d32] to-[#00897b]', // Verde a Esmeralda
-    complete: 'bg-gradient-to-r from-[#2e7d32] to-[#00897b] shadow-[0_0_12px_rgba(46,125,50,0.3)]',
+    mid: 'bg-gradient-to-r from-[#aed581] to-[#72B626]', // Lima a Verde
+    high: 'bg-gradient-to-r from-[#72B626] to-[#00897b]', // Verde a Esmeralda
+    complete: 'bg-gradient-to-r from-[#72B626] to-[#00897b] shadow-[0_0_12px_rgba(46,125,50,0.3)]',
   };
 
   return (

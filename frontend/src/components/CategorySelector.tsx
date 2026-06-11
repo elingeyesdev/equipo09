@@ -69,7 +69,7 @@ export function CategorySelector({ selected, onChange }: Props) {
   if (loading) {
     return (
       <div className="py-10 flex flex-col items-center justify-center gap-4">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2e7d32] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#72B626] rounded-full animate-spin" />
         <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest leading-none">Cargando sectores...</span>
       </div>
     );
@@ -97,7 +97,7 @@ export function CategorySelector({ selected, onChange }: Props) {
         {categories.map((cat) => {
           const isSelected = selected.includes(cat.id);
           const IconComponent = CATEGORY_ICONS[cat.name] ?? Pin;
-          const chipColor = cat.color ?? '#2e7d32';
+          const chipColor = cat.color ?? '#72B626';
           
           return (
             <button
@@ -107,14 +107,14 @@ export function CategorySelector({ selected, onChange }: Props) {
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer border-[1.5px] shadow-sm active:scale-95 text-left group
                 ${isSelected 
-                  ? 'bg-white font-black text-[#1c2b1e] border-[#2e7d32] shadow-md translate-y-[-2px]' 
-                  : 'bg-gray-50/50 border-gray-100 text-slate-500 hover:bg-white hover:border-[#2e7d32]'
+                  ? 'bg-white font-black text-[#1c2b1e] border-[#72B626] shadow-md translate-y-[-2px]' 
+                  : 'bg-gray-50/50 border-gray-100 text-slate-500 hover:bg-white hover:border-[#72B626]'
                 }
               `}
               onClick={() => toggle(cat.id)}
               aria-pressed={isSelected}
             >
-              <span className={`transition-transform group-hover:scale-110 ${isSelected ? 'text-[#2e7d32]' : 'text-slate-400'}`}>
+              <span className={`transition-transform group-hover:scale-110 ${isSelected ? 'text-[#72B626]' : 'text-slate-400'}`}>
                  <IconComponent size={18} strokeWidth={isSelected ? 2.5 : 2} />
               </span>
               <span className="text-[11px] uppercase tracking-wider flex-1 truncate font-bold">{cat.displayName}</span>

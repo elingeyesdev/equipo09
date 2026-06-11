@@ -113,7 +113,7 @@ export function CampaignFilters({ query, onChange }: Props) {
   const presetLabel = PRESETS.find((p) => p.id === presetActive)?.label ?? 'Todas';
   const sortLabel = SORT_OPTIONS.find((o) => o.key === sortSelectValue)?.label ?? '';
 
-  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[14px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[14px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-[#72B626]/10 placeholder:text-gray-400 font-medium";
 
   return (
     <section
@@ -123,33 +123,33 @@ export function CampaignFilters({ query, onChange }: Props) {
       {!filtersOpen ? (
         <button
           type="button"
-          className="w-full bg-white border border-emerald-100/50 rounded-[24px] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-900/5 transition-all text-left shadow-sm group active:scale-[0.99] cursor-pointer"
+          className="w-full bg-white border border-gray-100/50 rounded-[24px] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-[#1c2b1e]/20/5 transition-all text-left shadow-sm group active:scale-[0.99] cursor-pointer"
           onClick={() => setFiltersOpen(true)}
           aria-expanded="false"
         >
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-all">
-             <SlidersHorizontal className="text-[#2e7d32]" size={22} strokeWidth={2.5} />
+          <div className="w-12 h-12 rounded-2xl bg-[#f0f9e0] flex items-center justify-center group-hover:scale-110 transition-all">
+             <SlidersHorizontal className="text-[#72B626]" size={22} strokeWidth={2.5} />
           </div>
           <div className="flex-1">
             <span className="block text-[15px] font-black text-[#1c2b1e] tracking-tight">Panel de Control de Listado</span>
             <span className="block text-[12px] font-medium text-slate-400">Búsqueda avanzada, filtrado por estado y ordenamiento</span>
           </div>
           {showClear && (
-            <span className="bg-emerald-100 text-[#2e7d32] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest mr-2 animate-pulse">
+            <span className="bg-[#f0f9e0] text-[#72B626] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest mr-2 animate-pulse">
               Filtros Activos
             </span>
           )}
           <ChevronDown className="text-slate-300 group-hover:text-slate-500 transition-colors mr-2" size={20} />
         </button>
       ) : (
-        <div className="bg-white border border-emerald-100 rounded-[32px] p-8 shadow-xl shadow-emerald-900/5 relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-xl shadow-[#1c2b1e]/20/5 relative overflow-hidden animate-in zoom-in-95 duration-300">
            {/* Decorative background element */}
-           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full blur-3xl -mr-16 -mt-16"></div>
+           <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9e0]/50 rounded-full blur-3xl -mr-16 -mt-16"></div>
 
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-emerald-50 pb-8">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-gray-100 pb-8">
               <div>
                 <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-3 leading-none">
-                   <Zap className="text-[#2e7d32]" size={24} strokeWidth={2.5} /> 
+                   <Zap className="text-[#72B626]" size={24} strokeWidth={2.5} /> 
                    Criterios de Visualización
                 </h2>
                 <p className="text-[13px] font-medium text-slate-400 leading-relaxed max-w-sm mt-2">
@@ -158,13 +158,13 @@ export function CampaignFilters({ query, onChange }: Props) {
               </div>
               <div className="flex items-center gap-3">
                 {showClear && (
-                  <button type="button" className="bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black px-5 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none cursor-pointer" onClick={clearAll}>
+                  <button type="button" className="bg-[#f0f9e0] hover:bg-[#f0f9e0] text-[#72B626] font-black px-5 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none cursor-pointer" onClick={clearAll}>
                     Limpiar Todo
                   </button>
                 )}
                 <button
                   type="button"
-                  className="bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-6 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center gap-2"
+                  className="bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-6 py-2.5 rounded-xl transition-all active:scale-95 text-[13px] border-none shadow-lg shadow-[#72B626]/20/20 cursor-pointer flex items-center gap-2"
                   onClick={() => setFiltersOpen(false)}
                 >
                   Confirmar & Cerrar
@@ -207,8 +207,8 @@ export function CampaignFilters({ query, onChange }: Props) {
                             className={`
                                px-4 py-2.5 rounded-xl text-[12px] font-black transition-all border-[1.5px] cursor-pointer
                                ${presetActive === id 
-                                 ? 'bg-[#2e7d32] text-white border-[#2e7d32] shadow-md shadow-emerald-500/20' 
-                                 : 'bg-white text-slate-500 border-gray-100 hover:border-emerald-200'
+                                 ? 'bg-[#72B626] text-white border-[#72B626] shadow-md shadow-[#72B626]/20/20' 
+                                 : 'bg-white text-slate-500 border-gray-100 hover:border-gray-100'
                                }
                             `}
                             onClick={() => onChange({ filterPreset: id, page: 1 })}
@@ -223,7 +223,7 @@ export function CampaignFilters({ query, onChange }: Props) {
               </div>
 
               {/* Columna Derecha: Orden y Fechas */}
-              <div className="flex flex-col gap-8 bg-emerald-50/10 p-6 rounded-3xl border border-emerald-50/50">
+              <div className="flex flex-col gap-8 bg-[#f0f9e0]/10 p-6 rounded-3xl border border-gray-100/50">
                  <div className="flex flex-col gap-3">
                     <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">
                        Prioridad de Visualización
@@ -293,14 +293,14 @@ export function CampaignFilters({ query, onChange }: Props) {
               </div>
            </div>
 
-           <div className="mt-8 pt-6 border-t border-emerald-50 flex items-center justify-between">
+           <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
               <div className="text-[12px] font-medium text-slate-400">
                  Modo: <strong className="text-slate-900">{presetLabel}</strong> · 
                  Orden: <strong className="text-slate-900">{sortLabel}</strong>
                  {query.search?.trim() && <> · Búsqueda: <strong className="text-slate-900">"{query.search}"</strong></>}
               </div>
               <button 
-                className="text-[13px] font-black text-[#2e7d32] hover:underline decoration-2 underline-offset-4 cursor-pointer border-none bg-transparent flex items-center gap-2"
+                className="text-[13px] font-black text-[#72B626] hover:underline decoration-2 underline-offset-4 cursor-pointer border-none bg-transparent flex items-center gap-2"
                 onClick={() => setFiltersOpen(false)}
               >
                 <ChevronUp size={16} strokeWidth={2.5} />

@@ -12,6 +12,7 @@ import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
+import { LandingPage } from './pages/LandingPage';
 
 // Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -101,17 +102,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/"
-          element={
-            localStorage.getItem('accessToken')
-              ? (localStorage.getItem('adminAccessLevel') === 'super_admin' ? <Navigate to="/superadmin" replace /> 
-                 : localStorage.getItem('adminAccessLevel') === 'admin' ? <Navigate to="/admin" replace /> 
-                 : localStorage.getItem('userRole') === 'entrepreneur' ? <Navigate to="/entrepreneur-campaigns" replace /> 
-                 : <Navigate to="/dashboard" replace />)
-              : <Navigate to="/login" replace />
-          }
-        />
+        <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

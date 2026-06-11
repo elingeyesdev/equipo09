@@ -39,7 +39,7 @@ import {
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
   reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#2e7d32' },
+  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
 };
 
 function statusLabel(status: string): string {
@@ -359,7 +359,7 @@ export function CampaignPreviewModal({
               <span className={`px-3 md:px-4 py-1 md:py-1.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest shadow-sm border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
                 ? 'bg-amber-50 text-amber-600 border-amber-100'
                 : campaign.status === 'approved' || campaign.status === 'published'
-                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                  ? 'bg-[#f0f9e0] text-[#72B626] border-gray-100'
                   : campaign.status === 'rejected'
                     ? 'bg-red-50 text-red-600 border-red-100'
                     : 'bg-slate-50 text-slate-500 border-slate-100'
@@ -381,7 +381,7 @@ export function CampaignPreviewModal({
         <div className="bg-white px-10 border-b border-slate-100 flex items-center gap-8 z-30">
           <button
             onClick={() => setActiveTab('details')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'details' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'details' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
           >
             Detalles de Proyecto
@@ -399,7 +399,7 @@ export function CampaignPreviewModal({
           {(campaign.status === 'published' || campaign.status === 'funded') && (
             <button
               onClick={() => setActiveTab('investors')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'investors' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'investors' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
               Inversores Activos ({investorsTotal})
@@ -408,7 +408,7 @@ export function CampaignPreviewModal({
           {campaign.campaignType === 'reward' && !isAdmin && (
             <button
               onClick={() => setActiveTab('rewards')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
               <Gem size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
@@ -417,7 +417,7 @@ export function CampaignPreviewModal({
           )}
           <button
             onClick={() => setActiveTab('documents')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'documents' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'documents' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
           >
             <FileText size={14} className={activeTab === 'documents' ? 'text-blue-500' : 'text-slate-400'} />
@@ -559,7 +559,7 @@ export function CampaignPreviewModal({
                 {/* Financial Product Structure (Tiers) */}
                 <section className="space-y-6">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div className="flex items-center gap-3 text-[#2e7d32]">
+                    <div className="flex items-center gap-3 text-[#72B626]">
                       <TrendingUp size={20} strokeWidth={2.5} />
                       <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Estructura de Captación</h3>
                     </div>
@@ -572,7 +572,7 @@ export function CampaignPreviewModal({
                     {effectiveRewards.map((tier, idx) => (
                       <div key={idx} className="p-6 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
                         <div className="flex justify-between items-start">
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center group-hover:bg-[#2e7d32] group-hover:text-white transition-colors">
+                          <div className="w-12 h-12 rounded-2xl bg-[#f0f9e0] text-[#72B626] flex items-center justify-center group-hover:bg-[#72B626] group-hover:text-white transition-colors">
                             <Rocket size={20} />
                           </div>
                           <span className="text-lg font-black text-[#1c2b1e]">
@@ -623,7 +623,7 @@ export function CampaignPreviewModal({
                     <span className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
                       ? 'bg-amber-50 text-amber-600 border-amber-100'
                       : campaign.status === 'approved' || campaign.status === 'published'
-                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        ? 'bg-[#f0f9e0] text-[#72B626] border-gray-100'
                         : campaign.status === 'rejected'
                           ? 'bg-red-50 text-red-600 border-red-100'
                           : 'bg-slate-50 text-slate-500 border-slate-100'
@@ -639,8 +639,8 @@ export function CampaignPreviewModal({
                         {formatCampaignCurrency(cur, currency)}
                       </span>
                       <div className="flex items-center justify-center gap-2 mt-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[13px] font-black text-emerald-600">
+                        <div className="w-2 h-2 rounded-full bg-[#72B626] animate-pulse"></div>
+                        <span className="text-[13px] font-black text-[#72B626]">
                           {Math.round((cur / goal) * 100)}% Completado
                         </span>
                       </div>
@@ -749,7 +749,7 @@ export function CampaignPreviewModal({
                 {(history.length > 0 || historyLoading) && (
                   <section className="p-10 space-y-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-[#2e7d32]">
+                      <div className="flex items-center gap-3 text-[#72B626]">
                         <Clock size={18} strokeWidth={2.5} />
                         <h3 className="text-[11px] font-black uppercase tracking-widest">Historial de Revisión</h3>
                       </div>
@@ -804,7 +804,7 @@ export function CampaignPreviewModal({
                               )}
                             </div>
                           </div>
-                          <span className="text-[12px] font-black text-emerald-600">+{formatCampaignCurrency(inv.amount, currency)}</span>
+                          <span className="text-[12px] font-black text-[#72B626]">+{formatCampaignCurrency(inv.amount, currency)}</span>
                         </div>
                       ))}
                     </div>
@@ -848,7 +848,7 @@ export function CampaignPreviewModal({
                           <p className="font-bold text-[14px] mb-1">{doc.original_filename}</p>
                           <p className="text-[12px] text-slate-500">{doc.justification}</p>
                           <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">
-                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-emerald-500' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{statusLabel(doc.verification_status)}</span>
+                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-[#72B626]' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{statusLabel(doc.verification_status)}</span>
                           </p>
                           {doc.reviewer_notes && <p className="text-[11px] text-red-500 mt-1 italic">"{doc.reviewer_notes}"</p>}
                         </div>
@@ -856,7 +856,7 @@ export function CampaignPreviewModal({
                           <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[12px] font-bold no-underline">Ver Documento</a>
                           {isAdmin && doc.verification_status === 'pending' && (
                             <>
-                              <button onClick={() => handleReviewDocument(doc.id, 'approved')} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[12px] font-bold border-none cursor-pointer">Aprobar</button>
+                              <button onClick={() => handleReviewDocument(doc.id, 'approved')} className="px-4 py-2 bg-[#f0f9e0] hover:bg-[#f0f9e0] text-[#4a7f1a] rounded-lg text-[12px] font-bold border-none cursor-pointer">Aprobar</button>
                               <button onClick={() => handleReviewDocument(doc.id, 'rejected')} className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[12px] font-bold border-none cursor-pointer">Rechazar</button>
                             </>
                           )}
@@ -898,7 +898,7 @@ export function CampaignPreviewModal({
                   <button
                     onClick={() => onApprove?.()}
                     disabled={actionLoading}
-                    className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-900/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
+                    className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-[#1c2b1e]/20/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
                   >
                     {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Aprobar</>}
                   </button>
@@ -933,7 +933,7 @@ export function CampaignPreviewModal({
                     <button
                       onClick={onPublish}
                       disabled={actionLoading}
-                      className="flex-1 md:w-56 h-14 bg-[#2e7d32] hover:bg-[#1c2b1e] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer flex items-center justify-center gap-2"
+                      className="flex-1 md:w-56 h-14 bg-[#72B626] hover:bg-[#1c2b1e] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-[#72B626]/20/20 border-none cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Rocket size={16} strokeWidth={2.5} /> Lanzar
                     </button>
@@ -985,7 +985,7 @@ export function CampaignPreviewModal({
                   className={`px-5 py-2.5 font-bold rounded-xl text-xs uppercase tracking-widest transition-all active:scale-95 border-none cursor-pointer text-white ${
                     dialog.type === 'prompt' && dialog.title.toLowerCase().includes('rechaz')
                       ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20'
-                      : 'bg-[#1c2b1e] hover:bg-[#2e7d32] shadow-lg shadow-emerald-950/20'
+                      : 'bg-[#1c2b1e] hover:bg-[#72B626] shadow-lg shadow-[#1c2b1e]/20'
                   }`}
                 >
                   Aceptar

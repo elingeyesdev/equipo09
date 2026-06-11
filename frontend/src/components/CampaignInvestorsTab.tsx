@@ -52,7 +52,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
   if (loading && !data) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#72B626] animate-spin" />
         <p className="text-slate-400 font-medium text-sm">Analizando registro de capital...</p>
       </div>
     );
@@ -80,7 +80,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-3 text-emerald-600 mb-2">
+          <div className="flex items-center gap-3 text-[#72B626] mb-2">
             <Users size={20} strokeWidth={2.5} />
             <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Registro de Inversores</h3>
           </div>
@@ -94,9 +94,9 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Inversores</span>
             <span className="text-xl font-black text-slate-900">{data?.meta?.totalItems || 0}</span>
           </div>
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 shadow-sm">
-            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Retención de Capital</span>
-            <span className="text-xl font-black text-emerald-700">100%</span>
+          <div className="bg-[#f0f9e0] border border-gray-100 rounded-2xl px-5 py-3 shadow-sm">
+            <span className="text-[10px] font-black text-[#72B626] uppercase tracking-widest block mb-1">Retención de Capital</span>
+            <span className="text-xl font-black text-[#4a7f1a]">100%</span>
           </div>
         </div>
       </div>
@@ -108,9 +108,9 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
             <div 
               key={inv.userId}
               onClick={() => setSelectedInvestor(inv)}
-              className="bg-white border border-slate-100 rounded-[32px] p-6 hover:shadow-2xl hover:border-emerald-200 transition-all cursor-pointer group relative overflow-hidden"
+              className="bg-white border border-slate-100 rounded-[32px] p-6 hover:shadow-2xl hover:border-gray-100 transition-all cursor-pointer group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/30 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-100/50 transition-colors"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9e0]/30 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#f0f9e0]/50 transition-colors"></div>
               
               <div className="flex items-start gap-5 relative z-10">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 shadow-inner border border-white">
@@ -136,7 +136,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                     <h4 className="font-black text-slate-900 text-[16px] truncate">
                       {inv.displayName || `${inv.firstName} ${inv.lastName}`}
                     </h4>
-                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">
+                    <span className="text-[10px] font-black text-[#72B626] bg-[#f0f9e0] px-2 py-1 rounded-lg uppercase tracking-wider">
                       Activo
                     </span>
                   </div>
@@ -163,7 +163,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                         {formatCampaignCurrency(inv.totalInvested, currency)}
                       </span>
                     </div>
-                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center">
+                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-[#72B626] group-hover:text-white transition-all flex items-center justify-center">
                       <ChevronRight size={20} />
                     </button>
                   </div>
@@ -194,7 +194,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
               className={`w-10 h-10 rounded-xl font-black text-[13px] transition-all ${
                 page === i + 1 
                   ? 'bg-[#1c2b1e] text-white' 
-                  : 'bg-white border border-slate-200 text-slate-400 hover:border-emerald-300'
+                  : 'bg-white border border-slate-200 text-slate-400 hover:border-gray-100'
               }`}
             >
               {i + 1}
@@ -211,7 +211,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
           <div className="bg-white rounded-[40px] w-full max-w-[500px] overflow-hidden relative z-10 shadow-2xl animate-in zoom-in-95 duration-300 border border-white">
             
             {/* Modal Header/Cover */}
-            <div className="h-32 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] relative">
+            <div className="h-32 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] relative">
               <button 
                 onClick={() => setSelectedInvestor(null)}
                 className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all flex items-center justify-center border-none cursor-pointer"
@@ -240,7 +240,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
               <h3 className="text-2xl font-black text-slate-900 mb-1">
                 {selectedInvestor.displayName || `${selectedInvestor.firstName} ${selectedInvestor.lastName}`}
               </h3>
-              <p className="text-emerald-600 font-black text-[11px] uppercase tracking-widest mb-6 flex items-center justify-center gap-2">
+              <p className="text-[#72B626] font-black text-[11px] uppercase tracking-widest mb-6 flex items-center justify-center gap-2">
                 <Heart size={12} fill="currentColor" /> Inversor de Impacto
               </p>
 
@@ -251,7 +251,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                 </div>
                 <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100 col-span-2">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Recompensa Seleccionada</span>
-                  <span className="text-[13px] font-black text-emerald-600 truncate block">
+                  <span className="text-[13px] font-black text-[#72B626] truncate block">
                     {selectedInvestor.rewardTitle || 'Sin Recompensa (Donación)'}
                   </span>
                 </div>
@@ -279,7 +279,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
 
               <div className="mt-10 flex gap-4">
                 <button 
-                  className="flex-1 h-14 bg-[#1c2b1e] hover:bg-[#2e7d32] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-emerald-900/10"
+                  className="flex-1 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-[#1c2b1e]/20/10"
                   onClick={() => alert('Próximamente: Chat con inversor')}
                 >
                   <MessageSquare size={18} /> Enviar Mensaje
