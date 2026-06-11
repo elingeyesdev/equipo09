@@ -27,4 +27,5 @@ export declare class CampaignRepository {
     createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any>;
     getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]>;
     getFinancialProgress(campaignId: string): Promise<CampaignFinancialProgress | null>;
+    getDetailedInvestmentsForReport(campaignId: string): Promise<any[]>;
 }

@@ -197,8 +197,8 @@ export class InvestmentsRepository extends BaseRepository {
       // 8. Crear el registro en reward_claims si corresponde
       if (rewardTierId) {
         await client.query(
-          `INSERT INTO reward_claims (investment_id, reward_tier_id, status) VALUES ($1, $2, 'pending')`,
-          [inv.id, rewardTierId]
+          `INSERT INTO reward_claims (investment_id, status) VALUES ($1, 'pending')`,
+          [inv.id]
         );
       }
 

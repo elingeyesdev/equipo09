@@ -1,6 +1,7 @@
 import { CampaignRepository, PaginatedCampaigns } from '../repositories';
-import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto, CampaignFinancialProgress } from '../models';
+import { EntrepreneurCampaign, CreateCampaignDto, QueryCampaignsDto, CampaignFinancialProgress, AdvancedAnalyticsDto } from '../models';
 import { CreateCampaignUpdateDto } from '../dto';
+import { PassThrough } from 'stream';
 export declare class CampaignService {
     private readonly campaignRepo;
     constructor(campaignRepo: CampaignRepository);
@@ -21,4 +22,9 @@ export declare class CampaignService {
     incrementViewCount(campaignId: string): Promise<void>;
     createCampaignUpdate(campaignId: string, authorId: string, dto: CreateCampaignUpdateDto): Promise<any>;
     getRecentPublicUpdatesGroupedByCampaign(): Promise<any[]>;
+    getAdvancedAnalytics(campaignId: string): Promise<AdvancedAnalyticsDto>;
+    generateCampaignReport(campaignId: string, format: 'csv' | 'pdf'): Promise<{
+        stream: PassThrough;
+        filename: string;
+    }>;
 }

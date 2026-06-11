@@ -16,7 +16,7 @@ let CampaignsModule = class CampaignsModule {
 exports.CampaignsModule = CampaignsModule;
 exports.CampaignsModule = CampaignsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [controllers_1.EntrepreneurCampaignsController, controllers_1.PublicCampaignController],
+        controllers: [controllers_1.EntrepreneurCampaignsController, controllers_1.PublicCampaignController, controllers_1.CampaignAnalyticsController],
         providers: [services_1.CampaignService, repositories_1.CampaignRepository],
         exports: [services_1.CampaignService],
     })

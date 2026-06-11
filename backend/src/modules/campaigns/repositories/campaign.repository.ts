@@ -423,7 +423,7 @@ export class CampaignRepository {
       `SELECT
         c.id, c.title, c.slug, c.status,
         c.goal_amount, c.current_amount, c.investor_count,
-        c.currency, c.start_date, c.end_date, c.funded_at
+        c.currency, c.start_date, c.end_date, c.funded_at, c.created_at
        FROM campaigns c
        WHERE c.id = $1`,
       [campaignId],
@@ -533,6 +533,7 @@ export class CampaignRepository {
       endDate: campaign.end_date,
       daysRemaining,
       fundedAt: campaign.funded_at,
+      createdAt: campaign.created_at,
       investments: {
         total: investmentStats?.total_investments ?? 0,
         completed: investmentStats?.completed_investments ?? 0,
@@ -561,5 +562,36 @@ export class CampaignRepository {
       dailyProgress,
       fundingBreakdown,
     };
+  }
+
+  async getDetailedInvestmentsForReport(campaignId: string): Promise<any[]> {
+    const query = `
+      SELECT
+        i.id,
+        i.amount,
+        i.currency,
+        i.status,
+        i.created_at,
+        rt.title as reward_title,
+        u.email,
+        COALESCE(ip.display_name, ip.first_name || ' ' || ip.last_name) AS investor_name
+      FROM investments i
+      JOIN users u ON i.investor_id = u.id
+      LEFT JOIN investor_profiles ip ON i.investor_id = ip.user_id
+      LEFT JOIN reward_tiers rt ON i.reward_tier_id = rt.id
+      WHERE i.campaign_id = $1
+      ORDER BY i.created_at DESC
+    `;
+    const { rows } = await this.pool.query(query, [campaignId]);
+    return rows.map(row => ({
+      id: row.id,
+      amount: parseFloat(row.amount),
+      currency: row.currency,
+      status: row.status,
+      createdAt: row.created_at,
+      rewardTitle: row.reward_title || 'Aporte Directo',
+      email: row.email,
+      investorName: row.investor_name || 'Inversor Anónimo',
+    }));
   }
 }

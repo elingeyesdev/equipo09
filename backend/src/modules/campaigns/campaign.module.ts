@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CampaignService } from './services';
 import { CampaignRepository } from './repositories';
-import { EntrepreneurCampaignsController, PublicCampaignController } from './controllers';
+import { EntrepreneurCampaignsController, PublicCampaignController, CampaignAnalyticsController } from './controllers';
 
 @Module({
-  controllers: [EntrepreneurCampaignsController, PublicCampaignController],
+  controllers: [EntrepreneurCampaignsController, PublicCampaignController, CampaignAnalyticsController],
   providers: [CampaignService, CampaignRepository],
   exports: [CampaignService],
 })

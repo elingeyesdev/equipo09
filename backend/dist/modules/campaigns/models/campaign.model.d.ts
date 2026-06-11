@@ -56,6 +56,7 @@ export interface CampaignFinancialProgress {
     endDate: Date | null;
     daysRemaining: number | null;
     fundedAt: Date | null;
+    createdAt?: Date | null;
     investments: {
         total: number;
         completed: number;
@@ -119,4 +120,26 @@ export interface QueryPublicCampaignsDto {
     q?: string;
     sortBy?: 'created_at' | 'current_amount' | 'goal_amount' | 'end_date';
     sortOrder?: 'ASC' | 'DESC';
+}
+export interface AdvancedAnalyticsDto {
+    campaignId: string;
+    title: string;
+    goalAmount: number;
+    currentAmount: number;
+    grossAmount: number;
+    platformFeePercentage: number;
+    platformFee: number;
+    netAmount: number;
+    daysElapsed: number;
+    dailyRate: number;
+    projectedRemainingDays: number | null;
+    dailyProgress: {
+        date: string;
+        accumulatedAmount: number;
+    }[];
+    fundingBreakdown: {
+        rewardTierId: string | null;
+        rewardTitle: string;
+        totalAmount: number;
+    }[];
 }
