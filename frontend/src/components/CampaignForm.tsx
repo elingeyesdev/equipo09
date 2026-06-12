@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -221,12 +221,12 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     }
   };
 
-  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 font-medium";
+  const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 placeholder:text-gray-400 font-medium";
   const labelClass = "text-[12px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
   const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
 
   return (
-    <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-emerald-900/5 border border-emerald-50 animate-in fade-in zoom-in-95 duration-500 font-['Plus Jakarta Sans',sans-serif]">
+    <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-gray-900/5 border border-green-50 animate-in fade-in zoom-in-95 duration-500 font-['Plus Jakarta Sans',sans-serif]">
       <div className="mb-10">
         <h2 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-2 leading-none">
           {initialData ? 'Actualizar campaña' : 'Lanzar nueva campaña'}
@@ -272,7 +272,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                 <div className="text-sm text-slate-500">Cargando categorías...</div>
               ) : (
                 categories.map(c => (
-                  <label key={c.id} className="cursor-pointer flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2 hover:bg-emerald-50 hover:border-emerald-200 transition-colors">
+                  <label key={c.id} className="cursor-pointer flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2 hover:bg-green-50 hover:border-emerald-200 transition-colors">
                     <input
                       type="checkbox"
                       value={c.id}
@@ -390,7 +390,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <div className="flex flex-col md:col-span-3">
             <label className={`${labelClass} flex items-center gap-2`}>Imagen de Portada <InfoHint text="Sube una imagen horizontal de buena calidad (JPG/PNG)." /></label>
             <div 
-              className={`relative h-[200px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${coverPreview ? 'border-[#2e7d32] bg-emerald-50/10' : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30'}`}
+              className={`relative h-[200px] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden cursor-pointer ${coverPreview ? 'border-[#72B626] bg-green-50/10' : 'border-gray-200 hover:border-emerald-300 hover:bg-green-50/30'}`}
               onClick={() => document.getElementById('cover-upload')?.click()}
             >
               {coverPreview ? (
@@ -441,7 +441,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
         </div>
 
-        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
+        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-green-50">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
               <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
@@ -455,7 +455,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             <button
               type="button"
               onClick={() => setShowRewardForm(true)}
-              className="bg-white hover:bg-emerald-50 text-[#2e7d32] font-black px-6 py-2.5 rounded-xl border border-emerald-100 shadow-sm transition-all active:scale-95 flex items-center gap-2 text-[13px]"
+              className="bg-white hover:bg-green-50 text-[#72B626] font-black px-6 py-2.5 rounded-xl border border-green-100 shadow-sm transition-all active:scale-95 flex items-center gap-2 text-[13px]"
             >
               <Plus size={16} strokeWidth={3} />
               Agregar Nivel
@@ -475,7 +475,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                       <h4 className="font-black text-[#1c2b1e] text-[15px] mb-1">{r.title}</h4>
                       <p className="text-[12px] text-slate-500 font-medium mb-3 line-clamp-1">{r.description}</p>
                       <div className="flex gap-4">
-                        <div className="text-[11px] font-black text-[#2e7d32] bg-emerald-50 px-2 py-1 rounded-md uppercase">
+                        <div className="text-[11px] font-black text-[#72B626] bg-green-50 px-2 py-1 rounded-md uppercase">
                           {r.minPercentage}% - {r.maxPercentage}%
                         </div>
                       </div>
@@ -508,8 +508,8 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
               <div className="fixed inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                 <div className="bg-white rounded-[32px] w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-300">
                   <h4 className="text-xl font-black text-[#1c2b1e] mb-6 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                      {editingRewardIndex !== null ? <Edit2 size={20} className="text-[#2e7d32]" /> : <Plus size={20} className="text-[#2e7d32]" />}
+                    <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                      {editingRewardIndex !== null ? <Edit2 size={20} className="text-[#72B626]" /> : <Plus size={20} className="text-[#72B626]" />}
                     </div>
                     {editingRewardIndex !== null ? 'Editar Nivel' : 'Nuevo Nivel'}
                   </h4>
@@ -584,7 +584,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                     <button
                       type="button"
                       onClick={addReward}
-                      className="flex-1 px-6 py-3 rounded-xl bg-[#2e7d32] text-white font-black text-[14px] active:scale-95 transition-all"
+                      className="flex-1 px-6 py-3 rounded-xl bg-[#72B626] text-white font-black text-[14px] active:scale-95 transition-all"
                     >
                       {editingRewardIndex !== null ? 'Guardar Cambios' : 'Agregar'}
                     </button>
@@ -595,10 +595,10 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
         {/* Documents Section */}
-        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-emerald-50">
+        <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-green-50">
           <div className="mb-6">
             <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
-              <AlertCircle size={20} className="text-[#2e7d32]" />
+              <AlertCircle size={20} className="text-[#72B626]" />
               Documentación de Respaldo
             </h3>
             <p className="text-[13px] text-slate-500 font-medium">
@@ -655,7 +655,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-emerald-50">
+        <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-green-50">
           <button
             type="button"
             className="w-full md:w-auto bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-[#c62828] font-bold px-8 py-3.5 rounded-xl transition-all border-none active:scale-95 cursor-pointer text-[14px] flex items-center justify-center gap-2"
@@ -668,7 +668,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <button
             type="submit"
             disabled={saving}
-            className="w-full md:w-auto bg-[#2e7d32] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full md:w-auto bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-green-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>

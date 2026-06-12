@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
@@ -9,7 +9,7 @@ interface Message {
 
 const WELCOME_MSG: Message = {
   role: 'assistant',
-  content: '¡Hola! Soy el asistente de UniFundMe 👋 ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre campañas, DonaTok, inversiones y más.',
+  content: '¡Hola! Soy el asistente de Unifundme 👋 ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre campañas, DonaTok, inversiones y más.',
 };
 
 export function AISupportChat() {
@@ -64,15 +64,15 @@ export function AISupportChat() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-['Sora',sans-serif] flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Chat window */}
       {open && (
         <div
-          className="w-[360px] max-w-[calc(100vw-48px)] rounded-[24px] shadow-2xl overflow-hidden flex flex-col"
+          className="w-[360px] max-w-[calc(100vw-48px)] rounded-2xl shadow-lg overflow-hidden flex flex-col"
           style={{
             background: 'white',
-            border: '1px solid rgba(46,125,50,0.12)',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(46,125,50,0.08)',
+            border: '1px solid rgba(114,182,38,0.15)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
             height: '500px',
             maxHeight: 'calc(100vh - 120px)',
           }}
@@ -80,7 +80,7 @@ export function AISupportChat() {
           {/* Header */}
           <div
             className="px-5 py-4 flex items-center justify-between flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
+            style={{ background: '#1c2b1e' }}
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
@@ -111,8 +111,8 @@ export function AISupportChat() {
                   className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5"
                   style={{
                     background: msg.role === 'assistant'
-                      ? 'linear-gradient(135deg, #1c2b1e, #72B626)'
-                      : 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
+                      ? '#1c2b1e'
+                      : '#e0e7ff',
                   }}
                 >
                   {msg.role === 'assistant'
@@ -129,7 +129,7 @@ export function AISupportChat() {
                     color: '#1c2b1e',
                     borderBottomLeftRadius: 4,
                   } : {
-                    background: 'linear-gradient(135deg, #72B626, #00897b)',
+                    background: '#72B626',
                     color: 'white',
                     borderBottomRightRadius: 4,
                   }}
@@ -143,7 +143,7 @@ export function AISupportChat() {
               <div className="flex gap-2.5">
                 <div
                   className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
+                  style={{ background: '#1c2b1e' }}
                 >
                   <Bot size={13} className="text-white" strokeWidth={2.5} />
                 </div>
@@ -177,7 +177,7 @@ export function AISupportChat() {
                 className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 border-none cursor-pointer flex-shrink-0"
                 style={{
                   background: input.trim() && !loading
-                    ? 'linear-gradient(135deg, #72B626, #00897b)'
+                    ? '#72B626'
                     : '#e5e7eb',
                 }}
               >
@@ -188,7 +188,7 @@ export function AISupportChat() {
               </button>
             </div>
             <p className="text-[10px] text-slate-300 text-center mt-2 font-medium">
-              Impulsado por DeepSeek AI · UniFundMe
+              Impulsado por DeepSeek AI · Unifundme
             </p>
           </div>
         </div>
@@ -197,8 +197,8 @@ export function AISupportChat() {
       {/* Toggle button */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-105 active:scale-95 border-none cursor-pointer relative"
-        style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)', boxShadow: '0 8px 32px rgba(46,125,50,0.45)' }}
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95 border-none cursor-pointer relative"
+        style={{ background: '#72B626' }}
         title="Soporte IA"
       >
         {open

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { X, Check, Eye } from 'lucide-react';
 
 interface KYCReviewModalProps {

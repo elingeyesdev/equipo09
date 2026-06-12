@@ -1,4 +1,4 @@
-import { Navbar } from '../components/Navbar';
+﻿import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { AddCapitalModal } from '../components/AddCapitalModal';
 
@@ -58,8 +58,8 @@ export function InvestorDashboardPage() {
       <div className="bg-white border-b border-gray-200 pt-10 pb-28 px-6">
         <div className="max-w-[1100px] mx-auto">
           <div className="flex items-center gap-4 mb-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#E6F9F0' }}>
-              <LayoutDashboard size={22} strokeWidth={2} style={{ color: '#02A95C' }} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#f5fce8' }}>
+              <LayoutDashboard size={22} strokeWidth={2} style={{ color: '#72B626' }} />
             </div>
             <h1 className="text-[32px] font-bold text-gray-900 tracking-tight">
               Panel de Inversor
@@ -74,7 +74,7 @@ export function InvestorDashboardPage() {
       <main className="max-w-[1100px] mx-auto px-6 -mt-20 relative z-20" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         {loading && (
           <div className="py-20 flex flex-col items-center justify-center gap-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <div className="w-10 h-10 border-3 border-gray-200 border-t-[#02A95C] rounded-full animate-spin" />
+            <div className="w-10 h-10 border-3 border-gray-200 border-t-[#72B626] rounded-full animate-spin" />
             <span className="text-[13px] text-gray-400">Cargando tu panel...</span>
           </div>
         )}
@@ -82,14 +82,14 @@ export function InvestorDashboardPage() {
         {error && (
           <div className="bg-white/90 backdrop-blur-xl rounded-[32px] p-12 text-center shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-white animate-in fade-in zoom-in-95 duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-            <div className="text-[#2e7d32] mb-6 flex justify-center relative z-10">
+            <div className="text-[#72B626] mb-6 flex justify-center relative z-10">
                <Gem size={64} strokeWidth={1.5} />
             </div>
             <h2 className="text-3xl font-black text-[#1c2b1e] tracking-tight mb-4 leading-none relative z-10">Bienvenido a CrowdFunding</h2>
             <p className="text-[16px] text-slate-500 font-medium leading-relaxed max-w-md mx-auto mb-10 relative z-10">
               Parece que aún no tienes configurado tu perfil de inversor. Complétalo para empezar a invertir y monitorear tu capital con solidez financiera.
             </p>
-            <Link to="/profile" className="inline-flex items-center justify-center bg-gradient-to-r from-[#2e7d32] to-[#1c2b1e] hover:from-[#1c2b1e] hover:to-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-[0_8px_20px_rgba(46,125,50,0.3)] no-underline cursor-pointer gap-3 relative z-10">
+            <Link to="/profile" className="inline-flex items-center justify-center bg-gradient-to-r from-[#72B626] to-[#1c2b1e] hover:from-[#1c2b1e] hover:to-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-[0_8px_20px_rgba(46,125,50,0.3)] no-underline cursor-pointer gap-3 relative z-10">
               Completar Perfil Corporativo 
               <ArrowRight size={20} strokeWidth={2.5} />
             </Link>
@@ -106,8 +106,8 @@ export function InvestorDashboardPage() {
             <div className="flex flex-col gap-8">
               <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-4">
                  <div className="flex items-center gap-3">
-                   <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#E6F9F0' }}>
-                     <TrendingUp size={18} strokeWidth={2} style={{ color: '#02A95C' }} />
+                   <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#f5fce8' }}>
+                     <TrendingUp size={18} strokeWidth={2} style={{ color: '#72B626' }} />
                    </div>
                    <h2 className="text-[18px] font-bold text-gray-900">Operaciones Recientes</h2>
                  </div>
@@ -122,7 +122,7 @@ export function InvestorDashboardPage() {
                                ? 'bg-white text-gray-900 shadow-sm' 
                                : 'bg-transparent text-gray-500 hover:text-gray-700'
                            }`}
-                           style={{ fontFamily: "'Inter', sans-serif" }}
+                           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                          >
                            {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : type === 'equity' ? 'Equity' : 'Recompensa'}
                          </button>
@@ -131,7 +131,7 @@ export function InvestorDashboardPage() {
                    <select 
                      value={sortType} 
                      onChange={(e) => setSortType(e.target.value)}
-                     className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-[13px] font-medium shadow-sm outline-none cursor-pointer hover:border-[#02A95C] transition-colors appearance-none w-full sm:w-auto"
+                     className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-[13px] font-medium shadow-sm outline-none cursor-pointer hover:border-[#72B626] transition-colors appearance-none w-full sm:w-auto"
                    >
                      <option value="newest">Más recientes</option>
                      <option value="oldest">Más antiguas</option>
@@ -144,17 +144,17 @@ export function InvestorDashboardPage() {
               
               {loadingInvestments ? (
                 <div className="py-10 text-center text-slate-400 font-bold text-[13px] uppercase tracking-widest flex flex-col items-center gap-4">
-                  <div className="w-8 h-8 border-4 border-slate-100 border-t-[#2e7d32] rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-slate-100 border-t-[#72B626] rounded-full animate-spin" />
                   Cargando operaciones...
                 </div>
               ) : filteredInvestments.length === 0 ? (
                 <div className="bg-white rounded-[32px] border border-dashed border-emerald-200 p-20 text-center shadow-sm">
-                  <div className="text-emerald-100 mb-6 flex justify-center">
+                  <div className="text-green-100 mb-6 flex justify-center">
                      <TrendingUp size={64} strokeWidth={1} />
                   </div>
                   <h3 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-3">Sin Actividad Pendiente</h3>
                   <p className="text-[14px] text-slate-400 font-medium max-w-xs mx-auto">No hay operaciones que coincidan con tu búsqueda. Explora nuestras campañas activas.</p>
-                  <Link to="/explore" className="inline-block mt-8 bg-emerald-50 hover:bg-[#2e7d32] hover:text-white text-[#2e7d32] font-black px-8 py-3 rounded-xl transition-all border-none active:scale-95 cursor-pointer no-underline shadow-sm">
+                  <Link to="/explore" className="inline-block mt-8 bg-green-50 hover:bg-[#72B626] hover:text-white text-[#72B626] font-black px-8 py-3 rounded-xl transition-all border-none active:scale-95 cursor-pointer no-underline shadow-sm">
                     Explorar Campañas
                   </Link>
                 </div>
@@ -166,7 +166,7 @@ export function InvestorDashboardPage() {
                         {getImageUrl(inv.campaignCoverImage) ? (
                           <img src={getImageUrl(inv.campaignCoverImage)} alt={inv.campaignTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32]" />
+                          <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626]" />
                         )}
                         <div className="absolute top-3 left-3">
                            <span className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest">
@@ -177,7 +177,7 @@ export function InvestorDashboardPage() {
                       
                       <div className="flex-1 min-w-0 w-full py-2">
                         <div className="flex items-center gap-3 mb-3">
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${inv.investmentStatus === 'completed' ? 'bg-emerald-100 text-[#2e7d32]' : 'bg-slate-100 text-slate-500'}`}>
+                          <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${inv.investmentStatus === 'completed' ? 'bg-green-100 text-[#72B626]' : 'bg-slate-100 text-slate-500'}`}>
                             {inv.investmentStatus === 'completed' ? 'Completado' : inv.investmentStatus}
                           </span>
                           <span className="text-[12px] font-bold text-slate-400 flex items-center gap-1.5">
@@ -185,7 +185,7 @@ export function InvestorDashboardPage() {
                             {new Date(inv.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <h3 className="text-[22px] font-black text-[#1c2b1e] tracking-tight mb-2 truncate group-hover:text-[#2e7d32] transition-colors">
+                        <h3 className="text-[22px] font-black text-[#1c2b1e] tracking-tight mb-2 truncate group-hover:text-[#72B626] transition-colors">
                           {inv.campaignTitle}
                         </h3>
                         {inv.rewardTitle && (
@@ -206,7 +206,7 @@ export function InvestorDashboardPage() {
                             <button
                               onClick={() => handleDownloadReceipt(inv.id)}
                               disabled={downloadingId === inv.id}
-                              className="text-[12px] font-black text-white bg-[#2e7d32] hover:bg-[#1c2b1e] px-4 py-2.5 rounded-xl border-none cursor-pointer inline-flex items-center gap-2 transition-all shadow-md shadow-emerald-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-[12px] font-black text-white bg-[#72B626] hover:bg-[#1c2b1e] px-4 py-2.5 rounded-xl border-none cursor-pointer inline-flex items-center gap-2 transition-all shadow-md shadow-gray-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {downloadingId === inv.id ? (
                                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -216,7 +216,7 @@ export function InvestorDashboardPage() {
                               Descargar Recibo
                             </button>
                           )}
-                          <Link to={`/campaign/${inv.campaignId}`} className="text-[13px] font-black text-slate-500 hover:text-[#2e7d32] border-none bg-transparent cursor-pointer inline-flex items-center gap-1 px-2 py-2 transition-colors no-underline">
+                          <Link to={`/campaign/${inv.campaignId}`} className="text-[13px] font-black text-slate-500 hover:text-[#72B626] border-none bg-transparent cursor-pointer inline-flex items-center gap-1 px-2 py-2 transition-colors no-underline">
                             Ver Campaña <ArrowRight size={14} />
                           </Link>
                         </div>

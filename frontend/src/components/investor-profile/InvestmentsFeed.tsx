@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
 import { getMyInvestments } from '../../api/investor.api';
@@ -81,7 +81,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
           <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 bg-[#f0f9e0] rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
-              <div className="w-10 h-10 bg-[#f0f9e0] text-[#00897b] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <BarChart3 size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversiones</span>

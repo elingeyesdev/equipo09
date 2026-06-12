@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+﻿import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -161,7 +161,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── INFORMACIÓN FISCAL ───────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-gray-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#72B626] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <Scale size={16} strokeWidth={2.5} />
            </span>
            Documentación de Capital
@@ -273,7 +273,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       {/* ── SECTORES DE INTERÉS ──────────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
-           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#00897b] flex items-center justify-center text-sm shadow-sm border border-gray-100">
+           <span className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#72B626] flex items-center justify-center text-sm shadow-sm border border-gray-100">
              <Target size={16} strokeWidth={2.5} />
            </span>
            Sectores de Interés Técnico

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 /* 
    Plus Jakarta Sans — Design System
@@ -7,10 +7,10 @@
 
 :root {
   /* Core brand palette — brighter, friendlier green */
-  --primary:        #02A95C;
-  --primary-dark:   #017A42;
-  --primary-light:  #E6F9F0;
-  --primary-mid:    #00875A;
+  --primary:        #72B626;
+  --primary-dark:   #4a7f1a;
+  --primary-light:  #f5fce8;
+  --primary-mid:    #4a7f1a;
 
   /* Neutrals */
   --text-heading:   #111827;

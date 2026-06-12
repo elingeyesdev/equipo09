@@ -1,4 +1,4 @@
-import { CampaignCard } from './CampaignCard';
+﻿import { CampaignCard } from './CampaignCard';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { 
   FolderOpen, 

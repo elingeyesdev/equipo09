@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utilidad premium para compartir una campaña de crowdfunding.
  * Usa navigator.share en dispositivos móviles o copia el enlace con fallback premium.
  */

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
@@ -40,7 +40,7 @@ import { shareCampaignUrl } from '../utils/share.utils';
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
   reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#2e7d32' },
+  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
 };
 
 /* ───────────────────────────────────────────────── */
@@ -91,7 +91,7 @@ function DetailSkeleton() {
 
           {/* Sidebar skeleton */}
           <div className="w-full lg:w-[380px] shrink-0">
-            <div className="bg-white rounded-[28px] p-8 space-y-6 shadow-sm border border-emerald-50">
+            <div className="bg-white rounded-[28px] p-8 space-y-6 shadow-sm border border-green-50">
               <div className="h-8 bg-slate-200 rounded-full w-[60%]" />
               <div className="h-3 bg-slate-100 rounded-full w-full" />
               <div className="h-4 bg-slate-200 rounded-full w-[40%]" />
@@ -212,7 +212,7 @@ export function CampaignDetailPage() {
               </button>
               <button
                 onClick={retry}
-                className="px-6 py-3 rounded-xl bg-[#2e7d32] text-white font-black text-[13px] uppercase tracking-widest hover:bg-[#256b29] transition-all active:scale-95 cursor-pointer border-none flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-[#72B626] text-white font-black text-[13px] uppercase tracking-widest hover:bg-[#256b29] transition-all active:scale-95 cursor-pointer border-none flex items-center gap-2"
               >
                 <RefreshCw size={14} strokeWidth={3} />
                 Reintentar
@@ -251,7 +251,7 @@ export function CampaignDetailPage() {
         <div className="flex justify-between items-center mb-8">
           <button
             onClick={handleGoBack}
-            className="flex items-center gap-2 text-slate-500 hover:text-[#2e7d32] font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-none group"
+            className="flex items-center gap-2 text-slate-500 hover:text-[#72B626] font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-none group"
           >
             <ArrowLeft size={18} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform" />
             Regresar al Portal
@@ -260,7 +260,7 @@ export function CampaignDetailPage() {
           <button
             type="button"
             onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
-            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-emerald-500 hover:text-[#2e7d32] text-slate-500 px-4 py-2.5 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
+            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-green-500 hover:text-[#72B626] text-slate-500 px-4 py-2.5 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
           >
             <Share2 size={15} strokeWidth={2.5} />
             Compartir Campaña
@@ -276,7 +276,7 @@ export function CampaignDetailPage() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#1c2b1e] via-[#2e7d32] to-[#1c2b1e] flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-[#1c2b1e] via-[#72B626] to-[#1c2b1e] flex items-center justify-center">
               <Rocket size={80} strokeWidth={0.8} className="text-white/10" />
             </div>
           )}
@@ -306,8 +306,8 @@ export function CampaignDetailPage() {
               style={{
                 background: showPitch
                   ? 'rgba(255,255,255,0.95)'
-                  : 'linear-gradient(135deg, #2e7d32, #00897b)',
-                color: showPitch ? '#2e7d32' : '#fff',
+                  : 'linear-gradient(135deg, #72B626, #72B626)',
+                color: showPitch ? '#72B626' : '#fff',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
                 backdropFilter: 'blur(8px)',
               }}
@@ -324,7 +324,7 @@ export function CampaignDetailPage() {
                 width: `${visualProgress}%`,
                 background: exactProgress >= 100
                   ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-                  : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
+                  : 'linear-gradient(90deg, #a8d97c, #72B626)',
               }}
             />
           </div>
@@ -366,7 +366,7 @@ export function CampaignDetailPage() {
 
             {/* Entrepreneur mini banner */}
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-[12px] font-black overflow-hidden shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-[12px] font-black overflow-hidden shrink-0">
                 {getImageUrl(campaign.entrepreneurAvatar) ? (
                   <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -376,7 +376,7 @@ export function CampaignDetailPage() {
               <div>
                 <p className="text-[13px] font-bold text-slate-600">
                   por{' '}
-                  <span className="text-[#2e7d32]">
+                  <span className="text-[#72B626]">
                     {campaign.entrepreneurDisplayName
                       ? `@${campaign.entrepreneurDisplayName}`
                       : campaign.entrepreneurName}
@@ -386,10 +386,10 @@ export function CampaignDetailPage() {
             </div>
 
             {/* Description — Campaign Story */}
-            <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+            <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
               <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Target size={20} strokeWidth={2.5} className="text-[#2e7d32]" />
+                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Target size={20} strokeWidth={2.5} className="text-[#72B626]" />
                 </div>
                 Historia del Proyecto
               </h2>
@@ -400,7 +400,7 @@ export function CampaignDetailPage() {
 
             {/* ── Módulo de progreso de metas económicas ── */}
             {finance && (
-              <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+              <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
                 <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
                     <TrendingUp size={20} strokeWidth={2.5} className="text-indigo-600" />
@@ -439,7 +439,7 @@ export function CampaignDetailPage() {
 
             {/* ── Donation: free amount input ── */}
             {campaign.campaignType === 'donation' && (
-              <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10 mb-8">
+              <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
                 <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
                     <Heart size={20} strokeWidth={2.5} className="text-pink-500" />
@@ -465,7 +465,7 @@ export function CampaignDetailPage() {
                       }}
                       placeholder={`Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
                       disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
-                      className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 text-[18px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium disabled:opacity-50"
+                      className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 text-[18px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -473,17 +473,17 @@ export function CampaignDetailPage() {
             )}
 
             {/* Entrepreneur Bio Section */}
-            <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-8 md:p-10">
+            <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10">
               <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <User size={20} strokeWidth={2.5} className="text-[#2e7d32]" />
+                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <User size={20} strokeWidth={2.5} className="text-[#72B626]" />
                 </div>
                 Sobre el Emprendedor
               </h2>
 
               <div className="flex items-start gap-5">
                 {/* Avatar */}
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#2e7d32] flex items-center justify-center text-white text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-emerald-500/10">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-green-500/10">
                   {getImageUrl(campaign.entrepreneurAvatar) ? (
                     <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -496,7 +496,7 @@ export function CampaignDetailPage() {
                     {campaign.entrepreneurName}
                   </h3>
                   {campaign.entrepreneurDisplayName && (
-                    <p className="text-[13px] text-[#2e7d32] font-bold mb-4">
+                    <p className="text-[13px] text-[#72B626] font-bold mb-4">
                       @{campaign.entrepreneurDisplayName}
                     </p>
                   )}
@@ -524,7 +524,7 @@ export function CampaignDetailPage() {
                           console.error('Error al iniciar conversación:', err);
                         }
                       }}
-                      className="mt-5 flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] font-black text-[13px] uppercase tracking-wider border-none transition-all active:scale-95 cursor-pointer shadow-sm"
+                      className="mt-5 flex items-center gap-2 px-5 py-3 rounded-xl bg-green-50 hover:bg-green-100 text-[#72B626] font-black text-[13px] uppercase tracking-wider border-none transition-all active:scale-95 cursor-pointer shadow-sm"
                     >
                       <MessageCircle size={16} strokeWidth={2.5} />
                       Contactar Emprendedor
@@ -540,7 +540,7 @@ export function CampaignDetailPage() {
             <div className="lg:sticky lg:top-8 space-y-6">
 
               {/* Investment Card */}
-              <div className="bg-white rounded-[28px] shadow-lg shadow-emerald-500/5 border border-emerald-50 p-8">
+              <div className="bg-white rounded-[28px] shadow-lg shadow-green-500/5 border border-green-50 p-8">
                 {/* Raised Amount */}
                 <div className="mb-6">
                   <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">
@@ -562,7 +562,7 @@ export function CampaignDetailPage() {
                     trackClassName="shadow-inner"
                   />
                   <div className="flex justify-between mt-2">
-                    <span className="text-[13px] font-black text-[#2e7d32]">
+                    <span className="text-[13px] font-black text-[#72B626]">
                       {exactProgress}%
                     </span>
                     <span className="text-[13px] font-bold text-slate-400">
@@ -574,14 +574,14 @@ export function CampaignDetailPage() {
                 {/* Stats grid */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-[#f4f7f4] rounded-2xl p-4 text-center">
-                    <Users size={20} strokeWidth={2} className="text-[#2e7d32] mx-auto mb-2" />
+                    <Users size={20} strokeWidth={2} className="text-[#72B626] mx-auto mb-2" />
                     <p className="text-xl font-black text-[#1c2b1e]">{campaign.investorCount}</p>
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                       Inversores
                     </p>
                   </div>
                   <div className="bg-[#f4f7f4] rounded-2xl p-4 text-center">
-                    <Calendar size={20} strokeWidth={2} className="text-[#2e7d32] mx-auto mb-2" />
+                    <Calendar size={20} strokeWidth={2} className="text-[#72B626] mx-auto mb-2" />
                     <p className="text-xl font-black text-[#1c2b1e]">
                       {daysRemaining !== null
                         ? daysRemaining > 0 ? daysRemaining : 0
@@ -664,11 +664,11 @@ export function CampaignDetailPage() {
                         }}
                         placeholder={campaign.campaignType === 'reward' ? 'Selecciona una recompensa' : `Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
                         disabled={investmentLoading || campaign.campaignType === 'reward'}
-                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#2e7d32] focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
+                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
                       />
                     </div>
                     {selectedTierId && (
-                      <p className="text-[11px] text-[#2e7d32] font-bold mt-2 flex items-center gap-1">
+                      <p className="text-[11px] text-[#72B626] font-bold mt-2 flex items-center gap-1">
                         <Gem size={11} strokeWidth={2.5} />
                         Recompensa: {campaign.rewardTiers?.find(t => t.id === selectedTierId)?.title}
                       </p>
@@ -686,7 +686,7 @@ export function CampaignDetailPage() {
 
                 {/* ── Success Message ── */}
                 {investmentSuccess && (
-                  <div className="bg-emerald-50 text-[#2e7d32] p-4 rounded-xl text-[13px] font-bold border border-emerald-100 mb-4 flex items-center gap-2">
+                  <div className="bg-green-50 text-[#72B626] p-4 rounded-xl text-[13px] font-bold border border-green-100 mb-4 flex items-center gap-2">
                     <CheckCircle2 size={18} strokeWidth={2.5} />
                     ¡Inversión realizada exitosamente!
                   </div>
@@ -758,7 +758,7 @@ export function CampaignDetailPage() {
                         onClick={() => navigate('/dashboard')}
                         className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97]"
                         style={{
-                          background: 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
+                          background: 'linear-gradient(135deg, #72B626, #1c2b1e)',
                           color: '#fff',
                           boxShadow: '0 8px 24px rgba(46,125,50,0.3)',
                         }}
@@ -775,7 +775,7 @@ export function CampaignDetailPage() {
                           onClick={() => navigate('/login', { state: { from: location.pathname } })}
                           className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] flex items-center justify-center gap-2"
                           style={{
-                            background: 'linear-gradient(135deg, #2e7d32, #1c2b1e)',
+                            background: 'linear-gradient(135deg, #72B626, #1c2b1e)',
                             color: '#fff',
                             boxShadow: '0 8px 24px rgba(46,125,50,0.3)',
                           }}
@@ -798,7 +798,7 @@ export function CampaignDetailPage() {
                         className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         style={{
                           background: canInvest
-                            ? 'linear-gradient(135deg, #2e7d32, #1c2b1e)'
+                            ? 'linear-gradient(135deg, #72B626, #1c2b1e)'
                             : '#94a3b8',
                           color: '#fff',
                           boxShadow: canInvest
@@ -838,13 +838,13 @@ export function CampaignDetailPage() {
               </div>
 
               {/* Campaign status card */}
-              <div className="bg-white rounded-[28px] shadow-sm border border-emerald-50 p-6">
+              <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-6">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full animate-pulse"
                     style={{
                       backgroundColor:
-                        campaign.status === 'published' ? '#2e7d32'
+                        campaign.status === 'published' ? '#72B626'
                           : campaign.status === 'funded' ? '#f9a825'
                           : '#64748b',
                     }}
@@ -866,8 +866,8 @@ export function CampaignDetailPage() {
       {relatedCampaigns.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-6 pb-16">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Sparkles size={20} strokeWidth={2.5} className="text-[#2e7d32]" />
+            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+              <Sparkles size={20} strokeWidth={2.5} className="text-[#72B626]" />
             </div>
             <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight">
               También te puede interesar
@@ -890,10 +890,10 @@ export function CampaignDetailPage() {
                 <div
                   key={rc.id}
                   onClick={() => navigate(`/campaign/${rc.id}`)}
-                  className="bg-white rounded-[22px] shadow-sm border border-emerald-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+                  className="bg-white rounded-[22px] shadow-sm border border-green-50 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
                 >
                   {/* Cover */}
-                  <div className="relative h-40 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
+                  <div className="relative h-40 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] overflow-hidden">
                     {rcCover ? (
                       <img src={rcCover} alt={rc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
@@ -923,7 +923,7 @@ export function CampaignDetailPage() {
 
                   {/* Info */}
                   <div className="p-5 flex-1 flex flex-col gap-2">
-                    <h4 className="text-[14px] font-black text-[#1c2b1e] leading-tight line-clamp-2 group-hover:text-[#2e7d32] transition-colors">
+                    <h4 className="text-[14px] font-black text-[#1c2b1e] leading-tight line-clamp-2 group-hover:text-[#72B626] transition-colors">
                       {rc.title}
                     </h4>
                     <p className="text-[12px] text-slate-400 font-bold">
@@ -932,8 +932,8 @@ export function CampaignDetailPage() {
 
                     <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-50">
                       <div className="flex items-center gap-1.5">
-                        <Target size={12} strokeWidth={2.5} className="text-[#2e7d32]" />
-                        <span className="text-[12px] font-black text-[#2e7d32]">{rcProgress}%</span>
+                        <Target size={12} strokeWidth={2.5} className="text-[#72B626]" />
+                        <span className="text-[12px] font-black text-[#72B626]">{rcProgress}%</span>
                       </div>
                       <span className="text-[11px] font-bold text-slate-400">
                         ${rc.currentAmount.toLocaleString()} / ${rc.goalAmount.toLocaleString()}

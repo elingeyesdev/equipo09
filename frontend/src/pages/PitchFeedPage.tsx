@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
@@ -9,6 +9,8 @@ import {
   Rocket, TrendingUp, Users, ArrowRight,
   Loader2, AlertCircle, RefreshCw, Play,
 } from 'lucide-react';
+
+const GREEN = '#72B626';
 
 /* ─────────────────────────────────────────────
    PROGRESS BAR MINI
@@ -21,9 +23,7 @@ function FundingBar({ current, goal }: { current: number; goal: number }) {
         className="h-full rounded-full transition-all duration-700"
         style={{
           width: `${pct}%`,
-          background: pct >= 100
-            ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-            : 'linear-gradient(90deg, #a5d6a7, #72B626)',
+          background: pct >= 100 ? '#f9a825' : GREEN,
         }}
       />
     </div>
@@ -68,7 +68,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(to top, rgba(10,20,12,0.95) 0%, rgba(10,20,12,0.6) 40%, transparent 70%)',
+            'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 40%, transparent 70%)',
         }}
       />
 
@@ -78,7 +78,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
         <div className="flex gap-2 mb-3">
           <span
             className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white"
-            style={{ background: 'rgba(46,125,50,0.75)', backdropFilter: 'blur(6px)' }}
+            style={{ background: 'rgba(114,182,38,0.75)', backdropFilter: 'blur(6px)' }}
           >
             {campaign.categoryName}
           </span>
@@ -106,7 +106,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
 
         {/* Entrepreneur row */}
         <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-[11px] font-black overflow-hidden shrink-0 ring-2 ring-white/20">
+          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white text-[11px] font-black overflow-hidden shrink-0 ring-2 ring-white/20">
             {getImageUrl(campaign.entrepreneurAvatar) ? (
               <img src={getImageUrl(campaign.entrepreneurAvatar)!} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -146,16 +146,15 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
         {/* CTA Button */}
         <button
           onClick={() => navigate(`/campaign/${campaign.id}`)}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-black text-[15px] uppercase tracking-wider transition-all active:scale-95 hover:brightness-110"
+          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-bold text-[15px] uppercase tracking-wider transition-all active:scale-95 hover:brightness-110 border-none cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, #72B626, #00897b)',
-            boxShadow: '0 6px 24px rgba(46,125,50,0.45)',
+            background: GREEN,
             color: '#fff',
           }}
         >
-          <Rocket size={18} strokeWidth={2.5} />
+          <Rocket size={18} strokeWidth={2} />
           Ver Campaña e Invertir
-          <ArrowRight size={18} strokeWidth={2.5} />
+          <ArrowRight size={18} strokeWidth={2} />
         </button>
       </div>
 
@@ -239,12 +238,11 @@ export function PitchFeedPage() {
   // ── Render states ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
+      <div className="min-h-screen bg-[#0e0e0e] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5">
           <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
+            className="w-20 h-20 rounded-2xl flex items-center justify-center bg-gray-900"
           >
             <Loader2 size={36} className="text-white animate-spin" />
           </div>
@@ -258,17 +256,17 @@ export function PitchFeedPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
+      <div className="min-h-screen bg-[#0e0e0e] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5 px-6 text-center">
           <AlertCircle size={48} className="text-red-400" strokeWidth={1.5} />
           <p className="text-white font-bold text-lg">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[13px] uppercase tracking-widest text-white transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #72B626, #00897b)' }}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-[13px] uppercase tracking-widest text-white transition-all active:scale-95 border-none cursor-pointer"
+            style={{ background: GREEN }}
           >
-            <RefreshCw size={15} strokeWidth={2.5} />
+            <RefreshCw size={15} strokeWidth={2} />
             Reintentar
           </button>
         </div>
@@ -278,12 +276,11 @@ export function PitchFeedPage() {
 
   if (campaigns.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a140c] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
+      <div className="min-h-screen bg-[#0e0e0e] flex flex-col font-['Plus Jakarta Sans',sans-serif]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-5 px-8 text-center">
           <div
-            className="w-24 h-24 rounded-3xl flex items-center justify-center mb-2"
-            style={{ background: 'linear-gradient(135deg, #1c2b1e, #72B626)' }}
+            className="w-24 h-24 rounded-3xl flex items-center justify-center mb-2 bg-gray-900"
           >
             <Play size={44} strokeWidth={1.2} className="text-white/60" />
           </div>
@@ -297,7 +294,7 @@ export function PitchFeedPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a140c] font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#0e0e0e] font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
       {/* Navbar */}
       <Navbar />
 
@@ -309,13 +306,11 @@ export function PitchFeedPage() {
             onClick={() => {
               cardRefs.current[i]?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="rounded-full transition-all duration-300"
+            className="rounded-full transition-all duration-300 border-none cursor-pointer"
             style={{
               width: activeIndex === i ? '8px' : '6px',
               height: activeIndex === i ? '24px' : '6px',
-              background: activeIndex === i
-                ? 'linear-gradient(180deg, #a5d6a7, #72B626)'
-                : 'rgba(255,255,255,0.25)',
+              background: activeIndex === i ? GREEN : 'rgba(255,255,255,0.25)',
             }}
             title={`Pitch ${i + 1}`}
           />

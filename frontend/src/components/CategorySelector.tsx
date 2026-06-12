@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { getCategories } from '../api/categories.api';
 import type { Category } from '../types/category.types';
 import { 

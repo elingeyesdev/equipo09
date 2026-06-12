@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import type { InvestorProfile } from '../../types/investor.types';
 import { 
   Lightbulb, 

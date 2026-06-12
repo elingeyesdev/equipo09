@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import type { RewardTier } from '../../api/public-campaigns.api';
 import {
   X,

@@ -1,4 +1,4 @@
-import type { RewardTier } from '../../api/public-campaigns.api';
+﻿import type { RewardTier } from '../../api/public-campaigns.api';
 import {
   Gem,
   Check,

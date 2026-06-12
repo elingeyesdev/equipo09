@@ -1,4 +1,4 @@
-export type AppUserRole = 'entrepreneur' | 'investor';
+﻿export type AppUserRole = 'entrepreneur' | 'investor';
 
 /** Prioriza emprendedor si tiene ambos roles (misma lógica que la barra de navegación). */
 export function primaryRoleFromServerRoles(roles: string[] | undefined | null): AppUserRole {

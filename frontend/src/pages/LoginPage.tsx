@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
-import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock, Rocket, Shield, TrendingUp } from 'lucide-react';
+
+// Brand colors
+const GREEN = '#72B626';
+const GREEN_DARK = '#4a7f1a';
+// const UNI = '#8B1938'; // available if needed
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -119,7 +124,7 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#72B626] focus:ring-3 focus:ring-[#72B626]/10"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 />
               </div>
@@ -139,7 +144,7 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-[15px] text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-[#72B626] focus:ring-3 focus:ring-[#72B626]/10"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 />
               </div>
@@ -152,7 +157,7 @@ export function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4.5 h-4.5 appearance-none border-2 border-gray-300 rounded checked:border-[#02A95C] checked:bg-[#02A95C] transition-all cursor-pointer peer"
+                  className="w-4.5 h-4.5 appearance-none border-2 border-gray-300 rounded checked:border-[#72B626] checked:bg-[#72B626] transition-all cursor-pointer peer"
                 />
                 <CheckCircle2 size={12} strokeWidth={3} className="text-white absolute left-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 transition-all" />
               </div>
@@ -167,12 +172,12 @@ export function LoginPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl text-white text-[15px] font-semibold cursor-pointer transition-all flex items-center justify-center gap-2.5 border-none mt-1"
               style={{
-                background: '#02A95C',
+                background: GREEN,
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 opacity: loading ? 0.8 : 1,
               }}
-              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#017A42'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#02A95C'; }}
+              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = GREEN_DARK; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = GREEN; }}
             >
               {loading ? (
                 <>
@@ -194,7 +199,7 @@ export function LoginPage() {
             <Link
               to="/register"
               className="text-[14px] font-semibold no-underline"
-              style={{ color: '#02A95C', textDecoration: 'none' }}
+              style={{ color: GREEN, textDecoration: 'none' }}
             >
               Crear una cuenta
             </Link>
@@ -206,13 +211,13 @@ export function LoginPage() {
       {/* ── Columna Derecha: Ilustración visual ── */}
       <div
         className="hidden lg:flex w-[55%] flex-col items-center justify-center p-16 relative overflow-hidden"
-        style={{ background: '#F0FDF8' }}
+        style={{ background: '#f7f9f7' }}
       >
         {/* Patrón de puntos sutil */}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: 'radial-gradient(circle, #02A95C22 1px, transparent 1px)',
+            backgroundImage: `radial-gradient(circle, ${GREEN}33 1px, transparent 1px)`,
             backgroundSize: '28px 28px',
           }}
         />
@@ -221,7 +226,7 @@ export function LoginPage() {
           
           {/* Headline */}
           <div className="mb-8">
-            <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#02A95C]/10 text-[#017A42] mb-4">
+            <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-white border border-gray-200 mb-4" style={{ color: GREEN_DARK }}>
               ✓ Proyectos verificados
             </span>
             <h2 className="text-[32px] font-bold text-gray-900 leading-tight mb-3">
@@ -232,45 +237,42 @@ export function LoginPage() {
             </p>
           </div>
 
-          {/* Campaign mock card */}
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-            {/* Cover */}
-            <div
-              className="h-[140px] relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #064E3B 0%, #02A95C 100%)' }}
-            >
-              <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/20 text-white backdrop-blur-sm">
-                  Energía Limpia
-                </span>
+          {/* Key pillars instead of the card */}
+          <div className="flex flex-col gap-6 my-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
+                <Rocket size={18} className="text-[#72B626]" />
               </div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <p className="text-[18px] font-bold leading-tight">EcoVolt: Tejas Solares</p>
-                <p className="text-[12px] text-white/70 mt-0.5">por Sofía Rodríguez</p>
+              <div>
+                <h4 className="text-[14px] font-bold text-gray-900">Impulsa proyectos reales</h4>
+                <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">Conéctate con startups, proyectos ecológicos y de impacto social listos para escalar.</p>
               </div>
             </div>
-
-            {/* Stats */}
-            <div className="p-4">
-              <div className="flex justify-between text-[13px] mb-2">
-                <span className="font-bold text-gray-900">$72,400 USD</span>
-                <span className="text-gray-400">de $100,000 meta</span>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
+                <Shield size={18} className="text-[#72B626]" />
               </div>
-              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
-                <div className="h-full rounded-full" style={{ width: '72%', background: '#02A95C' }} />
+              <div>
+                <h4 className="text-[14px] font-bold text-gray-900">Seguridad y Confianza</h4>
+                <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">Verificación de identidad KYC y transacciones auditadas con total transparencia.</p>
               </div>
-              <div className="flex items-center justify-between text-[12px] text-gray-500">
-                <span><span className="font-semibold text-gray-700">148</span> inversores</span>
-                <span className="text-[#02A95C] font-semibold">72% completado</span>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
+                <TrendingUp size={18} className="text-[#72B626]" />
+              </div>
+              <div>
+                <h4 className="text-[14px] font-bold text-gray-900">Retornos claros</h4>
+                <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">Accede a métricas transparentes e informes del progreso de tus inversiones.</p>
               </div>
             </div>
           </div>
 
           {/* Trust badges */}
-          <div className="flex items-center gap-4 mt-6">
+          <div className="flex items-center gap-4 mt-8 pt-6 border-t border-gray-200">
             {['Seguro', 'Transparente', 'Verificado'].map(t => (
               <div key={t} className="flex items-center gap-1.5 text-[12px] text-gray-500 font-medium">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#02A95C' }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: GREEN }} />
                 {t}
               </div>
             ))}

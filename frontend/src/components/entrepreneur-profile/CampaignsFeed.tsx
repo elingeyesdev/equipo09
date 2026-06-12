@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import type { EntrepreneurCampaign } from '../../types/campaign.types';
 import {
   Lightbulb,
@@ -215,7 +215,7 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
 
                   <div className="h-4 bg-slate-100 rounded-full overflow-hidden mb-8 shadow-inner relative">
                     <div
-                      className="h-full bg-gradient-to-r from-[#aed581] via-[#72B626] to-[#00897b] rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(46,125,50,0.3)]"
+                      className="h-full bg-gradient-to-r from-[#aed581] via-[#72B626] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(46,125,50,0.3)]"
                       style={{ width: `${calculatePercentage(campaign.currentAmount, campaign.goalAmount)}%` }}
                     ></div>
                   </div>

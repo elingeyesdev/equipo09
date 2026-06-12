@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { formatCampaignCurrency, computeFundingPercent, clampPercentForBar } from '../utils/campaignFunding';
 import {
@@ -63,7 +63,7 @@ export function CampaignCard({
 
   /* --- Banner color gradient by status --- */
   const bannerGradient =
-    campaign.status === 'published'  ? 'linear-gradient(135deg, #1c2b1e 0%, #2e7d32 60%, #00897b 100%)' :
+    campaign.status === 'published'  ? 'linear-gradient(135deg, #1c2b1e 0%, #72B626 60%, #72B626 100%)' :
     campaign.status === 'funded' || campaign.status === 'partially_funded'
                                      ? 'linear-gradient(135deg, #14532d 0%, #16a34a 60%, #10b981 100%)' :
     campaign.status === 'draft'      ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' :
@@ -71,7 +71,7 @@ export function CampaignCard({
                                      ? 'linear-gradient(135deg, #78350f 0%, #d97706 100%)' :
     campaign.status === 'rejected'   ? 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%)' :
     campaign.status === 'completed'  ? 'linear-gradient(135deg, #312e81 0%, #4f46e5 100%)' :
-                                       'linear-gradient(135deg, #1e293b 0%, #2e7d32 100%)';
+                                       'linear-gradient(135deg, #1e293b 0%, #72B626 100%)';
 
   return (
     <article
@@ -154,7 +154,7 @@ export function CampaignCard({
 
         {/* Título + descripción */}
         <div>
-          <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-1 group-hover:text-[#02A95C] transition-colors line-clamp-2">
+          <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-1 group-hover:text-[#72B626] transition-colors line-clamp-2">
             {campaign.title}
           </h3>
           <p className="text-[13px] text-gray-400 leading-relaxed line-clamp-2">
@@ -168,7 +168,7 @@ export function CampaignCard({
             <p className="text-[11px] text-slate-400 font-black uppercase tracking-wider mb-0.5 flex items-center justify-center gap-1">
               <TrendingUp size={11} /> Recaudado
             </p>
-            <p className="text-[15px] font-black text-[#2e7d32]">
+            <p className="text-[15px] font-black text-[#72B626]">
               {formatCampaignCurrency(campaign.currentAmount, campaign.currency || 'USD')}
             </p>
           </div>
@@ -196,14 +196,14 @@ export function CampaignCard({
         <div>
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-[12px] text-gray-400">Progreso</span>
-            <span className="text-[12px] font-semibold" style={{ color: '#02A95C' }}>{pct}%</span>
+            <span className="text-[12px] font-semibold" style={{ color: '#72B626' }}>{pct}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${barWidth}%`,
-                background: pct >= 100 ? '#F59E0B' : '#02A95C',
+                background: pct >= 100 ? '#F59E0B' : '#72B626',
               }}
             />
           </div>
@@ -248,7 +248,7 @@ export function CampaignCard({
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-bold text-[13px] transition-all active:scale-95 shadow-md shadow-emerald-200"
                 disabled={busy}
                 onClick={() => onPublish(campaign.id)}
-                style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)' }}
+                style={{ background: 'linear-gradient(135deg, #72B626, #72B626)' }}
               >
                 <Rocket size={15} /> {busy ? 'Publicando…' : 'Publicar Campaña'}
                 <ChevronRight size={15} />
@@ -280,7 +280,7 @@ export function CampaignCard({
             {/* Publicar Novedad */}
             {campaign.status === 'published' && onPublishUpdate && (
               <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-emerald-100 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 bg-green-50 text-emerald-800 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-green-100 cursor-pointer"
                 onClick={() => onPublishUpdate(campaign.id, campaign.title)}
               >
                 <Send size={14} /> Publicar Novedad
@@ -292,7 +292,7 @@ export function CampaignCard({
               <button
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:opacity-90 cursor-pointer"
                 onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
-                style={{ background: 'linear-gradient(135deg, #2e7d32, #00897b)' }}
+                style={{ background: 'linear-gradient(135deg, #72B626, #72B626)' }}
               >
                 <Share2 size={14} /> Compartir Campaña
               </button>
@@ -370,7 +370,7 @@ export function CampaignCard({
         className="h-[3px] w-full mt-auto"
         style={{
           background: campaign.status === 'published'
-            ? 'linear-gradient(90deg, #2e7d32, #00897b)'
+            ? 'linear-gradient(90deg, #72B626, #72B626)'
             : campaign.status === 'draft'
             ? '#e2e8f0'
             : campaign.status === 'pending_review' || campaign.status === 'in_review'

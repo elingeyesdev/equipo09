@@ -1,4 +1,4 @@
-import { formatCampaignCurrency } from '../utils/campaignFunding';
+﻿import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { Calendar, Users } from 'lucide-react';
 
 interface Props {

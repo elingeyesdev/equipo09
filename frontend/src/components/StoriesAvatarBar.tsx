@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import { getRecentStories, type CampaignStoryGroup, type StoryItem } from '../api/public-campaigns.api';
 import { getImageUrl } from '../utils/image.utils';
@@ -382,7 +382,7 @@ export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #72B626, #00897b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #72B626, #72B626)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Zap size={16} color="#fff" />
           </div>
           <div>

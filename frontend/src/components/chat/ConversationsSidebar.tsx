@@ -1,4 +1,4 @@
-import { Search, MessageCircle, Wifi, WifiOff } from 'lucide-react';
+﻿import { Search, MessageCircle, Wifi, WifiOff } from 'lucide-react';
 import type { Conversation } from '../../api/chat.api';
 import { getImageUrl } from '../../utils/image.utils';
 
@@ -34,7 +34,7 @@ function AvatarFallback({ name, className }: { name: string; className?: string 
     .toUpperCase();
   return (
     <div
-      className={`rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-bold select-none ${className}`}
+      className={`rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white font-bold select-none ${className}`}
     >
       {initials || '?'}
     </div>
@@ -83,7 +83,7 @@ export function ConversationsSidebar({
             <h2 className="text-[17px] font-black text-slate-800 tracking-tight">Mensajes</h2>
           </div>
           {connected ? (
-            <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+            <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 bg-green-50 px-2.5 py-1 rounded-full">
               <Wifi size={12} />
               En línea
             </span>
@@ -163,7 +163,7 @@ export function ConversationsSidebar({
                         className="w-11 h-11"
                       />
                       {hasUnread && (
-                        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-emerald-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1">
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-green-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1">
                           {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                         </span>
                       )}

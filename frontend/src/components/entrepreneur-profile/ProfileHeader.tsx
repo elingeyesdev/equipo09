@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
 import {
   Building2,
@@ -67,7 +67,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
         {/* Mesh Gradient / Abstract Background */}
         <div className="absolute inset-0 opacity-40">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00897b] rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
         </div>
 
         {coverUrl ? (

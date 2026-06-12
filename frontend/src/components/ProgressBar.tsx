@@ -1,4 +1,4 @@
-export type ProgressBarTone = 'low' | 'mid' | 'high' | 'complete';
+﻿export type ProgressBarTone = 'low' | 'mid' | 'high' | 'complete';
 
 export function progressToneFromPercent(clampedPercent: number): ProgressBarTone {
   if (clampedPercent >= 100) return 'complete';
@@ -29,8 +29,8 @@ export function ProgressBar({ value, tone = 'auto', className, trackClassName, m
   const toneClasses = {
     low: 'bg-gradient-to-r from-slate-300 to-slate-400',
     mid: 'bg-gradient-to-r from-[#aed581] to-[#72B626]', // Lima a Verde
-    high: 'bg-gradient-to-r from-[#72B626] to-[#00897b]', // Verde a Esmeralda
-    complete: 'bg-gradient-to-r from-[#72B626] to-[#00897b] shadow-[0_0_12px_rgba(46,125,50,0.3)]',
+    high: 'bg-gradient-to-r from-[#72B626] to-[#72B626]', // Verde a Esmeralda
+    complete: 'bg-gradient-to-r from-[#72B626] to-[#72B626] shadow-[0_0_12px_rgba(46,125,50,0.3)]',
   };
 
   return (
@@ -65,7 +65,7 @@ export function ProgressBar({ value, tone = 'auto', className, trackClassName, m
                 <div
                   className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.1)] ${
                     isReached
-                      ? 'bg-emerald-500 border-white scale-110 shadow-emerald-500/20'
+                      ? 'bg-green-500 border-white scale-110 shadow-green-500/20'
                       : 'bg-slate-300 border-white hover:bg-slate-400 hover:scale-105'
                   }`}
                 />

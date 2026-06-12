@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import type { QueryCampaignsDto, CampaignFilterPreset } from '../types/campaign.types';
 import { 
   Search, 

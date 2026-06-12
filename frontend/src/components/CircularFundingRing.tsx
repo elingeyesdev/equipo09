@@ -1,4 +1,4 @@
-import {
+﻿import {
   clampPercentForBar,
   computeFundingPercent,
   formatFundingPercent,

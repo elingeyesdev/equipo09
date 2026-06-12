@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { ConversationsSidebar } from '../components/chat/ConversationsSidebar';
@@ -198,7 +198,7 @@ export function ChatPage() {
           ) : (
             /* Pantalla vacía cuando no hay conversación seleccionada */
             <div className="flex-1 flex flex-col items-center justify-center gap-5 bg-gray-50">
-              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-gray-100">
+              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center text-green-500 shadow-sm border border-gray-100">
                 <MessageCircle size={36} strokeWidth={1.5} />
               </div>
               <div className="text-center">
@@ -209,7 +209,7 @@ export function ChatPage() {
                   Elige un chat de la lista para comenzar
                 </p>
               </div>
-              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[12px] font-medium px-5 py-2 rounded-lg">
+              <div className="bg-green-50 border border-green-100 text-emerald-700 text-[12px] font-medium px-5 py-2 rounded-lg">
                 Puedes iniciar un chat desde el detalle de cualquier campaña
               </div>
             </div>

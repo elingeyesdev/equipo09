@@ -1,4 +1,4 @@
-export type CampaignStatus =
+﻿export type CampaignStatus =
   | 'draft'
   | 'pending_review'
   | 'in_review'

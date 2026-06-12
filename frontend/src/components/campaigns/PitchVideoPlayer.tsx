@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, Play } from 'lucide-react';
 
 /* ─────────────────────────────────────────────

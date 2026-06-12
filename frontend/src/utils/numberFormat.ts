@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Formatea un número con separadores de miles (puntos como 1.000)
  * @param value - Número a formatear
  * @returns Número formateado con puntos

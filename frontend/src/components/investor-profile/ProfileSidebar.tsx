@@ -1,4 +1,4 @@
-import type { InvestorProfile } from '../../types/investor.types';
+﻿import type { InvestorProfile } from '../../types/investor.types';
 import { 
   MapPin, 
   FileText, 
@@ -61,7 +61,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         </div>
         <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
           <div 
-            className="h-full bg-gradient-to-r from-[#a5d6a7] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
+            className="h-full bg-gradient-to-r from-[#a8d97c] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
             style={{ width: `${percentage}%` }}
           ></div>
         </div>

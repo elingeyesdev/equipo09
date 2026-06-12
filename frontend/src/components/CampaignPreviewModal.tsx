@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
@@ -389,10 +389,10 @@ export function CampaignPreviewModal({
           {(campaign.status === 'published' || campaign.status === 'funded' || isAdmin) && (
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'analytics' ? 'border-[#2e7d32] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'analytics' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
-              <TrendingUp size={14} className={activeTab === 'analytics' ? 'text-emerald-500' : 'text-slate-400'} />
+              <TrendingUp size={14} className={activeTab === 'analytics' ? 'text-green-500' : 'text-slate-400'} />
               Progreso Económico
             </button>
           )}

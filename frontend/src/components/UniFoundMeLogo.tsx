@@ -1,4 +1,4 @@
-/**
+﻿/**
  * variant="color"  → logo a color completo, para fondos claros (default)
  * variant="white"  → logo invertido a blanco, para fondos oscuros
  * variant="icon"   → solo el ícono/engrane cuadrado, para espacios pequeños
@@ -24,7 +24,7 @@ export function UniFoundMeLogo({ className = '', variant = 'color' }: UniFoundMe
   return (
     <img
       src={SRC[variant]}
-      alt="UniFundMe"
+      alt="Unifundme"
       className={`block w-auto object-contain ${className}`}
       style={{ filter: variant === 'white' ? 'brightness(0) invert(1)' : undefined }}
     />

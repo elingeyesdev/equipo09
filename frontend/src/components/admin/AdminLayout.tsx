@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -163,7 +163,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {/* Footer */}
         <footer className="bg-white border-t border-[#d8dbe0] px-6 py-3 text-xs text-gray-500 flex justify-between">
           <div>
-            <span className="font-semibold text-gray-700">UniFundMe Admin</span> &copy; 2026.
+            <span className="font-semibold text-gray-700">Unifundme Admin</span> &copy; 2026.
           </div>
           <div>
             Desarrollado con <span className="text-gray-700 font-semibold">CoreUI Layout</span>

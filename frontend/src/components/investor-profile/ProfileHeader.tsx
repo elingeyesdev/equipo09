@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import type { InvestorProfile } from '../../types/investor.types';
 import { 
   MapPin, 
@@ -53,7 +53,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
       <div className="h-64 md:h-80 w-full bg-[#1c2b1e] relative overflow-hidden rounded-b-[40px] shadow-2xl flex items-center justify-center">
         <div className="absolute inset-0 opacity-40">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00897b] rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
         </div>
         
         {profile?.coverUrl ? (
@@ -142,8 +142,8 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
 
               {profile && (
                 <div className="flex items-center gap-2 text-[13px] font-medium">
-                  <TrendingUp size={14} className="text-[#00897b]" />
-                  <span className="text-[#00897b] font-bold">{profile.totalInvestments} inversiones</span>
+                  <TrendingUp size={14} className="text-[#72B626]" />
+                  <span className="text-[#72B626] font-bold">{profile.totalInvestments} inversiones</span>
                 </div>
               )}
             </div>

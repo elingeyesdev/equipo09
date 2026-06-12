@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import {
   Sparkles, X, Send, ChevronDown, Loader2,
   Lightbulb, BarChart2, Gift, Megaphone, Video, Target,
@@ -8,6 +8,8 @@ import { aiCampaignChat, type ChatMessage, type CampaignContext } from '../api/a
 interface Props {
   campaignContext?: CampaignContext;
 }
+
+const GREEN = '#72B626';
 
 const QUICK_PROMPTS = [
   { icon: <Lightbulb size={13} />, label: 'Crear campaña desde cero',   text: 'Quiero crear una nueva campaña desde cero. Guíame paso a paso: qué información necesito, qué tipo elegir y cómo estructurar mi propuesta de valor.' },
@@ -80,8 +82,8 @@ export function AICampaignAssistant({ campaignContext }: Props) {
       {/* ── Floating trigger ── */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="fixed bottom-6 left-6 z-40 w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl transition-all hover:scale-110 active:scale-95"
-        style={{ background: 'linear-gradient(135deg,#1c2b1e,#72B626)', boxShadow: '0 8px 24px rgba(114,182,38,0.45)' }}
+        className="fixed bottom-6 left-6 z-40 w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all hover:scale-110 active:scale-95 border-none cursor-pointer"
+        style={{ background: GREEN }}
         title="Asistente IA para campañas"
       >
         {open
@@ -91,16 +93,14 @@ export function AICampaignAssistant({ campaignContext }: Props) {
 
       {/* ── Panel ── */}
       {open && (
-        <div className="fixed bottom-24 left-6 z-40 w-[370px] max-w-[calc(100vw-48px)] flex flex-col rounded-[24px] overflow-hidden shadow-2xl border border-gray-100 animate-in slide-in-from-bottom-4 duration-300"
+        <div className="fixed bottom-24 left-6 z-40 w-[370px] max-w-[calc(100vw-48px)] flex flex-col rounded-2xl overflow-hidden shadow-lg border border-gray-100 animate-in slide-in-from-bottom-4 duration-300"
           style={{ maxHeight: '78vh', background: '#fff' }}>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 shrink-0"
-            style={{ background: 'linear-gradient(135deg,#1c2b1e,#2d4a22)' }}>
+          <div className="flex items-center justify-between px-5 py-4 shrink-0 bg-gray-900">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(114,182,38,0.25)' }}>
-                <Sparkles size={18} className="text-[#a5d6a7]" strokeWidth={2.5} />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10">
+                <Sparkles size={18} className="text-[#a8d97c]" strokeWidth={2.5} />
               </div>
               <div>
                 <p className="text-white font-black text-[14px] leading-none">CampaignAI</p>
@@ -123,10 +123,9 @@ export function AICampaignAssistant({ campaignContext }: Props) {
 
           {/* Campaign context badge */}
           {campaignContext?.title && (
-            <div className="mx-4 mt-3 px-3 py-2 rounded-xl flex items-center gap-2 shrink-0"
-              style={{ background: '#f0f9e0', border: '1px solid #d4f0a0' }}>
+            <div className="mx-4 mt-3 px-3 py-2 rounded-xl flex items-center gap-2 shrink-0 bg-gray-50 border border-gray-200">
               <BarChart2 size={13} className="text-[#72B626] shrink-0" strokeWidth={2.5} />
-              <p className="text-[11px] font-bold text-[#4a7f1a] truncate">
+              <p className="text-[11px] font-bold text-gray-700 truncate">
                 Contexto: <span className="font-black">{campaignContext.title}</span>
                 {campaignContext.goalAmount && ` · $${campaignContext.goalAmount.toLocaleString()}`}
               </p>
@@ -134,7 +133,7 @@ export function AICampaignAssistant({ campaignContext }: Props) {
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
+          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0" style={{ scrollbarWidth: 'thin' }}>
 
             {/* Welcome + quick prompts */}
             {showQuick && messages.length === 0 && (
@@ -151,8 +150,8 @@ export function AICampaignAssistant({ campaignContext }: Props) {
                 <div className="grid grid-cols-2 gap-2">
                   {QUICK_PROMPTS.map((q, i) => (
                     <button key={i} onClick={() => send(q.text)}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all hover:shadow-md active:scale-[0.98] cursor-pointer border-none"
-                      style={{ background: '#f0f9e0', color: '#4a7f1a' }}>
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all hover:shadow-sm active:scale-[0.98] cursor-pointer border-none"
+                      style={{ background: '#f5fce8', color: '#4a7f1a' }}>
                       <span className="shrink-0 text-[#72B626]">{q.icon}</span>
                       <span className="text-[11px] font-black leading-tight">{q.label}</span>
                     </button>
@@ -165,31 +164,25 @@ export function AICampaignAssistant({ campaignContext }: Props) {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mr-2 mt-0.5"
-                    style={{ background: 'linear-gradient(135deg,#1c2b1e,#72B626)' }}>
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mr-2 mt-0.5 bg-gray-900">
                     <Sparkles size={13} className="text-white" strokeWidth={2.5} />
                   </div>
                 )}
                 <div
                   className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed font-medium ${
                     msg.role === 'user'
-                      ? 'text-white rounded-br-sm'
-                      : 'text-[#1c2b1e] rounded-bl-sm border border-gray-100'
+                      ? 'text-white rounded-br-sm bg-gray-900'
+                      : 'text-[#1c2b1e] rounded-bl-sm border border-gray-100 bg-[#f7f9f7]'
                   }`}
-                  style={{
-                    background: msg.role === 'user'
-                      ? 'linear-gradient(135deg,#1c2b1e,#72B626)'
-                      : '#f7f9f7',
-                  }}
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
                 />
               </div>
             ))}
 
+            {/* Loading */}
             {loading && (
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#1c2b1e,#72B626)' }}>
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-gray-900">
                   <Sparkles size={13} className="text-white" strokeWidth={2.5} />
                 </div>
                 <div className="bg-[#f7f9f7] border border-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2">
@@ -217,13 +210,13 @@ export function AICampaignAssistant({ campaignContext }: Props) {
                 onClick={() => send(input)}
                 disabled={!input.trim() || loading}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-white transition-all active:scale-95 disabled:opacity-40 border-none cursor-pointer shrink-0"
-                style={{ background: 'linear-gradient(135deg,#4a7f1a,#72B626)' }}
+                style={{ background: GREEN }}
               >
                 <Send size={14} strokeWidth={2.5} />
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-medium text-center mt-2">
-              Impulsado por DeepSeek AI · UniFundMe
+              Impulsado por DeepSeek AI · Unifundme
             </p>
           </div>
         </div>

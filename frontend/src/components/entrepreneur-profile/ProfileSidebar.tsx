@@ -1,4 +1,4 @@
-import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
+﻿import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
 import { 
   MapPin, 
   FileText, 

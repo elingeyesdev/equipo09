@@ -1,27 +1,50 @@
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { User, LogOut, MessageCircle, Menu, X } from 'lucide-react';
-import { NotificationBell } from './NotificationBell';
 import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut, User, MessageCircle } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 import { getMyConversations } from '../api/chat.api';
 
-export function Navbar() {
+interface NavbarProps {
+  socket?: any;
+}
+
+
+export function Navbar({ socket }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const userRole = localStorage.getItem('userRole');
   const userEmail = localStorage.getItem('userEmail');
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-    getMyConversations()
-      .then((convs) => {
-        const total = convs.reduce((acc, c) => acc + c.unreadCount, 0);
-        setUnreadCount(total);
-      })
-      .catch(() => { });
-  }, [location.pathname]);
+    const fetchUnread = async () => {
+      try {
+        const conversations = await getMyConversations();
+        const count = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+        setUnreadCount(count);
+      } catch (err) {
+        console.error('Error fetching unread count', err);
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewMessage = () => {
+      getMyConversations()
+        .then(convs => setUnreadCount(convs.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0)))
+        .catch(() => {});
+    };
+    socket.on('chat_message_received', handleNewMessage);
+    return () => {
+      socket.off('chat_message_received', handleNewMessage);
+    };
+  }, [socket]);
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -37,7 +60,7 @@ export function Navbar() {
   const navLinkClass = (path: string) =>
     `text-[14px] font-medium px-3 py-1.5 rounded-md transition-colors duration-150 ${
       isActive(path)
-        ? 'text-[#02A95C] font-semibold'
+        ? 'text-[#72B626] font-semibold'
         : 'text-gray-600 hover:text-gray-900'
     }`;
 
@@ -69,7 +92,7 @@ export function Navbar() {
             <Link
               to="/donatok"
               className={`text-[14px] font-medium px-3 py-1.5 rounded-md transition-colors duration-150 ${
-                isActive('/donatok') ? 'text-[#02A95C] font-semibold' : 'text-gray-600 hover:text-gray-900'
+                isActive('/donatok') ? 'text-[#72B626] font-semibold' : 'text-gray-600 hover:text-gray-900'
               }`}
               style={{ textDecoration: 'none' }}
             >
@@ -89,7 +112,7 @@ export function Navbar() {
                     Mensajes
                   </span>
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#02A95C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#72B626] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -109,7 +132,7 @@ export function Navbar() {
                     Mensajes
                   </span>
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#02A95C] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#72B626] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -124,8 +147,8 @@ export function Navbar() {
           {/* User Email (Desktop) */}
           {userEmail && (
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200">
-              <div className="w-6 h-6 rounded-full bg-[#02A95C]/10 flex items-center justify-center">
-                <User size={13} className="text-[#02A95C]" strokeWidth={2} />
+              <div className="w-6 h-6 rounded-full bg-[#72B626]/10 flex items-center justify-center">
+                <User size={13} className="text-[#72B626]" strokeWidth={2} />
               </div>
               <span className="text-[13px] font-medium text-gray-700 truncate max-w-[140px]">
                 {userEmail}
@@ -164,7 +187,7 @@ export function Navbar() {
         >
           <Link
             to="/explore"
-            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/explore') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/explore') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => setIsMenuOpen(false)}
             style={{ textDecoration: 'none' }}
           >
@@ -172,7 +195,7 @@ export function Navbar() {
           </Link>
           <Link
             to="/donatok"
-            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/donatok') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/donatok') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => setIsMenuOpen(false)}
             style={{ textDecoration: 'none' }}
           >
@@ -183,7 +206,7 @@ export function Navbar() {
             <>
               <Link
                 to="/entrepreneur-campaigns"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-campaigns') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-campaigns') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -191,7 +214,7 @@ export function Navbar() {
               </Link>
               <Link
                 to="/entrepreneur-profile"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-profile') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/entrepreneur-profile') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -199,7 +222,7 @@ export function Navbar() {
               </Link>
               <Link
                 to="/chat"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -208,7 +231,7 @@ export function Navbar() {
                   Mensajes
                 </span>
                 {unreadCount > 0 && (
-                  <span className="min-w-[18px] h-[18px] bg-[#02A95C] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  <span className="min-w-[18px] h-[18px] bg-[#72B626] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                     {unreadCount}
                   </span>
                 )}
@@ -218,7 +241,7 @@ export function Navbar() {
             <>
               <Link
                 to="/dashboard"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -226,7 +249,7 @@ export function Navbar() {
               </Link>
               <Link
                 to="/profile"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/profile') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/profile') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -234,7 +257,7 @@ export function Navbar() {
               </Link>
               <Link
                 to="/chat"
-                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#E6F9F0] text-[#02A95C] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
                 onClick={() => setIsMenuOpen(false)}
                 style={{ textDecoration: 'none' }}
               >
@@ -243,7 +266,7 @@ export function Navbar() {
                   Mensajes
                 </span>
                 {unreadCount > 0 && (
-                  <span className="min-w-[18px] h-[18px] bg-[#02A95C] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  <span className="min-w-[18px] h-[18px] bg-[#72B626] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                     {unreadCount}
                   </span>
                 )}

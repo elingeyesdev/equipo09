@@ -1,4 +1,4 @@
-export function computeFundingPercent(currentAmount: number, goalAmount: number): number {
+﻿export function computeFundingPercent(currentAmount: number, goalAmount: number): number {
   if (!Number.isFinite(currentAmount) || !Number.isFinite(goalAmount) || goalAmount <= 0) {
     return 0;
   }

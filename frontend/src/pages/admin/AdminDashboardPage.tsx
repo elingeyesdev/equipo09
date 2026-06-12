@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { 
   getDashboardStats, 
@@ -105,7 +105,7 @@ export function AdminDashboardPage() {
                >En Revisión</button>
                <button 
                  onClick={() => setStatusFilter('published')}
-                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer border-none bg-transparent ${statusFilter === 'published' ? 'text-emerald-600 bg-emerald-50 font-bold' : 'text-gray-500 hover:text-gray-700'}`}
+                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer border-none bg-transparent ${statusFilter === 'published' ? 'text-emerald-600 bg-green-50 font-bold' : 'text-gray-500 hover:text-gray-700'}`}
                >Campañas Activas</button>
                <button 
                  onClick={() => setStatusFilter('kyc')}
@@ -126,22 +126,22 @@ export function AdminDashboardPage() {
             </div>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</span>
-              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+              <div className="text-[10px] font-bold text-emerald-600 bg-green-50 px-2 py-0.5 rounded flex items-center gap-1">
                  <ChevronRight size={10} className="-rotate-90" /> +12%
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-4 border-t-emerald-500 shadow-sm transition-all group">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-t-4 border-t-green-500 shadow-sm transition-all group">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-emerald-600">
                 <Rocket size={20} />
               </div>
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Campañas Activas</span>
             </div>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-bold text-gray-900">{stats?.totalCampaigns || 0}</span>
-              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+              <div className="text-[10px] font-bold text-emerald-600 bg-green-50 px-2 py-0.5 rounded flex items-center gap-1">
                  <ChevronRight size={10} className="-rotate-90" /> +5%
               </div>
             </div>
@@ -158,7 +158,7 @@ export function AdminDashboardPage() {
               <span className="text-2xl font-bold text-gray-900">
                 ${(stats?.totalFunded || 0).toLocaleString()}
               </span>
-              <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+              <div className="text-[10px] font-bold text-emerald-600 bg-green-50 px-2 py-0.5 rounded flex items-center gap-1">
                  <ChevronRight size={10} className="-rotate-90" /> +24%
               </div>
             </div>
@@ -173,7 +173,7 @@ export function AdminDashboardPage() {
               <h2 className="text-[14px] font-bold text-gray-800 uppercase tracking-wide">
                 {statusFilter === 'pending_review' ? 'Revisión de Propuestas Técnicas' : statusFilter === 'kyc' ? 'Verificaciones KYC Pendientes' : 'Monitoreo de Capital Activo'}
               </h2>
-              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : statusFilter === 'kyc' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[11px] px-2 py-0.5 rounded font-bold`}>
+              <span className={`${statusFilter === 'pending_review' ? 'bg-indigo-100 text-indigo-700' : statusFilter === 'kyc' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-emerald-700'} text-[11px] px-2 py-0.5 rounded font-bold`}>
                 {statusFilter === 'kyc' ? pendingKyc.length : totalCampaigns}
               </span>
             </div>

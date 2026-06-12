@@ -1,4 +1,4 @@
-export interface EntrepreneurProfile {
+﻿export interface EntrepreneurProfile {
   id: string;
   userId: string;
   firstName: string;

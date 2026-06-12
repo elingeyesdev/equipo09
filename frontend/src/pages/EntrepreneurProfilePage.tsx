@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { getCampaignFinancialProgress, getMyCampaignById } from '../api/campaign.api';
@@ -156,7 +156,7 @@ export function EntrepreneurProfilePage() {
 
         {profileLoading ? (
           <div className="max-w-[1100px] mx-auto py-32 flex flex-col items-center justify-center gap-6">
-            <Loader2 className="w-14 h-14 text-[#2e7d32] animate-spin" strokeWidth={2.5} />
+            <Loader2 className="w-14 h-14 text-[#72B626] animate-spin" strokeWidth={2.5} />
             <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando Perfil Corporativo...</p>
           </div>
         ) : (
@@ -191,19 +191,19 @@ export function EntrepreneurProfilePage() {
                 {/* Mensajes de Estado y Onboarding */}
                 <div className="w-full mb-2 flex flex-col gap-4">
                   {!profileLoading && !profile && (
-                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-6 rounded-[32px] shadow-xl shadow-emerald-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
+                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-6 rounded-[32px] shadow-xl shadow-gray-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30">
                           <Rocket size={24} strokeWidth={2.5} />
                         </div>
                         <div>
                           <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-1">¡Casi listo para emprender!</h4>
-                          <p className="text-emerald-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder publicar tu primera campaña.</p>
+                          <p className="text-green-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder publicar tu primera campaña.</p>
                         </div>
                       </div>
                       <button
                         onClick={() => setModalType('profile')}
-                        className="bg-white text-[#2e7d32] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
+                        className="bg-white text-[#72B626] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-green-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
                       >
                         Completar Ahora
                       </button>
@@ -253,51 +253,51 @@ export function EntrepreneurProfilePage() {
                 ) : activeTab === 'info' ? (
                   <div className="flex flex-col gap-8">
                     {/* Personal */}
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center">
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
                             <User size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Personales</h3>
                         </div>
-                        <button onClick={() => setModalType('profile')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('profile')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Completo</p><p className="font-bold text-[#1c2b1e]">{profile?.firstName} {profile?.lastName}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#2e7d32]">@{profile?.displayName || 'No definido'}</p></div>
-                        <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">LinkedIn</p><p className="font-bold text-[#2e7d32] flex items-center gap-2"><ExternalLink size={14} /> {profile?.linkedinUrl || '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#72B626]">@{profile?.displayName || 'No definido'}</p></div>
+                        <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">LinkedIn</p><p className="font-bold text-[#72B626] flex items-center gap-2"><ExternalLink size={14} /> {profile?.linkedinUrl || '-'}</p></div>
                         <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Biografía</p><p className="text-slate-600 leading-relaxed">{profile?.bio || 'Sin biografía.'}</p></div>
                       </div>
                     </section>
 
                     {/* Company */}
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center">
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
                             <Building2 size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Startup & Site</h3>
                         </div>
-                        <button onClick={() => setModalType('company')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('company')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre de Empresa</p><p className="font-bold text-[#1c2b1e]">{profile?.companyName || '-'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Sitio Web</p><p className="font-bold text-[#2e7d32] flex items-center gap-2"><Globe size={14} /> {profile?.website || '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Sitio Web</p><p className="font-bold text-[#72B626] flex items-center gap-2"><Globe size={14} /> {profile?.website || '-'}</p></div>
                       </div>
                     </section>
 
                     {/* Location */}
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center">
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
                             <MapPin size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación</h3>
                         </div>
-                        <button onClick={() => setModalType('address')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('address')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">País</p><p className="font-bold text-[#1c2b1e]">{profile?.country || '-'}</p></div>
@@ -307,15 +307,15 @@ export function EntrepreneurProfilePage() {
                     </section>
 
                     {/* Banking */}
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm text-center md:text-left">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm text-center md:text-left">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center">
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
                             <CreditCard size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Canal de Fondos</h3>
                         </div>
-                        <button onClick={() => setModalType('banking')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('banking')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Banco</p><p className="font-bold text-[#1c2b1e]">{profile?.bankName || '-'}</p></div>
@@ -326,15 +326,15 @@ export function EntrepreneurProfilePage() {
                 ) : activeTab === 'banking' ? (
                   <div className="flex flex-col gap-8">
                     {/* Banking */}
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm text-center md:text-left">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm text-center md:text-left">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center">
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
                             <CreditCard size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Canal de Fondos</h3>
                         </div>
-                        <button onClick={() => setModalType('banking')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('banking')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Banco</p><p className="font-bold text-[#1c2b1e]">{profile?.bankName || '-'}</p></div>
@@ -345,7 +345,7 @@ export function EntrepreneurProfilePage() {
                 ) : activeTab === 'finance' ? (
                   <div className="space-y-6 w-full">
                     {/* Header y Selector */}
-                    <div className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div>
                         <h3 className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest mb-1">Metas Económicas</h3>
                         <p className="text-slate-400 text-xs font-semibold">Análisis en tiempo real y proyecciones de recaudación</p>
@@ -356,7 +356,7 @@ export function EntrepreneurProfilePage() {
                           <select
                             value={selectedFinanceCampaignId}
                             onChange={(e) => setSelectedFinanceCampaignId(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-[13px] font-bold outline-none focus:border-[#2e7d32] transition-colors appearance-none cursor-pointer"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-[13px] font-bold outline-none focus:border-[#72B626] transition-colors appearance-none cursor-pointer"
                           >
                             {campaigns.map((c) => (
                               <option key={c.id} value={c.id}>
@@ -374,8 +374,8 @@ export function EntrepreneurProfilePage() {
                     </div>
 
                     {financeLoading ? (
-                      <div className="bg-white rounded-[32px] border border-emerald-50 p-12 text-center py-32 flex flex-col items-center justify-center gap-4">
-                        <Loader2 className="w-10 h-10 text-[#2e7d32] animate-spin" />
+                      <div className="bg-white rounded-[32px] border border-green-50 p-12 text-center py-32 flex flex-col items-center justify-center gap-4">
+                        <Loader2 className="w-10 h-10 text-[#72B626] animate-spin" />
                         <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Cargando métricas financieras...</p>
                       </div>
                     ) : campaignFinance ? (
@@ -388,8 +388,8 @@ export function EntrepreneurProfilePage() {
                         createdAt={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.createdAt}
                       />
                     ) : (
-                      <div className="bg-white rounded-[32px] border border-emerald-50 p-12 text-center text-slate-400 py-32">
-                        <Wallet size={80} strokeWidth={1} className="text-emerald-100 mb-6 mx-auto" />
+                      <div className="bg-white rounded-[32px] border border-green-50 p-12 text-center text-slate-400 py-32">
+                        <Wallet size={80} strokeWidth={1} className="text-green-100 mb-6 mx-auto" />
                         <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">
                           Gestión Financiera
                         </h3>
@@ -400,9 +400,9 @@ export function EntrepreneurProfilePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="bg-white rounded-[50px] shadow-sm border border-emerald-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
-                    <div className="text-emerald-100 mb-6 flex justify-center">
+                  <div className="bg-white rounded-[50px] shadow-sm border border-green-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
+                    <div className="text-green-100 mb-6 flex justify-center">
                       {activeTab === 'conversations' ? (
                         <MessageSquare size={80} strokeWidth={1} />
                       ) : (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -232,8 +232,8 @@ export const CampaignReviewPage: React.FC = () => {
                 <p className="text-lg font-bold text-gray-900">{total}</p>
               </div>
             </div>
-            <div className="p-4 bg-white border border-gray-200 border-t-4 border-t-emerald-500 rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
-              <div className="w-9 h-9 rounded bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <div className="p-4 bg-white border border-gray-200 border-t-4 border-t-green-500 rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
+              <div className="w-9 h-9 rounded bg-green-50 flex items-center justify-center text-emerald-600">
                 <Video size={18} />
               </div>
               <div>
@@ -291,7 +291,7 @@ export const CampaignReviewPage: React.FC = () => {
             
             <button 
               onClick={loadCampaigns}
-              className="px-4 py-2 bg-[#02A95C] hover:bg-[#017A42] text-white font-semibold rounded-lg transition-all active:scale-95 cursor-pointer border-none text-[13px]"
+              className="px-4 py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white font-semibold rounded-lg transition-all active:scale-95 cursor-pointer border-none text-[13px]"
             >
               Actualizar
             </button>
@@ -352,7 +352,7 @@ export const CampaignReviewPage: React.FC = () => {
                               <span className="text-[10px] text-gray-400">Ref: {campaign.id.substring(0, 8)}</span>
                               {(campaign as any).video_url && (
                                 <span
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100"
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-green-50 border border-green-100"
                                   title="Tiene video pitch en DonaTok"
                                 >
                                   <PlayCircle size={9} /> DonaTok
@@ -372,7 +372,7 @@ export const CampaignReviewPage: React.FC = () => {
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                           campaign.type === 'reward' 
                             ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-green-50 text-emerald-700 border-emerald-200'
                         }`}>
                           {campaign.type === 'reward' ? 'Recompensa' : 'Donación'}
                         </span>
@@ -384,7 +384,7 @@ export const CampaignReviewPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold text-xs border border-emerald-200">
+                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-emerald-600 font-bold text-xs border border-emerald-200">
                             {campaign.audit_score || 0}%
                          </div>
                       </td>
@@ -402,7 +402,7 @@ export const CampaignReviewPage: React.FC = () => {
                               e.stopPropagation();
                               handleQuickApprove(campaign.id, campaign.title);
                             }}
-                            className="w-9 h-9 flex items-center justify-center bg-white hover:bg-emerald-50 text-emerald-600 rounded-lg transition-all border border-gray-200 shadow-sm cursor-pointer active:scale-95"
+                            className="w-9 h-9 flex items-center justify-center bg-white hover:bg-green-50 text-emerald-600 rounded-lg transition-all border border-gray-200 shadow-sm cursor-pointer active:scale-95"
                             title="Aprobar Inmediatamente"
                           >
                             <CheckCircle2 size={16} />
@@ -426,7 +426,7 @@ export const CampaignReviewPage: React.FC = () => {
             </div>
           ) : (
             <div className="py-20 flex flex-col items-center justify-center text-center px-6">
-              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mb-4">
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-emerald-600 mb-4">
                 <CheckCircle2 size={32} />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">¡Todo al día!</h3>
@@ -457,7 +457,7 @@ export const CampaignReviewPage: React.FC = () => {
                       onClick={() => setPage(i + 1)}
                       className={`w-8 h-8 rounded flex items-center justify-center font-bold text-xs transition-all cursor-pointer ${
                         page === i + 1 
-                          ? 'bg-[#02A95C] text-white shadow-sm border-none' 
+                          ? 'bg-[#72B626] text-white shadow-sm border-none' 
                           : 'bg-white text-gray-400 border border-gray-200 hover:border-gray-300'
                       }`}
                     >

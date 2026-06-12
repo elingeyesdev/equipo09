@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { getCategories } from '../api/categories.api';
@@ -22,13 +22,13 @@ const GREEN_DARK = '#4a7f1a';
 
 const CAMPAIGN_TYPE = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63', bg: '#fce4ec' },
-  reward:   { label: 'Recompensa', icon: Gem,       color: '#f9a825', bg: '#fff8e1' },
-  equity:   { label: 'Equity',     icon: TrendingUp, color: GREEN,     bg: '#f0f9e0' },
+  reward: { label: 'Recompensa', icon: Gem, color: '#f9a825', bg: '#fff8e1' },
+  equity: { label: 'Equity', icon: TrendingUp, color: GREEN, bg: '#f0f9e0' },
 };
 
 function formatCurrency(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000)     return `$${(n / 1_000).toFixed(0)}k`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}k`;
   return `$${n.toLocaleString()}`;
 }
 
@@ -46,14 +46,14 @@ const HERO_FALLBACKS = [
 
 // Arc positions for the 8 images — they fan out from bottom-left to top-right
 const ARC_POSITIONS = [
-  { top: '55%', left: '2%',  size: 100 },
+  { top: '55%', left: '2%', size: 100 },
   { top: '30%', left: '10%', size: 115 },
-  { top: '8%',  left: '24%', size: 105 },
-  { top: '0%',  left: '45%', size: 120 },
-  { top: '8%',  left: '65%', size: 110 },
+  { top: '8%', left: '24%', size: 105 },
+  { top: '0%', left: '45%', size: 120 },
+  { top: '8%', left: '65%', size: 110 },
   { top: '30%', left: '76%', size: 105 },
-  { top: '55%', left: '80%', size: 95  },
-  { top: '75%', left: '60%', size: 90  },
+  { top: '55%', left: '80%', size: 95 },
+  { top: '75%', left: '60%', size: 90 },
 ];
 
 function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; campaigns: PublicCampaign[] }) {
@@ -106,8 +106,8 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
                 />
               </div>
               <button type="submit"
-                className="px-6 py-3.5 rounded-2xl text-white font-black text-[13px] uppercase tracking-wider transition-all active:scale-95 border-none cursor-pointer"
-                style={{ background: `linear-gradient(135deg,${GREEN_DARK},${GREEN})` }}>
+                className="px-6 py-3.5 rounded-xl text-white font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 border-none cursor-pointer hover:opacity-90"
+                style={{ background: GREEN }}>
                 Buscar
               </button>
             </form>
@@ -115,9 +115,9 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
             {/* CTAs */}
             <div className="flex flex-wrap gap-3 mb-10">
               <Link to="/register"
-                className="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-2xl font-black text-[15px] no-underline transition-all hover:opacity-90 active:scale-95 shadow-lg"
-                style={{ background: `linear-gradient(135deg,${GREEN_DARK},${GREEN})`, boxShadow: '0 4px 20px rgba(114,182,38,0.4)' }}>
-                <Rocket size={16} strokeWidth={2.5} />
+                className="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-xl font-bold text-[15px] no-underline transition-all hover:opacity-90 active:scale-95"
+                style={{ background: GREEN }}>
+                <Rocket size={16} strokeWidth={2} />
                 Comenzar campaña
               </Link>
               <Link to="/explore"
@@ -131,8 +131,8 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
             <div className="flex flex-wrap gap-5">
               {[
                 { icon: CheckCircle2, text: `${totalCampaigns > 0 ? totalCampaigns + '+' : ''} campañas activas`, color: GREEN },
-                { icon: Shield,       text: 'Plataforma verificada',    color: '#1565c0' },
-                { icon: Users,        text: '100+ inversores activos',  color: '#7b1fa2' },
+                { icon: Shield, text: 'Plataforma verificada', color: '#1565c0' },
+                { icon: Users, text: '100+ inversores activos', color: '#7b1fa2' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-1.5 text-gray-500 text-[13px] font-semibold">
                   <Icon size={14} strokeWidth={2.5} style={{ color }} /> {text}
@@ -171,10 +171,10 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
 // ─── Stats bar ────────────────────────────────────────────────────────────────
 function StatsBar({ totalCampaigns, totalAmount }: { totalCampaigns: number; totalAmount: number }) {
   const stats = [
-    { label: 'Campañas lanzadas',  value: totalCampaigns > 0 ? `${totalCampaigns}+` : '—', icon: Rocket,     color: GREEN },
-    { label: 'Total recaudado',    value: totalAmount   > 0 ? formatCurrency(totalAmount) : '—', icon: DollarSign, color: '#00897b' },
-    { label: 'Inversores activos', value: '100+',              icon: Users,      color: '#1565c0' },
-    { label: 'Tasa de éxito',      value: '94%',               icon: TrendingUp,  color: UNI },
+    { label: 'Campañas lanzadas', value: totalCampaigns > 0 ? `${totalCampaigns}+` : '—', icon: Rocket, color: GREEN },
+    { label: 'Total recaudado', value: totalAmount > 0 ? formatCurrency(totalAmount) : '—', icon: DollarSign, color: '#72B626' },
+    { label: 'Inversores activos', value: '100+', icon: Users, color: '#1565c0' },
+    { label: 'Tasa de éxito', value: '94%', icon: TrendingUp, color: UNI },
   ];
   return (
     <section className="bg-[#f7f9f7] py-6">
@@ -220,7 +220,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
       <div className="relative h-[190px] bg-gray-100 overflow-hidden">
         {coverUrl
           ? <img src={coverUrl} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={e => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=600'; }} />
+            onError={e => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=600'; }} />
           : <div className="w-full h-full flex items-center justify-center"><Rocket size={40} strokeWidth={1} className="text-gray-300" /></div>
         }
         {/* Badges */}
@@ -254,7 +254,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all"
-              style={{ width: `${progress}%`, background: progress >= 100 ? 'linear-gradient(90deg,#f9a825,#ff6f00)' : `linear-gradient(90deg,#a5d6a7,${GREEN})` }} />
+              style={{ width: `${progress}%`, background: progress >= 100 ? '#f9a825' : GREEN }} />
           </div>
         </div>
         {/* Footer */}
@@ -361,8 +361,8 @@ function AnimatedStepNumber({ index, active, progress }: { index: number; active
 
 function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
-  const [progress, setProgress]     = useState(0);
-  const [paused, setPaused]         = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -385,7 +385,7 @@ function HowItWorksSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
           {/* Image (changes with step) */}
-          <div className="relative rounded-[32px] overflow-hidden shadow-2xl h-[420px] bg-gray-100 order-2 lg:order-1">
+          <div className="relative rounded-2xl overflow-hidden shadow-md h-[420px] bg-gray-100 order-2 lg:order-1">
             {HOW_STEPS.map((s, i) => (
               <img key={i} src={s.image} alt={s.title}
                 className="absolute inset-0 w-full h-full object-cover transition-all duration-700"
@@ -422,9 +422,9 @@ function HowItWorksSection() {
             </ol>
 
             <Link to="/register"
-              className="mt-10 inline-flex items-center gap-2 text-white px-8 py-4 rounded-2xl font-black text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all shadow-lg"
-              style={{ background: `linear-gradient(135deg,${GREEN_DARK},${GREEN})`, boxShadow: '0 4px 20px rgba(114,182,38,0.35)' }}>
-              <Rocket size={16} strokeWidth={2.5} /> Comenzar ahora — es gratis
+              className="mt-10 inline-flex items-center gap-2 text-white px-8 py-4 rounded-xl font-bold text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all"
+              style={{ background: GREEN }}>
+              <Rocket size={16} strokeWidth={2} /> Comenzar ahora — es gratis
             </Link>
           </div>
         </div>
@@ -436,28 +436,28 @@ function HowItWorksSection() {
 // ─── Yellow "Te ayudamos" section ─────────────────────────────────────────────
 function YellowHelpSection() {
   return (
-    <section className="py-20" style={{ background: 'linear-gradient(135deg,#fffde7,#fff9c4)' }}>
+    <section className="py-20 bg-gray-50 border-y border-gray-100">
       <div className="max-w-[800px] mx-auto px-6 text-center">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-5"
-          style={{ background: 'rgba(139,25,56,0.12)', color: UNI }}>
-          <Heart size={11} strokeWidth={3} fill={UNI} /> Te ayudamos.
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full mb-5 bg-white border border-gray-200"
+          style={{ color: UNI }}>
+          <Heart size={11} strokeWidth={2.5} /> Te ayudamos.
         </span>
-        <h2 className="text-[28px] md:text-[40px] font-black text-gray-900 tracking-tight leading-tight mb-5">
-          Consigue lo que necesitas para que tu<br className="hidden md:block" /> campaña tenga éxito en UniFundMe.
+        <h2 className="text-[28px] md:text-[38px] font-bold text-gray-900 tracking-tight leading-tight mb-5">
+          Consigue lo que necesitas para que tu<br className="hidden md:block" /> campaña tenga éxito.
         </h2>
-        <p className="text-[16px] text-gray-600 leading-relaxed mb-8 max-w-[600px] mx-auto">
+        <p className="text-[15px] text-gray-500 leading-relaxed mb-8 max-w-[580px] mx-auto">
           Desde causas sociales y proyectos de arte hasta startups con equity.
-          Siempre que necesites financiamiento, puedes solicitarlo aquí. ¿Tienes preguntas? Usa nuestro chat de soporte.
+          Siempre que necesites financiamiento, puedes solicitarlo aquí.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/register"
-            className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-2xl font-black text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all shadow-lg"
-            style={{ background: `linear-gradient(135deg,${UNI},#a91f44)`, boxShadow: '0 4px 20px rgba(139,25,56,0.35)' }}>
+            className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-xl font-semibold text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all"
+            style={{ background: UNI }}>
             Iniciar una campaña
           </Link>
           <Link to="/explore"
-            className="inline-flex items-center gap-2 text-gray-700 px-8 py-4 rounded-2xl font-bold text-[15px] no-underline border-2 border-gray-300 hover:border-gray-400 hover:bg-white/70 transition-all">
-            Explorar campañas <ArrowRight size={15} strokeWidth={2.5} />
+            className="inline-flex items-center gap-2 text-gray-700 px-8 py-4 rounded-xl font-semibold text-[15px] no-underline border border-gray-300 hover:border-gray-400 hover:bg-white transition-all">
+            Explorar campañas <ArrowRight size={15} strokeWidth={2} />
           </Link>
         </div>
       </div>
@@ -483,8 +483,8 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
 
   // Valores fijos para evitar que cambien en cada render
   const mockStats = items.map((_, i) => ({
-    likes:    [327, 184, 512, 96, 241][i % 5],
-    comments: [42,  17,  88,  9,  63][i % 5],
+    likes: [327, 184, 512, 96, 241][i % 5],
+    comments: [42, 17, 88, 9, 63][i % 5],
   }));
 
   return (
@@ -533,7 +533,7 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                     const progress = c.goalAmount > 0 ? Math.min(Math.round((c.currentAmount / c.goalAmount) * 100), 100) : 0;
                     const bgColor = DONATOKS_COLORS[i % DONATOKS_COLORS.length];
                     const isActive = i === activeIndex;
-                    const isPrev  = i === (activeIndex - 1 + items.length) % items.length;
+                    const isPrev = i === (activeIndex - 1 + items.length) % items.length;
                     return (
                       <div key={c.id} className="absolute inset-0 transition-all duration-500"
                         style={{ transform: isActive ? 'translateY(0%)' : isPrev ? 'translateY(-100%)' : 'translateY(100%)', opacity: isActive ? 1 : 0, zIndex: isActive ? 10 : 1 }}>
@@ -553,9 +553,9 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                         {/* Acciones laterales */}
                         <div className="absolute right-2.5 bottom-[110px] z-20 flex flex-col items-center gap-4">
                           {[
-                            { Icon: Heart,         val: mockStats[i]?.likes ?? 0,    color: '#ff4d6d' },
+                            { Icon: Heart, val: mockStats[i]?.likes ?? 0, color: '#ff4d6d' },
                             { Icon: MessageSquare, val: mockStats[i]?.comments ?? 0, color: '#60a5fa' },
-                            { Icon: Share2,        val: null,                         color: '#a7f3d0' },
+                            { Icon: Share2, val: null, color: '#a7f3d0' },
                           ].map(({ Icon, val, color }, idx) => (
                             <div key={idx} className="flex flex-col items-center gap-0.5">
                               <div className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
@@ -614,7 +614,7 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                   {items.map((_, i) => (
                     <button key={i} onClick={() => setActiveIndex(i)}
                       className="rounded-full border-none cursor-pointer transition-all duration-300"
-                      style={{ width: i === activeIndex ? 18 : 6, height: 6, background: i === activeIndex ? `linear-gradient(90deg,${GREEN},#00897b)` : '#cbd5e1' }} />
+                      style={{ width: i === activeIndex ? 18 : 6, height: 6, background: i === activeIndex ? `linear-gradient(90deg,${GREEN},#72B626)` : '#cbd5e1' }} />
                   ))}
                 </div>
               )}
@@ -635,10 +635,10 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
             {/* Features — 2 columnas en móvil, lista en desktop */}
             <ul className="grid grid-cols-2 lg:flex lg:flex-col gap-3 lg:gap-4 mb-8 max-w-[480px] mx-auto lg:mx-0">
               {[
-                { icon: Play,      text: 'Videos cortos',          subtext: 'de cada campaña',       color: GREEN },
-                { icon: ChevronUp, text: 'Scroll vertical',        subtext: 'para descubrir más',     color: '#00897b' },
-                { icon: Heart,     text: 'Apoya proyectos',        subtext: 'que te inspiran',        color: '#e91e63' },
-                { icon: Share2,    text: 'Comparte',               subtext: 'con tu red',             color: '#1565c0' },
+                { icon: Play, text: 'Videos cortos', subtext: 'de cada campaña', color: GREEN },
+                { icon: ChevronUp, text: 'Scroll vertical', subtext: 'para descubrir más', color: '#72B626' },
+                { icon: Heart, text: 'Apoya proyectos', subtext: 'que te inspiran', color: '#e91e63' },
+                { icon: Share2, text: 'Comparte', subtext: 'con tu red', color: '#1565c0' },
               ].map(({ icon: Icon, text, subtext, color }) => (
                 <li key={text} className="flex items-center gap-2.5 lg:gap-3">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${color}15` }}>
@@ -655,7 +655,7 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
             <Link to="/donatok"
               className="inline-flex items-center gap-2.5 text-white px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl font-black text-[14px] sm:text-[15px] no-underline hover:-translate-y-0.5 transition-all active:scale-95"
               style={{ background: `linear-gradient(135deg,#1c2b1e,${GREEN})`, boxShadow: `0 8px 28px rgba(114,182,38,0.35)` }}>
-              🎬 Abrir DonaTok <ArrowRight size={15} strokeWidth={2.5} />
+              Abrir DonaTok <ArrowRight size={15} strokeWidth={2.5} />
             </Link>
           </div>
         </div>
@@ -666,12 +666,12 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 const CAT_IMAGES: Record<string, string> = {
-  'Tecnología':     'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&h=400&fit=crop',
-  'Arte':           'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=400&fit=crop',
-  'Educación':      'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&h=400&fit=crop',
-  'Salud':          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500&h=400&fit=crop',
+  'Tecnología': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&h=400&fit=crop',
+  'Arte': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=400&fit=crop',
+  'Educación': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&h=400&fit=crop',
+  'Salud': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500&h=400&fit=crop',
   'Medio Ambiente': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500&h=400&fit=crop',
-  'Social':         'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=500&h=400&fit=crop',
+  'Social': 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=500&h=400&fit=crop',
 };
 const DEFAULT_CAT_IMG = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=500&h=400&fit=crop';
 
@@ -716,7 +716,7 @@ function CategoriesSection({ categories }: { categories: Category[] }) {
 // ─── Trust section ────────────────────────────────────────────────────────────
 function TrustSection() {
   return (
-    <section className="py-20" style={{ background: `linear-gradient(135deg,#1c2b1e,${GREEN_DARK})` }}>
+    <section className="py-20" style={{ background: '#1c2b1e' }}>
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
           {/* Text */}
@@ -726,7 +726,7 @@ function TrustSection() {
               <Shield size={11} strokeWidth={3} /> Plataforma de confianza
             </span>
             <h2 className="text-[30px] md:text-[42px] font-black text-white tracking-tight leading-tight mb-5">
-              UniFundMe es el líder de<br />confianza en Bolivia.
+              Unifundme es el líder de<br />confianza en Bolivia.
             </h2>
             <p className="text-white/60 text-[16px] leading-relaxed mb-8 max-w-[480px]">
               Con transparencia total en cada transacción, verificación de identidad KYC y un equipo de soporte
@@ -734,10 +734,10 @@ function TrustSection() {
             </p>
             <ul className="flex flex-col gap-4 mb-10">
               {[
-                { icon: Shield,       text: 'Verificación KYC obligatoria para emprendedores',  color: '#a7f3d0' },
-                { icon: Lock,         text: 'Transacciones 100% seguras y auditadas',            color: '#93c5fd' },
-                { icon: CheckCircle2, text: 'Equipo de revisión humana de campañas',             color: '#fde68a' },
-                { icon: Globe,        text: 'Plataforma accesible desde toda Bolivia',           color: '#f9a8d4' },
+                { icon: Shield, text: 'Verificación KYC obligatoria para emprendedores', color: '#a7f3d0' },
+                { icon: Lock, text: 'Transacciones 100% seguras y auditadas', color: '#93c5fd' },
+                { icon: CheckCircle2, text: 'Equipo de revisión humana de campañas', color: '#fde68a' },
+                { icon: Globe, text: 'Plataforma accesible desde toda Bolivia', color: '#f9a8d4' },
               ].map(({ icon: Icon, text, color }) => (
                 <li key={text} className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -750,16 +750,16 @@ function TrustSection() {
             </ul>
             <Link to="/register"
               className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-2xl font-black text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all border-2 border-white/20 hover:border-white/40 hover:bg-white/10"
-              >
+            >
               Comenzar ahora <ArrowRight size={15} strokeWidth={2.5} />
             </Link>
           </div>
 
           {/* Image */}
           <div className="relative">
-            <div className="rounded-[32px] overflow-hidden shadow-2xl h-[420px]">
+            <div className="rounded-2xl overflow-hidden shadow-md h-[420px]">
               <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=700&h=500&fit=crop"
-                alt="Equipo UniFundMe" className="w-full h-full object-cover" />
+                alt="Equipo Unifundme" className="w-full h-full object-cover" />
             </div>
             {/* Floating card */}
             <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 border border-gray-100">
@@ -788,13 +788,13 @@ function CTABanner() {
           ¿Listo para hacer realidad<br />tu proyecto?
         </h2>
         <p className="text-gray-500 text-[16px] leading-relaxed mb-8">
-          Únete a cientos de emprendedores bolivianos que ya están financiando sus sueños con UniFundMe.
+          Únete a cientos de emprendedores bolivianos que ya están financiando sus sueños con Unifundme.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/register"
-            className="inline-flex items-center gap-2 text-white px-9 py-4 rounded-2xl font-black text-[16px] no-underline hover:opacity-90 active:scale-95 transition-all shadow-xl"
-            style={{ background: `linear-gradient(135deg,${GREEN_DARK},${GREEN})`, boxShadow: '0 6px 24px rgba(114,182,38,0.4)' }}>
-            <Rocket size={17} strokeWidth={2.5} /> Comenzar campaña
+            className="inline-flex items-center gap-2 text-white px-9 py-4 rounded-xl font-semibold text-[16px] no-underline hover:opacity-90 active:scale-95 transition-all"
+            style={{ background: GREEN }}>
+            <Rocket size={17} strokeWidth={2} /> Comenzar campaña
           </Link>
           <Link to="/explore"
             className="inline-flex items-center gap-2 text-gray-700 px-9 py-4 rounded-2xl font-bold text-[16px] no-underline border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
@@ -812,31 +812,31 @@ function Footer() {
     {
       title: 'Explorar',
       links: [
-        { label: 'Todas las campañas',  to: '/explore' },
-        { label: 'DonaTok',            to: '/donatok' },
-        { label: 'Categorías',         to: '/explore' },
+        { label: 'Todas las campañas', to: '/explore' },
+        { label: 'DonaTok', to: '/donatok' },
+        { label: 'Categorías', to: '/explore' },
       ],
     },
     {
       title: 'Recolectar fondos',
       links: [
         { label: 'Cómo iniciar una campaña', to: '/register' },
-        { label: 'Tipos de campaña',         to: '/explore' },
-        { label: 'Consejos y recursos',      to: '/explore' },
+        { label: 'Tipos de campaña', to: '/explore' },
+        { label: 'Consejos y recursos', to: '/explore' },
       ],
     },
     {
       title: 'Acerca de',
       links: [
-        { label: 'Cómo funciona UniFundMe', to: '/' },
-        { label: 'Iniciar sesión',           to: '/login' },
-        { label: 'Registrarse',              to: '/register' },
+        { label: 'Cómo funciona Unifundme', to: '/' },
+        { label: 'Iniciar sesión', to: '/login' },
+        { label: 'Registrarse', to: '/register' },
       ],
     },
   ];
 
   return (
-    <footer className="bg-gray-900 text-white font-['Sora',sans-serif]">
+    <footer className="bg-gray-900 text-white">
       <div className="max-w-[1280px] mx-auto px-6 pt-14 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
@@ -868,7 +868,7 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-7 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-[13px] font-medium">
-            © 2026 UniFundMe. Todos los derechos reservados.
+            © 2026 Unifundme. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-2 text-white/20 text-[12px] font-semibold">
             <Lock size={11} strokeWidth={2} /> Plataforma segura y verificada
@@ -894,14 +894,14 @@ export function LandingPage() {
         setTotalCampaigns(res.meta.totalItems);
         setTotalAmount(res.data.reduce((acc, c) => acc + c.currentAmount, 0));
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setCampaignsLoading(false));
 
-    getCategories().then(setCategories).catch(() => {});
+    getCategories().then(setCategories).catch(() => { });
   }, []);
 
   return (
-    <div className="font-['Sora',sans-serif]">
+    <div>
       <Navbar />
       <HeroSection totalCampaigns={totalCampaigns} campaigns={featuredCampaigns} />
       <StatsBar totalCampaigns={totalCampaigns} totalAmount={totalAmount} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { addCapital } from '../api/investor.api';
 import { 
   X, 

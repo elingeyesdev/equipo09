@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 /**
  * Mensaje legible para fallos de Axios (incl. 502 del proxy de Vite cuando no hay backend).

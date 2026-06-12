@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Navbar } from '../components/Navbar';
@@ -96,7 +96,7 @@ export function InvestorProfilePage() {
 
         {profileLoading ? (
           <div className="max-w-[1100px] mx-auto p-40 flex flex-col items-center justify-center gap-6">
-            <Loader2 className="w-14 h-14 text-[#2e7d32] animate-spin" strokeWidth={2.5} />
+            <Loader2 className="w-14 h-14 text-[#72B626] animate-spin" strokeWidth={2.5} />
             <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando Perfil Corporativo...</p>
           </div>
         ) : (
@@ -123,19 +123,19 @@ export function InvestorProfilePage() {
               <div className="flex-1 min-w-0 flex flex-col gap-10 w-full">
                 <div className="w-full mb-2 flex flex-col gap-4">
                   {!profileLoading && !profile && (
-                    <div className="bg-gradient-to-r from-[#2e7d32] to-[#1c2b1e] text-white p-6 rounded-[32px] shadow-xl shadow-emerald-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
+                    <div className="bg-gradient-to-r from-[#72B626] to-[#1c2b1e] text-white p-6 rounded-[32px] shadow-xl shadow-gray-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30">
                           <Rocket size={24} strokeWidth={2.5} />
                         </div>
                         <div>
                           <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-1">¡Casi listo para invertir!</h4>
-                          <p className="text-emerald-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder realizar tu primera inversión.</p>
+                          <p className="text-green-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder realizar tu primera inversión.</p>
                         </div>
                       </div>
                       <button
                         onClick={() => setModalType('profile')}
-                        className="bg-white text-[#2e7d32] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-emerald-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
+                        className="bg-white text-[#72B626] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-green-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
                       >
                         Completar Ahora
                       </button>
@@ -148,7 +148,7 @@ export function InvestorProfilePage() {
                     </div>
                   )}
                   {successMessage && (
-                    <div className="bg-emerald-50 text-[#2e7d32] p-5 rounded-[24px] text-[14px] font-bold border border-emerald-100 shadow-sm flex items-center gap-3">
+                    <div className="bg-green-50 text-[#72B626] p-5 rounded-[24px] text-[14px] font-bold border border-green-100 shadow-sm flex items-center gap-3">
                       <CheckCircle2 size={20} strokeWidth={2.5} /> {successMessage}
                     </div>
                   )}
@@ -158,30 +158,30 @@ export function InvestorProfilePage() {
                   <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
                 ) : activeTab === 'info' ? (
                   <div className="flex flex-col gap-8">
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><User size={20} strokeWidth={2.5} /></div>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><User size={20} strokeWidth={2.5} /></div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Personales</h3>
                         </div>
-                        <button onClick={() => setModalType('profile')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('profile')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Completo</p><p className="font-bold text-[#1c2b1e]">{profile?.firstName} {profile?.lastName}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#2e7d32]">@{profile?.displayName || 'No definido'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tipo de Inversor</p><p className="font-bold text-[#2e7d32] flex items-center gap-2"><Shield size={14} /> {profile?.investorType ? INVESTOR_TYPE_LABELS[profile.investorType] : '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#72B626]">@{profile?.displayName || 'No definido'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tipo de Inversor</p><p className="font-bold text-[#72B626] flex items-center gap-2"><Shield size={14} /> {profile?.investorType ? INVESTOR_TYPE_LABELS[profile.investorType] : '-'}</p></div>
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tax ID</p><p className="font-bold text-[#1c2b1e]">{profile?.taxId || '-'}</p></div>
                         <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Biografía</p><p className="text-slate-600 leading-relaxed">{profile?.bio || 'Sin biografía.'}</p></div>
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><MapPin size={20} strokeWidth={2.5} /></div>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><MapPin size={20} strokeWidth={2.5} /></div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación</h3>
                         </div>
-                        <button onClick={() => setModalType('address')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('address')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">País</p><p className="font-bold text-[#1c2b1e]">{profile?.country || '-'}</p></div>
@@ -191,13 +191,13 @@ export function InvestorProfilePage() {
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-[32px] border border-emerald-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-emerald-50 text-[#2e7d32] rounded-xl flex items-center justify-center"><Target size={20} strokeWidth={2.5} /></div>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><Target size={20} strokeWidth={2.5} /></div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Preferencias de Inversión</h3>
                         </div>
-                        <button onClick={() => setModalType('investment')} className="text-[#2e7d32] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
+                        <button onClick={() => setModalType('investment')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Inversión Mínima</p><p className="font-bold text-[#1c2b1e]">{profile?.minInvestment ? `$${profile.minInvestment.toLocaleString()}` : '-'}</p></div>
@@ -207,7 +207,7 @@ export function InvestorProfilePage() {
                             <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-3">Sectores de Interés</p>
                             <div className="flex flex-wrap gap-2">
                               {profile.preferredCategories.map((cat, i) => (
-                                <span key={i} className="bg-emerald-50 text-[#2e7d32] border border-emerald-100 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider">{cat}</span>
+                                <span key={i} className="bg-green-50 text-[#72B626] border border-green-100 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider">{cat}</span>
                               ))}
                             </div>
                           </div>
@@ -218,9 +218,9 @@ export function InvestorProfilePage() {
                 ) : activeTab === 'capital' ? (
                   <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
                 ) : (
-                  <div className="bg-white rounded-[50px] shadow-sm border border-emerald-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
-                    <div className="text-emerald-100 mb-6 flex justify-center">
+                  <div className="bg-white rounded-[50px] shadow-sm border border-green-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
+                    <div className="text-green-100 mb-6 flex justify-center">
                       {activeTab === 'conversations' ? <MessageSquare size={80} strokeWidth={1} /> : <FolderOpen size={80} strokeWidth={1} />}
                     </div>
                     <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">

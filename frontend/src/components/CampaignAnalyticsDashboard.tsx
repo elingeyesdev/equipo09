@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -139,12 +139,12 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
       {/* ── TOP SECTION: PROJECTION WIDGET ── */}
       <div className="bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
         {/* Decorative background aura */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-60 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-60 pointer-events-none" />
         
         <div className="flex items-center gap-5 relative z-10">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ring-4 ${
             projection.status === 'success'
-              ? 'bg-emerald-50 text-emerald-600 ring-emerald-500/10'
+              ? 'bg-green-50 text-emerald-600 ring-green-500/10'
               : projection.status === 'active'
                 ? 'bg-indigo-50 text-indigo-600 ring-indigo-500/10 animate-pulse'
                 : 'bg-amber-50 text-amber-600 ring-amber-500/10'
@@ -180,7 +180,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
             </div>
           )}
           {projection.status === 'success' && (
-            <div className="bg-emerald-600/5 border border-emerald-100 rounded-2xl px-6 py-3.5 text-center">
+            <div className="bg-emerald-600/5 border border-green-100 rounded-2xl px-6 py-3.5 text-center">
               <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Meta</span>
               <span className="text-2xl font-black text-emerald-600 tracking-tight">100% Alcanzado</span>
             </div>
@@ -194,7 +194,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
         <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#2e7d32] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-green-50 text-[#72B626] flex items-center justify-center">
                 <TrendingUp size={20} strokeWidth={2.5} />
               </div>
               <div>
@@ -319,7 +319,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
       {/* ── BOTTOM STATS ROW: AUDIT INFO ── */}
       <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 border border-slate-100 rounded-[24px] p-5 gap-4">
         <div className="flex items-center gap-3 text-slate-500">
-          <ShieldCheck size={18} className="text-emerald-500" />
+          <ShieldCheck size={18} className="text-green-500" />
           <span className="text-[11px] font-black uppercase tracking-wider">Metas Económicas Reguladas en Tiempo Real</span>
         </div>
         <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm text-[11px] font-bold text-slate-600">

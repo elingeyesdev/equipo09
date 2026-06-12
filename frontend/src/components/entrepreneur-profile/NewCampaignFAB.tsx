@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+﻿import { Plus } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | null;
 

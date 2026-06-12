@@ -1,4 +1,4 @@
-import type { CapitalOverview } from '../types/investor.types';
+﻿import type { CapitalOverview } from '../types/investor.types';
 import { Link } from 'react-router-dom';
 import { 
   AlertTriangle, 
@@ -42,7 +42,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#d4f0a0]/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-transform duration-1000 group-hover:scale-150" />
           
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#a5d6a7] border border-white/10 group-hover:scale-110 transition-transform duration-500">
+            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#a8d97c] border border-white/10 group-hover:scale-110 transition-transform duration-500">
               <Wallet size={28} strokeWidth={2.5} />
             </div>
             {hasMaxConfigured && onAddCapital && (
@@ -122,7 +122,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
       {!hasMaxConfigured && (
         <div className="bg-[#1c2b1e] border border-[#1c2b1e] p-6 rounded-[24px] flex flex-col sm:flex-row sm:items-center gap-5 animate-in slide-in-from-top-4 duration-700 shadow-xl shadow-[#1c2b1e]/20/10 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#72B626]/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#a5d6a7] shrink-0 border border-white/5 relative z-10">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#a8d97c] shrink-0 border border-white/5 relative z-10">
              <AlertTriangle size={24} strokeWidth={2.5} />
           </div> 
           <div className="flex-1 relative z-10">

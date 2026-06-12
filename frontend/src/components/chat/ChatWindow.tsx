@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { Send, ArrowLeft, Rocket, Loader2 } from 'lucide-react';
 import type { Conversation, Message } from '../../api/chat.api';
 import { getMessages } from '../../api/chat.api';
@@ -214,7 +214,7 @@ export function ChatWindow({
         {conversation.campaignId && (
           <Link
             to={`/campaign/${conversation.campaignId}`}
-            className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg no-underline transition-colors max-w-[160px] truncate"
+            className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg no-underline transition-colors max-w-[160px] truncate"
           >
             <Rocket size={12} />
             <span className="truncate">{conversation.campaignTitle ?? 'Ver campaña'}</span>
@@ -251,7 +251,7 @@ export function ChatWindow({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 py-20">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-50 flex items-center justify-center text-emerald-300">
+            <div className="w-16 h-16 rounded-3xl bg-green-50 flex items-center justify-center text-emerald-300">
               <Send size={28} strokeWidth={1.5} />
             </div>
             <p className="text-[14px] font-bold text-slate-400">¡Sé el primero en escribir!</p>
@@ -302,7 +302,7 @@ export function ChatWindow({
                       <div
                         className={`px-3 py-1.5 text-[13.5px] leading-relaxed whitespace-pre-wrap break-words shadow-sm
                           ${isMe
-                            ? 'bg-[#E6F9F0] text-[#017A42] rounded-lg rounded-tr-none border border-emerald-100/50'
+                            ? 'bg-[#f5fce8] text-[#4a7f1a] rounded-lg rounded-tr-none border border-green-100/50'
                             : 'bg-white text-gray-800 rounded-lg rounded-tl-none border border-gray-100'
                           }`}
                       >
@@ -360,7 +360,7 @@ export function ChatWindow({
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="shrink-0 w-8 h-8 rounded bg-[#02A95C] hover:bg-[#017A42] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer border-none shadow-sm"
+            className="shrink-0 w-8 h-8 rounded bg-[#72B626] hover:bg-[#4a7f1a] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer border-none shadow-sm"
           >
             <Send size={14} />
           </button>

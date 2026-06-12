@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
@@ -35,7 +35,7 @@ import { shareCampaignUrl } from '../utils/share.utils';
 const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
   reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#2e7d32' },
+  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
 };
 
 function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick?: () => void }) {
@@ -62,7 +62,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
       className="bg-white rounded-xl border border-gray-200 overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col cursor-pointer">
 
       {/* Cover Image */}
-      <div className="relative h-48 bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] overflow-hidden">
+      <div className="relative h-48 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] overflow-hidden">
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -108,7 +108,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
             e.stopPropagation();
             shareCampaignUrl(campaign.id, campaign.title);
           }}
-          className="absolute bottom-4 right-4 w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-slate-700 hover:bg-[#2e7d32] hover:text-white transition-all shadow-lg shadow-black/10 active:scale-90 border-none cursor-pointer group/share"
+          className="absolute bottom-4 right-4 w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-slate-700 hover:bg-[#72B626] hover:text-white transition-all shadow-lg shadow-black/10 active:scale-90 border-none cursor-pointer group/share"
           title="Compartir Campaña"
         >
           <Share2 size={14} strokeWidth={2.5} className="group-hover/share:rotate-12 transition-transform" />
@@ -127,7 +127,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
       <div className="p-4 flex-1 flex flex-col gap-3">
         {/* Entrepreneur info */}
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-[#02A95C]/10 flex items-center justify-center text-[#02A95C] text-[10px] font-bold overflow-hidden shrink-0">
+          <div className="w-7 h-7 rounded-full bg-[#72B626]/10 flex items-center justify-center text-[#72B626] text-[10px] font-bold overflow-hidden shrink-0">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -152,7 +152,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         </div>
 
         {/* Title */}
-        <h3 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-[#02A95C] transition-colors">
+        <h3 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-[#72B626] transition-colors">
           {campaign.title}
         </h3>
 
@@ -178,7 +178,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${progress}%`,
-                background: progress >= 100 ? '#F59E0B' : '#02A95C',
+                background: progress >= 100 ? '#F59E0B' : '#72B626',
               }}
             />
           </div>
@@ -187,8 +187,8 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         {/* Stats */}
         <div className="flex items-center justify-between text-[12px] text-gray-400 pt-2 border-t border-gray-100">
           <div className="flex items-center gap-1">
-            <Target size={12} strokeWidth={2} style={{ color: '#02A95C' }} />
-            <span className="font-semibold" style={{ color: '#02A95C' }}>{progress}%</span>
+            <Target size={12} strokeWidth={2} style={{ color: '#72B626' }} />
+            <span className="font-semibold" style={{ color: '#72B626' }}>{progress}%</span>
           </div>
           <div className="flex items-center gap-1">
             <Users size={12} strokeWidth={2} />
@@ -342,7 +342,7 @@ export function ExploreCampaignsPage() {
       {/* Hero Section */}
       <div className={`bg-white border-b border-gray-200 relative transition-[z-index] ${showSuggestions ? 'z-40' : 'z-0'}`}>
         <div className="max-w-[1200px] mx-auto px-6 py-12 relative z-10 text-center">
-          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#E6F9F0] text-[#017A42] mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#f5fce8] text-[#4a7f1a] mb-4">
             Proyectos verificados
           </span>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
@@ -358,7 +358,7 @@ export function ExploreCampaignsPage() {
               <div className="flex-1 relative">
                 <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />
                 {suggestionsLoading && (
-                  <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 animate-spin z-10" strokeWidth={2.5} />
+                  <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin z-10" strokeWidth={2.5} />
                 )}
                 <input
                   ref={inputRef}
@@ -373,7 +373,7 @@ export function ExploreCampaignsPage() {
                   }}
                   onKeyDown={handleSearchKeyDown}
                   placeholder="Buscar campañas por nombre o descripción..."
-                  className="w-full pl-12 pr-10 py-4 rounded-xl bg-white border border-gray-300 text-[15px] outline-none focus:border-[#02A95C] focus:ring-3 focus:ring-[#02A95C]/10 placeholder:text-gray-400 shadow-sm"
+                  className="w-full pl-12 pr-10 py-4 rounded-xl bg-white border border-gray-300 text-[15px] outline-none focus:border-[#72B626] focus:ring-3 focus:ring-[#72B626]/10 placeholder:text-gray-400 shadow-sm"
                   autoComplete="off"
                   role="combobox"
                   aria-expanded={showSuggestions}
@@ -384,9 +384,9 @@ export function ExploreCampaignsPage() {
               <button
                 type="submit"
                 className="px-7 py-4 rounded-xl font-semibold text-[15px] text-white border-none cursor-pointer transition-all active:scale-95"
-                style={{ background: '#02A95C', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#017A42')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#02A95C')}
+                style={{ background: '#72B626', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#4a7f1a')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#72B626')}
               >
                 Buscar
               </button>
@@ -395,7 +395,7 @@ export function ExploreCampaignsPage() {
             {/* ── Suggestions Dropdown ── */}
             {showSuggestions && (
               <div
-                className="absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/15 border border-emerald-100/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/15 border border-green-100/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                 role="listbox"
               >
                 {suggestions.length === 0 && !suggestionsLoading ? (
@@ -428,14 +428,14 @@ export function ExploreCampaignsPage() {
                           role="option"
                           aria-selected={isSelected}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 text-left transition-all cursor-pointer border-none ${isSelected
-                            ? 'bg-emerald-50/80'
+                            ? 'bg-green-50/80'
                             : 'bg-transparent hover:bg-slate-50/80'
                             }`}
                           onClick={() => handleSuggestionClick(s.id)}
                           onMouseEnter={() => setSelectedIndex(idx)}
                         >
                           {/* Thumbnail */}
-                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-[#1c2b1e] to-[#2e7d32] shrink-0 shadow-sm">
+                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-[#1c2b1e] to-[#72B626] shrink-0 shadow-sm">
                             {thumbUrl ? (
                               <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -451,7 +451,7 @@ export function ExploreCampaignsPage() {
                               {s.title}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[10px] font-black text-white bg-[#2e7d32]/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                              <span className="text-[10px] font-black text-white bg-[#72B626]/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
                                 {s.categoryName}
                               </span>
                               <span className="text-[11px] font-medium text-slate-400 truncate">
@@ -467,18 +467,18 @@ export function ExploreCampaignsPage() {
                                     width: `${progress}%`,
                                     background: progress >= 100
                                       ? 'linear-gradient(90deg, #f9a825, #ff6f00)'
-                                      : 'linear-gradient(90deg, #a5d6a7, #2e7d32)',
+                                      : 'linear-gradient(90deg, #a8d97c, #72B626)',
                                   }}
                                 />
                               </div>
-                              <span className="text-[10px] font-black text-[#2e7d32] shrink-0">
+                              <span className="text-[10px] font-black text-[#72B626] shrink-0">
                                 {progress}%
                               </span>
                             </div>
                           </div>
 
                           {/* Arrow indicator */}
-                          <ArrowRight size={14} strokeWidth={2.5} className={`shrink-0 transition-all ${isSelected ? 'text-[#2e7d32] translate-x-0.5' : 'text-slate-300'
+                          <ArrowRight size={14} strokeWidth={2.5} className={`shrink-0 transition-all ${isSelected ? 'text-[#72B626] translate-x-0.5' : 'text-slate-300'
                             }`} />
                         </button>
                       );
@@ -487,7 +487,7 @@ export function ExploreCampaignsPage() {
                     {/* "Ver todos" footer */}
                     <button
                       type="button"
-                      className="w-full px-4 py-3 text-center border-t border-slate-50 text-[12px] font-black text-[#2e7d32] uppercase tracking-widest hover:bg-emerald-50/50 transition-all cursor-pointer border-x-0 border-b-0 bg-transparent flex items-center justify-center gap-2"
+                      className="w-full px-4 py-3 text-center border-t border-slate-50 text-[12px] font-black text-[#72B626] uppercase tracking-widest hover:bg-green-50/50 transition-all cursor-pointer border-x-0 border-b-0 bg-transparent flex items-center justify-center gap-2"
                       onClick={() => {
                         setShowSuggestions(false);
                         updateFilters({ q: searchInput || undefined });
@@ -515,8 +515,8 @@ export function ExploreCampaignsPage() {
                 key={tf.value}
                 onClick={() => updateFilters({ campaignType: tf.value || undefined })}
                 className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${(filters.campaignType || '') === tf.value
-                  ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                  ? 'bg-[#72B626] text-white shadow-lg shadow-green-500/20'
+                  : 'bg-slate-50 text-slate-500 hover:bg-green-50 hover:text-[#72B626]'
                   }`}
               >
                 {tf.label}
@@ -550,8 +550,8 @@ export function ExploreCampaignsPage() {
               type="button"
               onClick={() => setShowCategoryDropdown(prev => !prev)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${filters.categoryId
-                ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                : 'bg-slate-50 text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32]'
+                ? 'bg-[#72B626] text-white shadow-lg shadow-green-500/20'
+                : 'bg-slate-50 text-slate-500 hover:bg-green-50 hover:text-[#72B626]'
                 }`}
             >
               <LayoutGrid size={14} strokeWidth={2.5} />
@@ -562,7 +562,7 @@ export function ExploreCampaignsPage() {
             </button>
 
             {showCategoryDropdown && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-emerald-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-green-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <div className="max-h-[220px] overflow-y-auto">
                   {/* "Todos" option */}
                   <button
@@ -572,12 +572,12 @@ export function ExploreCampaignsPage() {
                       setShowCategoryDropdown(false);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${!filters.categoryId
-                      ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                      ? 'bg-green-50 text-[#72B626] font-black'
                       : 'bg-transparent text-slate-600 hover:bg-slate-50'
                       }`}
                   >
                     <span className="flex-1">Todos los sectores</span>
-                    {!filters.categoryId && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
+                    {!filters.categoryId && <Check size={14} strokeWidth={3} className="text-[#72B626]" />}
                   </button>
 
                   {/* Divider */}
@@ -595,12 +595,12 @@ export function ExploreCampaignsPage() {
                           setShowCategoryDropdown(false);
                         }}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${isActive
-                          ? 'bg-emerald-50 text-[#2e7d32] font-black'
+                          ? 'bg-green-50 text-[#72B626] font-black'
                           : 'bg-transparent text-slate-600 hover:bg-slate-50'
                           }`}
                       >
                         <span className="flex-1">{cat.displayName}</span>
-                        {isActive && <Check size={14} strokeWidth={3} className="text-[#2e7d32]" />}
+                        {isActive && <Check size={14} strokeWidth={3} className="text-[#72B626]" />}
                       </button>
                     );
                   })}
@@ -618,7 +618,7 @@ export function ExploreCampaignsPage() {
                 const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
                 updateFilters({ sortBy, sortOrder });
               }}
-              className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-emerald-500/20"
+              className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-green-500/20"
             >
               {sortOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -646,7 +646,7 @@ export function ExploreCampaignsPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-[28px] shadow-sm border border-emerald-50 overflow-hidden flex flex-col animate-pulse"
+                className="bg-white rounded-[28px] shadow-sm border border-green-50 overflow-hidden flex flex-col animate-pulse"
               >
                 {/* Cover image skeleton */}
                 <div className="h-48 bg-slate-200 relative">
@@ -715,7 +715,7 @@ export function ExploreCampaignsPage() {
                 setSearchInput('');
                 updateFilters({ q: undefined, campaignType: undefined, categoryId: undefined });
               }}
-              className="text-[#2e7d32] font-black text-[13px] uppercase tracking-widest hover:underline cursor-pointer border-none bg-transparent"
+              className="text-[#72B626] font-black text-[13px] uppercase tracking-widest hover:underline cursor-pointer border-none bg-transparent"
             >
               Limpiar filtros
             </button>
@@ -734,7 +734,7 @@ export function ExploreCampaignsPage() {
                 <button
                   onClick={() => goToPage(meta.currentPage - 1)}
                   disabled={meta.currentPage <= 1}
-                  className="w-12 h-12 bg-white rounded-xl shadow-sm border border-emerald-50 flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-[#2e7d32] transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer border-none"
+                  className="w-12 h-12 bg-white rounded-xl shadow-sm border border-green-50 flex items-center justify-center text-slate-400 hover:bg-green-50 hover:text-[#72B626] transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer border-none"
                 >
                   <ChevronLeft size={20} strokeWidth={2.5} />
                 </button>
@@ -749,8 +749,8 @@ export function ExploreCampaignsPage() {
                       <button
                         onClick={() => goToPage(page)}
                         className={`w-12 h-12 rounded-xl font-black text-[14px] transition-all active:scale-95 cursor-pointer border-none ${page === meta.currentPage
-                          ? 'bg-[#2e7d32] text-white shadow-lg shadow-emerald-500/20'
-                          : 'bg-white text-slate-500 hover:bg-emerald-50 hover:text-[#2e7d32] shadow-sm'
+                          ? 'bg-[#72B626] text-white shadow-lg shadow-green-500/20'
+                          : 'bg-white text-slate-500 hover:bg-green-50 hover:text-[#72B626] shadow-sm'
                           }`}
                       >
                         {page}
@@ -761,7 +761,7 @@ export function ExploreCampaignsPage() {
                 <button
                   onClick={() => goToPage(meta.currentPage + 1)}
                   disabled={meta.currentPage >= meta.totalPages}
-                  className="w-12 h-12 bg-white rounded-xl shadow-sm border border-emerald-50 flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-[#2e7d32] transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer border-none"
+                  className="w-12 h-12 bg-white rounded-xl shadow-sm border border-green-50 flex items-center justify-center text-slate-400 hover:bg-green-50 hover:text-[#72B626] transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer border-none"
                 >
                   <ChevronRight size={20} strokeWidth={2.5} />
                 </button>

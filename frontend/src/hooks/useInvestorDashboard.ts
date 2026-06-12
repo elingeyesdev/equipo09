@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { getCapitalOverview, getMyInvestments } from '../api/investor.api';
 import type { CapitalOverview } from '../types/investor.types';
 import type { InvestmentHistoryItem } from '../api/investor.api';

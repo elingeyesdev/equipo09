@@ -1,11 +1,11 @@
-/* Admin Styles - Dark Mode & Premium Aesthetics */
+﻿/* Admin Styles - Dark Mode & Premium Aesthetics */
 
 .admin-layout {
   display: flex;
   min-height: 100vh;
   background-color: #0c0e12;
   color: #f1f5f9;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 .admin-sidebar {

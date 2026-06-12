@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import type { EntrepreneurProfile, CreateEntrepreneurProfileDto } from '../types/entrepreneur.types';
 import { KYCUploadModal } from './KYCUploadModal';
 

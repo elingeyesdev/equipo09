@@ -1,4 +1,4 @@
-export interface DashboardStats {
+﻿export interface DashboardStats {
   totalUsers: number;
   totalCampaigns: number;
   totalFunded: number;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utility to normalize and safe-check image URLs.
  * Handles backend absolute paths, external URLs, and missing values.
  */
