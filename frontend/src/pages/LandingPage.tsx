@@ -10,7 +10,7 @@ import type { Category } from '../types/category.types';
 import {
   Rocket, Search, Heart, Gem, TrendingUp, Users, Target, Calendar,
   Shield, Zap, ChevronRight, ArrowRight, LayoutGrid,
-  CheckCircle2, Sparkles, Globe, Lock, Flame, Star, DollarSign,
+  CheckCircle2, Sparkles, Globe, Lock, Flame, Star,
   Play, Share2, MessageSquare,
   ChevronUp, ChevronDown,
 } from 'lucide-react';
@@ -25,12 +25,6 @@ const CAMPAIGN_TYPE = {
   reward: { label: 'Recompensa', icon: Gem, color: '#f9a825', bg: '#fff8e1' },
   equity: { label: 'Equity', icon: TrendingUp, color: GREEN, bg: '#f0f9e0' },
 };
-
-function formatCurrency(n: number) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}k`;
-  return `$${n.toLocaleString()}`;
-}
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 const HERO_FALLBACKS = [
@@ -77,11 +71,6 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
 
           {/* Left copy */}
           <div className="pb-14">
-            <span className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-6"
-              style={{ background: '#f0f9e0', color: GREEN }}>
-              <Sparkles size={11} strokeWidth={3} />
-              Plataforma de crowdfunding #1 de Bolivia
-            </span>
 
             <h1 className="text-[40px] md:text-[52px] lg:text-[60px] font-black text-gray-900 leading-[1.05] tracking-tight mb-5">
               Donde comienzan<br />
@@ -168,37 +157,7 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
   );
 }
 
-// ─── Stats bar ────────────────────────────────────────────────────────────────
-function StatsBar({ totalCampaigns, totalAmount }: { totalCampaigns: number; totalAmount: number }) {
-  const stats = [
-    { label: 'Campañas lanzadas', value: totalCampaigns > 0 ? `${totalCampaigns}+` : '—', icon: Rocket, color: GREEN },
-    { label: 'Total recaudado', value: totalAmount > 0 ? formatCurrency(totalAmount) : '—', icon: DollarSign, color: '#72B626' },
-    { label: 'Inversores activos', value: '100+', icon: Users, color: '#1565c0' },
-    { label: 'Tasa de éxito', value: '94%', icon: TrendingUp, color: UNI },
-  ];
-  return (
-    <section className="bg-[#f7f9f7] py-6">
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-50">
-          {stats.map(s => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} className="flex flex-col items-center justify-center py-7 px-4 gap-1 hover:bg-gray-50/50 transition-colors rounded-3xl">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-1.5" style={{ backgroundColor: `${s.color}15` }}>
-                  <Icon size={18} strokeWidth={2} style={{ color: s.color }} />
-                </div>
-                <p className="text-[26px] font-black text-gray-900 tracking-tight">{s.value}</p>
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest text-center">{s.label}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-// ─── Featured Campaigns ───────────────────────────────────────────────────────
 function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
   const navigate = useNavigate();
   const progress = campaign.goalAmount > 0
@@ -275,7 +234,7 @@ function FeaturedCampaignsSection({ campaigns, loading }: { campaigns: PublicCam
         <div className="flex items-end justify-between mb-10">
           <div>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3" style={{ background: '#f0f9e0', color: GREEN }}>
-              <Star size={11} strokeWidth={3} /> Destacadas
+              Destacadas
             </span>
             <h2 className="text-[30px] md:text-[38px] font-black text-gray-900 tracking-tight leading-tight">
               Campañas con más<br />financiamiento
@@ -401,7 +360,7 @@ function HowItWorksSection() {
           {/* Steps list */}
           <div className="order-1 lg:order-2">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-5" style={{ background: '#f0f9e0', color: GREEN }}>
-              <Zap size={11} strokeWidth={3} /> Simple y rápido
+              Simple y rápido
             </span>
             <h2 className="text-[30px] md:text-[38px] font-black text-gray-900 tracking-tight leading-tight mb-10">
               Recaudar fondos es fácil,<br />eficaz y de confianza.
@@ -433,14 +392,13 @@ function HowItWorksSection() {
   );
 }
 
-// ─── Yellow "Te ayudamos" section ─────────────────────────────────────────────
 function YellowHelpSection() {
   return (
     <section className="py-20 bg-gray-50 border-y border-gray-100">
       <div className="max-w-[800px] mx-auto px-6 text-center">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full mb-5 bg-white border border-gray-200"
           style={{ color: UNI }}>
-          <Heart size={11} strokeWidth={2.5} /> Te ayudamos.
+          Te ayudamos
         </span>
         <h2 className="text-[28px] md:text-[38px] font-bold text-gray-900 tracking-tight leading-tight mb-5">
           Consigue lo que necesitas para que tu<br className="hidden md:block" /> campaña tenga éxito.
@@ -465,7 +423,6 @@ function YellowHelpSection() {
   );
 }
 
-// ─── DonaTok Preview ─────────────────────────────────────────────────────────
 const DONATOKS_COLORS = ['#1c2b1e', '#0d2137', '#1a1a2e', '#1c1c1e', '#0a1628'];
 
 function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
@@ -481,7 +438,6 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
     return () => clearInterval(timer);
   }, [items.length, isPaused]);
 
-  // Valores fijos para evitar que cambien en cada render
   const mockStats = items.map((_, i) => ({
     likes: [327, 184, 512, 96, 241][i % 5],
     comments: [42, 17, 88, 9, 63][i % 5],
@@ -885,14 +841,12 @@ export function LandingPage() {
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
     fetchPublicCampaigns({ limit: 8, sortBy: 'current_amount', sortOrder: 'DESC' })
       .then(res => {
         setFeaturedCampaigns(res.data);
         setTotalCampaigns(res.meta.totalItems);
-        setTotalAmount(res.data.reduce((acc, c) => acc + c.currentAmount, 0));
       })
       .catch(() => { })
       .finally(() => setCampaignsLoading(false));
@@ -904,7 +858,6 @@ export function LandingPage() {
     <div>
       <Navbar />
       <HeroSection totalCampaigns={totalCampaigns} campaigns={featuredCampaigns} />
-      <StatsBar totalCampaigns={totalCampaigns} totalAmount={totalAmount} />
       <FeaturedCampaignsSection campaigns={featuredCampaigns.slice(0, 6)} loading={campaignsLoading} />
       <HowItWorksSection />
       <YellowHelpSection />
