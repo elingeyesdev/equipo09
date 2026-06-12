@@ -26,8 +26,11 @@ export function Navbar({ socket }: NavbarProps) {
         const conversations = await getMyConversations();
         const count = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
         setUnreadCount(count);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching unread count', err);
+        if (err?.response?.status === 401) {
+          handleLogout();
+        }
       }
     };
     fetchUnread();
