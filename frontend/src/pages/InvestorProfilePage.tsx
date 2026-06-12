@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Navbar } from '../components/Navbar';
@@ -12,7 +12,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  MessageSquare,
   User,
   MapPin,
   Shield,
@@ -221,16 +220,13 @@ export function InvestorProfilePage() {
                   <div className="bg-white rounded-[50px] shadow-sm border border-green-50 p-12 text-center text-slate-400 py-32 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-[100px] -mr-32 -mt-32 opacity-50"></div>
                     <div className="text-green-100 mb-6 flex justify-center">
-                      {activeTab === 'conversations' ? <MessageSquare size={80} strokeWidth={1} /> : <FolderOpen size={80} strokeWidth={1} />}
+                      <FolderOpen size={80} strokeWidth={1} />
                     </div>
                     <h3 className="text-2xl font-black text-[#1c2b1e] tracking-tight mb-3 uppercase tracking-widest">
-                      {activeTab === 'conversations' ? 'Centro de Conversaciones' : 'Módulo en Desarrollo'}
+                      Módulo en Desarrollo
                     </h3>
                     <p className="max-w-md mx-auto text-[15px] font-medium leading-relaxed text-slate-500">
-                      {activeTab === 'conversations'
-                        ? 'Módulo de comunicación directa con emprendedores encriptado. Se activará tras tu primera inversión.'
-                        : 'Este módulo estará disponible próximamente para fortalecer la transparencia de tu perfil corporativo.'
-                      }
+                      Este módulo estará disponible próximamente para fortalecer la transparencia de tu perfil corporativo.
                     </p>
                   </div>
                 )}

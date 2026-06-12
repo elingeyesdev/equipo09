@@ -1,4 +1,4 @@
-﻿import type { CapitalOverview } from '../types/investor.types';
+import type { CapitalOverview } from '../types/investor.types';
 import { Link } from 'react-router-dom';
 import { 
   AlertTriangle, 
@@ -35,7 +35,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
 
   return (
     <div className="flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif]">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Capital Disponible */}
         <div className={`${cardClass} col-span-1 sm:col-span-2 lg:col-span-2 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] border-none !shadow-[#1c2b1e]/20/20`}>
@@ -73,17 +73,6 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
             {formatCurrency(data.totalInvested || 0)}
           </div>
           <div className={labelClass}>Total Invertido</div>
-        </div>
-
-        {/* Monto Pendiente */}
-        <div className={cardClass}>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-400 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors duration-500">
-            <Clock size={24} strokeWidth={2.5} />
-          </div>
-          <div className={`${valueClass} text-[#1c2b1e]`}>
-            {formatCurrency(data.pendingAmount || 0)}
-          </div>
-          <div className={labelClass}>Monto Pendiente</div>
         </div>
 
         {/* Inversiones */}

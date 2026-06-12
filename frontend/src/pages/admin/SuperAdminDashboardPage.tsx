@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getAllAdmins, createAdmin, deleteAdmin } from '../../api/admin.api';
 import type { AdminUser } from '../../types/admin.types';
@@ -15,6 +15,8 @@ export function SuperAdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [creds, setCreds] = useState({ email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -50,13 +52,19 @@ export function SuperAdminDashboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(null);
     try {
       setIsSubmitting(true);
       await createAdmin(creds);
       setCreds({ email: '', password: '' });
+      setSubmitSuccess('Administrador creado con éxito.');
       await loadData();
     } catch(err: any) {
-        console.error(err);
+      console.error(err);
+      const apiMsg = err.response?.data?.message;
+      const formattedMsg = Array.isArray(apiMsg) ? apiMsg.join(', ') : apiMsg;
+      setSubmitError(formattedMsg || 'Error al intentar crear el administrador.');
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +118,20 @@ export function SuperAdminDashboardPage() {
               <ShieldCheck className="text-[#72B626]" size={20} />
               Acceso Institucional
            </h2>
+
+           {submitError && (
+             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium relative z-10 flex items-start gap-2">
+               <ShieldAlert className="shrink-0 text-red-500" size={16} />
+               <span>{submitError}</span>
+             </div>
+           )}
+
+           {submitSuccess && (
+             <div className="mb-4 p-3 bg-green-50 border border-green-200 text-emerald-700 text-xs rounded-lg font-medium relative z-10 flex items-start gap-2">
+               <ShieldCheck className="shrink-0 text-[#72B626]" size={16} />
+               <span>{submitSuccess}</span>
+             </div>
+           )}
            
            <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
             <div className="flex flex-col">

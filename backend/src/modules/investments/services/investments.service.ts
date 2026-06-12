@@ -71,88 +71,116 @@ export class InvestmentsService {
       throw new NotFoundException('Inversión no encontrada o no pertenece a este usuario.');
     }
 
-    // Configurar el documento sin márgenes iniciales para poder pintar la cabecera de lado a lado
+    // Ruta al logo (relativa al proyecto backend; ajustar si cambia el despliegue)
+    const path = require('path');
+    const fs = require('fs');
+    const logoPath = path.join(process.cwd(), '..', 'frontend', 'public', 'logocrowd.jpg');
+
+    // Configurar el documento sin márgenes iniciales para cabecera a todo el ancho
     const doc = new PDFDocument({ margin: 0, size: 'A4' });
     const stream = new PassThrough();
     doc.pipe(stream);
 
-    // Paleta de colores de la aplicación (basada en el frontend)
-    const primaryGreen = '#2e7d32';
-    const darkGreen = '#1c2b1e';
-    const accentEmerald = '#00897b';
-    const bgApp = '#f4f7f4';
-    const limeDeco = '#aed581';
+    // ── Paleta de colores oficial ──
+    const GREEN      = '#72B626';  // Verde corporativo
+    const GREEN_DARK = '#4a7f1a';  // Verde oscuro (hover / acento)
+    const DARK       = '#1c2b1e';  // Casi negro
+    const LIGHT_BG   = '#f5fce8';  // Fondo suave verde claro
 
-    // Cabecera con fondo verde
-    doc.rect(0, 0, doc.page.width, 140).fill(primaryGreen);
-    
-    // Título en la cabecera
-    doc.fillColor('#ffffff').fontSize(28).font('Helvetica-Bold').text('CROWDFUNDING', 0, 50, { align: 'center' });
-    doc.fontSize(14).font('Helvetica').text('Comprobante Oficial de Inversión', 0, 85, { align: 'center' });
-    
-    // Línea decorativa
-    doc.rect(0, 135, doc.page.width, 5).fill(limeDeco);
+    // ── Cabecera ──
+    doc.rect(0, 0, doc.page.width, 130).fill(DARK);
 
-    // Ajustar márgenes para el resto del documento
-    const marginX = 50;
-    let currentY = 180;
+    // Logo (si existe)
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, 50, 20, { height: 90, fit: [200, 90] });
+    } else {
+      // Fallback: texto de marca
+      doc.fillColor(GREEN).fontSize(26).font('Helvetica-Bold').text('Unifundme', 50, 50);
+    }
 
-    // Función auxiliar para dibujar secciones
+    // Título del comprobante alineado a la derecha
+    doc.fillColor('#ffffff')
+       .fontSize(13)
+       .font('Helvetica-Bold')
+       .text('COMPROBANTE DE INVERSIÓN', 0, 52, { align: 'right', width: doc.page.width - 50 });
+    doc.fillColor(GREEN)
+       .fontSize(10)
+       .font('Helvetica')
+       .text('Documento oficial generado automáticamente', 0, 71, { align: 'right', width: doc.page.width - 50 });
+
+    // Línea decorativa inferior de la cabecera
+    doc.rect(0, 125, doc.page.width, 5).fill(GREEN);
+
+    // ── Cuerpo del documento ──
+    const marginX  = 50;
+    let   currentY = 165;
+
+    // Función: título de sección
     const drawSectionTitle = (title: string, y: number) => {
-      doc.fillColor(primaryGreen).fontSize(16).font('Helvetica-Bold').text(title, marginX, y);
-      doc.moveTo(marginX, y + 22).lineTo(doc.page.width - marginX, y + 22).lineWidth(1.5).stroke(accentEmerald);
-      return y + 40;
+      doc.fillColor(GREEN).fontSize(12).font('Helvetica-Bold').text(title.toUpperCase(), marginX, y, { characterSpacing: 1 });
+      doc.moveTo(marginX, y + 18)
+         .lineTo(doc.page.width - marginX, y + 18)
+         .lineWidth(1)
+         .stroke(GREEN_DARK);
+      return y + 36;
     };
 
-    const drawRow = (label: string, value: string, y: number, isBoldValue: boolean = false) => {
-      doc.fillColor(darkGreen).fontSize(11).font('Helvetica-Bold').text(label, marginX, y);
-      doc.fillColor(darkGreen).fontSize(11).font(isBoldValue ? 'Helvetica-Bold' : 'Helvetica').text(value, marginX + 160, y, {
-        width: doc.page.width - marginX * 2 - 160,
-        align: 'left'
-      });
-      // Calcular el salto de línea necesario si el texto es muy largo
-      const height = doc.heightOfString(value, { width: doc.page.width - marginX * 2 - 160 });
-      return y + Math.max(25, height + 10);
+    // Función: fila de dato
+    const drawRow = (label: string, value: string, y: number, boldValue: boolean = false) => {
+      doc.fillColor('#555555').fontSize(10).font('Helvetica-Bold').text(label, marginX, y);
+      doc.fillColor(DARK).fontSize(10).font(boldValue ? 'Helvetica-Bold' : 'Helvetica')
+         .text(value, marginX + 165, y, { width: doc.page.width - marginX * 2 - 165 });
+      const h = doc.heightOfString(value, { width: doc.page.width - marginX * 2 - 165 });
+      return y + Math.max(22, h + 8);
     };
 
-    // Detalles del Inversor
+    // ── Sección: Datos del Inversor ──
     currentY = drawSectionTitle('Datos del Inversor', currentY);
-    const investorName = details.investor_first_name ? `${details.investor_first_name} ${details.investor_last_name || ''}` : 'Usuario Anónimo';
+    const investorName = details.investor_first_name
+      ? `${details.investor_first_name} ${details.investor_last_name || ''}`.trim()
+      : 'Usuario Anónimo';
     currentY = drawRow('Nombre:', investorName, currentY);
     currentY = drawRow('Correo Electrónico:', details.investor_email, currentY);
-    
-    currentY += 15;
+    currentY += 18;
 
-    // Detalles de la Inversión
+    // ── Sección: Detalles de la Operación ──
     currentY = drawSectionTitle('Detalles de la Operación', currentY);
     currentY = drawRow('ID de Transacción:', details.investment_id, currentY);
-    currentY = drawRow('Fecha:', new Date(details.investment_date).toLocaleString(), currentY);
+    currentY = drawRow('Fecha:', new Date(details.investment_date).toLocaleString('es-BO', { timeZone: 'America/La_Paz' }), currentY);
     currentY = drawRow('Campaña:', `${details.campaign_title} (${details.campaign_type.toUpperCase()})`, currentY);
     if (details.reward_title) {
       currentY = drawRow('Recompensa:', details.reward_title, currentY);
     }
     currentY = drawRow('Estado:', details.investment_status.toUpperCase(), currentY, true);
+    currentY += 22;
 
-    currentY += 25;
-
-    // Resumen Financiero
+    // ── Sección: Resumen Financiero ──
     currentY = drawSectionTitle('Resumen Financiero', currentY);
-    
-    // Caja de fondo para el monto
-    doc.rect(marginX, currentY, doc.page.width - marginX * 2, 70).fill(bgApp);
-    doc.fillColor(darkGreen).fontSize(14).font('Helvetica-Bold').text('Monto Invertido', marginX + 25, currentY + 28);
-    doc.fillColor(primaryGreen).fontSize(22).font('Helvetica-Bold').text(`$${Number(details.amount).toLocaleString()} ${details.currency}`, marginX, currentY + 23, { align: 'right', width: doc.page.width - marginX * 2 - 25 });
 
-    // Pie de página
-    doc.fillColor('grey').fontSize(9).font('Helvetica-Oblique').text(
-      'Este documento es un comprobante digital generado automáticamente y no requiere firma manuscrita.', 
-      marginX, 
-      doc.page.height - 70, 
-      { align: 'center', width: doc.page.width - marginX * 2 }
-    );
+    // Caja de monto destacada
+    doc.rect(marginX, currentY, doc.page.width - marginX * 2, 74).fill(LIGHT_BG);
+    doc.rect(marginX, currentY, 6, 74).fill(GREEN); // barra lateral verde
+
+    doc.fillColor('#555555').fontSize(11).font('Helvetica-Bold')
+       .text('Monto Invertido', marginX + 22, currentY + 18);
+    doc.fillColor(GREEN).fontSize(24).font('Helvetica-Bold')
+       .text(`$${Number(details.amount).toLocaleString()} ${details.currency}`,
+             marginX + 22, currentY + 37,
+             { width: doc.page.width - marginX * 2 - 44, align: 'right' });
+
+    // ── Pie de página ──
+    const footerY = doc.page.height - 55;
+    doc.rect(0, footerY - 10, doc.page.width, 1).fill(GREEN);
+
+    doc.fillColor('#aaaaaa').fontSize(8).font('Helvetica')
+       .text('Unifundme · Plataforma de Crowdfunding', marginX, footerY, { align: 'left' });
+    doc.fillColor('#aaaaaa').fontSize(8).font('Helvetica-Oblique')
+       .text('Este documento es un comprobante digital generado automáticamente.', marginX, footerY + 14,
+             { align: 'center', width: doc.page.width - marginX * 2 });
+    doc.fillColor('#aaaaaa').fontSize(8).font('Helvetica')
+       .text(new Date().toLocaleDateString('es-BO'), marginX, footerY, { align: 'right', width: doc.page.width - marginX * 2 });
 
     doc.end();
-
     return stream;
   }
 }

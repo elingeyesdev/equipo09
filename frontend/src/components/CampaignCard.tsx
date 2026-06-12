@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { formatCampaignCurrency, computeFundingPercent, clampPercentForBar } from '../utils/campaignFunding';
 import {
@@ -28,6 +28,7 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string; bg: string; te
   in_review:     { label: 'En Revisión',dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
   rejected:      { label: 'Rechazada', dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
   completed:     { label: 'Finalizada', dot: '#6366f1', bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
+  failed:        { label: 'Fallida',    dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
 };
 
 export function CampaignCard({
@@ -266,21 +267,10 @@ export function CampaignCard({
               </button>
             )}
 
-            {/* Finalizar campaña — abre confirmación inline */}
-            {canFinalize && onFinalize && (
-              <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-[13px] transition-all active:scale-95 shadow-sm"
-                disabled={busy}
-                onClick={() => setShowFinalizeConfirm(true)}
-              >
-                <Flag size={15} /> {busy ? 'Finalizando…' : 'Finalizar Campaña'}
-              </button>
-            )}
-
             {/* Publicar Novedad */}
             {campaign.status === 'published' && onPublishUpdate && (
               <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 bg-green-50 text-emerald-800 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-green-100 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#72B626]/10 text-[#72B626] border border-[#72B626]/25 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-[#72B626]/20 cursor-pointer"
                 onClick={() => onPublishUpdate(campaign.id, campaign.title)}
               >
                 <Send size={14} /> Publicar Novedad
@@ -290,11 +280,21 @@ export function CampaignCard({
             {/* Compartir campaña activa */}
             {campaign.status === 'published' && (
               <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:opacity-90 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#72B626]/10 text-[#72B626] border border-[#72B626]/25 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-[#72B626]/20 cursor-pointer"
                 onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
-                style={{ background: 'linear-gradient(135deg, #72B626, #72B626)' }}
               >
                 <Share2 size={14} /> Compartir Campaña
+              </button>
+            )}
+
+            {/* Finalizar campaña — abre confirmación inline */}
+            {canFinalize && onFinalize && (
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[13px] transition-all active:scale-95 shadow-md shadow-red-200/50 cursor-pointer border-none"
+                disabled={busy}
+                onClick={() => setShowFinalizeConfirm(true)}
+              >
+                <Flag size={15} /> {busy ? 'Finalizando…' : 'Finalizar Campaña'}
               </button>
             )}
           </div>
@@ -342,7 +342,12 @@ export function CampaignCard({
               <div>
                 <p className="font-black text-[13px] text-amber-900 mb-0.5">¿Finalizar esta campaña?</p>
                 <p className="text-[12px] text-amber-700 font-medium leading-relaxed">
-                  Esta acción <span className="font-black">no se puede deshacer</span>. La campaña quedará cerrada y no recibirá más inversiones.
+                  Esta acción <span className="font-black">no se puede deshacer</span>. La campaña quedará cerrada.
+                  {campaign.currentAmount < campaign.goalAmount && (
+                    <span className="block mt-1.5 text-red-700 font-black">
+                      La meta no fue alcanzada. Todos los inversores recibirán un reembolso automático inmediato.
+                    </span>
+                  )}
                 </p>
               </div>
             </div>

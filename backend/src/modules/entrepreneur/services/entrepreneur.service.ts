@@ -556,18 +556,52 @@ export class EntrepreneurService {
    */
   async finalizeCampaign(userId: string, campaignId: string): Promise<EntrepreneurCampaign> {
     await this.ensureEntrepreneurProfile(userId);
-    const updated = await this.campaignRepo.finalize(campaignId, userId);
-    if (!updated) {
+
+    const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+    if (!campaign || campaign.status !== 'published') {
       throw new BadRequestException(
         'Solo se pueden finalizar campañas que estén publicadas (activas)'
       );
     }
-    await this.notificationsService.notifyCampaignFinalized({
-      entrepreneurUserId: userId,
-      campaignTitle: updated.title,
-      campaignId: updated.id,
-    });
-    return updated;
+
+    // Check if the campaign failed to reach its goal
+    if (campaign.currentAmount < campaign.goalAmount) {
+      // Refund all investors
+      const updated = await this.campaignRepo.failAndRefundCampaign(campaignId, userId);
+      if (!updated) throw new BadRequestException('Error al reembolsar la campaña');
+
+      // Notify all investors
+      const investorsData = await this.campaignRepo.getCampaignInvestors(campaignId, userId, { limit: 1000 });
+      for (const investor of investorsData.investors) {
+        await this.notificationsService.notifyInvestmentRefunded({
+          investorUserId: investor.userId,
+          campaignTitle: updated.title,
+          amount: investor.totalInvested,
+          currency: updated.currency
+        });
+      }
+
+      // Notify entrepreneur
+      await this.notificationsService.notifyCampaignFailed({
+        entrepreneurUserId: userId,
+        campaignTitle: updated.title,
+        campaignId: updated.id,
+      });
+
+      return updated;
+    } else {
+      // Normal completion
+      const updated = await this.campaignRepo.finalize(campaignId, userId);
+      if (!updated) throw new BadRequestException('Error al finalizar campaña');
+
+      await this.notificationsService.notifyCampaignFinalized({
+        entrepreneurUserId: userId,
+        campaignTitle: updated.title,
+        campaignId: updated.id,
+      });
+
+      return updated;
+    }
   }
 
   // =========================================================================

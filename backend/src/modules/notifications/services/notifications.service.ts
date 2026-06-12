@@ -268,4 +268,38 @@ export class NotificationsService {
       data: { approved: params.approved, reason: params.reason },
     });
   }
+
+  async notifyInvestmentRefunded(params: {
+    investorUserId: string;
+    campaignTitle: string;
+    amount: number;
+    currency: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.investorUserId,
+      typeCode: 'investment_refunded',
+      title: 'Inversión Reembolsada',
+      body: `La campaña "${params.campaignTitle}" fue cancelada o no alcanzó su meta. Se han devuelto ${params.amount} ${params.currency} a tu billetera.`,
+      referenceType: 'investment',
+      actionUrl: '/investor-dashboard',
+      data: { campaign_title: params.campaignTitle, amount: params.amount, currency: params.currency },
+    });
+  }
+
+  async notifyCampaignFailed(params: {
+    entrepreneurUserId: string;
+    campaignTitle: string;
+    campaignId: string;
+  }): Promise<void> {
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: 'campaign_failed',
+      title: 'Campaña Fallida',
+      body: `Has finalizado la campaña "${params.campaignTitle}" sin alcanzar la meta. Las inversiones han sido reembolsadas automáticamente.`,
+      referenceType: 'campaign',
+      referenceId: params.campaignId,
+      actionUrl: '/my-campaigns',
+      data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
+    });
+  }
 }

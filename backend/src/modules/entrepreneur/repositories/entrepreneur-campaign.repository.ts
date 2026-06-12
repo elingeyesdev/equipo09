@@ -736,6 +736,79 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     return this.findOneByCreatorId(campaignId, creatorId);
   }
 
+  async failAndRefundCampaign(campaignId: string, creatorId: string): Promise<EntrepreneurCampaign | null> {
+    return this.transaction(async (client) => {
+      // 1. Bloquear y verificar la campaña
+      const campaignRes = await client.query(
+        `SELECT id, status FROM campaigns WHERE id = $1 AND creator_id = $2 FOR UPDATE`,
+        [campaignId, creatorId]
+      );
+      if (campaignRes.rowCount === 0) return null;
+      const status = campaignRes.rows[0].status;
+
+      if (status !== 'published') {
+        throw new Error('Solo se pueden fallar/reembolsar campañas que estén publicadas.');
+      }
+
+      // 2. Bloquear y obtener todas las inversiones completadas de esta campaña
+      const investmentsRes = await client.query(
+        `SELECT id, investor_id, amount, reward_tier_id 
+         FROM investments 
+         WHERE campaign_id = $1 AND status = 'completed' 
+         FOR UPDATE`,
+        [campaignId]
+      );
+
+      // 3. Procesar cada inversión
+      for (const inv of investmentsRes.rows) {
+        // A. Devolver el dinero al inversor (restar de total_invested)
+        await client.query(
+          `UPDATE investor_profiles 
+           SET total_invested = GREATEST(0, total_invested - $1) 
+           WHERE user_id = $2`,
+          [inv.amount, inv.investor_id]
+        );
+
+        // B. Marcar la inversión como reembolsada
+        await client.query(
+          `UPDATE investments 
+           SET status = 'refunded', 
+               refunded_amount = $1, 
+               refund_reason = 'Campaña finalizada sin alcanzar meta', 
+               refunded_at = NOW() 
+           WHERE id = $2`,
+          [inv.amount, inv.id]
+        );
+
+        // C. Liberar el cupo de la recompensa (si aplica)
+        if (inv.reward_tier_id) {
+          await client.query(
+            `UPDATE reward_tiers 
+             SET current_claims = GREATEST(0, current_claims - 1) 
+             WHERE id = $1`,
+            [inv.reward_tier_id]
+          );
+        }
+      }
+
+      // 4. Marcar la campaña como fallida
+      const updatedCampaign = await client.query(
+        `UPDATE campaigns 
+         SET status = 'failed', updated_at = NOW() 
+         WHERE id = $1
+         RETURNING id, title, slug, short_description, campaign_type,
+                   status, goal_amount, current_amount, investor_count,
+                   currency, cover_image_url, start_date, end_date,
+                   funded_at, is_featured, view_count,
+                   created_at, updated_at, published_at,
+                   description, video_url`,
+        [campaignId]
+      );
+
+      return mapRowToEntrepreneurCampaign(updatedCampaign.rows[0]);
+    });
+  }
+
   async insertCampaignDocument(
     campaignId: string,
     documentUrl: string,

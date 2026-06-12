@@ -1,4 +1,4 @@
-﻿import { Navbar } from '../components/Navbar';
+import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
 import { AddCapitalModal } from '../components/AddCapitalModal';
 
@@ -177,8 +177,16 @@ export function InvestorDashboardPage() {
                       
                       <div className="flex-1 min-w-0 w-full py-2">
                         <div className="flex items-center gap-3 mb-3">
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${inv.investmentStatus === 'completed' ? 'bg-green-100 text-[#72B626]' : 'bg-slate-100 text-slate-500'}`}>
-                            {inv.investmentStatus === 'completed' ? 'Completado' : inv.investmentStatus}
+                          <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest ${
+                            inv.investmentStatus === 'completed' ? 'bg-green-100 text-[#72B626]' :
+                            inv.investmentStatus === 'refunded' ? 'bg-red-100 text-red-600' :
+                            inv.investmentStatus === 'partially_refunded' ? 'bg-orange-100 text-orange-600' :
+                            'bg-slate-100 text-slate-500'
+                          }`}>
+                            {inv.investmentStatus === 'completed' ? 'Completado' :
+                             inv.investmentStatus === 'refunded' ? 'Reembolsado' :
+                             inv.investmentStatus === 'partially_refunded' ? 'Reemb. Parcial' :
+                             inv.investmentStatus}
                           </span>
                           <span className="text-[12px] font-bold text-slate-400 flex items-center gap-1.5">
                             <Clock size={12} />

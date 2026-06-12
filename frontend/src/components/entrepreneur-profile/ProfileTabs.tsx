@@ -1,7 +1,6 @@
-﻿import { 
+import { 
   Info, 
   Briefcase, 
-  MessageSquare, 
   CreditCard,
   Wallet 
 } from 'lucide-react';
@@ -15,7 +14,6 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
   const tabs = [
     { id: 'campaigns', label: 'Campañas', icon: Briefcase },
     { id: 'info', label: 'Información', icon: Info },
-    { id: 'conversations', label: 'Conversaciones', icon: MessageSquare },
     { id: 'finance', label: 'Finanzas', icon: Wallet },
     { id: 'banking', label: 'Datos Bancarios', icon: CreditCard },
   ];
