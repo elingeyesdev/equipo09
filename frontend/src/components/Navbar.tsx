@@ -19,6 +19,8 @@ export function Navbar({ socket }: NavbarProps) {
   const userEmail = localStorage.getItem('userEmail');
 
   useEffect(() => {
+    if (!userEmail) return;
+
     const fetchUnread = async () => {
       try {
         const conversations = await getMyConversations();
@@ -31,7 +33,7 @@ export function Navbar({ socket }: NavbarProps) {
     fetchUnread();
     const interval = setInterval(fetchUnread, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userEmail]);
 
   useEffect(() => {
     if (!socket) return;
@@ -118,7 +120,7 @@ export function Navbar({ socket }: NavbarProps) {
                   )}
                 </Link>
               </>
-            ) : (
+            ) : userRole ? (
               <>
                 <Link to="/dashboard" className={navLinkClass('/dashboard')} style={{ textDecoration: 'none' }}>
                   Mi Panel
@@ -138,7 +140,7 @@ export function Navbar({ socket }: NavbarProps) {
                   )}
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -159,14 +161,24 @@ export function Navbar({ socket }: NavbarProps) {
           {userEmail && <NotificationBell />}
 
           {/* Logout (Desktop) */}
-          <button
-            className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-[13px] font-medium cursor-pointer transition-colors"
-            onClick={handleLogout}
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
-            <LogOut size={15} strokeWidth={2} />
-            Salir
-          </button>
+          {userEmail ? (
+            <button
+              className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-[13px] font-medium cursor-pointer transition-colors"
+              onClick={handleLogout}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            >
+              <LogOut size={15} strokeWidth={2} />
+              Salir
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:flex items-center justify-center px-4 py-1.5 rounded-lg bg-[#72B626] text-white hover:bg-[#5e9620] text-[13px] font-medium transition-colors"
+              style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            >
+              Iniciar Sesión
+            </Link>
+          )}
 
           {/* Hamburger Menu Button (Mobile) */}
           <button
@@ -237,7 +249,7 @@ export function Navbar({ socket }: NavbarProps) {
                 )}
               </Link>
             </>
-          ) : (
+          ) : userRole ? (
             <>
               <Link
                 to="/dashboard"
@@ -272,9 +284,9 @@ export function Navbar({ socket }: NavbarProps) {
                 )}
               </Link>
             </>
-          )}
+          ) : null}
 
-          {userEmail && (
+          {userEmail ? (
             <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
               <div className="flex items-center gap-2 px-2.5 py-2">
                 <User size={16} className="text-gray-400" />
@@ -290,6 +302,17 @@ export function Navbar({ socket }: NavbarProps) {
                 <LogOut size={16} />
                 Cerrar sesión
               </button>
+            </div>
+          ) : (
+            <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
+              <Link
+                to="/login"
+                className="w-full flex items-center justify-center py-2.5 rounded-lg bg-[#72B626] text-white hover:bg-[#5e9620] text-[14px] font-medium cursor-pointer transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                Iniciar Sesión
+              </Link>
             </div>
           )}
         </div>
