@@ -51,16 +51,6 @@ __decorate([
 ], QueryCampaignsDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        enum: ['donation', 'reward', 'equity'],
-        description: 'Filtrar por tipo de campaña',
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsIn)(['donation', 'reward', 'equity']),
-    __metadata("design:type", String)
-], QueryCampaignsDto.prototype, "campaignType", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
         enum: ['created_at', 'current_amount', 'goal_amount', 'end_date', 'title'],
         default: 'created_at',
         description: 'Campo de ordenamiento',

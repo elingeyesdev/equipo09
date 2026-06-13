@@ -17,7 +17,6 @@ const schema = z.object({
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es Bs. 100'),
-  campaignType: z.enum(['donation', 'reward', 'equity']),
   categoryIds: z.array(z.string()).min(1, 'Debes seleccionar al menos una categoría'),
   endDate: z.string().optional().or(z.literal(''))
     .refine((val) => !val || isFutureDate(val), {
@@ -54,7 +53,6 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       description: initialData?.description || '',
       shortDescription: initialData?.shortDescription || '',
       goalAmount: initialData?.goalAmount || 1000,
-      campaignType: (initialData?.campaignType as CampaignType) || 'donation',
       categoryIds: initialData?.categoryIds || (initialData?.categoryId ? [initialData.categoryId] : []),
       endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
       videoUrl: initialData?.videoUrl || '',
@@ -131,7 +129,6 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         description: initialData.description || '',
         shortDescription: initialData.shortDescription || '',
         goalAmount: initialData.goalAmount || 1000,
-        campaignType: (initialData.campaignType as CampaignType) || 'donation',
         categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
         endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
         videoUrl: initialData.videoUrl || '',
@@ -206,7 +203,6 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       shortDescription: data.shortDescription || undefined,
       categoryIds: data.categoryIds,
       goalAmount: data.goalAmount,
-      campaignType: data.campaignType,
       endDate: data.endDate || undefined,
       rewards: rewards,
       videoUrl: data.videoUrl || undefined

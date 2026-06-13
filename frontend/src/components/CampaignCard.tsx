@@ -5,7 +5,7 @@ import {
   Eye, Send, Rocket, Trash2, CheckCircle2, Users, Calendar, TrendingUp,
   AlertTriangle, X, ChevronRight, MoreHorizontal, Flag, Share2
 } from 'lucide-react';
-import { shareCampaignUrl } from '../utils/share.utils';
+import { ShareModal } from './ShareModal';
 
 interface Props {
   campaign: EntrepreneurCampaign;
@@ -45,6 +45,7 @@ export function CampaignCard({
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const statusCfg = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG['draft'];
   const rawPercent = computeFundingPercent(campaign.currentAmount, campaign.goalAmount);
@@ -131,7 +132,7 @@ export function CampaignCard({
               {campaign.status === 'published' && (
                 <button
                   className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
-                  onClick={() => { setShowMenu(false); shareCampaignUrl(campaign.id, campaign.title); }}
+                  onClick={() => { setShowMenu(false); setShowShareModal(true); }}
                 >
                   <Share2 size={14} className="text-slate-400" /> Compartir
                 </button>
@@ -281,7 +282,7 @@ export function CampaignCard({
             {campaign.status === 'published' && (
               <button
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#72B626]/10 text-[#72B626] border border-[#72B626]/25 font-bold text-[13px] transition-all active:scale-95 shadow-sm hover:bg-[#72B626]/20 cursor-pointer"
-                onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
+                onClick={() => setShowShareModal(true)}
               >
                 <Share2 size={14} /> Compartir Campaña
               </button>
@@ -385,6 +386,13 @@ export function CampaignCard({
             : '#e2e8f0',
         }}
       />
+      {showShareModal && (
+        <ShareModal
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </article>
   );
 }

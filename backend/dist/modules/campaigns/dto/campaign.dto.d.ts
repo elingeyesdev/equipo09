@@ -4,7 +4,6 @@ export declare class CreateCampaignDto {
     shortDescription?: string;
     categoryId?: string;
     goalAmount: number;
-    campaignType: 'donation' | 'reward' | 'equity';
     startDate?: string;
     endDate?: string;
     videoUrl?: string;

@@ -26,11 +26,12 @@ import {
   Flame,
   Share2,
 } from 'lucide-react';
-import { shareCampaignUrl } from '../utils/share.utils';
+import { ShareModal } from '../components/ShareModal';
 
 
 
 function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick?: () => void }) {
+  const [showShare, setShowShare] = useState(false);
   const progress = campaign.goalAmount > 0
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
     : 0;
@@ -86,7 +87,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            shareCampaignUrl(campaign.id, campaign.title);
+            setShowShare(true);
           }}
           className="absolute bottom-4 right-4 w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md flex items-center justify-center text-slate-700 hover:bg-[#72B626] hover:text-white transition-all shadow-lg shadow-black/10 active:scale-90 border-none cursor-pointer group/share"
           title="Compartir Campaña"
@@ -182,6 +183,14 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
           )}
         </div>
       </div>
+
+      {showShare && (
+        <ShareModal
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
@@ -316,7 +325,7 @@ export function ExploreCampaignsPage() {
 
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200 relative">
-        <div className="max-w-[1200px] mx-auto px-6 py-6 md:py-8 relative z-10 text-center">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 md:py-8 relative z-10 text-center">
           <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#f5fce8] text-[#4a7f1a] mb-3">
             Proyectos verificados
           </span>
@@ -331,7 +340,7 @@ export function ExploreCampaignsPage() {
 
       {/* Filters Bar */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
-        <div className="max-w-[1200px] mx-auto px-6 py-3 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           
           {/* Left section: Category, Toggle and Sort filters */}
           <div className="flex flex-wrap items-center gap-4">
@@ -588,7 +597,7 @@ export function ExploreCampaignsPage() {
       </div>
 
       {/* Campaign Grid */}
-      <div className="max-w-[1200px] mx-auto px-6 py-10">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-10">
 
         {/* Novedades / Stories bar */}
         <StoriesAvatarBar style={{ marginBottom: '32px' }} />

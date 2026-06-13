@@ -31,7 +31,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
           slug,
           dto.shortDescription || null,
           dto.description,
-          dto.campaignType || 'donation',
+          'donation',
           dto.goalAmount,
           dto.endDate || null,
           dto.videoUrl || null
@@ -39,15 +39,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
       );
 
       const campaignId = result.rows[0].id;
-
-      if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
-        for (const catId of dto.categoryIds) {
-          await client.query(
-            `INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-            [campaignId, catId]
-          );
-        }
-      }
 
       // Si se enviaron recompensas en la creación, guardarlas
       if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
@@ -112,12 +103,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         default:
           break;
       }
-    }
-
-    if (query.campaignType) {
-      conditions.push(`c.campaign_type = $${paramIndex}`);
-      params.push(query.campaignType);
-      paramIndex++;
     }
 
     if (query.search) {
@@ -218,7 +203,7 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     );
 
     const categories = await executor.queryMany(
-      'SELECT c.id, c.display_name as "displayName", c.slug FROM categories c JOIN campaign_categories cc ON c.id = cc.category_id WHERE cc.campaign_id = $1',
+      'SELECT c.id, c.display_name as "displayName", c.slug FROM categories c JOIN campaigns cam ON c.id = cam.category_id WHERE cam.id = $1',
       [campaignId]
     );
 
@@ -368,16 +353,6 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
         `;
         const result = await client.query(query, values);
         if (result.rowCount === 0) return null;
-      }
-
-      if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
-        await client.query('DELETE FROM campaign_categories WHERE campaign_id = $1', [campaignId]);
-        for (const catId of dto.categoryIds) {
-          await client.query(
-            `INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-            [campaignId, catId]
-          );
-        }
       }
 
       // Si se enviaron recompensas, reemplazar las existentes

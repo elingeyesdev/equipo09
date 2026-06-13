@@ -12,7 +12,7 @@
   | 'completed'
   | 'suspended';
 
-export type CampaignType = 'donation' | 'reward' | 'equity';
+export type CampaignType = 'donation';
 
 export interface EntrepreneurCampaign {
   id: string;
@@ -50,7 +50,6 @@ export interface CreateCampaignDto {
   description: string;
   shortDescription?: string;
   goalAmount: number;
-  campaignType?: CampaignType;
   endDate?: string;
   categoryIds?: string[];
   rewards?: CreateRewardTierDto[];

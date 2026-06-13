@@ -401,7 +401,7 @@ export function CampaignPreviewModal({
               Donadores Activos ({investorsTotal})
             </button>
           )}
-          {campaign.campaignType === 'reward' && !isAdmin && (
+          {campaign.rewardTiers && campaign.rewardTiers.length > 0 && !isAdmin && (
             <button
               onClick={() => setActiveTab('rewards')}
               className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'

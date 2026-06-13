@@ -606,6 +606,10 @@ CREATE TABLE reward_tiers (
     items               JSONB          DEFAULT '[]',
     sort_order          INTEGER        NOT NULL DEFAULT 0,
     is_active           BOOLEAN        NOT NULL DEFAULT true,
+    min_percentage      NUMERIC(5,2)   NOT NULL DEFAULT 0
+                        CHECK (min_percentage >= 0 AND min_percentage <= 100),
+    max_percentage      NUMERIC(5,2)   NOT NULL DEFAULT 100
+                        CHECK (max_percentage >= 0 AND max_percentage <= 100),
     created_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     UNIQUE (id, campaign_id)
@@ -614,6 +618,7 @@ CREATE TABLE reward_tiers (
 CREATE INDEX idx_reward_tiers_campaign_id ON reward_tiers (campaign_id);
 CREATE INDEX idx_reward_tiers_amount ON reward_tiers (campaign_id, amount);
 CREATE INDEX idx_reward_tiers_is_active ON reward_tiers (campaign_id, is_active) WHERE is_active = true;
+CREATE INDEX idx_reward_tiers_percentage ON reward_tiers (campaign_id, min_percentage, max_percentage) WHERE is_active = true;
 
 CREATE TRIGGER trg_reward_tiers_updated_at
     BEFORE UPDATE ON reward_tiers
@@ -643,15 +648,10 @@ CREATE TABLE investments (
                             'refunded', 'partially_refunded', 'cancelled'
                         )),
     payment_method      VARCHAR(30),
-    payment_intent_id   VARCHAR(255),
     is_anonymous        BOOLEAN        NOT NULL DEFAULT false,
-    message             TEXT,
     refund_reason       TEXT,
     refunded_amount     NUMERIC(12,2)  DEFAULT 0,
     refunded_at         TIMESTAMPTZ,
-    ip_address          INET,
-    user_agent          TEXT,
-    metadata            JSONB          DEFAULT '{}',
     created_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     FOREIGN KEY (reward_tier_id, campaign_id) REFERENCES reward_tiers(id, campaign_id) ON DELETE SET NULL
@@ -767,7 +767,7 @@ COMMENT ON TABLE transactions IS 'Registro contable de cada movimiento financier
 -- -----------------------------------------------------------------------------
 CREATE TABLE reward_claims (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    investment_id       UUID         NOT NULL REFERENCES investments(id) ON DELETE CASCADE,
+    investment_id       UUID         NOT NULL UNIQUE REFERENCES investments(id) ON DELETE CASCADE,
     status              VARCHAR(20)  NOT NULL DEFAULT 'pending'
                         CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'issue_reported')),
     shipping_address    JSONB,
@@ -907,31 +907,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
--- 2. Consistencia estricta investments <-> reward_tiers
-CREATE OR REPLACE FUNCTION validate_investment_reward_tier()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_reward_campaign_id UUID;
-BEGIN
-    IF NEW.reward_tier_id IS NOT NULL THEN
-        SELECT campaign_id INTO v_reward_campaign_id 
-        FROM reward_tiers 
-        WHERE id = NEW.reward_tier_id;
-        
-        IF v_reward_campaign_id != NEW.campaign_id THEN
-            RAISE EXCEPTION 'Data Integrity Error: reward_tier_id % does not belong to campaign_id %', NEW.reward_tier_id, NEW.campaign_id;
-        END IF;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_validate_investment_reward
-    BEFORE INSERT OR UPDATE ON investments
-    FOR EACH ROW
-    EXECUTE FUNCTION validate_investment_reward_tier();
-
--- 3. Inmutabilidad de audit_logs
+-- 2. Inmutabilidad de audit_logs
 CREATE OR REPLACE FUNCTION prevent_audit_log_modification()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -986,31 +962,21 @@ CREATE TRIGGER trg_sync_campaign_totals
     FOR EACH ROW
     EXECUTE FUNCTION sync_campaign_totals();
 
--- 5. Sincronización automática de reward_tiers (current_claims)
-CREATE OR REPLACE FUNCTION sync_reward_tier_claims()
+-- 5. Sincronización de reward_tiers.current_claims vía reward_claims
+-- El trigger vive en reward_claims (fuente de verdad), no en investments.
+-- Así current_claims refleja registros físicos existentes, no el estado de la inversión.
+CREATE OR REPLACE FUNCTION fn_sync_reward_tier_claims()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Handle INSERT or UPDATE into 'completed'
-    IF (TG_OP = 'INSERT' AND NEW.status = 'completed' AND NEW.reward_tier_id IS NOT NULL) OR
-       (TG_OP = 'UPDATE' AND NEW.status = 'completed' AND OLD.status != 'completed' AND NEW.reward_tier_id IS NOT NULL) THEN
-        
-        UPDATE reward_tiers 
-        SET current_claims = current_claims + 1 
-        WHERE id = NEW.reward_tier_id;
-        
-    -- Handle UPDATE away from 'completed'
-    ELSIF (TG_OP = 'UPDATE' AND OLD.status = 'completed' AND NEW.status != 'completed' AND OLD.reward_tier_id IS NOT NULL) THEN
-        
-        UPDATE reward_tiers 
-        SET current_claims = current_claims - 1 
-        WHERE id = OLD.reward_tier_id;
+    IF TG_OP = 'INSERT' THEN
+        UPDATE reward_tiers
+        SET current_claims = current_claims + 1
+        WHERE id = (SELECT reward_tier_id FROM investments WHERE id = NEW.investment_id);
 
-    -- Handle DELETE
-    ELSIF (TG_OP = 'DELETE' AND OLD.status = 'completed' AND OLD.reward_tier_id IS NOT NULL) THEN
-        
-        UPDATE reward_tiers 
-        SET current_claims = current_claims - 1 
-        WHERE id = OLD.reward_tier_id;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE reward_tiers
+        SET current_claims = GREATEST(current_claims - 1, 0)
+        WHERE id = (SELECT reward_tier_id FROM investments WHERE id = OLD.investment_id);
     END IF;
 
     RETURN NULL;
@@ -1018,9 +984,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_sync_reward_tier_claims
-    AFTER INSERT OR UPDATE OR DELETE ON investments
+    AFTER INSERT OR DELETE ON reward_claims
     FOR EACH ROW
-    EXECUTE FUNCTION sync_reward_tier_claims();
+    EXECUTE FUNCTION fn_sync_reward_tier_claims();
 
 -- 6. Sincronización automática de categories (campaign_count)
 CREATE OR REPLACE FUNCTION sync_category_campaigns()

@@ -131,7 +131,7 @@ let AdminRepository = class AdminRepository extends database_1.BaseRepository {
         return this.queryOne(`DELETE FROM campaigns WHERE id = $1 RETURNING *`, [campaignId]);
     }
     async findPendingCampaigns(queryDto) {
-        const { page = 1, limit = 10, campaignType, status, sortBy = 'created_at', sortOrder = 'DESC', q } = queryDto;
+        const { page = 1, limit = 10, status, sortBy = 'created_at', sortOrder = 'DESC', q } = queryDto;
         const offset = (page - 1) * limit;
         const conditions = [];
         const params = [];
@@ -140,11 +140,6 @@ let AdminRepository = class AdminRepository extends database_1.BaseRepository {
         conditions.push(`c.status = $${paramIndex}`);
         params.push(targetStatus);
         paramIndex++;
-        if (campaignType) {
-            conditions.push(`c.campaign_type = $${paramIndex}`);
-            params.push(campaignType);
-            paramIndex++;
-        }
         if (q) {
             conditions.push(`(c.title ILIKE $${paramIndex} OR ep.first_name ILIKE $${paramIndex} OR ep.last_name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`);
             params.push(`%${q}%`);

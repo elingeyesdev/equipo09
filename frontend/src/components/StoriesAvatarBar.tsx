@@ -382,15 +382,9 @@ export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #72B626, #72B626)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Zap size={16} color="#fff" />
-          </div>
           <div>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#1c2b1e', letterSpacing: 0.5, textTransform: 'uppercase' }}>
               Novedades
-              {hasUnseen && (
-                <span style={{ marginLeft: 8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#00e676', verticalAlign: 'middle', boxShadow: '0 0 6px #00e676' }} />
-              )}
             </p>
             <p style={{ margin: 0, fontSize: 11, color: '#6b7280', fontWeight: 500 }}>
               Actualizaciones de las últimas 24h · {groups.length} campaña{groups.length !== 1 ? 's' : ''}

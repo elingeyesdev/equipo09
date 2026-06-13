@@ -35,15 +35,6 @@ export class QueryCampaignsDto extends PaginationDto {
   status?: string;
 
   @ApiPropertyOptional({
-    enum: ['donation', 'reward', 'equity'],
-    description: 'Filtrar por tipo de campaña',
-  })
-  @IsOptional()
-  @IsString()
-  @IsIn(['donation', 'reward', 'equity'])
-  campaignType?: string;
-
-  @ApiPropertyOptional({
     enum: ['created_at', 'current_amount', 'goal_amount', 'end_date', 'title'],
     default: 'created_at',
     description: 'Campo de ordenamiento',

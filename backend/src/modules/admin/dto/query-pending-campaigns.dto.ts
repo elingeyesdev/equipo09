@@ -5,7 +5,6 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export enum CampaignTypeFilter {
   ALL = 'all',
   DONATION = 'donation',
-  REWARD = 'reward',
 }
 
 export class QueryPendingCampaignsDto {

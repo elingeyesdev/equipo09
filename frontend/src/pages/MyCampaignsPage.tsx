@@ -101,7 +101,7 @@ export function MyCampaignsPage() {
       <Navbar />
 
       {/* Hero / Cover Section */}
-      <div className="bg-white border-b border-gray-200 py-10 px-6">
+      <div className="bg-white border-b border-gray-200 py-8 sm:py-10 px-4 sm:px-6">
         <div className="max-w-[1200px] mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
@@ -136,14 +136,7 @@ export function MyCampaignsPage() {
       </div>
 
       {/* Main Container */}
-      <div className="max-w-[1200px] mx-auto px-6 pt-8">
-        <div className="flex flex-wrap gap-4 mb-8">
-          <SummaryStat icon={<Rocket size={18} />}    label="Campañas" value={campaigns.length}   accent="#72B626" />
-          <SummaryStat icon={<TrendingUp size={18} />} label="Recaudado" value={formatMoney(totalRaised)} accent="#72B626" />
-          <SummaryStat icon={<Users size={18} />}     label="Donadores" value={totalInvestors}    accent="#f59e0b" />
-          <SummaryStat icon={<Star size={18} />}      label="Activas" value={activeCount}    accent="#aed581" />
-        </div>
-
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pt-8">
         <div className="bg-white rounded-xl border border-gray-200 mb-6 overflow-hidden shadow-sm">
           {/* Status tabs */}
           <div className="flex overflow-x-auto border-b border-gray-100 px-4 gap-0 scrollbar-hide">

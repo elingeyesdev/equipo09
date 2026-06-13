@@ -25,7 +25,7 @@ import { formatCampaignCurrency } from '../utils/campaignFunding';
 
 interface Props {
   finance: CampaignFinancialProgress | null;
-  campaignType: 'donation' | 'reward' | 'equity';
+  campaignType?: string;
   startDate?: string | Date | null;
   createdAt?: string | Date | null;
 }
@@ -109,17 +109,6 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
 
   // 3. Desglose de Fuentes de Financiamiento (Donut Chart)
   const pieData = useMemo(() => {
-    if (campaignType === 'equity') {
-      const totalEquity = (finance as any).equityPercentage || 15; // default 15%
-      const committedPercentage = goalAmount > 0 ? (currentAmount / goalAmount) * totalEquity : 0;
-      const remainingPercentage = Math.max(0, totalEquity - committedPercentage);
-      
-      return [
-        { name: 'Equity Comprometido', value: Number(committedPercentage.toFixed(2)), color: '#10b981' },
-        { name: 'Equity Disponible', value: Number(remainingPercentage.toFixed(2)), color: '#e2e8f0' }
-      ];
-    }
-
     if (fundingBreakdown.length === 0) {
       return [{ name: 'Sin Aportes', value: 100, color: '#e2e8f0' }];
     }
@@ -132,7 +121,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
         value: b.totalAmount,
         color: PIE_COLORS[idx % PIE_COLORS.length]
       }));
-  }, [fundingBreakdown, campaignType, goalAmount, currentAmount, finance]);
+  }, [fundingBreakdown]);
 
   return (
     <div className="space-y-8 font-['Plus Jakarta Sans',sans-serif]">
@@ -260,7 +249,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
               <div>
                 <h3 className="text-[14px] font-black text-[#1c2b1e] uppercase tracking-wider">Desglose de Ingresos</h3>
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  {campaignType === 'equity' ? 'Distribución de capital social' : 'Distribución por Reward Tiers'}
+                  Distribución por Recompensas
                 </p>
               </div>
             </div>
@@ -291,7 +280,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
                   formatter={(value: any) => [
-                    campaignType === 'equity' ? `${value}%` : `Bs. ${value.toLocaleString('es-BO')}`,
+                    `Bs. ${value.toLocaleString('es-BO')}`,
                     'Valor'
                   ]}
                 />
@@ -307,7 +296,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
                     <span className="truncate leading-none">{entry.name}</span>
                   </div>
                   <span className="text-slate-900 font-black">
-                    {campaignType === 'equity' ? `${entry.value}%` : `${formatCampaignCurrency(entry.value, currency)}`}
+                    {formatCampaignCurrency(entry.value, currency)}
                   </span>
                 </div>
               ))}

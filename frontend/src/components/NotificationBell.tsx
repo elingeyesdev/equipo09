@@ -150,7 +150,7 @@ export function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-[calc(100%+8px)] w-[380px] max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-[#1c2b1e]/20/10 z-50 overflow-hidden"
+          className="fixed sm:absolute top-[72px] sm:top-[calc(100%+8px)] left-4 right-4 sm:left-auto sm:right-0 sm:w-[380px] max-h-[70vh] sm:max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden"
           style={{ animation: 'slideDownFade 0.18s ease-out' }}
         >
           {/* Header */}

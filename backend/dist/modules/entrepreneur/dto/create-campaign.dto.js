@@ -47,12 +47,6 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCampaignDto.prototype, "goalAmount", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: ['donation', 'reward', 'equity'], example: 'donation' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(['donation', 'reward', 'equity']),
-    __metadata("design:type", String)
-], CreateCampaignDto.prototype, "campaignType", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '2026-12-31T23:59:59Z' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),

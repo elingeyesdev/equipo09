@@ -34,7 +34,7 @@ import {
   MessageCircle,
   Share2,
 } from 'lucide-react';
-import { shareCampaignUrl } from '../utils/share.utils';
+import { ShareModal } from '../components/ShareModal';
 
 
 
@@ -46,14 +46,14 @@ function DetailSkeleton() {
   return (
     <div className="min-h-screen bg-[#f4f7f4] font-['Plus Jakarta Sans',sans-serif]">
       <Navbar />
-      <div className="max-w-[1200px] mx-auto px-6 py-8 animate-pulse">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-pulse">
         {/* Back button skeleton */}
         <div className="h-5 w-44 bg-slate-200 rounded-full mb-8" />
 
         {/* Hero image skeleton */}
         <div className="h-[380px] md:h-[440px] bg-slate-200 rounded-[28px] mb-10" />
 
-        <div className="flex flex-col lg:flex-row gap-10">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
           {/* Main content skeleton */}
           <div className="flex-1 space-y-6">
             <div className="flex gap-3 mb-4">
@@ -128,6 +128,7 @@ export function CampaignDetailPage() {
   const [investmentError, setInvestmentError] = useState<string | null>(null);
   const [investmentSuccess, setInvestmentSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // ── Related campaigns state ──
   const [relatedCampaigns, setRelatedCampaigns] = useState<PublicCampaign[]>([]);
@@ -226,7 +227,7 @@ export function CampaignDetailPage() {
     <div className="min-h-screen bg-[#f4f7f4] font-['Plus Jakarta Sans',sans-serif]">
       <Navbar />
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* ── Back & Share bar ── */}
         <div className="flex justify-between items-center mb-8">
           <button
@@ -239,7 +240,7 @@ export function CampaignDetailPage() {
 
           <button
             type="button"
-            onClick={() => shareCampaignUrl(campaign.id, campaign.title)}
+            onClick={() => setShowShareModal(true)}
             className="flex items-center gap-2 bg-white border border-slate-200 hover:border-green-500 hover:text-[#72B626] text-slate-500 px-4 py-2.5 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
           >
             <Share2 size={15} strokeWidth={2.5} />
@@ -323,7 +324,7 @@ export function CampaignDetailPage() {
         )}
 
         {/* ── Content + Sidebar ── */}
-        <div className="flex flex-col lg:flex-row gap-10">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
           {/* ── Main Content ── */}
           <div className="flex-1 min-w-0">
@@ -373,8 +374,8 @@ export function CampaignDetailPage() {
 
 
 
-            {/* ── Reward Tiers (only for reward campaigns) ── */}
-            {campaign.campaignType === 'reward' && campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
+            {/* ── Reward Tiers ── */}
+            {campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
               <RewardTierCards
                 tiers={campaign.rewardTiers}
                 selectedTierId={selectedTierId}
@@ -588,13 +589,11 @@ export function CampaignDetailPage() {
                         step="0.01"
                         value={customAmount}
                         onChange={(e) => {
-                          if (campaign.campaignType !== 'reward') {
-                            setCustomAmount(e.target.value);
-                            setInvestmentError(null);
-                          }
+                          setCustomAmount(e.target.value);
+                          setInvestmentError(null);
                         }}
-                        placeholder={campaign.campaignType === 'reward' ? 'Selecciona una recompensa' : `Mínimo Bs. ${campaign.minInvestment?.toLocaleString('es-BO') || '1'}`}
-                        disabled={investmentLoading || campaign.campaignType === 'reward'}
+                        placeholder={`Mínimo Bs. ${campaign.minInvestment?.toLocaleString('es-BO') || '1'}`}
+                        disabled={investmentLoading}
                         className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
                       />
                     </div>
@@ -643,10 +642,6 @@ export function CampaignDetailPage() {
                   const handleInvest = () => {
                     if (!token) {
                       navigate('/login', { state: { from: location.pathname } });
-                      return;
-                    }
-                    if (campaign.campaignType === 'reward' && !selectedTierId) {
-                      setInvestmentError('Para esta campaña, es obligatorio seleccionar una recompensa de la lista.');
                       return;
                     }
                     if (!hasValidAmount) {
@@ -748,9 +743,7 @@ export function CampaignDetailPage() {
                       </button>
                       {!hasValidAmount && (
                         <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
-                          {campaign.campaignType === 'reward' && campaign.rewardTiers?.length
-                            ? 'Selecciona una recompensa o ingresa un monto'
-                            : 'Ingresa el monto que deseas donar'}
+                          Ingresa el monto que deseas donar
                         </p>
                       )}
                       {amountBelowTier && selectedTier && (
@@ -797,7 +790,7 @@ export function CampaignDetailPage() {
 
       {/* ── Related Campaigns ── */}
       {relatedCampaigns.length > 0 && (
-        <div className="max-w-[1200px] mx-auto px-6 pb-16">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
               <Sparkles size={20} strokeWidth={2.5} className="text-[#72B626]" />
@@ -925,6 +918,14 @@ export function CampaignDetailPage() {
             }
           }}
           onCancel={() => setShowConfirmModal(false)}
+        />
+      )}
+
+      {showShareModal && campaign && (
+        <ShareModal
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+          onClose={() => setShowShareModal(false)}
         />
       )}
     </div>

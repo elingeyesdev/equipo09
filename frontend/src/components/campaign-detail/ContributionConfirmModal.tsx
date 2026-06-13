@@ -34,12 +34,8 @@ interface ContributionConfirmModalProps {
   onCancel: () => void;
 }
 
-/* ── Campaign type helpers ── */
-const CAMPAIGN_LABELS: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
-  donation:  { label: 'Donación',    icon: Heart,      color: '#e91e63', bgColor: '#fce4ec' },
-  reward:    { label: 'Recompensa',  icon: Gift,        color: '#f9a825', bgColor: '#fff8e1' },
-  equity:    { label: 'Equity',      icon: TrendingUp, color: '#72B626', bgColor: '#e8f5e9' },
-};
+/* ── Campaign type badge ── */
+const DONATION_LABEL = { label: 'Donación', icon: Heart, color: '#e91e63', bgColor: '#fce4ec' };
 
 /* ───────────────────────────────────────────────── */
 /*  MODAL COMPONENT                                  */
@@ -53,7 +49,7 @@ export function ContributionConfirmModal({
   onConfirm,
   onCancel,
 }: ContributionConfirmModalProps) {
-  const typeInfo = CAMPAIGN_LABELS[campaign.campaignType] || CAMPAIGN_LABELS.donation;
+  const typeInfo = DONATION_LABEL;
   const TypeIcon = typeInfo.icon;
   const currency = campaign.currency || 'BOB';
 

@@ -116,7 +116,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
           </button>
         </div>
         <div className="flex items-center gap-4 text-[#1c2b1e] text-[14px]">
-          <div className={`${iconBox} bg-[#1c2b1e] text-white border-transparent`}>
+          <div className={iconBox}>
              <Building2 size={18} strokeWidth={2.5} />
           </div>
           <div className="min-w-0">
@@ -242,24 +242,6 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
           </div>
         )}
       </div>
-
-      {profile && onDeleteProfile && (
-        <div className="rounded-[28px] p-6 border border-red-100 bg-red-50/40 shadow-sm">
-          <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
-          <p className="text-[13px] text-red-900/80 font-medium leading-snug mb-4">
-            Elimina solo tu perfil de emprendedor. Tu usuario y sesión siguen activos. No disponible si tienes campañas.
-          </p>
-          <button
-            type="button"
-            onClick={() => void onDeleteProfile()}
-            className="w-full py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Trash2 size={16} strokeWidth={2.5} />
-            Eliminar perfil emprendedor
-          </button>
-        </div>
-      )}
-
       {userEmail && (
         <div className="px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm flex items-center gap-3">
            <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] flex items-center justify-center text-[#72B626]">

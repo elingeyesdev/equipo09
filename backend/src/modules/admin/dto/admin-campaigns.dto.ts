@@ -17,11 +17,6 @@ export class QueryAdminCampaignsDto {
   @Min(1)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ description: 'Tipo de campaña', enum: ['donation', 'reward', 'equity'] })
-  @IsOptional()
-  @IsEnum(['donation', 'reward', 'equity'])
-  campaignType?: string;
-
   @ApiPropertyOptional({ description: 'Estado de la campaña', enum: ['pending_review', 'approved', 'rejected', 'published'] })
   @IsOptional()
   @IsString()

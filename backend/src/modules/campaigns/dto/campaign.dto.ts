@@ -39,9 +39,6 @@ export class CreateCampaignDto {
   @Min(100, { message: 'El monto mínimo de recaudación es de 100' })
   goalAmount: number;
 
-  @ApiProperty({ enum: ['donation', 'reward', 'equity'] })
-  @IsEnum(['donation', 'reward', 'equity'])
-  campaignType: 'donation' | 'reward' | 'equity';
 
   /** @IsOptional debe ir antes de @IsDateString; si no, `undefined` falla validación y devuelve 400. */
   @ApiPropertyOptional({ example: '2024-12-01T00:00:00.000Z' })

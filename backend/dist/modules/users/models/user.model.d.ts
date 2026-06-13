@@ -5,7 +5,6 @@ export interface User {
     emailVerified: boolean;
     phoneVerified: boolean;
     isActive: boolean;
-    avatarUrl: string | null;
     preferredLanguage: string;
     timezone: string;
     lastLoginAt: Date | null;

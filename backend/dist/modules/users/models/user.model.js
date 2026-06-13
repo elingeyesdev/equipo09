@@ -9,7 +9,6 @@ function mapRowToUser(row) {
         emailVerified: row.email_verified,
         phoneVerified: row.phone_verified,
         isActive: row.is_active,
-        avatarUrl: row.avatar_url ?? null,
         preferredLanguage: row.preferred_language,
         timezone: row.timezone,
         lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,

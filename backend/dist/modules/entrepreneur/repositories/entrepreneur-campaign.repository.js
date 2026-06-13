@@ -26,17 +26,12 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 slug,
                 dto.shortDescription || null,
                 dto.description,
-                dto.campaignType || 'donation',
+                'donation',
                 dto.goalAmount,
                 dto.endDate || null,
                 dto.videoUrl || null
             ]);
             const campaignId = result.rows[0].id;
-            if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
-                for (const catId of dto.categoryIds) {
-                    await client.query(`INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [campaignId, catId]);
-                }
-            }
             if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
                 for (const reward of dto.rewards) {
                     await client.query(`INSERT INTO reward_tiers (
@@ -85,11 +80,6 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 default:
                     break;
             }
-        }
-        if (query.campaignType) {
-            conditions.push(`c.campaign_type = $${paramIndex}`);
-            params.push(query.campaignType);
-            paramIndex++;
         }
         if (query.search) {
             conditions.push(`c.title ILIKE $${paramIndex}`);
@@ -156,7 +146,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
         if (!row)
             return null;
         const rewardTiers = await executor.queryMany('SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY min_percentage ASC', [campaignId]);
-        const categories = await executor.queryMany('SELECT c.id, c.display_name as "displayName", c.slug FROM categories c JOIN campaign_categories cc ON c.id = cc.category_id WHERE cc.campaign_id = $1', [campaignId]);
+        const categories = await executor.queryMany('SELECT c.id, c.display_name as "displayName", c.slug FROM categories c JOIN campaigns cam ON c.id = cam.category_id WHERE cam.id = $1', [campaignId]);
         const campaign = (0, models_1.mapRowToEntrepreneurCampaign)(row);
         campaign.rewardTiers = rewardTiers.map(reward_tier_model_1.mapRowToRewardTier);
         campaign.categories = categories;
@@ -257,12 +247,6 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
                 const result = await client.query(query, values);
                 if (result.rowCount === 0)
                     return null;
-            }
-            if (dto.categoryIds && Array.isArray(dto.categoryIds)) {
-                await client.query('DELETE FROM campaign_categories WHERE campaign_id = $1', [campaignId]);
-                for (const catId of dto.categoryIds) {
-                    await client.query(`INSERT INTO campaign_categories (campaign_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [campaignId, catId]);
-                }
             }
             if (dto.rewards && Array.isArray(dto.rewards)) {
                 await client.query('DELETE FROM reward_tiers WHERE campaign_id = $1', [campaignId]);

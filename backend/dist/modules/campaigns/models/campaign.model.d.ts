@@ -7,7 +7,7 @@ export interface EntrepreneurCampaign {
     subtitle: string | null;
     description: string;
     shortDescription: string | null;
-    campaignType: 'donation' | 'reward' | 'equity';
+    campaignType: 'donation';
     status: 'draft' | 'pending_review' | 'active' | 'paused' | 'successful' | 'failed' | 'cancelled';
     goalAmount: number;
     currentAmount: number;
@@ -29,7 +29,7 @@ export interface CreateCampaignDto {
     shortDescription?: string;
     categoryId?: string;
     goalAmount: number;
-    campaignType: 'donation' | 'reward' | 'equity';
+    campaignType: 'donation';
     endDate?: Date;
 }
 export interface QueryCampaignsDto {
@@ -88,7 +88,7 @@ export interface PublicCampaign {
     title: string;
     slug: string;
     shortDescription: string | null;
-    campaignType: 'donation' | 'reward' | 'equity';
+    campaignType: 'donation';
     status: string;
     goalAmount: number;
     currentAmount: number;

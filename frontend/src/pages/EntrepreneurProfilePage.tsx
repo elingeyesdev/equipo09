@@ -25,7 +25,8 @@ import {
   Globe,
   ExternalLink,
   Rocket,
-  Wallet
+  Wallet,
+  Building
 } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'edit-campaign' | 'kyc' | null;
@@ -275,7 +276,7 @@ export function EntrepreneurProfilePage() {
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center">
-                            <Building2 size={20} strokeWidth={2.5} />
+                            <Building size={20} strokeWidth={2.5} />
                           </div>
                           <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Startup & Site</h3>
                         </div>

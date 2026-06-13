@@ -25,8 +25,6 @@ interface Props {
 
 const CAMPAIGN_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
   donation: { icon: Heart, label: 'Donación', color: '#e91e63' },
-  reward: { icon: Gift, label: 'Recompensa', color: '#f9a825' },
-  equity: { icon: TrendingUp, label: 'Equity', color: '#72B626' },
 };
 
 const STATUS_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
@@ -48,10 +46,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       try {
         setInvestmentsLoading(true);
         const data = await getMyInvestments();
-        const mappedData = data.map(inv => ({
-          ...inv,
-          campaignType: inv.campaignType === 'equity' ? 'donation' : inv.campaignType
-        }));
+        const mappedData = data.map(inv => ({ ...inv, campaignType: 'donation' as const }));
         setInvestments(mappedData);
       } catch {
         // silently fail — will show empty state

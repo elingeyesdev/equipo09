@@ -3,7 +3,6 @@ export declare class CreateCampaignDto {
     description: string;
     shortDescription?: string;
     goalAmount: number;
-    campaignType?: 'donation' | 'reward' | 'equity';
     endDate?: string;
     categoryIds?: string[];
     rewards?: any[];

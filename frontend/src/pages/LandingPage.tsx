@@ -66,13 +66,13 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
 
   return (
     <section className="bg-white overflow-hidden">
-      <div className="max-w-[1280px] mx-auto px-6 pt-14 pb-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-[520px]">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center min-h-[480px] sm:min-h-[520px]">
 
           {/* Left copy */}
           <div className="pb-14">
 
-            <h1 className="text-[40px] md:text-[52px] lg:text-[60px] font-black text-gray-900 leading-[1.05] tracking-tight mb-5">
+            <h1 className="text-[28px] sm:text-[36px] md:text-[48px] lg:text-[60px] font-black text-gray-900 leading-[1.05] tracking-tight mb-5">
               Donde comienzan<br />
               <span style={{ color: GREEN }}>los sueños</span>{' '}
               <span style={{ color: UNI }}>que se hacen</span><br />
@@ -229,9 +229,9 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
 
 function FeaturedCampaignsSection({ campaigns, loading }: { campaigns: PublicCampaign[]; loading: boolean }) {
   return (
-    <section className="bg-[#f7f9f7] py-20">
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="flex items-end justify-between mb-10">
+    <section className="bg-[#f7f9f7] py-12 sm:py-20">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="flex items-end justify-between mb-8 sm:mb-10">
           <div>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3" style={{ background: '#f0f9e0', color: GREEN }}>
               Destacadas
@@ -339,12 +339,12 @@ function HowItWorksSection() {
   }, [paused, activeStep]);
 
   return (
-    <section className="bg-[#f7f9f7] py-24" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section className="bg-[#f7f9f7] py-12 lg:py-24" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
           {/* Image (changes with step) */}
-          <div className="relative rounded-2xl overflow-hidden shadow-md h-[420px] bg-gray-100 order-2 lg:order-1">
+          <div className="relative rounded-2xl overflow-hidden shadow-md h-[240px] sm:h-[340px] lg:h-[420px] bg-gray-100 order-2 lg:order-1">
             {HOW_STEPS.map((s, i) => (
               <img key={i} src={s.image} alt={s.title}
                 className="absolute inset-0 w-full h-full object-cover transition-all duration-700"
@@ -622,38 +622,50 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 const CAT_IMAGES: Record<string, string> = {
-  'Tecnología': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&h=400&fit=crop',
-  'Arte': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=400&fit=crop',
-  'Educación': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&h=400&fit=crop',
-  'Salud': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500&h=400&fit=crop',
-  'Medio Ambiente': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500&h=400&fit=crop',
-  'Social': 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=500&h=400&fit=crop',
+  'technology':    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=420&fit=crop',
+  'health':        'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&h=420&fit=crop',
+  'education':     'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=420&fit=crop',
+  'environment':   'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=420&fit=crop',
+  'art':           'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=420&fit=crop',
+  'social-impact': 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=420&fit=crop',
+  'food':          'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=420&fit=crop',
+  'fashion':       'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=420&fit=crop',
+  'gaming':        'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&h=420&fit=crop',
+  'real-estate':   'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=420&fit=crop',
+  'fintech':       'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=420&fit=crop',
+  'agriculture':   'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=420&fit=crop',
+  'mobility':      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=420&fit=crop',
+  'media':         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=420&fit=crop',
+  'community':     'https://images.unsplash.com/photo-1511632765153-3bcf5e24d11a?w=600&h=420&fit=crop',
 };
-const DEFAULT_CAT_IMG = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=500&h=400&fit=crop';
+const DEFAULT_CAT_IMG = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=600&h=420&fit=crop';
 
 function CategoriesSection({ categories }: { categories: Category[] }) {
-  const cats = categories.slice(0, 6);
+  const cats = categories.slice(0, 9);
   if (cats.length === 0) return null;
   return (
-    <section className="bg-[#f7f9f7] py-20">
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="flex items-end justify-between mb-10">
+    <section className="bg-[#f7f9f7] py-12 sm:py-20">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="flex items-end justify-between mb-8 sm:mb-10">
           <div>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3" style={{ background: '#f0f9e0', color: GREEN }}>
               <LayoutGrid size={11} strokeWidth={3} /> Temas destacados
             </span>
-            <h2 className="text-[30px] md:text-[38px] font-black text-gray-900 tracking-tight">Descubre por categoría</h2>
+            <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-black text-gray-900 tracking-tight">Descubre por categoría</h2>
           </div>
+          <Link to="/explore" className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-bold no-underline hover:opacity-70 transition-opacity" style={{ color: GREEN }}>
+            Ver todas <ArrowRight size={14} strokeWidth={2.5} />
+          </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {cats.map(cat => (
             <Link key={cat.id} to={`/explore?category=${cat.id}`}
               className="group relative rounded-3xl overflow-hidden h-[220px] cursor-pointer no-underline block shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <img src={CAT_IMAGES[cat.name] || DEFAULT_CAT_IMG} alt={cat.name}
+              <img src={CAT_IMAGES[cat.slug] ?? DEFAULT_CAT_IMG} alt={cat.displayName}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-5 left-5 right-5">
-                <h3 className="text-white text-[18px] font-black mb-1">{cat.name}</h3>
+                <h3 className="text-white text-[18px] font-black mb-1">{cat.displayName}</h3>
                 <span className="inline-flex items-center gap-1 text-white/70 text-[12px] font-semibold">
                   Ver campañas <ArrowRight size={12} strokeWidth={2.5} />
                 </span>
@@ -672,16 +684,16 @@ function CategoriesSection({ categories }: { categories: Category[] }) {
 // ─── Trust section ────────────────────────────────────────────────────────────
 function TrustSection() {
   return (
-    <section className="py-20" style={{ background: '#1c2b1e' }}>
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+    <section className="py-12 sm:py-20" style={{ background: '#1c2b1e' }}>
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center">
           {/* Text */}
           <div>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-5"
               style={{ background: 'rgba(114,182,38,0.2)', color: '#a7f3d0' }}>
               <Shield size={11} strokeWidth={3} /> Plataforma de confianza
             </span>
-            <h2 className="text-[30px] md:text-[42px] font-black text-white tracking-tight leading-tight mb-5">
+            <h2 className="text-[22px] sm:text-[30px] md:text-[42px] font-black text-white tracking-tight leading-tight mb-5">
               Unifundme es el líder de<br />confianza en Bolivia.
             </h2>
             <p className="text-white/60 text-[16px] leading-relaxed mb-8 max-w-[480px]">
@@ -713,7 +725,7 @@ function TrustSection() {
 
           {/* Image */}
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-md h-[420px]">
+            <div className="rounded-2xl overflow-hidden shadow-md h-[260px] sm:h-[340px] lg:h-[420px]">
               <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=700&h=500&fit=crop"
                 alt="Equipo Unifundme" className="w-full h-full object-cover" />
             </div>
@@ -737,10 +749,10 @@ function TrustSection() {
 // ─── Final CTA ────────────────────────────────────────────────────────────────
 function CTABanner() {
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-[700px] mx-auto px-6 text-center">
+    <section className="py-12 sm:py-20 bg-white">
+      <div className="max-w-[700px] mx-auto px-4 sm:px-6 text-center">
         <UniFoundMeLogo variant="color" className="mx-auto mb-6 h-14 sm:h-20" />
-        <h2 className="text-[30px] md:text-[44px] font-black text-gray-900 tracking-tight mb-4">
+        <h2 className="text-[24px] sm:text-[30px] md:text-[44px] font-black text-gray-900 tracking-tight mb-4">
           ¿Listo para hacer realidad<br />tu proyecto?
         </h2>
         <p className="text-gray-500 text-[16px] leading-relaxed mb-8">
@@ -793,8 +805,8 @@ function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="max-w-[1280px] mx-auto px-6 pt-14 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
             <Link to="/" className="no-underline mb-4 inline-block">
