@@ -92,9 +92,9 @@ export function MyCampaignsPage() {
   const activeCount = campaigns.filter(c => c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded').length;
 
   const formatMoney = (n: number) =>
-    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M`
-    : n >= 1_000   ? `$${(n / 1_000).toFixed(1)}K`
-    : `$${n}`;
+    n >= 1_000_000 ? `Bs. ${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000   ? `Bs. ${(n / 1_000).toFixed(1)}K`
+    : `Bs. ${n.toLocaleString('es-BO')}`;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>

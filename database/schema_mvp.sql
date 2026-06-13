@@ -219,7 +219,7 @@ CREATE TABLE campaigns (
     max_investment      NUMERIC(12,2),
     current_amount      NUMERIC(15,2)  NOT NULL DEFAULT 0 CHECK (current_amount >= 0),
     investor_count      INTEGER        NOT NULL DEFAULT 0 CHECK (investor_count >= 0),
-    currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    currency            VARCHAR(3)     NOT NULL DEFAULT 'BOB',
     start_date          TIMESTAMPTZ,
     end_date            TIMESTAMPTZ,
     funded_at           TIMESTAMPTZ,
@@ -262,7 +262,7 @@ CREATE TABLE reward_tiers (
     title               VARCHAR(200)   NOT NULL,
     description         TEXT           NOT NULL,
     amount              NUMERIC(12,2)  NOT NULL CHECK (amount > 0),
-    currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    currency            VARCHAR(3)     NOT NULL DEFAULT 'BOB',
     max_claims          INTEGER,
     current_claims      INTEGER        NOT NULL DEFAULT 0 CHECK (current_claims >= 0),
     estimated_delivery  DATE,
@@ -291,7 +291,7 @@ CREATE TABLE investments (
     investor_id         UUID           NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     reward_tier_id      UUID           REFERENCES reward_tiers(id) ON DELETE SET NULL,
     amount              NUMERIC(12,2)  NOT NULL CHECK (amount > 0),
-    currency            VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    currency            VARCHAR(3)     NOT NULL DEFAULT 'BOB',
     status              VARCHAR(20)    NOT NULL DEFAULT 'pending'
                         CHECK (status IN (
                             'pending', 'processing', 'completed', 'failed',
@@ -333,7 +333,7 @@ CREATE TABLE transactions (
                                 'payout', 'fee', 'adjustment'
                             )),
     amount                  NUMERIC(12,2)  NOT NULL,
-    currency                VARCHAR(3)     NOT NULL DEFAULT 'USD',
+    currency                VARCHAR(3)     NOT NULL DEFAULT 'BOB',
     fee_amount              NUMERIC(10,2)  DEFAULT 0,
     net_amount              NUMERIC(12,2),
     status                  VARCHAR(20)    NOT NULL DEFAULT 'pending'

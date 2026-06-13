@@ -155,7 +155,7 @@ let CampaignService = class CampaignService {
             const grossAmount = progress.currentAmount;
             const platformFee = Math.round(grossAmount * 0.05 * 100) / 100;
             const netAmount = Math.round((grossAmount - platformFee) * 100) / 100;
-            const currency = progress.currency || 'USD';
+            const currency = progress.currency || 'BOB';
             const cardWidth = (contentWidth - 20) / 3;
             const cardHeight = 65;
             const drawCard = (x, y, title, value, isNet = false) => {
@@ -166,9 +166,9 @@ let CampaignService = class CampaignService {
                 doc.fillColor(textDark).fontSize(9).font('Helvetica-Bold').text(title.toUpperCase(), x + 10, y + 15);
                 doc.fillColor(isNet ? primaryGreen : textDark).fontSize(14).font('Helvetica-Bold').text(value, x + 10, y + 35);
             };
-            drawCard(marginX, currentY, 'Monto Bruto Recaudado', `$${grossAmount.toLocaleString()} ${currency}`);
-            drawCard(marginX + cardWidth + 10, currentY, 'Comisión Plataforma (5%)', `$${platformFee.toLocaleString()} ${currency}`);
-            drawCard(marginX + (cardWidth + 10) * 2, currentY, 'Monto Neto Estimado', `$${netAmount.toLocaleString()} ${currency}`, true);
+            drawCard(marginX, currentY, 'Monto Bruto Recaudado', `Bs. ${grossAmount.toLocaleString('es-BO')}`);
+            drawCard(marginX + cardWidth + 10, currentY, 'Comisión Plataforma (5%)', `Bs. ${platformFee.toLocaleString('es-BO')}`);
+            drawCard(marginX + (cardWidth + 10) * 2, currentY, 'Monto Neto Estimado', `Bs. ${netAmount.toLocaleString('es-BO')}`, true);
             currentY += cardHeight + 35;
             doc.fillColor(primaryGreen).fontSize(14).font('Helvetica-Bold').text('Detalle de Aportes y Transacciones', marginX, currentY);
             currentY += 20;
@@ -224,7 +224,7 @@ let CampaignService = class CampaignService {
                     doc.text(truncatedEmail, cols.email.x + 5, currentY + 6, { lineBreak: false });
                     const truncatedReward = inv.rewardTitle.length > 18 ? inv.rewardTitle.substring(0, 16) + '..' : inv.rewardTitle;
                     doc.text(truncatedReward, cols.recompensa.x + 5, currentY + 6, { lineBreak: false });
-                    doc.text(`$${inv.amount.toLocaleString()}`, cols.monto.x + 5, currentY + 6, { align: 'right', width: cols.monto.w - 10, lineBreak: false });
+                    doc.text(`Bs. ${inv.amount.toLocaleString('es-BO')}`, cols.monto.x + 5, currentY + 6, { align: 'right', width: cols.monto.w - 10, lineBreak: false });
                     const statusText = inv.status.toUpperCase();
                     let statusColor = textDark;
                     if (inv.status === 'completed')

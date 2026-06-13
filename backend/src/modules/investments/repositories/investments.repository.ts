@@ -34,7 +34,7 @@ export class InvestmentsRepository extends BaseRepository {
 
     // Variables que capturamos dentro de la TX y usamos fuera
     let campaignTitle = '';
-    let campaignCurrency = 'USD';
+    let campaignCurrency = 'BOB';
     let goalAmount = 0;
     let entrepreneurUserId = '';
     let isFunded = false;
@@ -88,7 +88,7 @@ export class InvestmentsRepository extends BaseRepository {
       const minInvestment = Number(campaign.min_investment) || 0;
       if (dto.amount < minInvestment) {
         throw new BadRequestException(
-          `El monto de inversión ($${dto.amount}) es menor al mínimo requerido por la campaña ($${minInvestment}).`
+          `El monto de inversión (Bs. ${dto.amount.toLocaleString('es-BO')}) es menor al mínimo requerido por la campaña (Bs. ${minInvestment.toLocaleString('es-BO')}).`
         );
       }
 
@@ -98,13 +98,13 @@ export class InvestmentsRepository extends BaseRepository {
 
       if (dto.amount > remainingAmount) {
         throw new BadRequestException(
-          `El monto de inversión ($${dto.amount}) supera el saldo restante de la campaña ($${remainingAmount}).`
+          `El monto de inversión (Bs. ${dto.amount.toLocaleString('es-BO')}) supera el saldo restante de la campaña (Bs. ${remainingAmount.toLocaleString('es-BO')}).`
         );
       }
 
       // Capturar datos para notificaciones (se usan fuera de la TX)
       campaignTitle = campaign.title;
-      campaignCurrency = campaign.currency ?? 'USD';
+      campaignCurrency = campaign.currency ?? 'BOB';
       entrepreneurUserId = campaign.entrepreneur_user_id;
       isFunded = (currentAmount + dto.amount) >= goalAmount;
 

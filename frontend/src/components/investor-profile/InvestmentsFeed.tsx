@@ -77,7 +77,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Donado</span>
             </div>
             <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
-              ${capitalData.totalInvested.toLocaleString()}
+              Bs. {capitalData.totalInvested.toLocaleString('es-BO')}
             </div>
           </div>
 
@@ -106,11 +106,11 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capital Disponible</span>
             </div>
             <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
-              {capitalData.availableCapital !== null ? `$${capitalData.availableCapital.toLocaleString()}` : '—'}
+              {capitalData.availableCapital !== null ? `Bs. ${capitalData.availableCapital.toLocaleString('es-BO')}` : '—'}
             </div>
             {capitalData.pendingAmount > 0 && (
               <div className="text-[11px] font-bold text-amber-600 mt-1 relative z-10 flex items-center gap-1">
-                <Clock size={10} strokeWidth={3} /> ${capitalData.pendingAmount.toLocaleString()} pendiente
+                <Clock size={10} strokeWidth={3} /> Bs. {capitalData.pendingAmount.toLocaleString('es-BO')} pendiente
               </div>
             )}
           </div>
@@ -208,7 +208,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                     {/* Amount & Date */}
                     <div className="text-right shrink-0">
                       <p className="text-[15px] font-black text-[#1c2b1e] tracking-tighter">
-                        ${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        Bs. {inv.amount.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                         {new Date(inv.createdAt).toLocaleDateString('es-BO', {

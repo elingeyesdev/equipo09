@@ -28,12 +28,12 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
 
   const presetAmounts = [5000, 10000, 25000, 50000];
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+  const formatCurrency = (val: number) => {
+    const formatted = new Intl.NumberFormat('es-BO', {
       maximumFractionDigits: 0,
     }).format(val);
+    return `Bs. ${formatted}`;
+  };
 
   const parsedAmount = Number(amount) || 0;
   const previewNewMax = (currentMax || 0) + parsedAmount;
@@ -42,7 +42,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (parsedAmount < 100) {
-      setError('El monto mínimo es $100');
+      setError('El monto mínimo es Bs. 100');
       return;
     }
     setError(null);
@@ -151,17 +151,17 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                 Monto a agregar
               </span>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[16px]">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[15px]">Bs.</span>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => { setAmount(e.target.value); setError(null); }}
-                  placeholder="10,000"
+                  placeholder="10.000"
                   min={100}
                   step={100}
                   required
                   disabled={loading}
-                  className="w-full pl-9 pr-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-[#72B626] focus:ring-2 focus:ring-[#f0f9e0] text-[18px] font-black text-[#1c2b1e] tracking-tight transition-all outline-none disabled:opacity-50 bg-white"
+                  className="w-full pl-14 pr-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-[#72B626] focus:ring-2 focus:ring-[#f0f9e0] text-[18px] font-black text-[#1c2b1e] tracking-tight transition-all outline-none disabled:opacity-50 bg-white"
                   style={{ appearance: 'textfield' }}
                 />
               </div>
@@ -255,7 +255,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
               ) : (
                 <>
                   <ArrowUpCircle size={18} strokeWidth={2.5} />
-                  Confirmar +{parsedAmount >= 100 ? formatCurrency(parsedAmount) : '$0'}
+                  Confirmar +{parsedAmount >= 100 ? formatCurrency(parsedAmount) : 'Bs. 0'}
                 </>
               )}
             </button>

@@ -147,10 +147,10 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         <div>
           <div className="flex justify-between items-baseline mb-1.5">
             <span className="text-[18px] font-bold text-gray-900">
-              ${campaign.currentAmount.toLocaleString()}
+              Bs. {campaign.currentAmount.toLocaleString('es-BO')}
             </span>
             <span className="text-[12px] text-gray-400">
-              de ${campaign.goalAmount.toLocaleString()}
+              de Bs. {campaign.goalAmount.toLocaleString('es-BO')}
             </span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">

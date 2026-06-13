@@ -224,7 +224,7 @@ export function InvestorDashboardPage() {
                       <div className="w-full md:w-auto md:text-right shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between h-full bg-slate-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
                         <div className="text-left md:text-right">
                           <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Donado</p>
-                          <p className="text-3xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
+                          <p className="text-3xl font-black text-[#1c2b1e] tracking-tighter">Bs. {inv.amount.toLocaleString('es-BO')}</p>
                         </div>
                         <div className="flex flex-row md:flex-col items-center md:items-end gap-2 mt-0 md:mt-4">
                           {inv.investmentStatus === 'completed' && (

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Sparkles, X, Send, ChevronDown, Loader2,
   Lightbulb, BarChart2, Gift, Megaphone, Video, Target,
@@ -127,7 +127,7 @@ export function AICampaignAssistant({ campaignContext }: Props) {
               <BarChart2 size={13} className="text-[#72B626] shrink-0" strokeWidth={2.5} />
               <p className="text-[11px] font-bold text-gray-700 truncate">
                 Contexto: <span className="font-black">{campaignContext.title}</span>
-                {campaignContext.goalAmount && ` · $${campaignContext.goalAmount.toLocaleString()}`}
+                {campaignContext.goalAmount && ` · Bs. ${campaignContext.goalAmount.toLocaleString('es-BO')}`}
               </p>
             </div>
           )}

@@ -438,7 +438,7 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             totalRaised: Number(row?.total_raised ?? 0),
             totalInvestors: row?.total_investors ?? 0,
             averagePerCampaign: Number(row?.avg_per_campaign ?? 0),
-            currency: 'USD',
+            currency: 'BOB',
         };
     }
     async getHistory(campaignId) {

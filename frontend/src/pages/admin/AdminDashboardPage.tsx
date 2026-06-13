@@ -106,7 +106,7 @@ export function AdminDashboardPage() {
               <div>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Total Donado</span>
                 <span className="text-3xl font-extrabold text-gray-950 tracking-tight mt-2.5 block">
-                  ${(stats?.totalFunded || 0).toLocaleString()}
+                  Bs. {(stats?.totalFunded || 0).toLocaleString('es-BO')}
                 </span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#72B626] group-hover:bg-[#f5fce8] transition-all duration-300">
@@ -199,8 +199,8 @@ export function AdminDashboardPage() {
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <span className="text-sm font-bold text-gray-900">${parseFloat(campaign.goal_amount).toLocaleString()}</span>
-                          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider ml-1 block">USD</span>
+                          <span className="text-sm font-bold text-gray-900">Bs. {parseFloat(campaign.goal_amount).toLocaleString('es-BO')}</span>
+                          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider ml-1 block">BOB</span>
                         </div>
                         <button 
                           onClick={() => navigate('/admin/campaigns/review')}

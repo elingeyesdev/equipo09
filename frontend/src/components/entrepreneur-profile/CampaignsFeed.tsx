@@ -202,13 +202,13 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-1">Impacto Logrado</span>
                       <span className="text-[20px] font-black text-[#1c2b1e] block tracking-tighter leading-none">
-                        {campaign.currency} {campaign.currentAmount.toLocaleString()}
+                        Bs. {campaign.currentAmount.toLocaleString('es-BO')}
                       </span>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-1">Meta Estratégica</span>
                       <span className="text-[20px] font-black text-[#72B626] block tracking-tighter leading-none">
-                        {campaign.currency} {campaign.goalAmount.toLocaleString()}
+                        Bs. {campaign.goalAmount.toLocaleString('es-BO')}
                       </span>
                     </div>
                   </div>

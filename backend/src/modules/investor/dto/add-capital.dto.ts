@@ -8,13 +8,13 @@ import { Type } from 'class-transformer';
 export class AddCapitalDto {
   @ApiProperty({
     example: 25000,
-    description: 'Monto a agregar al capital disponible (USD). Mínimo $100.',
+    description: 'Monto a agregar al capital disponible (BOB). Mínimo Bs. 100.',
     type: Number,
   })
   @Type(() => Number)
   @IsNumber({}, { message: 'El monto debe ser un número válido' })
   @IsPositive({ message: 'El monto debe ser mayor a 0' })
-  @Min(100, { message: 'El monto mínimo para agregar capital es $100' })
+  @Min(100, { message: 'El monto mínimo para agregar capital es Bs. 100' })
   amount: number;
 
   @ApiPropertyOptional({

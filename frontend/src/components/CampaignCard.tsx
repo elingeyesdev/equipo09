@@ -170,7 +170,7 @@ export function CampaignCard({
               <TrendingUp size={11} /> Recaudado
             </p>
             <p className="text-[15px] font-black text-[#72B626]">
-              {formatCampaignCurrency(campaign.currentAmount, campaign.currency || 'USD')}
+              {formatCampaignCurrency(campaign.currentAmount, campaign.currency || 'BOB')}
             </p>
           </div>
           <div className="w-px h-8 bg-slate-100" />
@@ -210,10 +210,10 @@ export function CampaignCard({
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-[10px] text-slate-400 font-medium">
-              {formatCampaignCurrency(campaign.currentAmount, campaign.currency || 'USD')}
+              {formatCampaignCurrency(campaign.currentAmount, campaign.currency || 'BOB')}
             </span>
             <span className="text-[10px] text-slate-400 font-medium">
-              Meta: {formatCampaignCurrency(campaign.goalAmount, campaign.currency || 'USD')}
+              Meta: {formatCampaignCurrency(campaign.goalAmount, campaign.currency || 'BOB')}
             </span>
           </div>
         </div>

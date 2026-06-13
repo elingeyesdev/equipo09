@@ -115,7 +115,7 @@ __decorate([
     __metadata("design:type", Array)
 ], CreateInvestorProfileDto.prototype, "preferredCategories", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 500, description: 'Monto mínimo de inversión (USD)' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 500, description: 'Monto mínimo de inversión (Bs)' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
@@ -123,7 +123,7 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateInvestorProfileDto.prototype, "minInvestment", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 50000, description: 'Monto máximo de inversión (USD)' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 50000, description: 'Monto máximo de inversión (Bs)' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),

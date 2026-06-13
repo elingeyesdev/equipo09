@@ -40,7 +40,7 @@ Tu misión es ayudar a emprendedores bolivianos a crear campañas exitosas y ana
 - DonaTok: sección de videos cortos para promocionar campañas
 - Inversores verificados con capital disponible
 - Comisión de plataforma del 5% sobre fondos recaudados
-- Moneda principal: USD (dólares americanos)
+- Moneda principal: BOB (bolivianos, Bs.)
 
 ## Reglas de respuesta
 - Siempre en español, tono profesional pero cercano y motivador
@@ -83,8 +83,8 @@ export class AiCampaignService {
         `- Título: ${campaignContext.title ?? 'Sin título'}\n` +
         `- Tipo: ${campaignContext.campaignType ?? 'N/A'}\n` +
         `- Categoría: ${campaignContext.categoryName ?? 'N/A'}\n` +
-        `- Meta: $${campaignContext.goalAmount?.toLocaleString() ?? 0} USD\n` +
-        `- Recaudado: $${campaignContext.currentAmount?.toLocaleString() ?? 0} USD (${progress}%)\n` +
+        `- Meta: Bs. ${campaignContext.goalAmount?.toLocaleString('es-BO') ?? 0}\n` +
+        `- Recaudado: Bs. ${campaignContext.currentAmount?.toLocaleString('es-BO') ?? 0} (${progress}%)\n` +
         `- Inversores: ${campaignContext.investorCount ?? 0}\n` +
         `- Días restantes: ${campaignContext.daysRemaining ?? 'N/A'}\n` +
         `- Descripción actual:\n${campaignContext.description ?? 'Sin descripción'}\n\n` +

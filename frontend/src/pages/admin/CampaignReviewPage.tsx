@@ -363,8 +363,8 @@ export const CampaignReviewPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                           <span className="text-gray-900 font-bold text-[14px]">${parseFloat(campaign.goal_amount).toLocaleString()}</span>
-                           <span className="text-[10px] text-gray-400 uppercase tracking-wider">USD</span>
+                            <span className="text-gray-900 font-bold text-[14px]">Bs. {parseFloat(campaign.goal_amount).toLocaleString('es-BO')}</span>
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">BOB</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -482,7 +482,7 @@ export const CampaignReviewPage: React.FC = () => {
               goalAmount: parseFloat(selectedCampaignDetail.goal_amount || '0'),
               currentAmount: selectedCampaignDetail.current_amount || 0,
               investorCount: selectedCampaignDetail.investor_count || 0,
-              currency: selectedCampaignDetail.currency || 'USD',
+              currency: selectedCampaignDetail.currency || 'BOB',
               coverImageUrl: selectedCampaignDetail.main_image_url || null,
               categoryName: selectedCampaignDetail.category_name,
               categorySlug: '',

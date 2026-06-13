@@ -16,11 +16,10 @@ interface Props {
 
 export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    const formatted = new Intl.NumberFormat('es-BO', {
       maximumFractionDigits: 0,
     }).format(val);
+    return `Bs. ${formatted}`;
   };
 
   const hasMaxConfigured = data.maxInvestmentLimit !== null;

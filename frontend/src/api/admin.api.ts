@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import type {
   DashboardStats,
   SystemUser,
@@ -137,7 +137,7 @@ export async function getCampaignDetail(id: string): Promise<PendingCampaignDeta
       slug: c.slug || c.id,
       status: c.status || 'pending_review',
       type: (c.campaign_type || c.campaignType || 'donation') as 'reward' | 'donation',
-      currency: c.currency || 'USD',
+      currency: c.currency || 'BOB',
       audit_score: c.audit_score,
       main_image_url: mainImageUrl,
       short_description: c.short_description || c.shortDescription || '',

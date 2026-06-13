@@ -316,7 +316,7 @@ export function AdminCampaignsPage() {
               goalAmount: parseFloat(selectedDetail.goal_amount || '0'),
               currentAmount: selectedDetail.current_amount || 0,
               investorCount: selectedDetail.investor_count || 0,
-              currency: selectedDetail.currency || 'USD',
+              currency: selectedDetail.currency || 'BOB',
               coverImageUrl: selectedDetail.main_image_url || selectedDetail.cover_image_url || null,
               categoryName: selectedDetail.category_name,
               categorySlug: '',

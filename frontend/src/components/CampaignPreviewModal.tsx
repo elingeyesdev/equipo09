@@ -307,7 +307,7 @@ export function CampaignPreviewModal({
 
   const cur = finance?.currentAmount ?? campaign.currentAmount;
   const goal = finance?.goalAmount ?? campaign.goalAmount;
-  const currency = campaign.currency || 'USD';
+  const currency = campaign.currency || 'BOB';
   const investorsTotal = finance?.investorCount ?? campaign.investorCount;
   const recent = finance?.recentInvestments ?? [];
 

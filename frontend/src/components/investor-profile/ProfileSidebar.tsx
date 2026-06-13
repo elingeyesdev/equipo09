@@ -127,7 +127,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
             </div>
             <div className="min-w-0">
               <div className="font-black truncate text-slate-900">
-                Rango: {profile?.minInvestment ? `$${profile.minInvestment.toLocaleString()}` : '—'} — {profile?.maxInvestment ? `$${profile.maxInvestment.toLocaleString()}` : '—'}
+                Rango: {profile?.minInvestment ? `Bs. ${profile.minInvestment.toLocaleString('es-BO')}` : '—'} — {profile?.maxInvestment ? `Bs. ${profile.maxInvestment.toLocaleString('es-BO')}` : '—'}
               </div>
               <div className="text-[12px] text-slate-400 font-bold tracking-widest mt-0.5">
                 Mín / Máx de donación

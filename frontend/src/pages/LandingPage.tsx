@@ -208,8 +208,8 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
         {/* Progress */}
         <div>
           <div className="flex justify-between items-baseline mb-1">
-            <span className="text-[16px] font-black text-gray-900">${campaign.currentAmount.toLocaleString()}</span>
-            <span className="text-[11px] font-semibold text-gray-400">meta: ${campaign.goalAmount.toLocaleString()}</span>
+            <span className="text-[16px] font-black text-gray-900">Bs. {campaign.currentAmount.toLocaleString('es-BO')}</span>
+            <span className="text-[11px] font-semibold text-gray-400">meta: Bs. {campaign.goalAmount.toLocaleString('es-BO')}</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all"
@@ -532,7 +532,7 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-[#d4f0a0] text-[9px] font-black">{progress}% financiado</span>
-                            <span className="text-white/50 text-[8px] font-bold">${c.currentAmount.toLocaleString()}</span>
+                            <span className="text-white/50 text-[8px] font-bold">Bs. {c.currentAmount.toLocaleString('es-BO')}</span>
                           </div>
                         </div>
                       </div>

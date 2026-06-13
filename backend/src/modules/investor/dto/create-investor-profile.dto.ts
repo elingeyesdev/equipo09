@@ -105,14 +105,14 @@ export class CreateInvestorProfileDto {
   @IsUUID('4', { each: true })
   preferredCategories?: string[];
 
-  @ApiPropertyOptional({ example: 500, description: 'Monto mínimo de inversión (USD)' })
+  @ApiPropertyOptional({ example: 500, description: 'Monto mínimo de inversión (Bs)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
   minInvestment?: number;
 
-  @ApiPropertyOptional({ example: 50000, description: 'Monto máximo de inversión (USD)' })
+  @ApiPropertyOptional({ example: 50000, description: 'Monto máximo de inversión (Bs)' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

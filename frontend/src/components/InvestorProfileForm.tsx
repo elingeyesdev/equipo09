@@ -243,7 +243,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col">
-            <label htmlFor="minInvestment" className={labelClass}>Donación Mínima (USD)</label>
+            <label htmlFor="minInvestment" className={labelClass}>Donación Mínima (Bs)</label>
             <input
               id="minInvestment"
               type="number"
@@ -256,7 +256,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
           </div>
 
           <div className="flex flex-col">
-            <label htmlFor="maxInvestment" className={labelClass}>Capacidad Máxima (USD)</label>
+            <label htmlFor="maxInvestment" className={labelClass}>Capacidad Máxima (Bs)</label>
             <input
               id="maxInvestment"
               type="number"

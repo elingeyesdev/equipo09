@@ -162,7 +162,7 @@ export class InvestmentsService {
     doc.fillColor('#555555').fontSize(11).font('Helvetica-Bold')
        .text('Monto Donado', marginX + 22, currentY + 18);
     doc.fillColor(GREEN).fontSize(24).font('Helvetica-Bold')
-       .text(`$${Number(details.amount).toLocaleString()} ${details.currency}`,
+       .text(`Bs. ${Number(details.amount).toLocaleString('es-BO')}`,
              marginX + 22, currentY + 37,
              { width: doc.page.width - marginX * 2 - 44, align: 'right' });
 

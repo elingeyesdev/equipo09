@@ -203,8 +203,8 @@ export function InvestorProfilePage() {
                         <button onClick={() => setModalType('investment')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Donación Mínima</p><p className="font-bold text-[#1c2b1e]">{profile?.minInvestment ? `$${profile.minInvestment.toLocaleString()}` : '-'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Capacidad Máxima</p><p className="font-bold text-[#1c2b1e]">{profile?.maxInvestment ? `$${profile.maxInvestment.toLocaleString()}` : '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Donación Mínima</p><p className="font-bold text-[#1c2b1e]">{profile?.minInvestment ? `Bs. ${profile.minInvestment.toLocaleString('es-BO')}` : '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Capacidad Máxima</p><p className="font-bold text-[#1c2b1e]">{profile?.maxInvestment ? `Bs. ${profile.maxInvestment.toLocaleString('es-BO')}` : '-'}</p></div>
                         {profile?.preferredCategories && profile.preferredCategories.length > 0 && (
                           <div className="md:col-span-2">
                             <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-3">Sectores de Interés</p>
@@ -238,7 +238,7 @@ export function InvestorProfilePage() {
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Capital Disponible</span>
                             <span className="text-2xl font-black text-[#1c2b1e]">
                               {capitalData.maxInvestmentLimit !== null
-                                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(capitalData.availableCapital || 0)
+                                ? `Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.availableCapital || 0)}`
                                 : 'No configurado'}
                             </span>
                           </div>
@@ -247,7 +247,7 @@ export function InvestorProfilePage() {
                           <div className="border border-slate-100 rounded-2xl p-6 bg-slate-50/50">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total Donado</span>
                             <span className="text-2xl font-black text-[#72B626]">
-                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(capitalData.totalInvested || 0)}
+                              {`Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.totalInvested || 0)}`}
                             </span>
                           </div>
 
@@ -256,7 +256,7 @@ export function InvestorProfilePage() {
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Límite Máximo</span>
                             <span className="text-2xl font-black text-[#1c2b1e]">
                               {capitalData.maxInvestmentLimit !== null
-                                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(capitalData.maxInvestmentLimit)
+                                ? `Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.maxInvestmentLimit)}`
                                 : 'No configurado'}
                             </span>
                           </div>
@@ -278,8 +278,8 @@ export function InvestorProfilePage() {
                               />
                             </div>
                             <div className="flex justify-between mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                              <span>Aportado: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(capitalData.totalInvested || 0)}</span>
-                              <span>Límite: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(capitalData.maxInvestmentLimit)}</span>
+                              <span>Aportado: Bs. {new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.totalInvested || 0)}</span>
+                              <span>Límite: Bs. {new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.maxInvestmentLimit)}</span>
                             </div>
                           </div>
                         )}

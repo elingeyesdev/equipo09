@@ -45,9 +45,9 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
     : 0;
 
   const formatMoney = (n: number) =>
-    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M`
-    : n >= 1_000   ? `$${(n / 1_000).toFixed(1)}K`
-    : `$${n}`;
+    n >= 1_000_000 ? `Bs. ${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000   ? `Bs. ${(n / 1_000).toFixed(1)}K`
+    : `Bs. ${n.toLocaleString('es-BO')}`;
 
   return (
     <div

@@ -47,7 +47,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
   const {
     currentAmount,
     goalAmount,
-    currency = 'USD',
+    currency = 'BOB',
     dailyProgress = [],
     fundingBreakdown = [],
     investorCount
@@ -223,7 +223,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(val) => `$${val.toLocaleString()}`}
+                  tickFormatter={(val) => `Bs. ${val.toLocaleString('es-BO')}`}
                   tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
                 />
                 <RechartsTooltip
@@ -234,7 +234,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
-                  formatter={(value: any) => [`$${value.toLocaleString()} ${currency}`, 'Total Acumulado']}
+                  formatter={(value: any) => [`Bs. ${value.toLocaleString('es-BO')}`, 'Total Acumulado']}
                   labelStyle={{ fontWeight: 900, color: '#10b981', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.1em' }}
                 />
                 <Area
@@ -291,7 +291,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
                   formatter={(value: any) => [
-                    campaignType === 'equity' ? `${value}%` : `$${value.toLocaleString()} ${currency}`,
+                    campaignType === 'equity' ? `${value}%` : `Bs. ${value.toLocaleString('es-BO')}`,
                     'Valor'
                   ]}
                 />

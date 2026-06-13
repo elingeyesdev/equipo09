@@ -24,11 +24,10 @@ interface Props {
 export function InvestorDashboardAnalytics({ data: _data, investments }: Props) {
   // Formateador de moneda
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    const formatted = new Intl.NumberFormat('es-BO', {
       maximumFractionDigits: 0,
     }).format(val);
+    return `Bs. ${formatted}`;
   };
 
   // 1. Cálculos de Métricas Financieras
@@ -150,7 +149,7 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(val) => `$${val.toLocaleString()}`}
+                  tickFormatter={(val) => `Bs. ${val.toLocaleString('es-BO')}`}
                   tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
                 />
                 <RechartsTooltip
@@ -162,7 +161,7 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
                   formatter={(value: any, _name: any, props: any) => [
-                    `$${value.toLocaleString()}`, 
+                    `Bs. ${value.toLocaleString('es-BO')}`, 
                     `Acumulado (${props.payload.campaign})`
                   ]}
                   labelStyle={{ fontWeight: 900, color: '#72B626', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.1em' }}

@@ -13,7 +13,7 @@ SELECT
     'Apoyo Básico',
     'Recibirás un agradecimiento personalizado del emprendedor y acceso anticipado a las actualizaciones del proyecto.',
     25.00,
-    'USD',
+    'BOB',
     NULL,  -- sin límite
     (c.end_date + INTERVAL '30 days')::date,
     1
@@ -29,7 +29,7 @@ SELECT
     'Patrocinador',
     'Incluye todo lo del nivel anterior, más un kit exclusivo con merchandising del proyecto y tu nombre en la lista de patrocinadores oficiales.',
     100.00,
-    'USD',
+    'BOB',
     50,  -- máximo 50 claims
     (c.end_date + INTERVAL '60 days')::date,
     2
@@ -50,7 +50,7 @@ SELECT
     'Inversionista VIP',
     'Acceso completo a todos los beneficios anteriores, además de una reunión virtual con el equipo fundador, acceso beta al producto y mención especial en el lanzamiento.',
     500.00,
-    'USD',
+    'BOB',
     10,  -- solo 10 disponibles
     (c.end_date + INTERVAL '90 days')::date,
     3

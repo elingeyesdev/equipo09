@@ -82,10 +82,10 @@ export function RewardTierCards({
                     isSelected ? 'text-[#72B626]' : 'text-[#1c2b1e]'
                   }`}
                 >
-                  ${tier.amount.toLocaleString()}
+                  Bs. {tier.amount.toLocaleString('es-BO')}
                 </span>
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  {tier.currency || 'USD'} o más
+                  {tier.currency || 'BOB'} o más
                 </span>
               </div>
 

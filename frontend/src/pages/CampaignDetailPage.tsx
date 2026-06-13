@@ -478,9 +478,9 @@ export function CampaignDetailPage() {
                     Recaudado
                   </p>
                   <p className="text-4xl font-black text-[#1c2b1e] tracking-tighter">
-                    ${campaign.currentAmount.toLocaleString()}
+                    Bs. {campaign.currentAmount.toLocaleString('es-BO')}
                     <span className="text-[14px] font-bold text-slate-400 ml-2">
-                      {campaign.currency || 'USD'}
+                      BOB
                     </span>
                   </p>
                 </div>
@@ -497,7 +497,7 @@ export function CampaignDetailPage() {
                       {exactProgress}%
                     </span>
                     <span className="text-[13px] font-bold text-slate-400">
-                      Meta: ${campaign.goalAmount.toLocaleString()}
+                      Meta: Bs. {campaign.goalAmount.toLocaleString('es-BO')}
                     </span>
                   </div>
                 </div>
@@ -532,7 +532,7 @@ export function CampaignDetailPage() {
                       Donación mínima
                     </span>
                     <span className="text-[14px] font-black text-[#1c2b1e]">
-                      ${campaign.minInvestment?.toLocaleString() || '0'}
+                      Bs. {campaign.minInvestment?.toLocaleString('es-BO') || '0'}
                     </span>
                   </div>
 
@@ -543,7 +543,7 @@ export function CampaignDetailPage() {
                         Donación máxima
                       </span>
                       <span className="text-[14px] font-black text-[#1c2b1e]">
-                        ${campaign.maxInvestment.toLocaleString()}
+                        Bs. {campaign.maxInvestment.toLocaleString('es-BO')}
                       </span>
                     </div>
                   )}
@@ -593,7 +593,7 @@ export function CampaignDetailPage() {
                             setInvestmentError(null);
                           }
                         }}
-                        placeholder={campaign.campaignType === 'reward' ? 'Selecciona una recompensa' : `Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
+                        placeholder={campaign.campaignType === 'reward' ? 'Selecciona una recompensa' : `Mínimo Bs. ${campaign.minInvestment?.toLocaleString('es-BO') || '1'}`}
                         disabled={investmentLoading || campaign.campaignType === 'reward'}
                         className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
                       />
@@ -654,15 +654,15 @@ export function CampaignDetailPage() {
                       return;
                     }
                     if (amountTooLow) {
-                      setInvestmentError(`El monto mínimo de donación es $${campaign.minInvestment?.toLocaleString()}.`);
+                      setInvestmentError(`El monto mínimo de donación es Bs. ${campaign.minInvestment?.toLocaleString('es-BO')}.`);
                       return;
                     }
                     if (amountTooHigh) {
-                      setInvestmentError(`El monto máximo de donación es $${campaign.maxInvestment?.toLocaleString()}.`);
+                      setInvestmentError(`El monto máximo de donación es Bs. ${campaign.maxInvestment?.toLocaleString('es-BO')}.`);
                       return;
                     }
                     if (amountBelowTier && selectedTier) {
-                      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es $${selectedTier.amount.toLocaleString()}.`);
+                      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es Bs. ${selectedTier.amount.toLocaleString('es-BO')}.`);
                       return;
                     }
                     // All validations passed → show confirmation modal
@@ -743,7 +743,7 @@ export function CampaignDetailPage() {
                             Procesando...
                           </>
                         ) : (
-                          `Donar $${hasValidAmount ? parsedAmount.toLocaleString() : '0'}`
+                          `Donar Bs. ${hasValidAmount ? parsedAmount.toLocaleString('es-BO') : '0'}`
                         )}
                       </button>
                       {!hasValidAmount && (
@@ -755,12 +755,12 @@ export function CampaignDetailPage() {
                       )}
                       {amountBelowTier && selectedTier && (
                         <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
-                          Mínimo ${selectedTier.amount.toLocaleString()} para esta recompensa
+                          Mínimo Bs. {selectedTier.amount.toLocaleString('es-BO')} para esta recompensa
                         </p>
                       )}
                       {amountTooLow && (
                         <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
-                          Donación mínima: ${campaign.minInvestment?.toLocaleString()}
+                          Donación mínima: Bs. {campaign.minInvestment?.toLocaleString('es-BO')}
                         </p>
                       )}
                     </>
@@ -869,7 +869,7 @@ export function CampaignDetailPage() {
                         <span className="text-[12px] font-black text-[#72B626]">{rcProgress}%</span>
                       </div>
                       <span className="text-[11px] font-bold text-slate-400">
-                        ${rc.currentAmount.toLocaleString()} / ${rc.goalAmount.toLocaleString()}
+                        Bs. {rc.currentAmount.toLocaleString('es-BO')} / Bs. {rc.goalAmount.toLocaleString('es-BO')}
                       </span>
                     </div>
                   </div>

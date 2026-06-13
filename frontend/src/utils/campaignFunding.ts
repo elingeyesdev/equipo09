@@ -1,4 +1,4 @@
-﻿export function computeFundingPercent(currentAmount: number, goalAmount: number): number {
+export function computeFundingPercent(currentAmount: number, goalAmount: number): number {
   if (!Number.isFinite(currentAmount) || !Number.isFinite(goalAmount) || goalAmount <= 0) {
     return 0;
   }
@@ -15,10 +15,9 @@ export function formatFundingPercent(currentAmount: number, goalAmount: number):
   return Number(percent.toFixed(2));
 }
 
-export function formatCampaignCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: currency || 'USD',
+export function formatCampaignCurrency(amount: number, currency?: string): string {
+  const formatted = new Intl.NumberFormat('es-BO', {
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(amount || 0);
+  return `Bs. ${formatted}`;
 }

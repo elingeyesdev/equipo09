@@ -55,7 +55,7 @@ export function ContributionConfirmModal({
 }: ContributionConfirmModalProps) {
   const typeInfo = CAMPAIGN_LABELS[campaign.campaignType] || CAMPAIGN_LABELS.donation;
   const TypeIcon = typeInfo.icon;
-  const currency = campaign.currency || 'USD';
+  const currency = campaign.currency || 'BOB';
 
   // Lock body scroll while modal is open
   useEffect(() => {
@@ -205,7 +205,7 @@ export function ContributionConfirmModal({
               </span>
             </div>
             <p className="text-3xl font-black text-[#1c2b1e] tracking-tighter">
-              ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              Bs. {amount.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               <span className="text-[13px] font-bold text-slate-400 ml-2 tracking-normal">
                 {currency}
               </span>

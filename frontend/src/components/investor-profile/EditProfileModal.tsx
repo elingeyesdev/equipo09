@@ -190,11 +190,11 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Donación Mínima (USD)</label>
+              <label className={labelClass}>Donación Mínima (Bs)</label>
               <input name="minInvestment" value={formData.minInvestment || ''} onChange={handleChange} className={inputClass} placeholder="500" type="number" />
             </div>
             <div>
-              <label className={labelClass}>Capacidad Máxima (USD)</label>
+              <label className={labelClass}>Capacidad Máxima (Bs)</label>
               <input name="maxInvestment" value={formData.maxInvestment || ''} onChange={handleChange} className={inputClass} placeholder="50000" type="number" />
             </div>
           </div>

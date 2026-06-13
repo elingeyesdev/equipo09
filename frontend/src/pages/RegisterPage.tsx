@@ -164,7 +164,7 @@ export function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             {isInvestor ? (
               <>
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold text-gray-900">$2.4M</p><p className="text-[12px] text-gray-500 mt-0.5">Donaciones totales</p></div>
+                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold text-gray-900">Bs. 2.4M</p><p className="text-[12px] text-gray-500 mt-0.5">Donaciones totales</p></div>
                 <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold" style={{ color: GREEN }}>+12%</p><p className="text-[12px] text-gray-500 mt-0.5">Tasa de impacto</p></div>
               </>
             ) : (

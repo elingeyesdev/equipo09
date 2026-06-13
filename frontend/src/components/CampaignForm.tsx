@@ -16,7 +16,7 @@ const schema = z.object({
   title: z.string().min(5, 'El título debe tener entre 5 y 50 caracteres').max(50, 'El título debe tener entre 5 y 50 caracteres'),
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
-  goalAmount: z.number().min(100, 'La meta mínima es $100'),
+  goalAmount: z.number().min(100, 'La meta mínima es Bs. 100'),
   campaignType: z.enum(['donation', 'reward', 'equity']),
   categoryIds: z.array(z.string()).min(1, 'Debes seleccionar al menos una categoría'),
   endDate: z.string().optional().or(z.literal(''))
@@ -264,7 +264,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           </div>
 
           <div className="flex flex-col md:col-span-1">
-            <label htmlFor="goalAmount" className={`${labelClass} flex items-center gap-2`}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span><InfoHint text="Monto total que quieres alcanzar con la campaña." /></label>
+            <label htmlFor="goalAmount" className={`${labelClass} flex items-center gap-2`}>Meta de Recaudación (Bs) <span className="text-[#c62828] font-bold">*</span><InfoHint text="Monto total que quieres alcanzar con la campaña." /></label>
             <Controller
               name="goalAmount"
               control={control}
