@@ -14,6 +14,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ChatModule } from './modules/chat/chat.module';
 import { AiSupportModule } from './modules/ai-support/ai-support.module';
 import { AiCampaignModule } from './modules/ai-campaign/ai-campaign.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -37,6 +38,7 @@ import { join } from 'path';
     ChatModule,
     AiSupportModule,
     AiCampaignModule,
+    CommentsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',

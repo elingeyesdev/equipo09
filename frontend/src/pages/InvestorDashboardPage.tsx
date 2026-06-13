@@ -1,5 +1,6 @@
 import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
+import { InvestorDashboardAnalytics } from '../components/InvestorDashboardAnalytics';
 import { AddCapitalModal } from '../components/AddCapitalModal';
 
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
@@ -17,6 +18,7 @@ export function InvestorDashboardPage() {
   const [showAddCapital, setShowAddCapital] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [sortType, setSortType] = useState<string>('newest');
+  const [activeTab, setActiveTab] = useState<'activity' | 'more'>('activity');
 
   const filteredInvestments = investments
     .filter(inv => filterType === 'all' || inv.campaignType === filterType)
@@ -106,8 +108,37 @@ export function InvestorDashboardPage() {
               data={data}
               onAddCapital={() => setShowAddCapital(true)}
             />
-            
-            <div className="flex flex-col gap-8">
+
+            {/* Pestañas de Navegación */}
+            <div className="flex border-b border-gray-200 gap-8 -mt-4 mb-4">
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`pb-4 text-[14px] font-black uppercase tracking-wider transition-all relative border-none bg-transparent cursor-pointer ${
+                  activeTab === 'activity' ? 'text-[#72B626]' : 'text-gray-400 hover:text-gray-600'
+                }`}
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                Actividad Reciente
+                {activeTab === 'activity' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#72B626] rounded-full" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('more')}
+                className={`pb-4 text-[14px] font-black uppercase tracking-wider transition-all relative border-none bg-transparent cursor-pointer ${
+                  activeTab === 'more' ? 'text-[#72B626]' : 'text-gray-400 hover:text-gray-600'
+                }`}
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                Ver más
+                {activeTab === 'more' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#72B626] rounded-full" />
+                )}
+              </button>
+            </div>
+
+            {activeTab === 'activity' && (
+              <div className="flex flex-col gap-8">
               <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-5 gap-4">
                  <div className="flex items-center gap-3">
                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#f5fce8' }}>
@@ -238,6 +269,14 @@ export function InvestorDashboardPage() {
                 </div>
               )}
             </div>
+            )}
+
+            {activeTab === 'more' && (
+              <InvestorDashboardAnalytics
+                data={data}
+                investments={investments}
+              />
+            )}
           </div>
         )}
       </main>

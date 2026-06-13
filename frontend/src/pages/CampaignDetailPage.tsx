@@ -7,6 +7,7 @@ import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaig
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
+import { CampaignComments } from '../components/campaign-detail/CampaignComments';
 import { ProgressBar } from '../components/ProgressBar';
 
 import { createInvestment } from '../api/investor.api';
@@ -456,7 +457,14 @@ export function CampaignDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* ── Comments section (below bio, inside flex-1 column) ── */}
+            <div className="mt-8">
+              <CampaignComments campaignId={campaign.id} />
+            </div>
           </div>
+          {/* end flex-1 main column */}
+
 
           {/* ── Sidebar ── */}
           <div className="w-full lg:w-[380px] shrink-0">
@@ -783,7 +791,9 @@ export function CampaignDetailPage() {
             </div>
           </div>
         </div>
+        {/* end flex row */}
       </div>
+      {/* end max-width container */}
 
       {/* ── Related Campaigns ── */}
       {relatedCampaigns.length > 0 && (
