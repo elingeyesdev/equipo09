@@ -39,14 +39,24 @@ import { join } from 'path';
     AiSupportModule,
     AiCampaignModule,
     CommentsModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-      serveStaticOptions: {
-        index: false,
-        redirect: false,
+    ServeStaticModule.forRoot([
+      {
+        rootPath: join(process.cwd(), 'uploads'),
+        serveRoot: '/uploads',
+        serveStaticOptions: {
+          index: false,
+          redirect: false,
+        },
       },
-    }),
+      {
+        rootPath: join(process.cwd(), '../frontend/dist'),
+        serveRoot: '/',
+        serveStaticOptions: {
+          index: 'index.html',
+          redirect: true,
+        },
+      },
+    ]),
   ],
 })
 export class AppModule {}

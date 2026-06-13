@@ -18,12 +18,12 @@ export class ChatRepository extends BaseRepository {
   ) {
     const rows = await this.queryMany(
       `SELECT c.* FROM conversations c
-       INNER JOIN conversation_participants pa ON pa.conversation_id = c.id AND pa.user_id = $1
-       INNER JOIN conversation_participants pb ON pb.conversation_id = c.id AND pb.user_id = $2
+       INNER JOIN conversation_participants pa ON pa.conversation_id = c.id AND pa.user_id = ?
+       INNER JOIN conversation_participants pb ON pb.conversation_id = c.id AND pb.user_id = ?
        WHERE c.conversation_type = 'direct'
-         AND ($3::UUID IS NULL OR c.campaign_id = $3::UUID)
+         AND (? IS NULL OR c.campaign_id = ?)
        LIMIT 1`,
-      [userA, userB, campaignId ?? null],
+      [userA, userB, campaignId ?? null, campaignId ?? null],
     );
     return rows[0] ?? null;
   }
@@ -37,21 +37,24 @@ export class ChatRepository extends BaseRepository {
     campaignId?: string,
     subject?: string,
   ) {
-    const conv = await this.queryOne(
-      `INSERT INTO conversations (campaign_id, subject, conversation_type, status)
-       VALUES ($1, $2, 'direct', 'active')
-       RETURNING *`,
-      [campaignId ?? null, subject ?? null],
-    );
-    if (!conv) throw new Error('No se pudo crear la conversación');
+    const { randomUUID } = await import('crypto');
+    const convId = randomUUID();
 
     await this.query(
-      `INSERT INTO conversation_participants (conversation_id, user_id, role)
-       VALUES ($1, $2, 'owner'), ($1, $3, 'member')`,
-      [conv.id, userA, userB],
+      `INSERT INTO conversations (id, campaign_id, subject, conversation_type, status, created_at, updated_at)
+       VALUES (?, ?, ?, 'direct', 'active', NOW(), NOW())`,
+      [convId, campaignId ?? null, subject ?? null],
     );
 
-    return conv;
+    const part1Id = randomUUID();
+    const part2Id = randomUUID();
+    await this.query(
+      `INSERT INTO conversation_participants (id, conversation_id, user_id, role, created_at)
+       VALUES (?, ?, ?, 'owner', NOW()), (?, ?, ?, 'member', NOW())`,
+      [part1Id, convId, userA, part2Id, convId, userB],
+    );
+
+    return this.queryOne(`SELECT * FROM conversations WHERE id = ?`, [convId]);
   }
 
   /**
@@ -82,7 +85,6 @@ export class ChatRepository extends BaseRepository {
          c.status,
          c.last_message_at,
          c.message_count,
-         -- Info del otro participante
          other_u.id          AS other_user_id,
          ep.first_name       AS other_first_name,
          ep.last_name        AS other_last_name,
@@ -91,38 +93,35 @@ export class ChatRepository extends BaseRepository {
          ip.last_name        AS other_last_name_inv,
          ip.avatar_url       AS other_avatar_inv,
          other_u.email       AS other_email,
-         -- Último mensaje
          lm.content          AS last_message_content,
          lm.created_at       AS last_message_created_at,
          lm.sender_id        AS last_message_sender_id,
-         -- Mensajes no leídos
          my_part.last_read_at,
          (SELECT COUNT(*) FROM messages m2
           WHERE m2.conversation_id = c.id
-            AND m2.sender_id != $1
+            AND m2.sender_id != ?
             AND (my_part.last_read_at IS NULL OR m2.created_at > my_part.last_read_at)
             AND m2.is_deleted = false
          ) AS unread_count,
-         -- Campaña info
          camp.title          AS campaign_title,
          camp.cover_image_url AS campaign_cover
        FROM conversations c
        INNER JOIN conversation_participants my_part
-         ON my_part.conversation_id = c.id AND my_part.user_id = $1
+         ON my_part.conversation_id = c.id AND my_part.user_id = ?
        INNER JOIN conversation_participants other_part
-         ON other_part.conversation_id = c.id AND other_part.user_id != $1
+         ON other_part.conversation_id = c.id AND other_part.user_id != ?
        INNER JOIN users other_u ON other_u.id = other_part.user_id
        LEFT JOIN entrepreneur_profiles ep ON ep.user_id = other_u.id
        LEFT JOIN investor_profiles ip ON ip.user_id = other_u.id
        LEFT JOIN campaigns camp ON camp.id = c.campaign_id
-       LEFT JOIN LATERAL (
-         SELECT content, created_at, sender_id FROM messages
-         WHERE conversation_id = c.id AND is_deleted = false
-         ORDER BY created_at DESC LIMIT 1
-       ) lm ON true
+       LEFT JOIN messages lm ON lm.conversation_id = c.id AND lm.is_deleted = false
+         AND lm.created_at = (
+           SELECT MAX(m_inner.created_at) FROM messages m_inner
+           WHERE m_inner.conversation_id = c.id AND m_inner.is_deleted = false
+         )
        WHERE c.status != 'archived'
        ORDER BY COALESCE(c.last_message_at, c.created_at) DESC`,
-      [userId],
+      [userId, userId, userId],
     );
   }
 
@@ -132,7 +131,7 @@ export class ChatRepository extends BaseRepository {
   async isParticipant(conversationId: string, userId: string): Promise<boolean> {
     const row = await this.queryOne(
       `SELECT 1 FROM conversation_participants
-       WHERE conversation_id = $1 AND user_id = $2`,
+       WHERE conversation_id = ? AND user_id = ?`,
       [conversationId, userId],
     );
     return row !== null;
@@ -142,7 +141,7 @@ export class ChatRepository extends BaseRepository {
    * Obtiene info básica de una conversación.
    */
   async findConversationById(id: string) {
-    return this.queryOne(`SELECT * FROM conversations WHERE id = $1`, [id]);
+    return this.queryOne(`SELECT * FROM conversations WHERE id = ?`, [id]);
   }
 
   // ─────────────────────────────────────────────────────────
@@ -158,22 +157,23 @@ export class ChatRepository extends BaseRepository {
     content: string,
     messageType: string = 'text',
   ) {
-    const msg = await this.queryOne(
-      `INSERT INTO messages (conversation_id, sender_id, content, message_type)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [conversationId, senderId, content, messageType],
+    const { randomUUID } = await import('crypto');
+    const msgId = randomUUID();
+
+    await this.query(
+      `INSERT INTO messages (id, conversation_id, sender_id, content, message_type, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+      [msgId, conversationId, senderId, content, messageType],
     );
 
     await this.query(
       `UPDATE conversations
        SET last_message_at = NOW(),
            message_count = message_count + 1
-       WHERE id = $1`,
+       WHERE id = ?`,
       [conversationId],
     );
 
-    // Fetch message with sender profile data so fullName is available
     const row = await this.queryOne(
       `SELECT m.*,
               ep.first_name  AS sender_first_name,
@@ -187,11 +187,11 @@ export class ChatRepository extends BaseRepository {
        INNER JOIN users u ON u.id = m.sender_id
        LEFT JOIN entrepreneur_profiles ep ON ep.user_id = m.sender_id
        LEFT JOIN investor_profiles ip ON ip.user_id = m.sender_id
-       WHERE m.id = $1`,
-      [msg!.id],
+       WHERE m.id = ?`,
+      [msgId],
     );
 
-    return row ?? msg;
+    return row;
   }
 
   /**
@@ -204,7 +204,7 @@ export class ChatRepository extends BaseRepository {
   ) {
     if (beforeId) {
       return this.queryMany(
-        `SELECT m.*, 
+        `SELECT m.*,
                 ep.first_name  AS sender_first_name,
                 ep.last_name   AS sender_last_name,
                 ep.avatar_url  AS sender_avatar,
@@ -216,12 +216,12 @@ export class ChatRepository extends BaseRepository {
          INNER JOIN users u ON u.id = m.sender_id
          LEFT JOIN entrepreneur_profiles ep ON ep.user_id = m.sender_id
          LEFT JOIN investor_profiles ip ON ip.user_id = m.sender_id
-         WHERE m.conversation_id = $1
+         WHERE m.conversation_id = ?
            AND m.is_deleted = false
-           AND m.created_at < (SELECT created_at FROM messages WHERE id = $3)
+           AND m.created_at < (SELECT created_at FROM messages WHERE id = ?)
          ORDER BY m.created_at DESC
-         LIMIT $2`,
-        [conversationId, limit, beforeId],
+         LIMIT ?`,
+        [conversationId, beforeId, limit],
       );
     }
 
@@ -238,10 +238,10 @@ export class ChatRepository extends BaseRepository {
        INNER JOIN users u ON u.id = m.sender_id
        LEFT JOIN entrepreneur_profiles ep ON ep.user_id = m.sender_id
        LEFT JOIN investor_profiles ip ON ip.user_id = m.sender_id
-       WHERE m.conversation_id = $1
+       WHERE m.conversation_id = ?
          AND m.is_deleted = false
        ORDER BY m.created_at DESC
-       LIMIT $2`,
+       LIMIT ?`,
       [conversationId, limit],
     );
   }
@@ -253,7 +253,7 @@ export class ChatRepository extends BaseRepository {
     await this.query(
       `UPDATE conversation_participants
        SET last_read_at = NOW()
-       WHERE conversation_id = $1 AND user_id = $2`,
+       WHERE conversation_id = ? AND user_id = ?`,
       [conversationId, userId],
     );
   }
@@ -273,7 +273,7 @@ export class ChatRepository extends BaseRepository {
        INNER JOIN users u ON u.id = cp.user_id
        LEFT JOIN entrepreneur_profiles ep ON ep.user_id = u.id
        LEFT JOIN investor_profiles ip ON ip.user_id = u.id
-       WHERE cp.conversation_id = $1 AND cp.user_id != $2
+       WHERE cp.conversation_id = ? AND cp.user_id != ?
        LIMIT 1`,
       [conversationId, myUserId],
     );

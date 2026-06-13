@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
 import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AdminRepository extends BaseRepository {
@@ -21,7 +22,7 @@ export class AdminRepository extends BaseRepository {
 
   async getAllUsers() {
     return this.queryMany(`
-      SELECT u.id, u.email, u.created_at, u.is_active 
+      SELECT u.id, u.email, u.created_at, u.is_active
       FROM users u
       LEFT JOIN admin_profiles a ON u.id = a.user_id
       WHERE a.id IS NULL
@@ -33,7 +34,7 @@ export class AdminRepository extends BaseRepository {
     return this.queryMany(`
       SELECT c.id, c.title, c.status, c.goal_amount, c.current_amount, c.created_at,
              u.email as creator_email,
-             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as creator_name
+             COALESCE(CONCAT(ep.first_name, ' ', ep.last_name), u.email) as creator_name
       FROM campaigns c
       JOIN users u ON c.creator_id = u.id
       LEFT JOIN entrepreneur_profiles ep ON u.id = ep.user_id
@@ -45,38 +46,36 @@ export class AdminRepository extends BaseRepository {
     return this.transaction(async (client) => {
       // 1. Get current status for history
       const currentCampaign = await client.query(
-        'SELECT status FROM campaigns WHERE id = $1',
+        'SELECT status FROM campaigns WHERE id = ?',
         [campaignId]
       );
-      
+
       if (currentCampaign.rows.length === 0) return null;
       const oldStatus = currentCampaign.rows[0].status;
 
       // 2. Update campaign status
-      let updatedCampaign;
       if (feedback) {
-        updatedCampaign = await client.query(`
-          UPDATE campaigns 
-          SET status = $2, 
-              metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{review_feedback}', to_jsonb($3::text)),
-              updated_at = NOW() 
-          WHERE id = $1 
-          RETURNING *
-        `, [campaignId, status, feedback]);
+        await client.query(`
+          UPDATE campaigns
+          SET status = ?,
+              metadata = JSON_SET(COALESCE(metadata, '{}'), '$.review_feedback', ?),
+              updated_at = NOW()
+          WHERE id = ?
+        `, [status, feedback, campaignId]);
       } else {
-        updatedCampaign = await client.query(`
-          UPDATE campaigns 
-          SET status = $2, updated_at = NOW() 
-          WHERE id = $1 
-          RETURNING *
-        `, [campaignId, status]);
+        await client.query(`
+          UPDATE campaigns
+          SET status = ?, updated_at = NOW()
+          WHERE id = ?
+        `, [status, campaignId]);
       }
 
       // 3. Record status history
+      const historyId = randomUUID();
       await client.query(`
-        INSERT INTO campaign_status_history (campaign_id, from_status, to_status, changed_by, reason)
-        VALUES ($1, $2, $3, $4, $5)
-      `, [campaignId, oldStatus, status, reviewerId, feedback || 'Cambio de estado administrativo']);
+        INSERT INTO campaign_status_history (id, campaign_id, from_status, to_status, changed_by, reason, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, NOW())
+      `, [historyId, campaignId, oldStatus, status, reviewerId, feedback || 'Cambio de estado administrativo']);
 
       // 4. Record review if it's a review action (approved, rejected, etc)
       const reviewDecisions = ['approved', 'rejected', 'published', 'changes_requested'];
@@ -87,41 +86,43 @@ export class AdminRepository extends BaseRepository {
           'rejected': 'rejected',
           'changes_requested': 'changes_requested'
         };
-        
+
+        const reviewId = randomUUID();
         await client.query(`
-          INSERT INTO campaign_reviews (campaign_id, reviewer_id, decision, feedback)
-          VALUES ($1, $2, $3, $4)
-        `, [campaignId, reviewerId, decisionMap[status] || 'approved', feedback]);
+          INSERT INTO campaign_reviews (id, campaign_id, reviewer_id, decision, feedback, created_at)
+          VALUES (?, ?, ?, ?, ?, NOW())
+        `, [reviewId, campaignId, reviewerId, decisionMap[status] || 'approved', feedback]);
       }
 
-      return updatedCampaign.rows[0];
+      return await client.query(`SELECT * FROM campaigns WHERE id = ?`, [campaignId]).then((r: any) => r.rows[0]);
     });
   }
 
   async getCampaignHistory(campaignId: string) {
     return this.queryMany(`
-      SELECT 
+      SELECT
         h.id,
         h.from_status,
         h.to_status,
         h.reason as feedback,
         h.created_at,
         u.email as changed_by_email,
-        COALESCE(ap.first_name || ' ' || ap.last_name, u.email) as changed_by_name
+        COALESCE(CONCAT(ap.first_name, ' ', ap.last_name), u.email) as changed_by_name
       FROM campaign_status_history h
       LEFT JOIN users u ON h.changed_by = u.id
       LEFT JOIN admin_profiles ap ON u.id = ap.user_id
-      WHERE h.campaign_id = $1
+      WHERE h.campaign_id = ?
       ORDER BY h.created_at DESC
     `, [campaignId]);
   }
 
   async createAdminProfile(userId: string, accessLevel: string) {
-    return this.queryOne(`
-      INSERT INTO admin_profiles (user_id, first_name, last_name, access_level, can_approve_campaigns, can_manage_users, can_manage_finances, is_active)
-      VALUES ($1, 'Admin', 'User', $2, true, true, true, true)
-      RETURNING *
-    `, [userId, accessLevel]);
+    const adminId = randomUUID();
+    await this.query(`
+      INSERT INTO admin_profiles (id, user_id, first_name, last_name, access_level, can_approve_campaigns, can_manage_users, can_manage_finances, is_active, created_at, updated_at)
+      VALUES (?, ?, 'Admin', 'User', ?, true, true, true, true, NOW(), NOW())
+    `, [adminId, userId, accessLevel]);
+    return this.queryOne(`SELECT * FROM admin_profiles WHERE id = ?`, [adminId]);
   }
 
   async getAllAdmins() {
@@ -134,22 +135,32 @@ export class AdminRepository extends BaseRepository {
   }
 
   async isUserAdmin(userId: string): Promise<boolean> {
-    const result = await this.queryOne(`SELECT id FROM admin_profiles WHERE user_id = $1`, [userId]);
+    const result = await this.queryOne(`SELECT id FROM admin_profiles WHERE user_id = ?`, [userId]);
     return !!result;
   }
 
   async deleteAdminProfile(adminId: string) {
-    return this.queryOne(`DELETE FROM admin_profiles WHERE id = $1 RETURNING *`, [adminId]);
+    const result = await this.queryOne(`SELECT * FROM admin_profiles WHERE id = ?`, [adminId]);
+    if (result) {
+      await this.query(`DELETE FROM admin_profiles WHERE id = ?`, [adminId]);
+    }
+    return result;
   }
 
   async softDeleteUser(userId: string) {
-    // Soft Delete the user, preventing further logins
-    return this.queryOne(`UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1 RETURNING *`, [userId]);
+    const result = await this.queryOne(`SELECT * FROM users WHERE id = ?`, [userId]);
+    if (result) {
+      await this.query(`UPDATE users SET is_active = false, updated_at = NOW() WHERE id = ?`, [userId]);
+    }
+    return result;
   }
 
   async hardDeleteCampaign(campaignId: string) {
-    // If it fails due to foreign key constraints, pg driver will throw an exception
-    return this.queryOne(`DELETE FROM campaigns WHERE id = $1 RETURNING *`, [campaignId]);
+    const result = await this.queryOne(`SELECT * FROM campaigns WHERE id = ?`, [campaignId]);
+    if (result) {
+      await this.query(`DELETE FROM campaigns WHERE id = ?`, [campaignId]);
+    }
+    return result;
   }
 
   async findPendingCampaigns(queryDto: QueryAdminCampaignsDto) {
@@ -158,33 +169,30 @@ export class AdminRepository extends BaseRepository {
 
     const conditions: string[] = [];
     const params: any[] = [];
-    let paramIndex = 1;
 
     // Default search for pending if no status provided
     const targetStatus = status || 'pending_review';
-    conditions.push(`c.status = $${paramIndex}`);
+    conditions.push(`c.status = ?`);
     params.push(targetStatus);
-    paramIndex++;
 
     if (q) {
-      conditions.push(`(c.title ILIKE $${paramIndex} OR ep.first_name ILIKE $${paramIndex} OR ep.last_name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`);
-      params.push(`%${q}%`);
-      paramIndex++;
+      const searchPattern = `%${q}%`;
+      conditions.push(`(c.title LIKE ? OR ep.first_name LIKE ? OR ep.last_name LIKE ? OR u.email LIKE ?)`);
+      params.push(searchPattern, searchPattern, searchPattern, searchPattern);
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // Whitelist sortBy to prevent SQL Injection (simple version)
     const allowedSortFields = ['created_at', 'goal_amount', 'title', 'status'];
     const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
     const safeSortOrder = sortOrder === 'ASC' ? 'ASC' : 'DESC';
 
     const dataQuery = `
       SELECT c.id, c.title, c.status, c.goal_amount, c.current_amount, c.created_at, c.campaign_type,
-             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as entrepreneur_name,
+             COALESCE(CONCAT(ep.first_name, ' ', ep.last_name), u.email) as entrepreneur_name,
              u.email as creator_email,
              (
-               20 + -- Base Score
+               20 +
                CASE WHEN LENGTH(c.title) > 20 THEN 15 ELSE 0 END +
                CASE WHEN LENGTH(COALESCE(c.description, '')) > 200 THEN 25 ELSE 0 END +
                CASE WHEN c.goal_amount > 1000 THEN 15 ELSE 0 END +
@@ -196,7 +204,7 @@ export class AdminRepository extends BaseRepository {
       LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
       ${whereClause}
       ORDER BY c.${safeSortBy} ${safeSortOrder}
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      LIMIT ? OFFSET ?
     `;
 
     const countQuery = `
@@ -233,11 +241,11 @@ export class AdminRepository extends BaseRepository {
 
   async getCampaignDetailAdmin(id: string) {
     const query = `
-      SELECT c.*, 
+      SELECT c.*,
              u.email as entrepreneur_email,
              ep.first_name as entrepreneur_first_name,
              ep.last_name as entrepreneur_last_name,
-             COALESCE(ep.first_name || ' ' || ep.last_name, u.email) as entrepreneur_name,
+             COALESCE(CONCAT(ep.first_name, ' ', ep.last_name), u.email) as entrepreneur_name,
              ep.avatar_url as entrepreneur_avatar,
              ep.bio as entrepreneur_bio,
              ep.linkedin_url as entrepreneur_linkedin,
@@ -247,23 +255,22 @@ export class AdminRepository extends BaseRepository {
       JOIN users u ON c.creator_id = u.id
       LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
       LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE c.id = $1
+      WHERE c.id = ?
     `;
-    
+
     const campaign = await this.queryOne(query, [id]);
     if (!campaign) return null;
 
-    // Fetch reward tiers safely
     let rewardTiers = [];
     try {
       rewardTiers = await this.queryMany(
-        `SELECT * FROM reward_tiers WHERE campaign_id = $1 ORDER BY amount ASC`,
+        `SELECT * FROM reward_tiers WHERE campaign_id = ? ORDER BY amount ASC`,
         [id]
       );
     } catch (e) {
       console.warn('Could not fetch reward tiers or table missing:', e);
     }
-    
+
     return {
       ...campaign,
       goal_amount: campaign.goal_amount?.toString() || '0',
@@ -281,18 +288,17 @@ export class AdminRepository extends BaseRepository {
   }
 
   async getCampaignDocuments(campaignId: string) {
-    return this.queryMany(`SELECT * FROM campaign_documents WHERE campaign_id = $1 ORDER BY created_at DESC`, [campaignId]);
+    return this.queryMany(`SELECT * FROM campaign_documents WHERE campaign_id = ? ORDER BY created_at DESC`, [campaignId]);
   }
 
   async reviewCampaignDocument(campaignId: string, docId: string, status: string, reviewerNotes: string, reviewerId: string) {
-    const res = await this.queryOne(
-      `UPDATE campaign_documents 
-       SET status = $1, reviewer_notes = $2, reviewed_by = $3, reviewed_at = NOW() 
-       WHERE id = $4 AND campaign_id = $5 
-       RETURNING *`,
+    await this.query(
+      `UPDATE campaign_documents
+       SET status = ?, reviewer_notes = ?, reviewed_by = ?, reviewed_at = NOW()
+       WHERE id = ? AND campaign_id = ?`,
       [status, reviewerNotes || null, reviewerId, docId, campaignId]
     );
-    return res;
+    return this.queryOne(`SELECT * FROM campaign_documents WHERE id = ?`, [docId]);
   }
 
   async getPendingKyc() {
@@ -310,20 +316,18 @@ export class AdminRepository extends BaseRepository {
       const kycStatus = action === 'approve' ? 'approved' : 'rejected';
       const identityVerified = action === 'approve';
       const rejectionReason = action === 'reject' ? reason || null : null;
-      
-      const updatedProfile = await client.query(`
-        UPDATE entrepreneur_profiles
-        SET kyc_status = $1,
-            identity_verified = $2,
-            identity_verified_at = CASE WHEN $2 = true THEN NOW() ELSE identity_verified_at END,
-            kyc_rejection_reason = $3,
-            updated_at = NOW()
-        WHERE id = $4
-        RETURNING *
-      `, [kycStatus, identityVerified, rejectionReason, entrepreneurId]);
 
-      // Podemos registrar la acción de revisión en audit_logs si existiera, o simplemente retornar.
-      return updatedProfile.rows[0];
+      await client.query(`
+        UPDATE entrepreneur_profiles
+        SET kyc_status = ?,
+            identity_verified = ?,
+            identity_verified_at = CASE WHEN ? = true THEN NOW() ELSE identity_verified_at END,
+            kyc_rejection_reason = ?,
+            updated_at = NOW()
+        WHERE id = ?
+      `, [kycStatus, identityVerified, identityVerified, rejectionReason, entrepreneurId]);
+
+      return await client.query(`SELECT * FROM entrepreneur_profiles WHERE id = ?`, [entrepreneurId]).then((r: any) => r.rows[0]);
     });
   }
 }

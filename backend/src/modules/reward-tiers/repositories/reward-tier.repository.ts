@@ -2,19 +2,21 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { BaseRepository } from '../../../common/database';
 import { RewardTier, mapRowToRewardTier } from '../models/reward-tier.model';
 import { CreateRewardTierDto, UpdateRewardTierDto } from '../dto/reward-tier.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class RewardTierRepository extends BaseRepository {
   async create(campaignId: string, dto: CreateRewardTierDto): Promise<RewardTier> {
+    const id = randomUUID();
     const query = `
       INSERT INTO reward_tiers (
-        campaign_id, title, description, amount, min_percentage, max_percentage, currency, max_claims,
+        id, campaign_id, title, description, amount, min_percentage, max_percentage, currency, max_claims,
         estimated_delivery, includes_shipping, shipping_details, image_url,
-        expires_at, items, sort_order
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-      RETURNING *;
+        expires_at, items, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `;
     const values = [
+      id,
       campaignId,
       dto.title,
       dto.description,
@@ -32,27 +34,28 @@ export class RewardTierRepository extends BaseRepository {
       dto.sortOrder || 0,
     ];
 
-    const row = await this.queryOne(query, values);
-    return mapRowToRewardTier(row);
+    await this.query(query, values);
+    const row = await this.queryOne(`SELECT * FROM reward_tiers WHERE id = ?`, [id]);
+    return mapRowToRewardTier(row!);
   }
 
   async findByCampaignId(campaignId: string, onlyActive = true): Promise<RewardTier[]> {
     const query = `
-      SELECT * FROM reward_tiers 
-      WHERE campaign_id = $1 ${onlyActive ? 'AND is_active = true' : ''}
-      ORDER BY sort_order ASC, min_percentage ASC;
+      SELECT * FROM reward_tiers
+      WHERE campaign_id = ? ${onlyActive ? 'AND is_active = true' : ''}
+      ORDER BY sort_order ASC, min_percentage ASC
     `;
     const rows = await this.queryMany(query, [campaignId]);
     return rows.map(mapRowToRewardTier);
   }
 
   async findById(id: string): Promise<RewardTier | null> {
-    const row = await this.queryOne(`SELECT * FROM reward_tiers WHERE id = $1`, [id]);
+    const row = await this.queryOne(`SELECT * FROM reward_tiers WHERE id = ?`, [id]);
     return row ? mapRowToRewardTier(row) : null;
   }
 
   async update(id: string, dto: UpdateRewardTierDto): Promise<RewardTier> {
-    const { clause, values, nextIndex } = this.buildUpdateSet({
+    const { clause, values } = this.buildUpdateSet({
       title: dto.title,
       description: dto.description,
       amount: dto.amount,
@@ -60,59 +63,58 @@ export class RewardTierRepository extends BaseRepository {
       max_percentage: dto.maxPercentage,
       currency: dto.currency,
       max_claims: dto.maxClaims,
-      estimatedDelivery: dto.estimatedDelivery,
-      includesShipping: dto.includesShipping,
-      shippingDetails: dto.shippingDetails,
-      imageUrl: dto.imageUrl,
-      expiresAt: dto.expiresAt,
+      estimated_delivery: dto.estimatedDelivery,
+      includes_shipping: dto.includesShipping,
+      shipping_details: dto.shippingDetails,
+      image_url: dto.imageUrl,
+      expires_at: dto.expiresAt,
       items: dto.items ? JSON.stringify(dto.items) : undefined,
-      sortOrder: dto.sortOrder,
-      isActive: dto.isActive,
+      sort_order: dto.sortOrder,
+      is_active: dto.isActive,
     });
 
-    const query = `UPDATE reward_tiers SET ${clause} WHERE id = $${nextIndex} RETURNING *;`;
-    const row = await this.queryOne(query, [...values, id]);
-    
+    if (!clause) throw new BadRequestException('No fields to update');
+    const query = `UPDATE reward_tiers SET ${clause}, updated_at = NOW() WHERE id = ?`;
+    await this.query(query, [...values, id]);
+
+    const row = await this.queryOne(`SELECT * FROM reward_tiers WHERE id = ?`, [id]);
     if (!row) throw new NotFoundException('Nivel de recompensa no encontrado');
     return mapRowToRewardTier(row);
   }
 
   async delete(id: string): Promise<void> {
-    const result = await this.query(`DELETE FROM reward_tiers WHERE id = $1`, [id]);
+    const result = await this.query(`DELETE FROM reward_tiers WHERE id = ?`, [id]);
     if (result.rowCount === 0) throw new NotFoundException('Nivel de recompensa no encontrado');
   }
 
   /**
    * Intenta reclamar una recompensa de forma atómica.
-   * Retorna el tier actualizado si tuvo éxito, o lanza un error si está agotado.
    */
   async claimRewardAtomic(id: string, client?: any): Promise<RewardTier> {
-    const query = `
-      UPDATE reward_tiers
-      SET current_claims = current_claims + 1
-      WHERE id = $1 
-        AND is_active = true
-        AND (max_claims IS NULL OR current_claims < max_claims)
-      RETURNING *;
-    `;
-    
     const db = client || this;
-    const row = await db.queryOne(query, [id]);
-    
-    if (!row) {
-      // Si no retorna fila, verificamos por qué
-      const exists = await this.findById(id);
-      if (!exists) throw new NotFoundException('La recompensa no existe.');
-      if (!exists.isActive) throw new BadRequestException('Esta recompensa ya no está activa.');
+    const before = await db.queryOne(`SELECT * FROM reward_tiers WHERE id = ?`, [id]);
+
+    if (!before) throw new NotFoundException('La recompensa no existe.');
+    if (!before.is_active) throw new BadRequestException('Esta recompensa ya no está activa.');
+
+    const maxClaims = before.max_claims !== null ? Number(before.max_claims) : null;
+    const currentClaims = Number(before.current_claims);
+    if (maxClaims !== null && currentClaims >= maxClaims) {
       throw new BadRequestException('Esta recompensa ha alcanzado su límite máximo (Sold Out).');
     }
-    
-    return mapRowToRewardTier(row);
+
+    await db.query(
+      `UPDATE reward_tiers SET current_claims = current_claims + 1 WHERE id = ?`,
+      [id]
+    );
+
+    const row = await db.queryOne(`SELECT * FROM reward_tiers WHERE id = ?`, [id]);
+    return mapRowToRewardTier(row!);
   }
 
   async getRewardClaims(campaignId: string): Promise<any[]> {
     const query = `
-      SELECT 
+      SELECT
         rc.id as claim_id,
         rc.status as claim_status,
         rc.tracking_number,
@@ -131,14 +133,14 @@ export class RewardTierRepository extends BaseRepository {
       JOIN users u ON i.investor_id = u.id
       JOIN investor_profiles ip ON i.investor_id = ip.user_id
       LEFT JOIN reward_claims rc ON rc.investment_id = i.id
-      WHERE i.campaign_id = $1 AND i.status = 'completed'
-      ORDER BY i.created_at DESC;
+      WHERE i.campaign_id = ? AND i.status = 'completed'
+      ORDER BY i.created_at DESC
     `;
     return this.queryMany(query, [campaignId]);
   }
 
   async updateRewardClaim(claimId: string, dto: any): Promise<any> {
-    const { clause, values, nextIndex } = this.buildUpdateSet({
+    const { clause, values } = this.buildUpdateSet({
       status: dto.status,
       tracking_number: dto.trackingNumber,
       tracking_url: dto.trackingUrl,
@@ -149,8 +151,10 @@ export class RewardTierRepository extends BaseRepository {
 
     if (!clause) return null;
 
-    const query = `UPDATE reward_claims SET ${clause} WHERE id = $${nextIndex} RETURNING *;`;
-    const row = await this.queryOne(query, [...values, claimId]);
+    const query = `UPDATE reward_claims SET ${clause}, updated_at = NOW() WHERE id = ?`;
+    await this.query(query, [...values, claimId]);
+
+    const row = await this.queryOne(`SELECT * FROM reward_claims WHERE id = ?`, [claimId]);
     if (!row) throw new NotFoundException('Reclamo de recompensa no encontrado');
     return row;
   }

@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool } from 'pg';
+import { createPool, Pool } from 'mysql2/promise';
 
 export const DATABASE_POOL = 'DATABASE_POOL';
 
@@ -10,26 +10,25 @@ export const DATABASE_POOL = 'DATABASE_POOL';
     {
       provide: DATABASE_POOL,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService): Pool => {
-        const pool = new Pool({
+      useFactory: async (configService: ConfigService): Promise<Pool> => {
+        const pool = createPool({
           host: configService.get<string>('DB_HOST', 'localhost'),
-          port: configService.get<number>('DB_PORT', 5432),
-          user: configService.get<string>('DB_USER', 'postgres'),
+          port: configService.get<number>('DB_PORT', 3306),
+          user: configService.get<string>('DB_USER', 'root'),
           password: configService.get<string>('DB_PASSWORD', '1234'),
           database: configService.get<string>('DB_NAME', 'crowdfunding'),
-          ssl: configService.get<string>('DB_SSL') === 'true'
-            ? { rejectUnauthorized: false }
-            : false,
-          max: 20,
-          idleTimeoutMillis: 30000,
-          connectionTimeoutMillis: 5000,
+          waitForConnections: true,
+          connectionLimit: 20,
+          queueLimit: 0,
+          enableKeepAlive: true,
+          keepAliveInitialDelayMs: 0,
         });
 
         pool.on('error', (err) => {
           console.error('❌ Unexpected DB pool error:', err.message);
         });
 
-        pool.on('connect', () => {
+        pool.on('connection', () => {
           console.log('✅ DB pool: new client connected');
         });
 

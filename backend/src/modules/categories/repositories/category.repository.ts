@@ -26,7 +26,7 @@ export class CategoryRepository extends BaseRepository {
    */
   async findByIds(ids: string[]): Promise<Category[]> {
     if (ids.length === 0) return [];
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+    const placeholders = ids.map(() => '?').join(', ');
     const rows = await this.queryMany(
       `SELECT * FROM categories
        WHERE id IN (${placeholders}) AND is_active = true

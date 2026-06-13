@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
 import { Notification, mapRowToNotification } from '../models/notification.model';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class NotificationsRepository extends BaseRepository {
@@ -18,34 +19,35 @@ export class NotificationsRepository extends BaseRepository {
     actionUrl?: string;
     data?: Record<string, any>;
   }): Promise<void> {
+    const notifId = randomUUID();
     await this.query(
-      `INSERT INTO notifications (user_id, type_id, title, body, channel, reference_type, reference_id, action_url, data)
+      `INSERT INTO notifications (id, user_id, type_id, title, body, channel, reference_type, reference_id, action_url, data, created_at, updated_at)
        SELECT
-         $1,
+         ?,
+         ?,
          nt.id,
-         $3,
-         $4,
+         ?,
+         ?,
          'in_app',
-         $5,
-         $6,
-         $7,
-         $8
-       FROM (SELECT 1) AS one
-       JOIN LATERAL (
-         SELECT id
-         FROM notification_types
-         WHERE code = $2
-         LIMIT 1
-       ) AS nt ON true`,
+         ?,
+         ?,
+         ?,
+         ?,
+         NOW(),
+         NOW()
+       FROM notification_types nt
+       WHERE nt.code = ?
+       LIMIT 1`,
       [
+        notifId,
         params.userId,
-        params.typeCode,
         params.title,
         params.body,
         params.referenceType ?? null,
         params.referenceId ?? null,
         params.actionUrl ?? null,
         JSON.stringify(params.data ?? {}),
+        params.typeCode,
       ]
     );
   }
@@ -58,9 +60,9 @@ export class NotificationsRepository extends BaseRepository {
       `SELECT n.*, nt.code AS type_code
        FROM notifications n
        LEFT JOIN notification_types nt ON nt.id = n.type_id
-       WHERE n.user_id = $1
+       WHERE n.user_id = ?
        ORDER BY n.created_at DESC
-       LIMIT $2`,
+       LIMIT ?`,
       [userId, limit]
     );
     return result.rows.map(mapRowToNotification);
@@ -71,7 +73,7 @@ export class NotificationsRepository extends BaseRepository {
    */
   async countUnread(userId: string): Promise<number> {
     const result = await this.query(
-      `SELECT COUNT(*) AS total FROM notifications WHERE user_id = $1 AND is_read = false`,
+      `SELECT COUNT(*) AS total FROM notifications WHERE user_id = ? AND is_read = false`,
       [userId]
     );
     return parseInt(result.rows[0]?.total ?? '0', 10);
@@ -84,7 +86,7 @@ export class NotificationsRepository extends BaseRepository {
     const result = await this.query(
       `UPDATE notifications
        SET is_read = true, read_at = NOW()
-       WHERE id = $1 AND user_id = $2 AND is_read = false`,
+       WHERE id = ? AND user_id = ? AND is_read = false`,
       [notificationId, userId]
     );
     return (result.rowCount ?? 0) > 0;
@@ -97,7 +99,7 @@ export class NotificationsRepository extends BaseRepository {
     const result = await this.query(
       `UPDATE notifications
        SET is_read = true, read_at = NOW()
-       WHERE user_id = $1 AND is_read = false`,
+       WHERE user_id = ? AND is_read = false`,
       [userId]
     );
     return result.rowCount ?? 0;
@@ -109,7 +111,7 @@ export class NotificationsRepository extends BaseRepository {
   async getInvestorsByCampaignId(campaignId: string): Promise<string[]> {
     const result = await this.query(
       `SELECT DISTINCT investor_id FROM investments
-       WHERE campaign_id = $1 AND status = 'completed'`,
+       WHERE campaign_id = ? AND status = 'completed'`,
       [campaignId]
     );
     return result.rows.map((r: any) => r.investor_id as string);
