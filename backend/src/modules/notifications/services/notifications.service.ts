@@ -2,12 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { NotificationsRepository } from '../repositories/notifications.repository';
 import { Notification } from '../models/notification.model';
 
+const NOTIFICATION_CURRENCY = 'BOB';
+
+function formatBolivianos(amount: number): string {
+  return `Bs. ${Number(amount || 0).toLocaleString('es-BO')}`;
+}
+
+function normalizeNotificationCurrencyBody(body: string): string {
+  return body.replace(/\b(\d+(?:[.,]\d{3})*(?:[.,]\d+)?)\s+(?:USD|BOB)\b/g, 'Bs. $1');
+}
+
 @Injectable()
 export class NotificationsService {
   constructor(private readonly notificationsRepository: NotificationsRepository) {}
 
   async getMyNotifications(userId: string): Promise<Notification[]> {
-    return this.notificationsRepository.getNotificationsByUserId(userId);
+    const notifications = await this.notificationsRepository.getNotificationsByUserId(userId);
+    return notifications.map((notification) => ({
+      ...notification,
+      body: normalizeNotificationCurrencyBody(notification.body),
+      data: notification.data?.currency
+        ? { ...notification.data, currency: NOTIFICATION_CURRENCY }
+        : notification.data,
+    }));
   }
 
   async getUnreadCount(userId: string): Promise<number> {
@@ -35,17 +52,19 @@ export class NotificationsService {
     campaignId: string;
     investmentId: string;
   }): Promise<void> {
+    const formattedAmount = formatBolivianos(params.amount);
+
     await this.notificationsRepository.createNotification({
       userId: params.entrepreneurUserId,
       typeCode: 'investment_received',
       title: 'Nueva inversión recibida',
-      body: `Recibiste una inversión de ${params.amount} ${params.currency} en "${params.campaignTitle}".`,
+      body: `Recibiste una inversión de ${formattedAmount} en "${params.campaignTitle}".`,
       referenceType: 'investment',
       referenceId: params.investmentId,
       actionUrl: `/campaign/${params.campaignId}`,
       data: {
         amount: params.amount,
-        currency: params.currency,
+        currency: NOTIFICATION_CURRENCY,
         campaign_title: params.campaignTitle,
         campaign_id: params.campaignId,
       },
@@ -63,17 +82,19 @@ export class NotificationsService {
     campaignId: string;
     investmentId: string;
   }): Promise<void> {
+    const formattedAmount = formatBolivianos(params.amount);
+
     await this.notificationsRepository.createNotification({
       userId: params.investorUserId,
       typeCode: 'investment_confirmed',
       title: 'Inversión confirmada',
-      body: `Tu inversión de ${params.amount} ${params.currency} en "${params.campaignTitle}" fue procesada exitosamente.`,
+      body: `Tu inversión de ${formattedAmount} en "${params.campaignTitle}" fue procesada exitosamente.`,
       referenceType: 'investment',
       referenceId: params.investmentId,
       actionUrl: `/campaign/${params.campaignId}`,
       data: {
         amount: params.amount,
-        currency: params.currency,
+        currency: NOTIFICATION_CURRENCY,
         campaign_title: params.campaignTitle,
         campaign_id: params.campaignId,
       },
@@ -90,19 +111,21 @@ export class NotificationsService {
     goalAmount: number;
     currency: string;
   }): Promise<void> {
+    const formattedGoalAmount = formatBolivianos(params.goalAmount);
+
     // Notificar al emprendedor
     await this.notificationsRepository.createNotification({
       userId: params.entrepreneurUserId,
       typeCode: 'campaign_funded',
       title: '¡Campaña financiada!',
-      body: `¡Felicidades! Tu campaña "${params.campaignTitle}" alcanzó su meta de ${params.goalAmount} ${params.currency}.`,
+      body: `¡Felicidades! Tu campaña "${params.campaignTitle}" alcanzó su meta de ${formattedGoalAmount}.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
       actionUrl: `/campaign/${params.campaignId}`,
       data: {
         campaign_title: params.campaignTitle,
         goal_amount: params.goalAmount,
-        currency: params.currency,
+        currency: NOTIFICATION_CURRENCY,
       },
     });
 
@@ -120,7 +143,7 @@ export class NotificationsService {
         data: {
           campaign_title: params.campaignTitle,
           goal_amount: params.goalAmount,
-          currency: params.currency,
+          currency: NOTIFICATION_CURRENCY,
         },
       });
     }
@@ -275,14 +298,16 @@ export class NotificationsService {
     amount: number;
     currency: string;
   }): Promise<void> {
+    const formattedAmount = formatBolivianos(params.amount);
+
     await this.notificationsRepository.createNotification({
       userId: params.investorUserId,
       typeCode: 'investment_refunded',
       title: 'Inversión Reembolsada',
-      body: `La campaña "${params.campaignTitle}" fue cancelada o no alcanzó su meta. Se han devuelto ${params.amount} ${params.currency} a tu billetera.`,
+      body: `La campaña "${params.campaignTitle}" fue cancelada o no alcanzó su meta. Se han devuelto ${formattedAmount} a tu billetera.`,
       referenceType: 'investment',
       actionUrl: '/dashboard',
-      data: { campaign_title: params.campaignTitle, amount: params.amount, currency: params.currency },
+      data: { campaign_title: params.campaignTitle, amount: params.amount, currency: NOTIFICATION_CURRENCY },
     });
   }
 

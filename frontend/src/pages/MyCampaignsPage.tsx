@@ -11,26 +11,10 @@ import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { getMyCampaignById } from '../api/campaign.api';
 import {
   Rocket, Plus, Search, AlertCircle, Loader2,
-  LayoutGrid, List, TrendingUp, Users, Star
+  LayoutGrid, List,
 } from 'lucide-react';
 
 /* ─── Small Summary Card ─── */
-function SummaryStat({
-  icon, label, value, accent,
-}: { icon: React.ReactNode; label: string; value: string | number; accent: string }) {
-  return (
-    <div className="flex-1 min-w-[130px] bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center gap-3 shadow-sm">
-      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: accent + '15' }}>
-        <span style={{ color: accent }}>{icon}</span>
-      </div>
-      <div>
-        <p className="text-[11px] font-semibold text-gray-400 mb-0.5">{label}</p>
-        <p className="text-[18px] font-bold text-gray-900 leading-none">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 const STATUS_TABS = [
   { value: 'all',            label: 'Todas' },
@@ -85,16 +69,6 @@ export function MyCampaignsPage() {
       c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  /* Calculated summary stats */
-  const totalRaised  = campaigns.reduce((s, c) => s + (c.currentAmount ?? 0), 0);
-  const totalInvestors = campaigns.reduce((s, c) => s + (c.investorCount ?? 0), 0);
-  const activeCount = campaigns.filter(c => c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded').length;
-
-  const formatMoney = (n: number) =>
-    n >= 1_000_000 ? `Bs. ${(n / 1_000_000).toFixed(1)}M`
-    : n >= 1_000   ? `Bs. ${(n / 1_000).toFixed(1)}K`
-    : `Bs. ${n.toLocaleString('es-BO')}`;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>

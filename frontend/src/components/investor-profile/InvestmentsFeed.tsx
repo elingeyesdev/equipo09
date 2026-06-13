@@ -62,29 +62,29 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
 
       {/* Capital Stats Grid */}
       {capitalData && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-[#f0f9e0] rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white rounded-xl sm:rounded-[28px] border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#f0f9e0] rounded-full blur-2xl sm:blur-3xl -mr-8 -mt-8 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
               <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <TrendingUp size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Donado</span>
             </div>
-            <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
+            <div className="text-[22px] sm:text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               Bs. {capitalData.totalInvested.toLocaleString('es-BO')}
             </div>
           </div>
 
-          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-[#f0f9e0] rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
+          <div className="bg-white rounded-xl sm:rounded-[28px] border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#f0f9e0] rounded-full blur-2xl sm:blur-3xl -mr-8 -mt-8 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
               <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <BarChart3 size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Donaciones</span>
             </div>
-            <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
+            <div className="text-[22px] sm:text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               {capitalData.totalInvestments}
             </div>
             <div className="text-[11px] font-bold text-slate-400 mt-1 relative z-10">
@@ -92,15 +92,15 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
             </div>
           </div>
 
-          <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-50"></div>
+          <div className="bg-white rounded-xl sm:rounded-[28px] border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-amber-50 rounded-full blur-2xl sm:blur-3xl -mr-8 -mt-8 opacity-50"></div>
             <div className="flex items-center gap-3 mb-4 relative z-10">
               <div className="w-10 h-10 bg-amber-50 text-[#f9a825] rounded-xl flex items-center justify-center border border-amber-100 group-hover:scale-110 transition-transform">
                 <Wallet size={18} strokeWidth={2.5} />
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capital Disponible</span>
             </div>
-            <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
+            <div className="text-[22px] sm:text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               {capitalData.availableCapital !== null ? `Bs. ${capitalData.availableCapital.toLocaleString('es-BO')}` : '—'}
             </div>
             {capitalData.pendingAmount > 0 && (
@@ -125,13 +125,13 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       )}
 
       {/* Investments List Area */}
-      <div className="bg-white rounded-[40px] shadow-sm p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 border border-gray-100">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-10">
+      <div className="bg-white rounded-2xl sm:rounded-[40px] shadow-sm p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 border border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 sm:mb-10">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-[#1c2b1e] text-white rounded-xl flex items-center justify-center">
-                <Heart size={18} strokeWidth={2.5} />
+             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#1c2b1e] text-white rounded-lg sm:rounded-xl flex items-center justify-center">
+                <Heart size={16} strokeWidth={2.5} className="sm:w-[18px] sm:h-[18px]" />
              </div>
-             <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">
+             <span className="text-[16px] sm:text-[20px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">
                Historial de Donaciones
              </span>
           </div>
@@ -154,11 +154,11 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                 <div
                   key={inv.id}
                   onClick={() => navigate(`/campaign/${inv.campaignId}`)}
-                  className="rounded-2xl border border-slate-100 p-4 hover:shadow-lg hover:border-gray-100 hover:-translate-y-0.5 transition-all cursor-pointer group"
+                  className="rounded-xl sm:rounded-2xl border border-slate-100 p-3 sm:p-4 hover:shadow-lg hover:border-gray-100 hover:-translate-y-0.5 transition-all cursor-pointer group"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Campaign thumbnail */}
-                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden shrink-0 bg-slate-100 shadow-sm">
                       {getImageUrl(inv.campaignCoverImage) ? (
                         <img src={getImageUrl(inv.campaignCoverImage)} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -173,7 +173,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 truncate group-hover:text-[#72B626] transition-colors">
+                      <p className="text-[12px] sm:text-[13px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 truncate group-hover:text-[#72B626] transition-colors">
                         {inv.campaignTitle}
                       </p>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -202,10 +202,10 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
 
                     {/* Amount & Date */}
                     <div className="text-right shrink-0">
-                      <p className="text-[15px] font-black text-[#1c2b1e] tracking-tighter">
+                      <p className="text-[13px] sm:text-[15px] font-black text-[#1c2b1e] tracking-tighter">
                         Bs. {inv.amount.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                      <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                         {new Date(inv.createdAt).toLocaleDateString('es-BO', {
                           day: 'numeric',
                           month: 'short',

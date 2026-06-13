@@ -87,9 +87,9 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-[28px] w-full max-w-[480px] shadow-2xl shadow-[#1c2b1e]/20/10 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
+      <div className="relative bg-white rounded-[28px] w-full max-w-[480px] max-h-[90vh] flex flex-col shadow-2xl shadow-[#1c2b1e]/20/10 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#1c2b1e] to-[#72B626] p-6 pb-8 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#1c2b1e] to-[#72B626] p-6 pb-8 relative overflow-hidden shrink-0">
           <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)',
           }} />
@@ -101,7 +101,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
             <X size={16} strokeWidth={3} />
           </button>
           <div className="flex items-center gap-3 relative z-10">
-            <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
               <ArrowUpCircle size={22} className="text-white" strokeWidth={2.5} />
             </div>
             <div>
@@ -117,7 +117,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
 
         {/* Success State */}
         {success ? (
-          <div className="p-10 text-center animate-in zoom-in-95 fade-in duration-300">
+          <div className="p-10 text-center animate-in zoom-in-95 fade-in duration-300 overflow-y-auto">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f0f9e0] flex items-center justify-center">
               <CheckCircle2 size={32} className="text-[#72B626]" strokeWidth={2.5} />
             </div>
@@ -133,7 +133,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
           </div>
         ) : (
           /* Form */
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} className="p-6 overflow-y-auto">
             {/* Current Balance Display */}
             <div className="bg-slate-50 rounded-2xl p-4 mb-6 flex items-center justify-between">
               <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">

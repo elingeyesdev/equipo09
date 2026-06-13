@@ -32,7 +32,7 @@ interface Props {
 
 const PIE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280'];
 
-export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, createdAt }: Props) {
+export function CampaignAnalyticsDashboard({ finance, startDate, createdAt }: Props) {
   if (!finance) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-white rounded-[32px] border border-slate-100 shadow-sm text-center min-h-[300px]">

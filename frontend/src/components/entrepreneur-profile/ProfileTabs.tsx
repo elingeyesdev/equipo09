@@ -19,8 +19,8 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
   ];
 
   return (
-    <div className="bg-white border-t border-gray-100">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto scrollbar-hide">
+    <div className="bg-white lg:border-t lg:border-gray-100">
+      <div className="max-w-[1100px] mx-auto px-2 sm:px-6 lg:px-4 flex gap-1 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -29,18 +29,18 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                whitespace-nowrap px-6 py-4 text-[14px] font-black transition-all duration-300 border-none bg-transparent cursor-pointer relative flex items-center gap-2 group
+                whitespace-nowrap px-3 sm:px-4 lg:px-6 py-3 lg:py-4 text-[12px] sm:text-[13px] lg:text-[14px] font-bold lg:font-black transition-all duration-300 border-none bg-transparent cursor-pointer relative flex items-center gap-1.5 sm:gap-2 group
                 ${isActive 
                   ? 'text-[#72B626]' 
                   : 'text-slate-400 hover:text-slate-900'
                 }
               `}
             >
-              <Icon size={18} strokeWidth={isActive ? 3 : 2} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-              <span className="uppercase tracking-widest">{tab.label}</span>
-              
+              <Icon strokeWidth={isActive ? 2.7 : 2} className={`w-4 h-4 lg:w-[18px] lg:h-[18px] transition-transform duration-300 ${isActive ? 'scale-105 lg:scale-110' : 'group-hover:scale-105 lg:group-hover:scale-110'}`} />
+              <span className="lg:uppercase lg:tracking-widest">{tab.label}</span>
+
               {isActive && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#72B626] rounded-t-full shadow-[0_-2px_8px_rgba(46,125,50,0.3)] animate-in fade-in slide-in-from-bottom-1 duration-500"></div>
+                <div className="absolute bottom-0 left-2 right-2 lg:left-0 lg:right-0 h-0.5 lg:h-1 bg-[#72B626] rounded-t-full animate-in fade-in slide-in-from-bottom-1 duration-500 lg:shadow-[0_-4px_12px_rgba(114,182,38,0.3)]"></div>
               )}
             </button>
           );

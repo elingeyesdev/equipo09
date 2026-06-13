@@ -125,19 +125,19 @@ export function InvestorProfilePage() {
                 {((!profileLoading && !profile) || error || successMessage) && (
                   <div className="w-full mb-8 flex flex-col gap-4">
                     {!profileLoading && !profile && (
-                      <div className="bg-gradient-to-r from-[#72B626] to-[#1c2b1e] text-white p-6 rounded-[32px] shadow-xl shadow-gray-900/10 flex items-center justify-between animate-in slide-in-from-top-4 duration-700">
-                        <div className="flex items-center gap-5">
-                          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30">
-                            <Rocket size={24} strokeWidth={2.5} />
+                      <div className="bg-gradient-to-r from-[#72B626] to-[#1c2b1e] text-white p-5 sm:p-6 rounded-[24px] sm:rounded-[32px] shadow-xl shadow-gray-900/10 flex flex-col sm:flex-row items-center sm:justify-between gap-5 sm:gap-4 text-center sm:text-left animate-in slide-in-from-top-4 duration-700">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30 shrink-0">
+                            <Rocket size={20} strokeWidth={2.5} className="sm:w-6 sm:h-6" />
                           </div>
                           <div>
-                            <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-1">¡Casi listo para donar!</h4>
+                            <h4 className="text-[16px] font-black tracking-tight uppercase tracking-widest leading-none mb-2 sm:mb-1">¡Casi listo para donar!</h4>
                             <p className="text-green-100/80 text-[13px] font-medium leading-tight">Completa tu información principal para poder realizar tu primera donación.</p>
                           </div>
                         </div>
                         <button
                           onClick={() => setModalType('profile')}
-                          className="bg-white text-[#72B626] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-green-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer"
+                          className="w-full sm:w-auto bg-white text-[#72B626] px-6 py-3 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-green-50 transition-all active:scale-95 shadow-lg border-none cursor-pointer shrink-0"
                         >
                           Completar Ahora
                         </button>
@@ -146,12 +146,12 @@ export function InvestorProfilePage() {
 
                     {error && (
                       <div className="bg-red-50 text-[#c62828] p-5 rounded-[24px] text-[14px] font-bold border border-red-100 shadow-sm flex items-center gap-3">
-                        <AlertCircle size={20} strokeWidth={2.5} /> {error}
+                        <AlertCircle size={20} strokeWidth={2.5} className="shrink-0" /> {error}
                       </div>
                     )}
                     {successMessage && (
                       <div className="bg-green-50 text-[#72B626] p-5 rounded-[24px] text-[14px] font-bold border border-green-100 shadow-sm flex items-center gap-3">
-                        <CheckCircle2 size={20} strokeWidth={2.5} /> {successMessage}
+                        <CheckCircle2 size={20} strokeWidth={2.5} className="shrink-0" /> {successMessage}
                       </div>
                     )}
                   </div>
@@ -160,66 +160,56 @@ export function InvestorProfilePage() {
                 {activeTab === 'donations' ? (
                   <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
                 ) : activeTab === 'info' ? (
-                  <div className="flex flex-col gap-8">
-                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
+                  <div className="flex flex-col gap-6 sm:gap-8">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] border border-green-50 p-6 sm:p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><User size={20} strokeWidth={2.5} /></div>
-                          <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Personales</h3>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center shrink-0"><User size={20} strokeWidth={2.5} /></div>
+                          <h3 className="text-[14px] sm:text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Personales</h3>
                         </div>
                         <button onClick={() => setModalType('profile')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Completo</p><p className="font-bold text-[#1c2b1e]">{profile?.firstName} {profile?.lastName}</p></div>
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Nombre Público</p><p className="font-bold text-[#72B626]">@{profile?.displayName || 'No definido'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tipo de Donador</p><p className="font-bold text-[#72B626] flex items-center gap-2"><Shield size={14} /> {profile?.investorType ? INVESTOR_TYPE_LABELS[profile.investorType] : '-'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tax ID</p><p className="font-bold text-[#1c2b1e]">{profile?.taxId || '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tipo de Donador</p><p className="font-bold text-[#72B626] flex items-center gap-2"><Shield size={14} className="shrink-0" /> {profile?.investorType ? INVESTOR_TYPE_LABELS[profile.investorType] : '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Tax ID</p><p className="font-bold text-[#1c2b1e] break-all">{profile?.taxId || '-'}</p></div>
                         <div className="md:col-span-2"><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Biografía</p><p className="text-slate-600 leading-relaxed">{profile?.bio || 'Sin biografía.'}</p></div>
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] border border-green-50 p-6 sm:p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><MapPin size={20} strokeWidth={2.5} /></div>
-                          <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación</h3>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center shrink-0"><MapPin size={20} strokeWidth={2.5} /></div>
+                          <h3 className="text-[14px] sm:text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación</h3>
                         </div>
                         <button onClick={() => setModalType('address')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">País</p><p className="font-bold text-[#1c2b1e]">{profile?.country || '-'}</p></div>
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Estado / Ciudad</p><p className="font-bold text-[#1c2b1e]">{profile?.state || '-'}, {profile?.city || '-'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Dirección Principal</p><p className="font-bold text-[#1c2b1e]">{profile?.addressLine1 || '-'}</p></div>
-                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Complemento</p><p className="font-bold text-[#1c2b1e]">{profile?.addressLine2 || '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Dirección Principal</p><p className="font-bold text-[#1c2b1e] break-words">{profile?.addressLine1 || '-'}</p></div>
+                        <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Complemento</p><p className="font-bold text-[#1c2b1e] break-words">{profile?.addressLine2 || '-'}</p></div>
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] border border-green-50 p-6 sm:p-8 shadow-sm">
                       <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center"><Target size={20} strokeWidth={2.5} /></div>
-                          <h3 className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Preferencias de Donación</h3>
+                          <div className="w-10 h-10 bg-green-50 text-[#72B626] rounded-xl flex items-center justify-center shrink-0"><Target size={20} strokeWidth={2.5} /></div>
+                          <h3 className="text-[14px] sm:text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest">Preferencias de Donación</h3>
                         </div>
                         <button onClick={() => setModalType('investment')} className="text-[#72B626] font-black uppercase text-[12px] cursor-pointer hover:underline border-none bg-transparent">Editar</button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[14px]">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-[14px]">
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Donación Mínima</p><p className="font-bold text-[#1c2b1e]">{profile?.minInvestment ? `Bs. ${profile.minInvestment.toLocaleString('es-BO')}` : '-'}</p></div>
                         <div><p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-1">Capacidad Máxima</p><p className="font-bold text-[#1c2b1e]">{profile?.maxInvestment ? `Bs. ${profile.maxInvestment.toLocaleString('es-BO')}` : '-'}</p></div>
-                        {profile?.preferredCategories && profile.preferredCategories.length > 0 && (
-                          <div className="md:col-span-2">
-                            <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-3">Sectores de Interés</p>
-                            <div className="flex flex-wrap gap-2">
-                              {profile.preferredCategories.map((cat, i) => (
-                                <span key={i} className="bg-green-50 text-[#72B626] border border-green-100 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider">{cat}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </section>
                   </div>
                 ) : activeTab === 'capital' ? (
-                  <div className="bg-white rounded-[32px] border border-green-50 p-8 shadow-sm space-y-8 w-full">
+                  <div className="bg-white rounded-2xl sm:rounded-[32px] border border-green-50 p-5 sm:p-8 shadow-sm space-y-6 sm:space-y-8 w-full">
                     <div>
                       <h3 className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest mb-1">Capital & Fondos</h3>
                       <p className="text-slate-400 text-xs font-semibold">Resumen de límites financieros y donaciones acumuladas</p>
@@ -234,9 +224,9 @@ export function InvestorProfilePage() {
                       <div className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Card 1 */}
-                          <div className="border border-slate-100 rounded-2xl p-6 bg-slate-50/50">
+                          <div className="border border-slate-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-slate-50/50">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Capital Disponible</span>
-                            <span className="text-2xl font-black text-[#1c2b1e]">
+                            <span className="text-xl sm:text-2xl font-black text-[#1c2b1e]">
                               {capitalData.maxInvestmentLimit !== null
                                 ? `Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.availableCapital || 0)}`
                                 : 'No configurado'}
@@ -244,17 +234,17 @@ export function InvestorProfilePage() {
                           </div>
                           
                           {/* Card 2 */}
-                          <div className="border border-slate-100 rounded-2xl p-6 bg-slate-50/50">
+                          <div className="border border-slate-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-slate-50/50">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total Donado</span>
-                            <span className="text-2xl font-black text-[#72B626]">
+                            <span className="text-xl sm:text-2xl font-black text-[#72B626]">
                               {`Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.totalInvested || 0)}`}
                             </span>
                           </div>
 
                           {/* Card 3 */}
-                          <div className="border border-slate-100 rounded-2xl p-6 bg-slate-50/50">
+                          <div className="border border-slate-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-slate-50/50">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Límite Máximo</span>
-                            <span className="text-2xl font-black text-[#1c2b1e]">
+                            <span className="text-xl sm:text-2xl font-black text-[#1c2b1e]">
                               {capitalData.maxInvestmentLimit !== null
                                 ? `Bs. ${new Intl.NumberFormat('es-BO', { maximumFractionDigits: 0 }).format(capitalData.maxInvestmentLimit)}`
                                 : 'No configurado'}

@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Loader2,
   Heart,
-  TrendingUp,
 } from 'lucide-react';
 
 /* ── Types ── */
@@ -84,12 +83,12 @@ export function ContributionConfirmModal({
 
       {/* ── Modal Card ── */}
       <div
-        className="relative w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-y-auto"
+        className="relative w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col"
         style={{ animation: 'slideUp 0.3s ease-out', maxHeight: 'calc(100vh - 2rem)' }}
       >
         {/* ── Header with gradient ── */}
         <div
-          className="relative px-8 pt-8 pb-6"
+          className="relative px-5 md:px-8 pt-6 md:pt-8 pb-5 md:pb-6 shrink-0"
           style={{
             background: 'linear-gradient(135deg, #1c2b1e 0%, #72B626 100%)',
           }}
@@ -104,18 +103,18 @@ export function ContributionConfirmModal({
             </button>
           )}
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-2 md:mb-4">
             <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center"
+              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
               style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
             >
               <ShieldCheck size={22} strokeWidth={2} className="text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white tracking-tight">
+              <h2 className="text-lg md:text-xl font-black text-white tracking-tight leading-tight">
                 Confirmar Aporte
               </h2>
-              <p className="text-[12px] font-medium text-white/60">
+              <p className="text-[11px] md:text-[12px] font-medium text-white/60 mt-0.5">
                 Revisa el resumen antes de continuar
               </p>
             </div>
@@ -123,7 +122,7 @@ export function ContributionConfirmModal({
         </div>
 
         {/* ── Body ── */}
-        <div className="px-8 py-6 space-y-5">
+        <div className="px-5 md:px-8 py-5 md:py-6 space-y-5 overflow-y-auto">
 
           {/* Campaign info */}
           <div className="flex items-start gap-4">
@@ -160,7 +159,7 @@ export function ContributionConfirmModal({
                   {typeInfo.label}
                 </span>
               </div>
-              <p className="text-[15px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 line-clamp-2">
+              <p className="text-[14px] md:text-[15px] font-black text-[#1c2b1e] tracking-tight leading-snug mb-1 line-clamp-2">
                 {campaign.title}
               </p>
               {campaign.entrepreneurName && (
@@ -200,9 +199,9 @@ export function ContributionConfirmModal({
                 Monto del Aporte
               </span>
             </div>
-            <p className="text-3xl font-black text-[#1c2b1e] tracking-tighter">
+            <p className="text-2xl md:text-3xl font-black text-[#1c2b1e] tracking-tighter">
               Bs. {amount.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              <span className="text-[13px] font-bold text-slate-400 ml-2 tracking-normal">
+              <span className="text-[12px] md:text-[13px] font-bold text-slate-400 ml-2 tracking-normal">
                 {currency}
               </span>
             </p>
@@ -217,11 +216,11 @@ export function ContributionConfirmModal({
                   Recompensa Incluida
                 </span>
               </div>
-              <p className="text-[14px] font-black text-[#1c2b1e] mb-1">
+              <p className="text-[13px] md:text-[14px] font-black text-[#1c2b1e] mb-1">
                 {selectedTier.title}
               </p>
               {selectedTier.description && (
-                <p className="text-[12px] text-slate-500 leading-relaxed">
+                <p className="text-[11px] md:text-[12px] text-slate-500 leading-relaxed">
                   {selectedTier.description}
                 </p>
               )}
@@ -231,7 +230,7 @@ export function ContributionConfirmModal({
           {/* Disclaimer */}
           <div className="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3.5">
             <AlertTriangle size={14} strokeWidth={2.5} className="text-slate-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-[10px] md:text-[11px] text-slate-400 font-medium leading-relaxed">
               Al confirmar, el monto será procesado y registrado como tu aporte a esta campaña.
               Esta acción no puede revertirse una vez completada.
             </p>
@@ -239,18 +238,18 @@ export function ContributionConfirmModal({
         </div>
 
         {/* ── Footer buttons ── */}
-        <div className="px-8 pb-8 flex gap-3">
+        <div className="px-5 md:px-8 pb-5 md:pb-8 flex flex-col sm:flex-row gap-3 shrink-0 pt-4 md:pt-0">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 py-4 rounded-2xl font-black text-[13px] uppercase tracking-widest bg-slate-100 text-slate-500 border-none cursor-pointer hover:bg-slate-200 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3.5 md:py-4 rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest bg-slate-100 text-slate-500 border-none cursor-pointer hover:bg-slate-200 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-[1.5] py-4 rounded-2xl font-black text-[13px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white"
+            className="flex-[1.5] py-3.5 md:py-4 rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white"
             style={{
               background: loading
                 ? '#64748b'

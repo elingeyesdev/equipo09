@@ -70,22 +70,23 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center min-h-[480px] sm:min-h-[520px]">
 
           {/* Left copy */}
-          <div className="pb-14">
+          {/* Left copy */}
+          <div className="pb-14 text-center lg:text-left flex flex-col items-center lg:items-start">
 
-            <h1 className="text-[28px] sm:text-[36px] md:text-[48px] lg:text-[60px] font-black text-gray-900 leading-[1.05] tracking-tight mb-5">
+            <h1 className="text-[34px] sm:text-[42px] md:text-[54px] lg:text-[64px] font-black text-gray-900 leading-[1.05] tracking-tight mb-4">
               Donde comienzan<br />
               <span style={{ color: GREEN }}>los sueños</span>{' '}
               <span style={{ color: UNI }}>que se hacen</span><br />
               realidad.
             </h1>
 
-            <p className="text-[17px] text-gray-500 leading-relaxed mb-8 max-w-[500px] font-medium">
+            <p className="text-[14px] sm:text-[15px] lg:text-[16px] text-gray-500 leading-relaxed mb-8 max-w-[500px] font-medium mx-auto lg:mx-0">
               Empieza en solo unos minutos. Con nuevas herramientas es más fácil
               que nunca crear tu campaña, contar tu historia y llegar a miles de donadores.
             </p>
 
             {/* Search bar */}
-            <form onSubmit={handleSearch} className="flex gap-2 mb-8 max-w-[520px]">
+            <form onSubmit={handleSearch} className="hidden sm:flex gap-2 mb-8 max-w-[520px] w-full">
               <div className="flex-1 relative">
                 <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" strokeWidth={2.5} />
                 <input type="text" value={query} onChange={e => setQuery(e.target.value)}
@@ -101,23 +102,38 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
               </button>
             </form>
 
+            {/* Mobile Arc of Images */}
+            <div className="lg:hidden relative h-[240px] mb-8 w-[350px] max-w-full transform scale-[0.6] origin-top mx-auto">
+              {ARC_POSITIONS.map((pos, i) => (
+                <div key={i}
+                  className="absolute rounded-full overflow-hidden shadow-xl ring-4 ring-white transition-transform hover:scale-105 duration-300"
+                  style={{ top: pos.top, left: pos.left, width: pos.size, height: pos.size, zIndex: i }}>
+                  <img src={images[i]} alt="" className="w-full h-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).src = HERO_FALLBACKS[i % HERO_FALLBACKS.length]; }} />
+                </div>
+              ))}
+              {/* Subtle radial gradient overlay */}
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse at 100% 100%, rgba(255,255,255,0.7) 0%, transparent 60%)' }} />
+            </div>
+
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3 mb-10">
-              <Link to="/register"
-                className="inline-flex items-center gap-2 text-white px-7 py-3.5 rounded-xl font-bold text-[15px] no-underline transition-all hover:opacity-90 active:scale-95"
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3 mb-10 w-full sm:w-auto">
+              <Link to="/entrepreneur-profile"
+                className="flex justify-center items-center gap-1.5 sm:gap-2 text-white px-2 py-3 sm:px-7 sm:py-3.5 rounded-xl font-bold text-[11px] sm:text-[15px] leading-tight text-center no-underline transition-all hover:opacity-90 active:scale-95"
                 style={{ background: GREEN }}>
-                <Rocket size={16} strokeWidth={2} />
+                <Rocket className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" strokeWidth={2} />
                 Comenzar campaña
               </Link>
               <Link to="/explore"
-                className="inline-flex items-center gap-2 text-gray-700 px-7 py-3.5 rounded-2xl font-bold text-[15px] no-underline border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
+                className="flex justify-center items-center gap-1.5 sm:gap-2 text-gray-700 px-2 py-3 sm:px-7 sm:py-3.5 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-[15px] leading-tight text-center no-underline border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
                 Explorar campañas
-                <ArrowRight size={15} strokeWidth={2.5} />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" strokeWidth={2.5} />
               </Link>
             </div>
 
             {/* Trust badges */}
-            <div className="flex flex-wrap gap-5">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-5">
               {[
                 { icon: CheckCircle2, text: `${totalCampaigns > 0 ? totalCampaigns + '+' : ''} campañas activas`, color: GREEN },
                 { icon: Shield, text: 'Plataforma verificada', color: '#1565c0' },
@@ -380,7 +396,7 @@ function HowItWorksSection() {
               ))}
             </ol>
 
-            <Link to="/register"
+            <Link to="/entrepreneur-profile"
               className="mt-10 inline-flex items-center gap-2 text-white px-8 py-4 rounded-xl font-bold text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all"
               style={{ background: GREEN }}>
               <Rocket size={16} strokeWidth={2} /> Comenzar ahora — es gratis
@@ -408,7 +424,7 @@ function YellowHelpSection() {
           Siempre que necesites financiamiento, puedes solicitarlo aquí.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <Link to="/register"
+          <Link to="/entrepreneur-profile"
             className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-xl font-semibold text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all"
             style={{ background: UNI }}>
             Iniciar una campaña
@@ -622,21 +638,21 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 const CAT_IMAGES: Record<string, string> = {
-  'technology':    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=420&fit=crop',
-  'health':        'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&h=420&fit=crop',
-  'education':     'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=420&fit=crop',
-  'environment':   'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=420&fit=crop',
-  'art':           'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=420&fit=crop',
+  'technology': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=420&fit=crop',
+  'health': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&h=420&fit=crop',
+  'education': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=420&fit=crop',
+  'environment': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=420&fit=crop',
+  'art': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=420&fit=crop',
   'social-impact': 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=420&fit=crop',
-  'food':          'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=420&fit=crop',
-  'fashion':       'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=420&fit=crop',
-  'gaming':        'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&h=420&fit=crop',
-  'real-estate':   'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=420&fit=crop',
-  'fintech':       'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=420&fit=crop',
-  'agriculture':   'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=420&fit=crop',
-  'mobility':      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=420&fit=crop',
-  'media':         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=420&fit=crop',
-  'community':     'https://images.unsplash.com/photo-1511632765153-3bcf5e24d11a?w=600&h=420&fit=crop',
+  'food': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=420&fit=crop',
+  'fashion': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=420&fit=crop',
+  'gaming': 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&h=420&fit=crop',
+  'real-estate': 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=420&fit=crop',
+  'fintech': 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=420&fit=crop',
+  'agriculture': 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=420&fit=crop',
+  'mobility': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=420&fit=crop',
+  'media': 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=420&fit=crop',
+  'community': 'https://images.unsplash.com/photo-1511632765153-3bcf5e24d11a?w=600&h=420&fit=crop',
 };
 const DEFAULT_CAT_IMG = 'https://images.unsplash.com/photo-1554224155-1696413565d3?w=600&h=420&fit=crop';
 
@@ -716,7 +732,7 @@ function TrustSection() {
                 </li>
               ))}
             </ul>
-            <Link to="/register"
+            <Link to="/entrepreneur-profile"
               className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-2xl font-black text-[15px] no-underline hover:opacity-90 active:scale-95 transition-all border-2 border-white/20 hover:border-white/40 hover:bg-white/10"
             >
               Comenzar ahora <ArrowRight size={15} strokeWidth={2.5} />
@@ -759,7 +775,7 @@ function CTABanner() {
           Únete a cientos de emprendedores bolivianos que ya están financiando sus sueños con Unifundme.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <Link to="/register"
+          <Link to="/entrepreneur-profile"
             className="inline-flex items-center gap-2 text-white px-9 py-4 rounded-xl font-semibold text-[16px] no-underline hover:opacity-90 active:scale-95 transition-all"
             style={{ background: GREEN }}>
             <Rocket size={17} strokeWidth={2} /> Comenzar campaña
@@ -788,7 +804,7 @@ function Footer() {
     {
       title: 'Recolectar fondos',
       links: [
-        { label: 'Cómo iniciar una campaña', to: '/register' },
+        { label: 'Cómo iniciar una campaña', to: '/entrepreneur-profile' },
         { label: 'Tipos de campaña', to: '/explore' },
         { label: 'Consejos y recursos', to: '/explore' },
       ],

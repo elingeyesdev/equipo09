@@ -50,7 +50,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
       <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={handleCoverChange} />
 
       {/* COVER */}
-      <div className="h-64 md:h-80 w-full bg-[#1c2b1e] relative overflow-hidden rounded-b-[40px] shadow-2xl flex items-center justify-center">
+      <div className="h-48 md:h-80 w-full bg-[#1c2b1e] relative overflow-hidden rounded-b-[32px] md:rounded-b-[40px] shadow-2xl flex items-center justify-center">
         <div className="absolute inset-0 opacity-40">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#72B626] rounded-full blur-[120px]"></div>
@@ -71,12 +71,12 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
       </div>
 
       {/* ── AVATAR & INFO CORE ───────────────────────────── */}
-      <div className="max-w-[1100px] mx-auto px-8">
-        <div className="relative -mt-20 flex flex-col md:flex-row items-end gap-6 md:gap-8">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-8">
+        <div className="relative -mt-20 flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8">
 
           {/* Avatar con Anillo de Estatus */}
           <div className="relative group">
-            <div className="w-40 h-40 rounded-[48px] border-[6px] border-[#f4f7f4] bg-white shadow-2xl overflow-hidden flex items-center justify-center relative z-10">
+            <div className="w-24 h-24 md:w-40 md:h-40 rounded-[32px] md:rounded-[48px] border-4 md:border-[6px] border-[#f4f7f4] bg-white shadow-2xl overflow-hidden flex items-center justify-center relative z-10">
               {profile?.avatarUrl ? (
                 <div
                   className="w-full h-full transition-opacity duration-500"
@@ -87,7 +87,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
                   }}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-4xl font-black text-white">
+                <div className="w-full h-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-3xl md:text-4xl font-black text-white">
                   {initials}
                 </div>
               )}
@@ -113,19 +113,19 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           </div>
 
           {/* Info Principal */}
-          <div className="flex-1 pb-2 text-center md:text-left">
-            <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
-              <h1 className="text-4xl font-black text-[#1c2b1e] tracking-tighter leading-none">
+          <div className="flex-1 pb-2 text-center md:text-left mt-2 md:mt-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-2 mb-3">
+              <h1 className="text-3xl md:text-4xl font-black text-[#1c2b1e] tracking-tighter leading-none break-words">
                 {profile ? `${profile.firstName} ${profile.lastName}` : 'Cargando Perfil...'}
               </h1>
               {profile?.displayName && (
-                <span className="text-[14px] font-bold text-[#72B626] bg-[#f0f9e0] px-3 py-1 rounded-lg">
+                <span className="text-[14px] font-bold text-[#72B626] bg-[#f0f9e0] px-3 py-1 rounded-lg inline-block self-center md:self-auto">
                   @{profile.displayName}
                 </span>
               )}
             </div>
 
-            <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-slate-500">
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-slate-500">
               {profile?.investorType && (
                 <div className="flex items-center gap-2 text-[13px] font-medium">
                   <Shield size={14} className="text-[#72B626]" />
@@ -150,7 +150,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
           </div>
 
           {/* Acciones de Edición */}
-          <div className="flex gap-3 pb-2 w-full md:w-auto">
+          <div className="flex gap-3 pb-2 w-full md:w-auto mt-4 md:mt-0 px-4 md:px-0">
             <button
               onClick={() => onEdit('profile')}
               className="flex-1 md:flex-none bg-white hover:bg-[#f0f9e0] text-slate-600 font-bold px-6 py-3 rounded-xl border border-gray-100 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-[13px]"

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { X, Check, Eye } from 'lucide-react';
 
 interface KYCReviewModalProps {
@@ -13,10 +13,14 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
   const [loading, setLoading] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   if (!isOpen || !kycData) return null;
 
   const handleApprove = async () => {
+    if (!window.confirm("¿Estás seguro de aprobar este KYC? Esta acción no se puede deshacer.")) {
+      return;
+    }
     try {
       setLoading(true);
       await onApprove(kycData.id);
@@ -63,19 +67,19 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Revisión KYC</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900">Revisión KYC</h3>
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
               Emprendedor: {kycData.first_name} {kycData.last_name} ({kycData.email})
             </p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full shrink-0">
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-4 md:p-6 overflow-y-auto space-y-6 flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-gray-200 rounded-xl p-4">
               <h4 className="font-bold text-gray-800 mb-3">Documento de Identidad</h4>
@@ -87,7 +91,12 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
                         Ver PDF
                      </a>
                    ) : (
-                     <img src={idDoc.url} alt="ID Document" className="w-full h-full object-contain" />
+                     <img 
+                       src={idDoc.url} 
+                       alt="ID Document" 
+                       className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity" 
+                       onClick={() => setPreviewImage(idDoc.url)}
+                     />
                    )}
                 </div>
               ) : (
@@ -102,7 +111,12 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
                    {faceDoc.url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? (
                      <video src={faceDoc.url} controls className="w-full h-full object-contain" />
                    ) : (
-                     <img src={faceDoc.url} alt="Face Validation" className="w-full h-full object-contain" />
+                     <img 
+                       src={faceDoc.url} 
+                       alt="Face Validation" 
+                       className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity" 
+                       onClick={() => setPreviewImage(faceDoc.url)}
+                     />
                    )}
                 </div>
               ) : (
@@ -127,7 +141,7 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
           )}
         </div>
 
-        <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+        <div className="p-4 md:p-6 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
           {showRejectForm ? (
             <>
               <button
@@ -143,7 +157,7 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
               <button
                 onClick={handleReject}
                 disabled={loading || !rejectReason.trim()}
-                className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 Confirmar Rechazo
               </button>
@@ -152,7 +166,7 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
             <button
               onClick={handleReject}
               disabled={loading}
-              className="px-6 py-2.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl flex items-center gap-2"
+              className="px-6 py-2.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl flex items-center justify-center gap-2"
             >
               <X size={16} /> Rechazar
             </button>
@@ -160,12 +174,30 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
           <button
             onClick={handleApprove}
             disabled={loading}
-            className="px-6 py-2.5 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-xl flex items-center gap-2"
+            className="px-6 py-2.5 text-sm font-bold text-white bg-[#72B626] hover:bg-[#1c2b1e] rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-colors shadow-lg shadow-[#72B626]/20"
           >
             <Check size={16} /> Aprobar KYC
           </button>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4" onClick={() => setPreviewImage(null)}>
+          <button 
+            className="absolute top-4 right-4 text-white hover:text-gray-300 p-2"
+            onClick={() => setPreviewImage(null)}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={previewImage} 
+            alt="Preview" 
+            className="max-w-full max-h-[90vh] object-contain cursor-zoom-out" 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

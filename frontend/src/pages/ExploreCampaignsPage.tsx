@@ -339,37 +339,40 @@ export function ExploreCampaignsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+      {/* Filters Bar */}
+      <div className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-40">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
           
-          {/* Left section: Category, Toggle and Sort filters */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-400 text-[13px] font-semibold mr-1">
+          {/* Left section: Category filter */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
+            <div className="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] font-semibold mr-1">
               <Filter size={16} className="text-[#72B626]" />
               Filtrar por:
             </div>
 
             {/* Category custom dropdown */}
-            <div ref={categoryDropdownRef} className="relative">
+            <div ref={categoryDropdownRef} className="relative flex-1 sm:flex-none">
               <button
                 type="button"
                 onClick={() => setShowCategoryDropdown(prev => !prev)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer ${filters.categoryId
+                className={`w-full sm:w-auto flex items-center justify-between sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer ${filters.categoryId
                   ? 'border-[#72B626] bg-[#72B626]/5 text-[#4a7f1a] shadow-sm shadow-[#72B626]/5'
                   : 'border-gray-200 bg-white text-slate-600 hover:border-[#72B626] hover:bg-slate-50'
                   }`}
               >
-                <LayoutGrid size={14} className={filters.categoryId ? 'text-[#4a7f1a]' : 'text-slate-400'} />
-                <span>
-                  {filters.categoryId
-                    ? categories.find(c => c.id === filters.categoryId)?.displayName || 'Sector'
-                    : 'Sector'}
-                </span>
-                <ChevronDown size={12} className="text-slate-400" />
+                <div className="flex items-center gap-2 truncate">
+                  <LayoutGrid size={14} className={`shrink-0 ${filters.categoryId ? 'text-[#4a7f1a]' : 'text-slate-400'}`} />
+                  <span className="truncate">
+                    {filters.categoryId
+                      ? categories.find(c => c.id === filters.categoryId)?.displayName || 'Sector'
+                      : 'Sector'}
+                  </span>
+                </div>
+                <ChevronDown size={12} className="text-slate-400 shrink-0" />
               </button>
 
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute top-full left-0 mt-1.5 w-[calc(100vw-2rem)] sm:w-60 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150 max-w-[300px]">
                   <div className="max-h-[260px] overflow-y-auto py-1">
                     <button
                       type="button"
@@ -412,50 +415,10 @@ export function ExploreCampaignsPage() {
                 </div>
               )}
             </div>
-
-            {/* Ending soon filter */}
-            <button
-              type="button"
-              onClick={() => {
-                const isActive = filters.sortBy === 'end_date' && filters.sortOrder === 'ASC';
-                if (isActive) {
-                  updateFilters({ sortBy: 'created_at', sortOrder: 'DESC' });
-                } else {
-                  updateFilters({ sortBy: 'end_date', sortOrder: 'ASC' });
-                }
-              }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer ${filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
-                ? 'border-orange-200 bg-orange-50/70 text-orange-700 shadow-sm shadow-orange-500/5'
-                : 'border-gray-200 bg-white text-slate-600 hover:border-orange-200 hover:bg-orange-50/30'
-                }`}
-            >
-              <Flame size={14} className={filters.sortBy === 'end_date' && filters.sortOrder === 'ASC' ? 'text-orange-600' : 'text-slate-400'} />
-              <span>Terminan pronto</span>
-            </button>
-
-            {/* Sort Dropdown */}
-            <div className="relative flex items-center gap-2 border-l border-gray-200 pl-4 h-6">
-              <span className="text-slate-400 text-[13px] font-semibold whitespace-nowrap">Ordenar por:</span>
-              <div className="relative">
-                <select
-                  value={currentSort}
-                  onChange={e => {
-                    const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
-                    updateFilters({ sortBy, sortOrder });
-                  }}
-                  className="bg-white border border-gray-200 rounded-xl pl-3 pr-8 py-1.5 text-[13px] font-semibold text-slate-700 outline-none cursor-pointer hover:border-[#72B626] focus:border-[#72B626] transition-all appearance-none"
-                >
-                  {sortOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
           </div>
 
           {/* Right section: Search Bar with Autocomplete */}
-          <div ref={searchContainerRef} className="relative z-40 w-full lg:w-[280px]">
+          <div ref={searchContainerRef} className="relative z-40 w-full sm:w-[280px]">
             <form onSubmit={handleSearch} className="relative">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />
               {suggestionsLoading && (

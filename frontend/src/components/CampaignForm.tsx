@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Save, X, Plus, Trash2, Gift, Edit2 } from 'lucide-react';
-import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, CampaignType } from '../types/campaign.types';
+import { AlertCircle, Save, X, Plus, Trash2, Gift, Edit2, Send } from 'lucide-react';
+import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
@@ -30,15 +30,18 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+type ConfirmAction = 'discard' | 'draft' | 'review' | null;
+
 interface Props {
   initialData?: EntrepreneurCampaign | null;
   onSuccess: (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]) => Promise<boolean>;
+  onSubmitForReview?: (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]) => Promise<boolean>;
   onCancel: () => void;
   saving: boolean;
   saveError: string | null;
 }
 
-export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveError }: Props) {
+export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCancel, saving, saveError }: Props) {
   const {
     register,
     handleSubmit,
@@ -77,6 +80,9 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
   const [documents, setDocuments] = useState<{ file: File; justification: string }[]>([]);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docJustification, setDocJustification] = useState('');
+  const [docError, setDocError] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
 
   const [rewardData, setRewardData] = useState<CreateRewardTierDto>({
     title: '',
@@ -168,6 +174,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     setDocuments([...documents, { file: docFile, justification: docJustification }]);
     setDocFile(null);
     setDocJustification('');
+    setDocError(null);
   };
 
   const removeDocument = (index: number) => {
@@ -196,22 +203,46 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
-    const dto: CreateCampaignDto = {
-      title: data.title,
-      description: data.description,
-      shortDescription: data.shortDescription || undefined,
-      categoryIds: data.categoryIds,
-      goalAmount: data.goalAmount,
-      endDate: data.endDate || undefined,
-      rewards: rewards,
-      videoUrl: data.videoUrl || undefined
-    };
+  const buildDto = (data: FormValues): CreateCampaignDto => ({
+    title: data.title,
+    description: data.description,
+    shortDescription: data.shortDescription || undefined,
+    categoryIds: data.categoryIds,
+    goalAmount: data.goalAmount,
+    endDate: data.endDate ? `${data.endDate}:00.000Z` : undefined,
+    rewards: rewards,
+    videoUrl: data.videoUrl || undefined,
+  });
 
-    const success = await onSuccess(dto, coverFile || undefined, documents);
-    if (success) {
-      onCancel();
+  const requestAction = (action: 'draft' | 'review', data: FormValues) => {
+    if (documents.length === 0) {
+      setDocError('Debes adjuntar al menos un documento de respaldo para continuar.');
+      return;
     }
+    setDocError(null);
+    setPendingFormData(data);
+    setConfirmAction(action);
+  };
+
+  const onSubmit = (data: FormValues) => requestAction('draft', data);
+
+  const handleConfirm = async () => {
+    if (!confirmAction || !pendingFormData) return;
+    if (confirmAction === 'discard') {
+      setConfirmAction(null);
+      onCancel();
+      return;
+    }
+    const dto = buildDto(pendingFormData);
+    setConfirmAction(null);
+    setPendingFormData(null);
+    let success = false;
+    if (confirmAction === 'review' && onSubmitForReview) {
+      success = await onSubmitForReview(dto, coverFile || undefined, documents);
+    } else {
+      success = await onSuccess(dto, coverFile || undefined, documents);
+    }
+    if (success) onCancel();
   };
 
   const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 placeholder:text-gray-400 font-medium";
@@ -582,11 +613,16 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <div className="mb-6">
             <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
               <AlertCircle size={20} className="text-[#72B626]" />
-              Documentación de Respaldo
+              Documentación de Respaldo <span className="text-[#c62828] font-bold">*</span>
             </h3>
             <p className="text-[13px] text-slate-500 font-medium">
               Sube los documentos que certifican la veracidad de tu campaña (ej. cotizaciones, permisos, actas).
             </p>
+            {docError && (
+              <p className="text-[12px] font-bold text-[#c62828] mt-2 flex items-center gap-1">
+                <AlertCircle size={13} /> {docError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-4 mb-6">
@@ -642,31 +678,107 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <button
             type="button"
             className="w-full md:w-auto bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-[#c62828] font-bold px-8 py-3.5 rounded-xl transition-all border-none active:scale-95 cursor-pointer text-[14px] flex items-center justify-center gap-2"
-            onClick={onCancel}
+            onClick={() => setConfirmAction('discard')}
             disabled={saving}
           >
             <X size={18} strokeWidth={2.5} />
-            Descartar Cambios
+            Descartar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="w-full md:w-auto bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-12 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-green-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full md:w-auto bg-white hover:bg-slate-100 text-[#1c2b1e] font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 border border-slate-200 cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {initialData ? 'Guardando...' : 'Publicando...'}
+                <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                Guardando...
               </>
             ) : (
               <>
                 <Save size={18} strokeWidth={2.5} />
-                {initialData ? 'Actualizar Datos' : 'Guardar Borrador'}
+                Guardar Borrador
               </>
             )}
           </button>
+          {onSubmitForReview && (
+            <button
+              type="button"
+              disabled={saving}
+              className="w-full md:w-auto bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-green-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
+              onClick={handleSubmit((data) => requestAction('review', data))}
+            >
+              {saving ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send size={18} strokeWidth={2.5} />
+                  Enviar a Revisión
+                </>
+              )}
+            </button>
+          )}
         </div>
       </form>
+
+      {/* Confirmation Dialog */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setConfirmAction(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full animate-in fade-in zoom-in-95 duration-200">
+            {confirmAction === 'discard' && (
+              <>
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <X size={24} className="text-[#c62828]" />
+                </div>
+                <h3 className="text-lg font-black text-[#1c2b1e] mb-2">¿Descartar cambios?</h3>
+                <p className="text-[14px] text-slate-500 mb-6">Se perderán todos los datos ingresados. Esta acción no se puede deshacer.</p>
+              </>
+            )}
+            {confirmAction === 'draft' && (
+              <>
+                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <Save size={24} className="text-slate-600" />
+                </div>
+                <h3 className="text-lg font-black text-[#1c2b1e] mb-2">¿Guardar como borrador?</h3>
+                <p className="text-[14px] text-slate-500 mb-6">La campaña quedará guardada como borrador. Podrás editarla y enviarla a revisión más adelante.</p>
+              </>
+            )}
+            {confirmAction === 'review' && (
+              <>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <Send size={24} className="text-[#72B626]" />
+                </div>
+                <h3 className="text-lg font-black text-[#1c2b1e] mb-2">¿Enviar a revisión?</h3>
+                <p className="text-[14px] text-slate-500 mb-6">Se guardará la campaña y se enviará al equipo de revisión. Recibirás una notificación con el resultado.</p>
+              </>
+            )}
+            <div className="flex gap-3">
+              <button
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-[14px] transition-colors border-none cursor-pointer"
+                onClick={() => setConfirmAction(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`flex-1 font-black py-3 rounded-xl text-[14px] transition-colors border-none cursor-pointer text-white ${
+                  confirmAction === 'discard'
+                    ? 'bg-[#c62828] hover:bg-red-800'
+                    : confirmAction === 'review'
+                    ? 'bg-[#72B626] hover:bg-[#1c2b1e]'
+                    : 'bg-[#1c2b1e] hover:bg-slate-700'
+                }`}
+                onClick={handleConfirm}
+              >
+                {confirmAction === 'discard' ? 'Sí, descartar' : confirmAction === 'review' ? 'Sí, enviar' : 'Sí, guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

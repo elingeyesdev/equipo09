@@ -230,14 +230,14 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
     <div className="fixed inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-[32px] w-[540px] max-w-full shadow-2xl flex flex-col max-h-[95vh] border border-white/20 relative" onClick={e => e.stopPropagation()}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9e0] rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between z-10">
-          <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight">{modalTitle}</span>
-          <button onClick={onClose} className="bg-slate-50 hover:bg-[#f0f9e0] border-none w-10 h-10 rounded-xl cursor-pointer flex items-center justify-center">
+        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between z-10 shrink-0">
+          <span className="text-[18px] md:text-[20px] font-black text-[#1c2b1e] tracking-tight">{modalTitle}</span>
+          <button onClick={onClose} className="bg-slate-50 hover:bg-[#f0f9e0] border-none w-10 h-10 rounded-xl cursor-pointer flex items-center justify-center shrink-0">
             <X size={20} className="text-slate-400" strokeWidth={2.5} />
           </button>
         </div>
-        <div className="px-8 py-6 overflow-y-auto z-10">{modalContent}</div>
-        <div className="px-8 py-6 border-t border-gray-100 flex gap-4 z-10 bg-slate-50/30">
+        <div className="px-5 md:px-8 py-4 md:py-6 overflow-y-auto z-10">{modalContent}</div>
+        <div className="px-5 md:px-8 py-4 md:py-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3 md:gap-4 z-10 bg-slate-50/30 shrink-0">
           <button className={btnSec} onClick={onClose}><X size={18} strokeWidth={2.5} /> Descartar</button>
           <button className={btnPri} onClick={handleSubmit} disabled={saving || type === 'avatar'}>
             {saving ? (<><Loader2 className="animate-spin" size={20} strokeWidth={2.5} /> Salvando Cambios...</>) : (<><Check size={20} strokeWidth={2.5} /> Confirmar Cambios</>)}

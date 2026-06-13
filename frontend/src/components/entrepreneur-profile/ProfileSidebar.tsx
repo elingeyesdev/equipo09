@@ -1,4 +1,4 @@
-﻿import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
+import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
 import { 
   MapPin, 
   FileText, 
@@ -44,7 +44,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
   const editBtn = "w-9 h-9 bg-slate-50 hover:bg-[#f0f9e0] text-slate-400 hover:text-[#72B626] rounded-xl flex items-center justify-center cursor-pointer transition-all border-none active:scale-95";
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif] lg:sticky lg:top-[140px] self-start">
+    <div className="flex flex-col w-full lg:w-[360px] shrink-0 gap-6 font-['Plus Jakarta Sans',sans-serif] lg:sticky lg:top-[140px] self-start">
       
       {/* Profile completeness */}
       {percentage < 100 && (
@@ -73,7 +73,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       )}
 
       {/* Personal data */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Biografía & Social</span>
           <button onClick={() => openModal('personal')} className={editBtn} title="Editar">
@@ -108,7 +108,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       </div>
 
       {/* Company */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Startup / Empresa</span>
           <button onClick={() => openModal('company')} className={editBtn}>
@@ -131,7 +131,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       </div>
 
       {/* Address */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación Legal</span>
           <button onClick={() => openModal('address')} className={editBtn}>
@@ -153,7 +153,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       </div>
 
       {/* Banking Data */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Datos Bancarios</span>
           <button onClick={() => openModal('banking')} className={editBtn}>
@@ -243,7 +243,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         )}
       </div>
       {userEmail && (
-        <div className="px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm flex items-center gap-3">
+        <div className="hidden lg:flex px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm items-center gap-3">
            <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] flex items-center justify-center text-[#72B626]">
               <Link2 size={14} strokeWidth={2.5} />
            </div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { submitKycDocuments } from '../api/entrepreneur.api';
 import type { EntrepreneurProfile } from '../types/entrepreneur.types';
 import { InfoHint } from './InfoHint';
@@ -91,21 +91,21 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
           <div>
             <h3 className="text-xl font-bold text-gray-900">Verificación de Identidad (KYC)</h3>
             <p className="text-sm text-gray-500 mt-1">Paso {step} de 2: {step === 1 ? 'Documento de Identidad' : 'Validación Facial'}</p>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">✕</button>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">{error}</div>}
           {step === 1 && (
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Sube tu Documento Oficial <InfoHint text="Formato imagen o PDF, legible y vigente." /></label>
               <div onClick={() => idInputRef.current?.click()} className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer ${idDocument ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}>
-                <p className="font-semibold">{idDocument ? idDocument.name : 'Haz clic para seleccionar archivo'}</p>
+                <p className="font-semibold break-words">{idDocument ? idDocument.name : 'Haz clic para seleccionar archivo'}</p>
                 <input ref={idInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => setIdDocument(e.target.files?.[0] || null)} />
               </div>
             </div>
@@ -116,25 +116,25 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
               {!faceVideo ? (
                 <div className="border-2 border-dashed rounded-xl p-4 bg-gray-50">
                   <div className="rounded-lg overflow-hidden bg-black mb-3 min-h-[220px] relative">
-                    <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay onLoadedMetadata={() => { videoRef.current?.play().catch(() => {}); }} />
-                    {!isCameraActive && <div className="absolute inset-0 flex items-center justify-center text-gray-200 bg-black/50">Activa tu cámara para tomar la foto</div>}
+                    <video ref={videoRef} className="w-full h-full object-cover absolute inset-0" playsInline muted autoPlay onLoadedMetadata={() => { videoRef.current?.play().catch(() => {}); }} />
+                    {!isCameraActive && <div className="absolute inset-0 flex items-center justify-center text-gray-200 bg-black/50 text-center p-4">Activa tu cámara para tomar la foto</div>}
                   </div>
                   {cameraError && <p className="text-sm text-red-600 font-medium mb-3">{cameraError}</p>}
                   <div className="flex gap-2">
-                    <button type="button" onClick={startCamera} disabled={isStartingCamera || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg disabled:opacity-50">{isStartingCamera ? 'Iniciando...' : 'Activar cámara'}</button>
-                    <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="px-4 py-2 text-sm font-bold text-white bg-[#72B626] rounded-lg disabled:opacity-50">Tomar foto</button>
+                    <button type="button" onClick={startCamera} disabled={isStartingCamera || isSubmitting} className="flex-1 px-4 py-2 text-[13px] md:text-sm font-bold text-white bg-blue-600 rounded-lg disabled:opacity-50">{isStartingCamera ? 'Iniciando...' : 'Activar cámara'}</button>
+                    <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="flex-1 px-4 py-2 text-[13px] md:text-sm font-bold text-white bg-[#72B626] rounded-lg disabled:opacity-50">Tomar foto</button>
                   </div>
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
               ) : (
                 <div className="border-2 border-green-400 bg-green-50 rounded-xl p-4 text-green-700">
                   {capturedPreview && <img src={capturedPreview} alt="Captura KYC" className="w-full max-h-64 object-cover rounded-lg mb-3" />}
-                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="px-4 py-2 text-sm font-bold text-[#4a7f1a] bg-[#f0f9e0] rounded-lg">Tomar otra foto</button>
+                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="w-full px-4 py-2 text-sm font-bold text-[#4a7f1a] bg-[#f0f9e0] rounded-lg">Tomar otra foto</button>
                 </div>
               )}
             </div>
           )}
-          <div className="flex justify-between pt-6 border-t border-gray-100 mt-6">
+          <div className="flex justify-between pt-6 border-t border-gray-100 mt-6 shrink-0">
             <button type="button" onClick={() => (step > 1 ? setStep(step - 1) : onClose())} className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl" disabled={isSubmitting}>{step > 1 ? 'Atrás' : 'Cancelar'}</button>
             {step < 2 ? (
               <button type="button" onClick={() => setStep(2)} disabled={!idDocument} className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl disabled:opacity-50">Siguiente</button>

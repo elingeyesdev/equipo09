@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsUUID, IsDateString, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsUUID, IsDateString, Matches, IsArray, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsAfterDate } from '../../../common/decorators/is-after-date.decorator';
@@ -6,6 +6,30 @@ import { IsAfterDate } from '../../../common/decorators/is-after-date.decorator'
 function emptyToUndefined({ value }: { value: unknown }): unknown {
   if (value === '' || value === null) return undefined;
   return value;
+}
+
+export class CreateRewardTierDto {
+  @ApiProperty({ example: 'Basic Supporter' })
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @ApiProperty({ example: 'Get early access to our newsletter' })
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  minPercentage?: number;
+
+  @ApiPropertyOptional({ example: 10 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maxPercentage?: number;
 }
 
 export class CreateCampaignDto {
@@ -21,6 +45,7 @@ export class CreateCampaignDto {
 
   @ApiPropertyOptional({ example: 'Sustainable bottles' })
   @IsOptional()
+  @Transform(emptyToUndefined)
   @IsString()
   shortDescription?: string;
 
@@ -32,6 +57,14 @@ export class CreateCampaignDto {
   @Transform(emptyToUndefined)
   @IsUUID()
   categoryId?: string;
+
+  @ApiPropertyOptional({
+    example: ['uuid-of-category-1', 'uuid-of-category-2'],
+    description: 'Array de categorías. Si se proporciona, se usa la primera.',
+  })
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  categoryIds?: string[];
 
   @ApiProperty({ example: 10000 })
   @Type(() => Number)
@@ -54,11 +87,19 @@ export class CreateCampaignDto {
 
   @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' })
   @IsOptional()
+  @Transform(emptyToUndefined)
   @IsString()
   @Matches(/(youtube\.com|youtu\.be|tiktok\.com)/, {
     message: 'El video debe ser un enlace válido de YouTube o TikTok',
   })
   videoUrl?: string;
+
+  @ApiPropertyOptional({ type: [CreateRewardTierDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateRewardTierDto)
+  rewards?: CreateRewardTierDto[];
 }
 
 export class QueryCampaignsDto {

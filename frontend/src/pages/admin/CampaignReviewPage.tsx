@@ -477,7 +477,7 @@ export const CampaignReviewPage: React.FC = () => {
               shortDescription: selectedCampaignDetail.short_description || '',
               description: selectedCampaignDetail.description || '',
               location: selectedCampaignDetail.location || 'Global',
-              campaignType: 'reward',
+              campaignType: 'donation',
               status: selectedCampaignDetail.status as any,
               goalAmount: parseFloat(selectedCampaignDetail.goal_amount || '0'),
               currentAmount: selectedCampaignDetail.current_amount || 0,

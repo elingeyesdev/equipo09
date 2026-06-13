@@ -27,7 +27,7 @@ export function ProfileTabs({ activeTab, setActiveTab }: Props) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                whitespace-nowrap px-6 py-4 text-[14px] font-black transition-all duration-300 border-none bg-transparent cursor-pointer relative flex items-center gap-2 group
+                whitespace-nowrap px-4 sm:px-6 py-3 sm:py-4 text-[12px] sm:text-[14px] font-black transition-all duration-300 border-none bg-transparent cursor-pointer relative flex items-center gap-2 group
                 ${isActive 
                   ? 'text-[#72B626]' 
                   : 'text-slate-400 hover:text-slate-900'

@@ -10,7 +10,6 @@ import {
   ChevronRight,
   ShieldCheck,
   ShieldAlert,
-  Trash2,
   Shield,
   Target,
   TrendingUp,
@@ -31,7 +30,7 @@ const INVESTOR_TYPE_LABELS: Record<string, string> = {
   angel: 'Ángel',
 };
 
-export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile }: Props) {
+export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile: _onDeleteProfile }: Props) {
   const fields = [
     { label: 'Información básica', value: profile?.firstName && profile?.lastName && profile?.bio, modal: 'profile' },
     { label: 'Datos fiscales', value: profile?.taxId, modal: 'fiscal' },
@@ -79,7 +78,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       )}
 
       {/* Bio & Type */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Biografía & Perfil</span>
           <button onClick={() => openModal('profile')} className={editBtn} title="Editar">
@@ -113,7 +112,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
       </div>
 
       {/* Investment Preferences */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Capital & Límites</span>
           <button onClick={() => openModal('investment')} className={editBtn}>
@@ -122,7 +121,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4 text-[#1c2b1e] text-[14px]">
-            <div className={`${iconBox} bg-[#1c2b1e] text-white border-transparent`}>
+            <div className={iconBox}>
                <TrendingUp size={18} strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
@@ -134,27 +133,11 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
               </div>
             </div>
           </div>
-
-          {profile?.preferredCategories && profile.preferredCategories.length > 0 && (
-            <div className="mt-2">
-              <div className="flex items-center gap-2 mb-3">
-                <Target size={14} className="text-[#72B626]" strokeWidth={2.5} />
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Sectores de Interés</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {profile.preferredCategories.map((cat, i) => (
-                  <span key={i} className="bg-[#f0f9e0] text-[#72B626] border border-gray-100 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider">
-                    {cat}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Address */}
-      <div className={cardClass}>
+      <div className={`${cardClass} hidden lg:block`}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-[16px] font-black text-[#1c2b1e] uppercase tracking-widest">Ubicación Legal</span>
           <button onClick={() => openModal('address')} className={editBtn}>
@@ -175,70 +158,9 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         </div>
       </div>
 
-      {/* Identity verification */}
-      <div className={`rounded-[28px] p-6 shadow-sm ring-1 group transition-all hover:shadow-lg ${profile?.identityVerified ? 'bg-[#f0f9e0]/50 ring-[#f0f9e0]' : 'bg-slate-50/50 ring-slate-100 hover:ring-slate-200'}`}>
-        <div className="flex justify-between items-center mb-5">
-          <span className="text-[15px] font-black text-[#1c2b1e] uppercase tracking-widest leading-none">Status de Revisión</span>
-        </div>
-        
-        {profile?.identityVerified ? (
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-[#72B626] shadow-sm shrink-0">
-                 <ShieldCheck size={24} strokeWidth={2.5} />
-              </div>
-              <div className="min-w-0">
-                <div className="font-black text-[#1c2b1e] text-[14px] leading-tight mb-1 uppercase tracking-tight">Identidad Certificada</div>
-                <div className="text-[11px] text-[#72B626] font-black uppercase tracking-tighter opacity-70">Donador verificado</div>
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <span className="bg-white border border-gray-100 text-[#72B626] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-[#72B626] rounded-full animate-pulse"></div> Check KYC
-              </span>
-              <span className="bg-white border border-gray-100 text-[#72B626] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xs flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-[#72B626] rounded-full animate-pulse"></div> Biometría
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white border border-red-50 rounded-2xl flex items-center justify-center text-[#f9a825] shadow-sm shrink-0">
-                 <Scale size={24} strokeWidth={2.5} />
-              </div>
-              <div className="min-w-0">
-                <div className="font-black text-slate-700 text-[14px] leading-tight mb-1 uppercase tracking-tight">Verificación Requerida</div>
-                <div className="text-[11px] text-slate-400 font-bold leading-tight">Envía tus documentos para proteger tu cuenta y habilitar donaciones.</div>
-              </div>
-            </div>
-            <button className="w-full mt-2 py-3.5 bg-[#f9a825] hover:bg-[#c62828] text-white font-black rounded-xl transition-all text-[12px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2">
-              <ShieldAlert size={16} strokeWidth={3} />
-              Iniciar Verificación
-            </button>
-          </div>
-        )}
-      </div>
-
-      {profile && onDeleteProfile && (
-        <div className="rounded-[28px] p-6 border border-red-100 bg-red-50/40 shadow-sm">
-          <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
-          <p className="text-[13px] text-red-900/80 font-medium leading-snug mb-4">
-            Elimina solo tu perfil de donador. Tu usuario y sesión siguen activos. No disponible si tienes donaciones.
-          </p>
-          <button
-            type="button"
-            onClick={() => void onDeleteProfile()}
-            className="w-full py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Trash2 size={16} strokeWidth={2.5} />
-            Eliminar perfil donador
-          </button>
-        </div>
-      )}
 
       {userEmail && (
-        <div className="px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm flex items-center gap-3">
+        <div className="hidden lg:flex px-6 py-4 bg-white border border-gray-100 rounded-[20px] shadow-sm items-center gap-3">
            <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] flex items-center justify-center text-[#72B626]">
               <Link2 size={14} strokeWidth={2.5} />
            </div>

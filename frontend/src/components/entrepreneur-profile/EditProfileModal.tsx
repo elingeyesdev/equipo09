@@ -96,6 +96,15 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       if (!formData.lastName || formData.lastName.trim().length < 2) {
         newErrors.lastName = 'El apellido es obligatorio (min. 2 caracteres)';
       }
+      if (!formData.bio || formData.bio.trim().length < 30) {
+        newErrors.bio = 'La biografía debe tener al menos 30 caracteres';
+      }
+    }
+
+    if (type === 'personal') {
+      if (!formData.bio || formData.bio.trim().length < 30) {
+        newErrors.bio = 'La biografía debe tener al menos 30 caracteres';
+      }
     }
 
     if (type === 'new-campaign') {
@@ -171,7 +180,12 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
             </div>
           </div>
           <div><label className={labelClass}>Nombre Público</label><input name="displayName" value={formData.displayName || ''} onChange={handleChange} className={inputClass} placeholder="@nombre_comercial" /></div>
-          <div><label className={labelClass}>Biografía Profesional</label><textarea name="bio" value={formData.bio || ''} onChange={handleChange} className={`${inputClass} resize-none`} rows={4} placeholder="Describe tu trayectoria..."></textarea></div>
+          <div><label className={labelClass}>Perfil LinkedIn</label><input name="linkedinUrl" value={formData.linkedinUrl || ''} onChange={handleChange} className={inputClass} placeholder="https://linkedin.com/in/usuario" /></div>
+          <div>
+            <label className={labelClass}>Biografía Profesional <span className="text-red-500">*</span></label>
+            <textarea name="bio" value={formData.bio || ''} onChange={handleChange} className={`${inputClass} resize-none ${errors.bio ? 'border-red-500 bg-red-50 focus:ring-red-500/10' : ''}`} rows={4} placeholder="Describe tu trayectoria..."></textarea>
+            {errors.bio && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase tracking-wider ml-1">{errors.bio}</p>}
+          </div>
         </div>
       );
       break;
@@ -181,15 +195,16 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       modalContent = (
         <div className="flex flex-col gap-5">
           <div>
-            <label className={labelClass}>Biografía Profesional</label>
+            <label className={labelClass}>Biografía Profesional <span className="text-red-500">*</span></label>
             <textarea 
               name="bio" 
               value={formData.bio || ''} 
               onChange={handleChange} 
-              className={`${inputClass} resize-none`} 
+              className={`${inputClass} resize-none ${errors.bio ? 'border-red-500 bg-red-50 focus:ring-red-500/10' : ''}`} 
               rows={4} 
               placeholder="Resume tu carrera..." 
             ></textarea>
+            {errors.bio && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase tracking-wider ml-1">{errors.bio}</p>}
           </div>
           <div><label className={labelClass}>Perfil LinkedIn</label><input name="linkedinUrl" value={formData.linkedinUrl || ''} onChange={handleChange} className={inputClass} placeholder="https://linkedin.com/in/usuario" /></div>
           <div className="bg-[#f0f9e0] border border-gray-100 p-4 rounded-xl text-sm text-[#1c2b1e] leading-relaxed font-bold flex items-start gap-3">
@@ -337,12 +352,15 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       modalTitle = 'Foto de Identidad';
       modalContent = (
         <div className="flex flex-col gap-6 items-center py-4 text-center">
-          <div className="w-[140px] h-[140px] rounded-full border-[5px] border-gray-100 bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-5xl font-black text-white shadow-xl shadow-[#1c2b1e]/20/10 overflow-hidden">
-            {profile?.avatarUrl ? (
+          <div 
+            className="w-[140px] h-[140px] rounded-full border-[5px] border-gray-100 bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-5xl font-black text-white shadow-xl shadow-[#1c2b1e]/20/10 overflow-hidden cursor-pointer relative group"
+            onClick={() => document.getElementById('avatar-upload-modal')?.click()}
+          >
+            {coverPreview || profile?.avatarUrl ? (
               <div 
                 className="w-full h-full"
                 style={{ 
-                  backgroundImage: `url(${profile.avatarUrl})`,
+                  backgroundImage: `url(${coverPreview || profile?.avatarUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
@@ -352,8 +370,18 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
                 {profile?.firstName ? (profile.firstName[0] + (profile.lastName?.[0] || '')).toUpperCase() : <User size={64} strokeWidth={1} />}
               </div>
             )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="bg-white text-[#1c2b1e] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1"><ImageIcon size={12}/> Cambiar</span>
+            </div>
+            <input 
+              id="avatar-upload-modal" 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleFileChange} 
+            />
           </div>
-          <p className="text-center text-[14px] text-slate-500 max-w-[280px] font-medium leading-relaxed">Utiliza una foto profesional. Puedes actualizarla directamente desde el botón de cámara en tu perfil.</p>
+          <p className="text-center text-[14px] text-slate-500 max-w-[280px] font-medium leading-relaxed">Selecciona una foto profesional para transmitir confianza a tus posibles inversores.</p>
           <div className="w-full h-px bg-[#f0f9e0]"></div>
         </div>
       );
@@ -369,18 +397,18 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       <div className="bg-white rounded-[32px] w-[540px] max-w-full shadow-2xl flex flex-col max-h-[95vh] border border-white/20 relative" onClick={e => e.stopPropagation()}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9e0] rounded-full blur-3xl -mr-16 -mt-16"></div>
 
-        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between z-10">
-          <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight">{modalTitle}</span>
-          <button onClick={onClose} className="bg-slate-50 hover:bg-[#f0f9e0] border-none w-10 h-10 rounded-xl cursor-pointer flex items-center justify-center">
+        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between z-10 shrink-0">
+          <span className="text-[18px] md:text-[20px] font-black text-[#1c2b1e] tracking-tight">{modalTitle}</span>
+          <button onClick={onClose} className="bg-slate-50 hover:bg-[#f0f9e0] border-none w-10 h-10 rounded-xl cursor-pointer flex items-center justify-center shrink-0">
             <X size={20} className="text-slate-400" strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="px-8 py-6 overflow-y-auto z-10">
+        <div className="px-5 md:px-8 py-4 md:py-6 overflow-y-auto z-10">
           {modalContent}
         </div>
 
-        <div className="px-8 py-6 border-t border-gray-100 flex gap-4 z-10 bg-slate-50/30">
+        <div className="px-5 md:px-8 py-4 md:py-6 border-t border-gray-100 flex flex-col sm:flex-row gap-3 md:gap-4 z-10 bg-slate-50/30 shrink-0">
           <button className={btnSec} onClick={onClose}>
             <X size={18} strokeWidth={2.5} />
             Descartar

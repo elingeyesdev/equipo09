@@ -145,9 +145,13 @@ export function CampaignComments({ campaignId }: Props) {
       <div className="flex gap-3 mb-8">
         {/* User avatar placeholder */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center shrink-0 overflow-hidden">
-          <span className="text-white text-[12px] font-black">
-            {isLoggedIn ? (localStorage.getItem('userId') || '?').charAt(0).toUpperCase() : '?'}
-          </span>
+          {isLoggedIn && localStorage.getItem('userAvatar') ? (
+            <img src={getImageUrl(localStorage.getItem('userAvatar'))} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white text-[12px] font-black">
+              U
+            </span>
+          )}
         </div>
 
         <div className="flex-1 relative">

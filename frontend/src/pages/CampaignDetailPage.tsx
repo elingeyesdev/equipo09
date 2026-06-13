@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
@@ -121,6 +121,9 @@ export function CampaignDetailPage() {
   // ── Pitch video state ──
   const [showPitch, setShowPitch] = useState(false);
 
+  // ── Scroll Ref ──
+  const donationCardRef = useRef<HTMLDivElement>(null);
+
   // ── Investment state ──
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -219,7 +222,55 @@ export function CampaignDetailPage() {
   }
 
 
+  const isExpired = daysRemaining !== null && daysRemaining <= 0;
+  const isFundedOrCompleted =
+    campaign.status === 'funded' ||
+    campaign.status === 'completed' ||
+    (campaign.goalAmount > 0 && campaign.currentAmount >= campaign.goalAmount);
+  const acceptsDonations = (campaign.status === 'published' || campaign.status === 'partially_funded') && !isExpired && !isFundedOrCompleted;
+  const token = localStorage.getItem('accessToken');
+  const parsedAmount = parseFloat(customAmount);
+  const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+  const amountTooLow = !!(hasValidAmount && campaign.minInvestment && parsedAmount < campaign.minInvestment);
+  const amountTooHigh = !!(hasValidAmount && campaign.maxInvestment && parsedAmount > campaign.maxInvestment);
+  const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
+  const amountBelowTier = !!(selectedTier && hasValidAmount && parsedAmount < selectedTier.amount);
+  const canInvest = acceptsDonations && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
+  const closedDonationLabel = isFundedOrCompleted ? 'Campaña completada' : isExpired ? 'Campaña finalizada' : 'No disponible';
 
+  const scrollToDonationCard = () => {
+    donationCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleDonateClick = () => {
+    if (!acceptsDonations || investmentSuccess) return;
+    if (!token) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+    if (!hasValidAmount) {
+      setInvestmentError('Ingresa un monto válido para donar.');
+      scrollToDonationCard();
+      return;
+    }
+    if (amountTooLow) {
+      setInvestmentError(`El monto mínimo de donación es Bs. ${campaign.minInvestment?.toLocaleString('es-BO')}.`);
+      scrollToDonationCard();
+      return;
+    }
+    if (amountTooHigh) {
+      setInvestmentError(`El monto máximo de donación es Bs. ${campaign.maxInvestment?.toLocaleString('es-BO')}.`);
+      scrollToDonationCard();
+      return;
+    }
+    if (amountBelowTier && selectedTier) {
+      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es Bs. ${selectedTier.amount.toLocaleString('es-BO')}.`);
+      scrollToDonationCard();
+      return;
+    }
+    setInvestmentError(null);
+    setShowConfirmModal(true);
+  };
 
   const coverUrl = getImageUrl(campaign.coverImageUrl);
 
@@ -229,27 +280,29 @@ export function CampaignDetailPage() {
 
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* ── Back & Share bar ── */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
           <button
             onClick={handleGoBack}
-            className="flex items-center gap-2 text-slate-500 hover:text-[#72B626] font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-none group"
+            className="flex items-center gap-1.5 sm:gap-2 text-slate-500 hover:text-[#72B626] font-bold text-[11px] sm:text-[13px] uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-none group"
           >
-            <ArrowLeft size={18} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform" />
-            Regresar al Portal
+            <ArrowLeft size={16} strokeWidth={2.5} className="group-hover:-translate-x-1 transition-transform sm:w-[18px] sm:h-[18px]" />
+            <span className="hidden sm:inline">Regresar al Portal</span>
+            <span className="inline sm:hidden">Regresar</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowShareModal(true)}
-            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-green-500 hover:text-[#72B626] text-slate-500 px-4 py-2.5 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
+            className="flex items-center gap-1.5 sm:gap-2 bg-white border border-slate-200 hover:border-green-500 hover:text-[#72B626] text-slate-500 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-[10px] sm:text-[13px] uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm shadow-slate-100"
           >
-            <Share2 size={15} strokeWidth={2.5} />
-            Compartir Campaña
+            <Share2 size={14} strokeWidth={2.5} className="sm:w-[15px] sm:h-[15px]" />
+            <span className="hidden sm:inline">Compartir Campaña</span>
+            <span className="inline sm:hidden">Compartir</span>
           </button>
         </div>
 
         {/* ── Hero Image ── */}
-        <div className="relative h-[320px] md:h-[440px] rounded-[28px] overflow-hidden shadow-xl shadow-black/5 mb-10">
+        <div className="relative h-[260px] sm:h-[320px] md:h-[440px] rounded-2xl sm:rounded-[28px] overflow-hidden shadow-xl shadow-black/5 mb-8 sm:mb-10">
           {coverUrl ? (
             <img
               src={coverUrl}
@@ -266,17 +319,17 @@ export function CampaignDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {/* Badges */}
-          <div className="absolute top-6 left-6 flex gap-3 flex-wrap">
-            <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl text-[11px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex gap-2 sm:gap-3 flex-wrap">
+            <span className="bg-white/90 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[11px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
               {campaign.categoryName}
             </span>
           </div>
 
           {/* DonaTok pitch button */}
-          {(campaign as any).videoUrl && (
+          {(campaign as any).videoUrl && (campaign as any).videoUrl.trim() !== '' && (
             <button
               onClick={() => setShowPitch(p => !p)}
-              className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-[9px] sm:text-[12px] uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
               style={{
                 background: showPitch
                   ? 'rgba(255,255,255,0.95)'
@@ -329,18 +382,18 @@ export function CampaignDetailPage() {
           {/* ── Main Content ── */}
           <div className="flex-1 min-w-0">
             {/* Title block */}
-            <h1 className="text-3xl md:text-4xl font-black text-[#1c2b1e] tracking-tight leading-tight mb-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1c2b1e] tracking-tight leading-tight mb-3">
               {campaign.title}
             </h1>
             {campaign.subtitle && (
-              <p className="text-[17px] text-slate-500 font-medium leading-relaxed mb-6">
+              <p className="text-[15px] sm:text-[17px] text-slate-500 font-medium leading-relaxed mb-6">
                 {campaign.subtitle}
               </p>
             )}
 
             {/* Entrepreneur mini banner */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-[12px] font-black overflow-hidden shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3 mb-6 sm:mb-8">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-[10px] sm:text-[12px] font-black overflow-hidden shrink-0">
                 {getImageUrl(campaign.entrepreneurAvatar) ? (
                   <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -348,7 +401,7 @@ export function CampaignDetailPage() {
                 )}
               </div>
               <div>
-                <p className="text-[13px] font-bold text-slate-600">
+                <p className="text-[12px] sm:text-[13px] font-bold text-slate-600">
                   por{' '}
                   <span className="text-[#72B626]">
                     {campaign.entrepreneurDisplayName
@@ -360,14 +413,14 @@ export function CampaignDetailPage() {
             </div>
 
             {/* Description — Campaign Story */}
-            <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
-              <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <Target size={20} strokeWidth={2.5} className="text-[#72B626]" />
+            <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10 mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Target size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
                 </div>
                 Historia del Proyecto
               </h2>
-              <div className="text-[15px] text-slate-600 leading-[1.9] whitespace-pre-wrap">
+              <div className="text-[14px] sm:text-[15px] text-slate-600 leading-[1.8] sm:leading-[1.9] whitespace-pre-wrap break-words">
                 {campaign.description || 'Este emprendedor aún no ha agregado una descripción detallada de su campaña.'}
               </div>
             </div>
@@ -398,17 +451,17 @@ export function CampaignDetailPage() {
 
 
             {/* Entrepreneur Bio Section */}
-            <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10">
-              <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <User size={20} strokeWidth={2.5} className="text-[#72B626]" />
+            <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10">
+              <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <User size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
                 </div>
                 Sobre el Emprendedor
               </h2>
 
-              <div className="flex items-start gap-5">
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
                 {/* Avatar */}
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-green-500/10">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-xl sm:text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-green-500/10">
                   {getImageUrl(campaign.entrepreneurAvatar) ? (
                     <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -417,15 +470,15 @@ export function CampaignDetailPage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[17px] font-black text-[#1c2b1e] mb-1 tracking-tight">
+                  <h3 className="text-[16px] sm:text-[17px] font-black text-[#1c2b1e] mb-0.5 sm:mb-1 tracking-tight">
                     {campaign.entrepreneurName}
                   </h3>
                   {campaign.entrepreneurDisplayName && (
-                    <p className="text-[13px] text-[#72B626] font-bold mb-4">
+                    <p className="text-[12px] sm:text-[13px] text-[#72B626] font-bold mb-3 sm:mb-4">
                       @{campaign.entrepreneurDisplayName}
                     </p>
                   )}
-                  <p className="text-[15px] text-slate-500 leading-[1.8] whitespace-pre-wrap">
+                  <p className="text-[14px] sm:text-[15px] text-slate-500 leading-[1.7] sm:leading-[1.8] whitespace-pre-wrap">
                     {campaign.entrepreneurBio || 'Este emprendedor aún no ha agregado su biografía.'}
                   </p>
 
@@ -472,13 +525,13 @@ export function CampaignDetailPage() {
             <div className="lg:sticky lg:top-8 space-y-6">
 
               {/* Investment Card */}
-              <div className="bg-white rounded-[28px] shadow-lg shadow-green-500/5 border border-green-50 p-8">
+              <div ref={donationCardRef} className="bg-white rounded-[24px] sm:rounded-[28px] shadow-lg shadow-green-500/5 border border-green-50 p-5 sm:p-8">
                 {/* Raised Amount */}
-                <div className="mb-6">
-                  <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                <div className="mb-5 sm:mb-6">
+                  <p className="text-[11px] sm:text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">
                     Recaudado
                   </p>
-                  <p className="text-4xl font-black text-[#1c2b1e] tracking-tighter">
+                  <p className="text-3xl sm:text-4xl font-black text-[#1c2b1e] tracking-tighter">
                     Bs. {campaign.currentAmount.toLocaleString('es-BO')}
                     <span className="text-[14px] font-bold text-slate-400 ml-2">
                       BOB
@@ -874,6 +927,18 @@ export function CampaignDetailPage() {
       )}
 
       {/* ── Contribution Confirmation Modal ── */}
+      {/* ── Floating Donate Button (Mobile) ── */}
+      {acceptsDonations && !investmentSuccess && (
+        <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+          <button
+            onClick={scrollToDonationCard}
+            className="bg-[#72B626] hover:bg-[#5a911e] text-white px-6 py-3.5 rounded-full font-black text-[14px] uppercase tracking-widest shadow-xl shadow-[#72B626]/30 transition-all active:scale-95 flex items-center justify-center gap-2 border-none cursor-pointer"
+          >
+            Donar Ahora
+          </button>
+        </div>
+      )}
+
       {showConfirmModal && (
         <ContributionConfirmModal
           campaign={{

@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../../users/repositories';
 import { User } from '../../users/models';
 import { LoginDto } from '../dto';
+import { GoogleProfile } from '../strategies/google.strategy';
 import {
   UnauthorizedException,
   NotFoundException,
@@ -98,6 +99,46 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido o usuario inactivo');
     }
     return user;
+  }
+
+  /**
+   * Autentica (o registra) un usuario via Google OAuth.
+   * - Si ya tiene cuenta con ese Google ID → login directo.
+   * - Si existe email pero sin OAuth → vincula la cuenta.
+   * - Si es nuevo → crea cuenta con el rol especificado.
+   */
+  async googleOAuthLogin(
+    profile: GoogleProfile,
+    signupRole: 'investor' | 'entrepreneur',
+    ip?: string,
+  ): Promise<LoginResponse> {
+    this.logger.log(`OAuth Google login: ${profile.email}`);
+
+    const user = await this.userRepo.findOrCreateGoogleUser({
+      googleId: profile.googleId,
+      email: profile.email,
+      picture: profile.picture,
+      signupRole,
+    });
+
+    await this.userRepo.updateLastLogin(user.id, ip);
+
+    const fullUser = await this.userRepo.findByIdWithRoles(user.id);
+    if (!fullUser) {
+      throw new UnauthorizedException('Error al autenticar con Google');
+    }
+
+    const payload = { sub: fullUser.id, email: fullUser.email };
+    const accessToken = this.jwtService.sign(payload);
+
+    this.logger.log(`OAuth Google login exitoso: ${fullUser.id}`);
+
+    return {
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: process.env.JWT_EXPIRES_IN ?? '24h',
+      user: fullUser,
+    };
   }
 
   /**

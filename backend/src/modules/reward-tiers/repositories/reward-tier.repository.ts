@@ -21,7 +21,7 @@ export class RewardTierRepository extends BaseRepository {
       dto.amount || null,
       dto.minPercentage || 0,
       dto.maxPercentage || 100,
-      dto.currency || 'USD',
+      dto.currency || 'BOB',
       dto.maxClaims ?? null,
       dto.estimatedDelivery || null,
       dto.includesShipping ?? false,

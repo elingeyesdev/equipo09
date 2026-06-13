@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getRecentStories, type CampaignStoryGroup, type StoryItem } from '../api/public-campaigns.api';
 import { getImageUrl } from '../utils/image.utils';
 
@@ -365,8 +365,6 @@ export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
   }
 
   if (groups.length === 0) return null;
-
-  const hasUnseen = Object.values(unseenMap).some(Boolean);
 
   return (
     <>

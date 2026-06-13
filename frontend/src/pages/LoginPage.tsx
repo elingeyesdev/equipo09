@@ -1,8 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
 import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock, Rocket, Shield, TrendingUp, Eye, EyeOff } from 'lucide-react';
+
+const GOOGLE_OAUTH_URL = '/api/v1/auth/google?role=investor';
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+      <path d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" fill="#FFC107"/>
+      <path d="M6.306 14.691l6.571 4.819C14.655 15.108 19.001 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z" fill="#FF3D00"/>
+      <path d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" fill="#4CAF50"/>
+      <path d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" fill="#1976D2"/>
+    </svg>
+  );
+}
 
 // Brand colors
 const GREEN = '#72B626';
@@ -12,6 +25,7 @@ const GREEN_DARK = '#4a7f1a';
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const redirectTo = (location.state as any)?.from || null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +40,10 @@ export function LoginPage() {
       setEmail(savedEmail);
       setRememberMe(true);
     }
-  }, []);
+    if (searchParams.get('error') === 'oauth') {
+      setError('No se pudo autenticar con Google. Intenta de nuevo.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,8 +220,27 @@ export function LoginPage() {
             </button>
           </form>
 
+          {/* Separador OR */}
+          <div className="flex items-center gap-3 mt-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-[12px] text-gray-400 font-medium">o continúa con</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* Botón Google */}
+          <a
+            href={GOOGLE_OAUTH_URL}
+            className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border border-gray-300 bg-white text-[14px] font-semibold text-gray-700 mt-3 cursor-pointer transition-all no-underline"
+            style={{ textDecoration: 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = '#9CA3AF')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = '#D1D5DB')}
+          >
+            <GoogleIcon />
+            <span>Continuar con Google</span>
+          </a>
+
           {/* Register link */}
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
             <span className="text-[14px] text-gray-500">¿Eres nuevo? </span>
             <Link
               to="/register"

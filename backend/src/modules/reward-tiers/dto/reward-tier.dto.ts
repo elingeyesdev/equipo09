@@ -27,7 +27,7 @@ export class CreateRewardTierDto {
   @Max(100)
   maxPercentage: number;
 
-  @ApiPropertyOptional({ example: 'USD' })
+  @ApiPropertyOptional({ example: 'BOB' })
   @IsOptional()
   @IsString()
   currency?: string;

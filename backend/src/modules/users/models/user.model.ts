@@ -14,6 +14,8 @@ export interface User {
   lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  avatarUrl?: string;
+  oauthProvider?: string;
   /** Roles asignados (join con user_roles + roles) */
   roles?: string[];
   adminAccessLevel?: string;
@@ -36,6 +38,8 @@ export function mapRowToUser(row: Record<string, any>): User {
     lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
+    avatarUrl: row.avatar_url ?? undefined,
+    oauthProvider: row.oauth_provider ?? undefined,
     roles: row.roles ?? undefined,
     adminAccessLevel: row.admin_access_level ?? undefined,
   };

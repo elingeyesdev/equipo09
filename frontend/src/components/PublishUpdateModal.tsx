@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { X, Send, Image, Video, FileText, Loader2 } from 'lucide-react';
 import { createCampaignUpdate } from '../api/campaign.api';
 
@@ -118,21 +118,21 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
         style={{ border: '1px solid #e2e8f0' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
           <div>
             <h3 className="text-lg font-black text-slate-800 tracking-tight">Publicar Novedad</h3>
             <p className="text-xs font-semibold text-[#72B626] line-clamp-1">{campaignTitle}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
           {error && (
             <div className="p-3.5 bg-red-50 border border-red-100 rounded-2xl text-[12px] font-bold text-red-600">
               {error}
@@ -182,7 +182,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">
               Agregar Adjunto (Opcional)
             </label>
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1 mb-3">
+            <div className="flex flex-col sm:flex-row bg-slate-100 p-1.5 rounded-2xl gap-1 mb-3">
               <button
                 type="button"
                 onClick={() => handleTabChange('text')}
@@ -271,7 +271,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-3 mt-4 border-t border-slate-100 pt-5">
+          <div className="flex flex-col sm:flex-row gap-3 mt-4 border-t border-slate-100 pt-5 shrink-0">
             <button
               type="button"
               disabled={loading}

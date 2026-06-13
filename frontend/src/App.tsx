@@ -16,6 +16,7 @@ import { AdminCampaignsPage } from './pages/admin/AdminCampaignsPage';
 import { AdminKycPage } from './pages/admin/AdminKycPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
 import { LandingPage } from './pages/LandingPage';
+import { OAuthCallbackPage } from './pages/OAuthCallbackPage';
 
 // Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<OAuthCallbackPage />} />
         <Route path="/explore" element={<ExploreCampaignsPage />} />
         <Route path="/donatok" element={<PitchFeedPage />} />
         <Route path="/campaign/:id" element={<CampaignDetailPage />} />

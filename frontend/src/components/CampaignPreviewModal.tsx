@@ -319,10 +319,10 @@ export function CampaignPreviewModal({
       <div className="bg-[#f8fafc] rounded-[40px] w-full max-w-[1200px] max-h-[95vh] overflow-hidden relative z-10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-500 border border-white/20 flex flex-col">
 
         {/* Top Navigation Bar */}
-        <header className="bg-white/80 backdrop-blur-xl px-10 py-6 border-b border-slate-200 flex justify-between items-center z-30">
-          <div className="flex items-center gap-6">
+        <header className="bg-white/80 backdrop-blur-xl px-4 md:px-10 py-4 md:py-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 z-30 relative">
+          <div className="flex items-center gap-6 w-full sm:w-auto">
             <div className="flex flex-col">
-              <div className="flex items-center gap-3 mb-1">
+              <div className="hidden sm:flex flex-wrap items-center gap-2 md:gap-3 mb-1">
                 <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                   ID: {campaign.id.split('-')[0]}
                 </span>
@@ -338,19 +338,19 @@ export function CampaignPreviewModal({
                   </div>
                 )}
               </div>
-              <h2 id="preview-title" className="text-2xl font-black text-[#1c2b1e] tracking-tight leading-none mb-2 max-w-xl truncate">
+              <h2 id="preview-title" className="text-xl md:text-2xl font-black text-[#1c2b1e] tracking-tight leading-none mb-2 max-w-xl truncate pr-12 sm:pr-0">
                 {campaign.title}
               </h2>
               {campaign.shortDescription && (
-                <p className="text-[14px] font-medium text-slate-500 line-clamp-1 max-w-2xl italic">
+                <p className="text-[13px] md:text-[14px] font-medium text-slate-500 line-clamp-1 max-w-2xl italic pr-8 sm:pr-0">
                   {campaign.shortDescription}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end mr-2 md:mr-4">
+          <div className="flex items-center gap-2 md:gap-4 absolute top-4 right-4 sm:relative sm:top-auto sm:right-auto">
+            <div className="hidden md:flex flex-col items-end mr-2 md:mr-4">
               <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado Actual</span>
               <span className={`px-3 md:px-4 py-1 md:py-1.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest shadow-sm border ${campaign.status === 'pending_review' || campaign.status === 'in_review'
                 ? 'bg-amber-50 text-amber-600 border-amber-100'
@@ -365,19 +365,19 @@ export function CampaignPreviewModal({
             </div>
             <button
               type="button"
-              className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center border-none cursor-pointer group"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center border-none cursor-pointer group"
               onClick={onClose}
             >
-              <X size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform" />
+              <X size={20} strokeWidth={2.5} className="md:w-6 md:h-6 group-hover:rotate-90 transition-transform" />
             </button>
           </div>
         </header>
 
         {/* Tab Navigation */}
-        <div className="bg-white px-10 border-b border-slate-100 flex items-center gap-8 z-30">
+        <div className="bg-white px-4 md:px-10 border-b border-slate-100 flex items-center gap-6 md:gap-8 z-30 overflow-x-auto scrollbar-hide whitespace-nowrap">
           <button
             onClick={() => setActiveTab('details')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'details' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            className={`py-4 md:py-5 text-[11px] md:text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer shrink-0 ${activeTab === 'details' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
           >
             Detalles de Proyecto
@@ -385,7 +385,7 @@ export function CampaignPreviewModal({
           {(campaign.status === 'published' || campaign.status === 'funded' || isAdmin) && (
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'analytics' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-4 md:py-5 text-[11px] md:text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 shrink-0 ${activeTab === 'analytics' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
               <TrendingUp size={14} className={activeTab === 'analytics' ? 'text-green-500' : 'text-slate-400'} />
@@ -395,7 +395,7 @@ export function CampaignPreviewModal({
           {(campaign.status === 'published' || campaign.status === 'funded') && (
             <button
               onClick={() => setActiveTab('investors')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'investors' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-4 md:py-5 text-[11px] md:text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer shrink-0 ${activeTab === 'investors' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
               Donadores Activos ({investorsTotal})
@@ -404,7 +404,7 @@ export function CampaignPreviewModal({
           {campaign.rewardTiers && campaign.rewardTiers.length > 0 && !isAdmin && (
             <button
               onClick={() => setActiveTab('rewards')}
-              className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`py-4 md:py-5 text-[11px] md:text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 shrink-0 ${activeTab === 'rewards' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
               <Gift size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
@@ -413,7 +413,7 @@ export function CampaignPreviewModal({
           )}
           <button
             onClick={() => setActiveTab('documents')}
-            className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'documents' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
+            className={`py-4 md:py-5 text-[11px] md:text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 shrink-0 ${activeTab === 'documents' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
           >
             <FileText size={14} className={activeTab === 'documents' ? 'text-blue-500' : 'text-slate-400'} />
@@ -426,7 +426,7 @@ export function CampaignPreviewModal({
           {activeTab === 'details' ? (
             <>
               {/* Left Column: Detailed Content */}
-              <main className="flex-1 p-10 lg:p-12 space-y-12">
+              <main className="flex-1 p-5 md:p-10 lg:p-12 space-y-8 md:space-y-12">
                 {/* Rejection Feedback Alert */}
                 {campaign.status === 'rejected' && (
                   <div className="bg-red-50 border-2 border-red-100 p-8 rounded-[40px] shadow-sm animate-in slide-in-from-top-4 duration-500">

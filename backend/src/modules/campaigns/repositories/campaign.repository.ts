@@ -49,7 +49,7 @@ export class CampaignRepository {
   async create(userId: string, dto: CreateCampaignDto): Promise<EntrepreneurCampaign> {
     const slug = dto.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
-    let categoryId = dto.categoryId;
+    let categoryId = (dto as any).categoryId || (dto.categoryIds && dto.categoryIds.length > 0 ? dto.categoryIds[0] : null);
     if (!categoryId) {
       const cat = await this.pool.query(`SELECT id FROM categories LIMIT 1`);
       if (!cat.rows[0]) {
@@ -63,13 +63,12 @@ export class CampaignRepository {
     const query = `
       INSERT INTO campaigns (
         creator_id, category_id, title, slug, description, short_description, 
-        campaign_type, status, goal_amount, end_date
+        campaign_type, status, goal_amount, end_date, video_url
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending_review', $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending_review', $8, $9, $10)
       RETURNING *;
     `;
 
-    // El frontend enviaba endDate como string con fecha, convertimos si existe.
     const endDateStr = dto.endDate ? new Date(dto.endDate).toISOString() : null;
 
     const values = [
@@ -79,13 +78,34 @@ export class CampaignRepository {
       slug,
       dto.description,
       dto.shortDescription || null,
-      dto.campaignType,
+      (dto as any).campaignType || 'donation',
       dto.goalAmount,
       endDateStr,
+      dto.videoUrl || null,
     ];
 
     const { rows } = await this.pool.query(query, values);
-    return this.mapRowToCampaign(rows[0]);
+    const campaign = rows[0];
+
+    // If rewards were provided, save them
+    if (dto.rewards && Array.isArray(dto.rewards) && dto.rewards.length > 0) {
+      for (const reward of dto.rewards) {
+        await this.pool.query(
+          `INSERT INTO reward_tiers (
+            campaign_id, title, description, min_percentage, max_percentage, is_active
+          ) VALUES ($1, $2, $3, $4, $5, true)`,
+          [
+            campaign.id,
+            reward.title,
+            reward.description,
+            reward.minPercentage || 0,
+            reward.maxPercentage || 100
+          ]
+        );
+      }
+    }
+
+    return this.mapRowToCampaign(campaign);
   }
 
   async findByCreatorId(userId: string, page: number = 1, limit: number = 10, sortBy: string = 'created_at', sortOrder: string = 'DESC'): Promise<PaginatedCampaigns> {

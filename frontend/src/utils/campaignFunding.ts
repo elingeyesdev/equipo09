@@ -15,7 +15,7 @@ export function formatFundingPercent(currentAmount: number, goalAmount: number):
   return Number(percent.toFixed(2));
 }
 
-export function formatCampaignCurrency(amount: number, currency?: string): string {
+export function formatCampaignCurrency(amount: number, _currency?: string): string {
   const formatted = new Intl.NumberFormat('es-BO', {
     maximumFractionDigits: 0,
   }).format(amount || 0);

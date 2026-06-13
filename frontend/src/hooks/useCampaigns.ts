@@ -1,4 +1,5 @@
-﻿import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import axios from 'axios';
 import {
   getMyCampaigns,
   createCampaign,
@@ -92,19 +93,17 @@ export function useCampaigns() {
     setRefreshToken((t) => t + 1);
   }, []);
 
-  const addCampaign = async (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]): Promise<boolean> => {
+  const addCampaign = async (dto: CreateCampaignDto, coverFile?: File, documents?: { file: File; justification: string }[]): Promise<string | null> => {
     try {
       setAdding(true);
       setAddError(null);
       const campaign = await createCampaign(dto);
-      
+
       if (coverFile) {
         try {
           await uploadCampaignImageApi(campaign.id, coverFile);
         } catch (uploadErr) {
           console.error('Error uploading campaign cover after creation:', uploadErr);
-          // Opcional: podrías decidir si esto invalida la creación o no. 
-          // Por ahora, la campaña ya se creó, así que retornamos true pero logueamos el error.
         }
       }
 
@@ -118,14 +117,17 @@ export function useCampaigns() {
         }
       }
 
-      // Resetear al query por defecto Y forzar re-fetch con token
       setQuery({ ...DEFAULT_QUERY });
       setRefreshToken((t) => t + 1);
-      return true;
+      return campaign.id;
     } catch (err: unknown) {
-      console.error('Error creating campaign:', err);
+      if (axios.isAxiosError(err)) {
+        console.error('Error creating campaign response:', err.response?.data);
+      } else {
+        console.error('Error creating campaign:', err);
+      }
       setAddError(getApiErrorMessage(err, 'Error al crear la campaña'));
-      return false;
+      return null;
     } finally {
       setAdding(false);
     }

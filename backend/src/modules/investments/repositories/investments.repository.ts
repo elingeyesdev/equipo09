@@ -77,7 +77,7 @@ export class InvestmentsRepository extends BaseRepository {
 
       const campaign = campaignResult.rows[0];
 
-      if (campaign.status !== 'published' && campaign.status !== 'funded') {
+      if (campaign.status !== 'published' && campaign.status !== 'partially_funded') {
         throw new BadRequestException('La campaña no está activa o no acepta inversiones actualmente.');
       }
 
@@ -95,6 +95,10 @@ export class InvestmentsRepository extends BaseRepository {
       goalAmount = Number(campaign.goal_amount) || 0;
       const currentAmount = Number(campaign.current_amount) || 0;
       const remainingAmount = goalAmount - currentAmount;
+
+      if (goalAmount > 0 && remainingAmount <= 0) {
+        throw new BadRequestException('La campaña ya alcanzó su meta y no acepta más donaciones.');
+      }
 
       if (dto.amount > remainingAmount) {
         throw new BadRequestException(

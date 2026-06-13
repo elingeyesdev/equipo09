@@ -29,9 +29,12 @@ export interface CreateCampaignDto {
   description: string;
   shortDescription?: string;
   categoryId?: string;
+  categoryIds?: string[];
   goalAmount: number;
   campaignType: 'donation';
-  endDate?: Date;
+  endDate?: Date | string;
+  videoUrl?: string | null;
+  rewards?: any[];
 }
 
 export interface QueryCampaignsDto {

@@ -19,14 +19,24 @@ export class EntrepreneurCampaignRepository extends BaseRepository {
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     const slug = `${baseSlug}-${randomSuffix}`;
 
+    // Resolve category_id (required NOT NULL in DB)
+    let categoryId: string | null =
+      (dto as any).categoryId ||
+      (dto.categoryIds && dto.categoryIds.length > 0 ? dto.categoryIds[0] : null);
+    if (!categoryId) {
+      const cat = await this.queryOne(`SELECT id FROM categories LIMIT 1`, []);
+      categoryId = cat?.id ?? null;
+    }
+
     return this.transaction(async (client) => {
       const result = await client.query(
         `INSERT INTO campaigns (
-          creator_id, title, slug, short_description, description,
+          creator_id, category_id, title, slug, short_description, description,
           campaign_type, goal_amount, end_date, status, video_url
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'draft', $9) RETURNING id`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft', $10) RETURNING id`,
         [
           creatorId,
+          categoryId,
           dto.title,
           slug,
           dto.shortDescription || null,

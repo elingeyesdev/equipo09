@@ -271,7 +271,6 @@ export class EntrepreneurService {
     this.logger.log(`Creando nueva campaña para user ${userId}: ${dto.title}`);
     const campaign = await this.campaignRepo.create(userId, dto);
     this.logger.log(`Campaña creada: ${campaign.id}`);
-    
     return campaign;
   }
 

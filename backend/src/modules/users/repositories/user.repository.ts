@@ -180,6 +180,67 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Busca o crea un usuario autenticado via Google OAuth.
+   * Orden de resolución:
+   *  1. Busca por (oauth_provider='google', oauth_provider_id).
+   *  2. Si existe por email → vincula la cuenta de Google.
+   *  3. Si no existe → crea nuevo usuario con el rol indicado.
+   */
+  async findOrCreateGoogleUser(params: {
+    googleId: string;
+    email: string;
+    picture: string;
+    signupRole: 'investor' | 'entrepreneur';
+  }): Promise<User> {
+    const { googleId, email, picture, signupRole } = params;
+
+    // 1. Buscar por Google ID
+    let row = await this.queryOne(
+      `SELECT u.*
+       FROM users u
+       WHERE u.oauth_provider = 'google' AND u.oauth_provider_id = $1`,
+      [googleId],
+    );
+
+    if (row) {
+      return mapRowToUser(row);
+    }
+
+    // 2. Buscar por email (vincular cuenta existente)
+    row = await this.queryOne(
+      `SELECT * FROM users WHERE LOWER(email) = LOWER($1)`,
+      [email],
+    );
+
+    if (row) {
+      await this.query(
+        `UPDATE users
+         SET oauth_provider = 'google',
+             oauth_provider_id = $1,
+             email_verified = true,
+             avatar_url = COALESCE(avatar_url, $2),
+             updated_at = NOW()
+         WHERE id = $3`,
+        [googleId, picture || null, row.id],
+      );
+      return mapRowToUser(row);
+    }
+
+    // 3. Crear nuevo usuario OAuth
+    const newRow = await this.queryOne(
+      `INSERT INTO users
+         (email, password_hash, email_verified, oauth_provider, oauth_provider_id, avatar_url, preferred_language)
+       VALUES ($1, NULL, true, 'google', $2, $3, 'es')
+       RETURNING *`,
+      [email.toLowerCase().trim(), googleId, picture || null],
+    );
+
+    const newUser = mapRowToUser(newRow!);
+    await this.assignRoleByName(newUser.id, signupRole);
+    return newUser;
+  }
+
+  /**
    * TEMPORAL: Crea o actualiza el usuario superadmin por defecto (acceso directo a db).
    */
   async seedSuperAdmin(passwordHash: string) {

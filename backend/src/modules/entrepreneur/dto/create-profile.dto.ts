@@ -1,6 +1,7 @@
 import {
   IsString,
   IsOptional,
+  IsNotEmpty,
   IsUrl,
   MaxLength,
   MinLength,
@@ -37,11 +38,12 @@ export class CreateEntrepreneurProfileDto {
   @MaxLength(150)
   displayName?: string;
 
-  @ApiPropertyOptional({ example: 'Emprendedor apasionado por la tecnología...', description: 'Biografía' })
-  @IsOptional()
+  @ApiProperty({ example: 'Emprendedor apasionado por la tecnología con más de 10 años de experiencia...', description: 'Biografía' })
   @IsString()
+  @IsNotEmpty()
+  @MinLength(30, { message: 'La biografía debe tener al menos 30 caracteres' })
   @MaxLength(2000)
-  bio?: string;
+  bio: string;
 
   @ApiPropertyOptional({ example: 'TechVentures SRL', description: 'Nombre de la empresa' })
   @IsOptional()

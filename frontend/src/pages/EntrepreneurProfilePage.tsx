@@ -112,7 +112,8 @@ export function EntrepreneurProfilePage() {
 
   const handleSave = async (type: string, data: any, file?: File, documents?: { file: File; justification: string }[]) => {
     if (type === 'new-campaign') {
-      await addCampaign(data, file, documents);
+      const id = await addCampaign(data, file, documents);
+      return id !== null;
     } else if (type === 'edit-campaign' && selectedCampaign) {
       await updateCampaign(selectedCampaign.id, data, file, documents);
     } else {
@@ -144,8 +145,22 @@ export function EntrepreneurProfilePage() {
       } = baseData;
 
       await submitProfile(sanitizedData);
+
+      if (type === 'avatar' && file) {
+        await uploadAvatarPhoto(file);
+      }
     }
     setModalType(null);
+  };
+
+  const handleOpenModal = (type: ModalType) => {
+    if (type === 'new-campaign') {
+      if (!profile || !profile.identityVerified) {
+        alert('Primero debes completar todo tu perfil con KYC');
+        return;
+      }
+    }
+    setModalType(type);
   };
 
   return (
@@ -182,7 +197,7 @@ export function EntrepreneurProfilePage() {
 
               <ProfileSidebar
                 profile={profile}
-                openModal={(type: ModalType) => setModalType(type)}
+                openModal={handleOpenModal}
                 userEmail={userEmail}
                 onDeleteProfile={profile ? handleDeleteProfile : undefined}
               />
@@ -235,7 +250,7 @@ export function EntrepreneurProfilePage() {
 
                 {activeTab === 'campaigns' ? (
                   <CampaignsFeed
-                    openModal={(type: ModalType) => setModalType(type)}
+                    openModal={handleOpenModal}
                     hasBanking={!!profile?.bankAccountNumber}
                     campaigns={campaigns}
                     loading={campaignsLoading}
@@ -422,8 +437,7 @@ export function EntrepreneurProfilePage() {
 
       {/* Acciones Rápidas */}
       <NewCampaignFAB
-        openModal={(type: ModalType) => setModalType(type)}
-        disabled={!profile?.identityVerified}
+        openModal={handleOpenModal}
       />
 
       {/* Modales */}
@@ -442,6 +456,17 @@ export function EntrepreneurProfilePage() {
             <CampaignForm
               initialData={modalType === 'edit-campaign' ? selectedCampaign : null}
               onSuccess={(dto, file, documents) => handleSave(modalType, dto, file, documents).then(() => true)}
+              onSubmitForReview={async (dto, file, documents) => {
+                let campaignId: string | null = null;
+                if (modalType === 'new-campaign') {
+                  campaignId = await addCampaign(dto, file, documents);
+                } else if (modalType === 'edit-campaign' && selectedCampaign) {
+                  const ok = await updateCampaign(selectedCampaign.id, dto, file, documents);
+                  campaignId = ok ? selectedCampaign.id : null;
+                }
+                if (!campaignId) return false;
+                return await submitForReview(campaignId);
+              }}
               onCancel={() => setModalType(null)}
               saving={adding}
               saveError={addError}
