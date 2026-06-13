@@ -42,7 +42,7 @@ export class NotificationsService {
       body: `Recibiste una inversión de ${params.amount} ${params.currency} en "${params.campaignTitle}".`,
       referenceType: 'investment',
       referenceId: params.investmentId,
-      actionUrl: `/campaigns/${params.campaignId}`,
+      actionUrl: `/campaign/${params.campaignId}`,
       data: {
         amount: params.amount,
         currency: params.currency,
@@ -98,7 +98,7 @@ export class NotificationsService {
       body: `¡Felicidades! Tu campaña "${params.campaignTitle}" alcanzó su meta de ${params.goalAmount} ${params.currency}.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: `/entrepreneur-campaigns/${params.campaignId}`,
+      actionUrl: `/campaign/${params.campaignId}`,
       data: {
         campaign_title: params.campaignTitle,
         goal_amount: params.goalAmount,
@@ -141,7 +141,7 @@ export class NotificationsService {
       body: `Tu campaña "${params.campaignTitle}" fue aprobada. ¡Ya puedes publicarla!`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: `/my-campaigns`,
+      actionUrl: `/entrepreneur-campaigns`,
       data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
     });
   }
@@ -164,7 +164,7 @@ export class NotificationsService {
         : `Tu campaña "${params.campaignTitle}" necesita cambios. Revisa el feedback del equipo.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: `/my-campaigns`,
+      actionUrl: `/entrepreneur-campaigns`,
       data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId, feedback: params.feedback },
     });
   }
@@ -210,7 +210,7 @@ export class NotificationsService {
       body: `Tu campaña "${params.campaignTitle}" fue enviada para revisión del equipo.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: '/my-campaigns',
+      actionUrl: '/entrepreneur-campaigns',
       data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
     });
   }
@@ -244,7 +244,7 @@ export class NotificationsService {
       body: `La campaña "${params.campaignTitle}" fue finalizada correctamente.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: '/my-campaigns',
+      actionUrl: '/entrepreneur-campaigns',
       data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
     });
   }
@@ -281,7 +281,7 @@ export class NotificationsService {
       title: 'Inversión Reembolsada',
       body: `La campaña "${params.campaignTitle}" fue cancelada o no alcanzó su meta. Se han devuelto ${params.amount} ${params.currency} a tu billetera.`,
       referenceType: 'investment',
-      actionUrl: '/investor-dashboard',
+      actionUrl: '/dashboard',
       data: { campaign_title: params.campaignTitle, amount: params.amount, currency: params.currency },
     });
   }
@@ -298,7 +298,7 @@ export class NotificationsService {
       body: `Has finalizado la campaña "${params.campaignTitle}" sin alcanzar la meta. Las inversiones han sido reembolsadas automáticamente.`,
       referenceType: 'campaign',
       referenceId: params.campaignId,
-      actionUrl: '/my-campaigns',
+      actionUrl: '/entrepreneur-campaigns',
       data: { campaign_title: params.campaignTitle, campaign_id: params.campaignId },
     });
   }
