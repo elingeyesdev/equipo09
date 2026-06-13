@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
@@ -128,7 +128,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
           <div className="flex items-center gap-1.5">
             <Users size={14} className="text-[#72B626]" strokeWidth={2.5} />
             <span className="text-white font-black text-[14px]">{campaign.investorCount}</span>
-            <span className="text-white/50 text-[12px] font-medium">inversores</span>
+            <span className="text-white/50 text-[12px] font-medium">donadores</span>
           </div>
           <div
             className="ml-auto text-[12px] font-black text-[#72B626]"
@@ -153,7 +153,7 @@ function PitchCard({ campaign, isActive }: PitchCardProps) {
           }}
         >
           <Rocket size={18} strokeWidth={2} />
-          Ver Campaña e Invertir
+          Ver Campaña y Donar
           <ArrowRight size={18} strokeWidth={2} />
         </button>
       </div>

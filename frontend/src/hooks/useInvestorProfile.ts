@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getMyInvestorProfile,
   createInvestorProfile,
@@ -74,7 +74,7 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
         setIsNewProfile(false);
       } catch (err: any) {
         if (err?.response?.status === 409) {
-          setError('El nombre público ya está en uso por otro inversor. Prueba con uno diferente.');
+          setError('El nombre público ya está en uso por otro donador. Prueba con uno diferente.');
           return;
         }
         const msg =
@@ -129,12 +129,12 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
       setProfile(null);
       setIsNewProfile(true);
       setSuccessMessage(
-        'Perfil de inversor eliminado. Tu cuenta sigue activa; puedes registrar un perfil nuevo cuando quieras.',
+        'Perfil de donador eliminado. Tu cuenta sigue activa; puedes registrar un perfil nuevo cuando quieras.',
       );
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
-        'No se pudo eliminar el perfil. ¿Tienes inversiones registradas?';
+        'No se pudo eliminar el perfil. ¿Tienes donaciones registradas?';
       setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setSaving(false);

@@ -537,6 +537,47 @@ let EntrepreneurCampaignRepository = class EntrepreneurCampaignRepository extend
             return null;
         return this.findOneByCreatorId(campaignId, creatorId);
     }
+    async failAndRefundCampaign(campaignId, creatorId) {
+        return this.transaction(async (client) => {
+            const campaignRes = await client.query(`SELECT id, status FROM campaigns WHERE id = $1 AND creator_id = $2 FOR UPDATE`, [campaignId, creatorId]);
+            if (campaignRes.rowCount === 0)
+                return null;
+            const status = campaignRes.rows[0].status;
+            if (status !== 'published') {
+                throw new Error('Solo se pueden fallar/reembolsar campañas que estén publicadas.');
+            }
+            const investmentsRes = await client.query(`SELECT id, investor_id, amount, reward_tier_id 
+         FROM investments 
+         WHERE campaign_id = $1 AND status = 'completed' 
+         FOR UPDATE`, [campaignId]);
+            for (const inv of investmentsRes.rows) {
+                await client.query(`UPDATE investor_profiles 
+           SET total_invested = GREATEST(0, total_invested - $1) 
+           WHERE user_id = $2`, [inv.amount, inv.investor_id]);
+                await client.query(`UPDATE investments 
+           SET status = 'refunded', 
+               refunded_amount = $1, 
+               refund_reason = 'Campaña finalizada sin alcanzar meta', 
+               refunded_at = NOW() 
+           WHERE id = $2`, [inv.amount, inv.id]);
+                if (inv.reward_tier_id) {
+                    await client.query(`UPDATE reward_tiers 
+             SET current_claims = GREATEST(0, current_claims - 1) 
+             WHERE id = $1`, [inv.reward_tier_id]);
+                }
+            }
+            const updatedCampaign = await client.query(`UPDATE campaigns 
+         SET status = 'failed', updated_at = NOW() 
+         WHERE id = $1
+         RETURNING id, title, slug, short_description, campaign_type,
+                   status, goal_amount, current_amount, investor_count,
+                   currency, cover_image_url, start_date, end_date,
+                   funded_at, is_featured, view_count,
+                   created_at, updated_at, published_at,
+                   description, video_url`, [campaignId]);
+            return (0, models_1.mapRowToEntrepreneurCampaign)(updatedCampaign.rows[0]);
+        });
+    }
     async insertCampaignDocument(campaignId, documentUrl, originalName, mimeType, fileSizeBytes, justification) {
         return this.queryOne(`INSERT INTO campaign_documents (campaign_id, file_url, original_name, mime_type, file_size_bytes, justification)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [campaignId, documentUrl, originalName, mimeType, fileSizeBytes, justification]);

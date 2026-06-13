@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
 import { getMyInvestments } from '../../api/investor.api';
@@ -10,7 +10,6 @@ import {
   BarChart3, 
   Clock,
   FolderOpen,
-  Gem,
   Heart,
   CheckCircle2,
   XCircle,
@@ -26,7 +25,7 @@ interface Props {
 
 const CAMPAIGN_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
   donation: { icon: Heart, label: 'Donación', color: '#e91e63' },
-  reward: { icon: Gem, label: 'Recompensa', color: '#f9a825' },
+  reward: { icon: Gift, label: 'Recompensa', color: '#f9a825' },
   equity: { icon: TrendingUp, label: 'Equity', color: '#72B626' },
 };
 
@@ -49,7 +48,11 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       try {
         setInvestmentsLoading(true);
         const data = await getMyInvestments();
-        setInvestments(data);
+        const mappedData = data.map(inv => ({
+          ...inv,
+          campaignType: inv.campaignType === 'equity' ? 'donation' : inv.campaignType
+        }));
+        setInvestments(mappedData);
       } catch {
         // silently fail — will show empty state
       } finally {
@@ -71,7 +74,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
               <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <TrendingUp size={18} strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Invertido</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Donado</span>
             </div>
             <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               ${capitalData.totalInvested.toLocaleString()}
@@ -84,7 +87,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
               <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <BarChart3 size={18} strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversiones</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Donaciones</span>
             </div>
             <div className="text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               {capitalData.totalInvestments}
@@ -131,10 +134,10 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-10">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-[#1c2b1e] text-white rounded-xl flex items-center justify-center">
-                <Gem size={18} strokeWidth={2.5} />
+                <Heart size={18} strokeWidth={2.5} />
              </div>
              <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">
-               Historial de Inversiones
+               Historial de Donaciones
              </span>
           </div>
         </div>
@@ -226,8 +229,8 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
             <div className="w-20 h-20 bg-white rounded-[28px] shadow-sm flex items-center justify-center text-[#d4f0a0] mb-6 group hover:scale-110 transition-transform">
                <FolderOpen size={40} strokeWidth={1} />
             </div>
-            <p className="text-[#1c2b1e] font-black text-[20px] mb-2 uppercase tracking-tight">Sin Inversiones Aún</p>
-            <p className="text-slate-400 font-medium text-[15px] max-w-[360px] leading-relaxed">Explora campañas activas y comienza a construir tu portafolio de inversión con impacto real.</p>
+            <p className="text-[#1c2b1e] font-black text-[20px] mb-2 uppercase tracking-tight">Sin Donaciones Aún</p>
+            <p className="text-slate-400 font-medium text-[15px] max-w-[360px] leading-relaxed">Explora campañas activas y comienza a apoyar proyectos con impacto real.</p>
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getCapitalOverview, getMyInvestments } from '../api/investor.api';
 import type { CapitalOverview } from '../types/investor.types';
 import type { InvestmentHistoryItem } from '../api/investor.api';
@@ -22,7 +22,7 @@ export function useInvestorDashboard() {
     } catch (err: any) {
       if (err.response?.status === 404) {
         // Significa que no ha creado su perfil aún
-        setError('No tienes perfil de inversor.');
+        setError('No tienes perfil de donador.');
       } else {
         setError('Error al cargar datos financieros.');
       }

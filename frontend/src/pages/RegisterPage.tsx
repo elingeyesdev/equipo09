@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { login } from '../api/investor.api';
@@ -78,8 +78,8 @@ export function RegisterPage() {
                     style={{ background: isInvestor ? GREEN : '#F3F4F6' }}>
                     <DollarSign size={16} strokeWidth={2} style={{ color: isInvestor ? 'white' : '#6B7280' }} />
                   </div>
-                  <p className="text-[14px] font-semibold text-gray-900">Inversor</p>
-                  <p className="text-[12px] text-gray-500 mt-0.5">Aportar capital</p>
+                  <p className="text-[14px] font-semibold text-gray-900">Donador</p>
+                  <p className="text-[12px] text-gray-500 mt-0.5">Donar fondos</p>
                   {isInvestor && <div className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: GREEN }}><CheckCircle2 size={11} strokeWidth={3} className="text-white" /></div>}
                 </button>
                 <button type="button" onClick={() => setRole('entrepreneur')}
@@ -153,19 +153,19 @@ export function RegisterPage() {
         <div className="w-full max-w-[380px] relative z-10">
           <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold mb-5"
             style={{ background: 'white', color: isInvestor ? GREEN_DARK : UNI, border: `1px solid ${isInvestor ? GREEN : UNI}30` }}>
-            {isInvestor ? '✓ Portafolio diversificado' : '✓ Sin comisiones ocultas'}
+            {isInvestor ? '✓ Historial de donaciones' : '✓ Sin comisiones ocultas'}
           </span>
           <h2 className="text-[28px] font-bold text-gray-900 leading-tight mb-3">
-            {isInvestor ? 'Haz crecer tu capital con proyectos reales.' : 'Tu idea merece el respaldo que necesita.'}
+            {isInvestor ? 'Apoya proyectos reales con tus donaciones.' : 'Tu idea merece el respaldo que necesita.'}
           </h2>
           <p className="text-[15px] text-gray-500 leading-relaxed mb-8">
-            {isInvestor ? 'Accede a campañas curadas con métricas claras y transparentes.' : 'Crea tu campaña en minutos y conéctate con inversores comprometidos.'}
+            {isInvestor ? 'Accede a campañas curadas con métricas claras y transparentes.' : 'Crea tu campaña en minutos y conéctate con donantes comprometidos.'}
           </p>
           <div className="grid grid-cols-2 gap-4">
             {isInvestor ? (
               <>
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold text-gray-900">$2.4M</p><p className="text-[12px] text-gray-500 mt-0.5">Capital invertido</p></div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold" style={{ color: GREEN }}>+12%</p><p className="text-[12px] text-gray-500 mt-0.5">Retorno promedio</p></div>
+                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold text-gray-900">$2.4M</p><p className="text-[12px] text-gray-500 mt-0.5">Donaciones totales</p></div>
+                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><p className="text-[24px] font-bold" style={{ color: GREEN }}>+12%</p><p className="text-[12px] text-gray-500 mt-0.5">Tasa de impacto</p></div>
               </>
             ) : (
               <>

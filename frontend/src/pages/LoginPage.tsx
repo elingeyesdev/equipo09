@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
@@ -97,7 +97,7 @@ export function LoginPage() {
             Inicia sesión
           </h1>
           <p className="text-[15px] text-gray-500 mb-8">
-            Gestiona tus proyectos e inversiones.
+            Gestiona tus proyectos y donaciones.
           </p>
 
           {/* Error */}
@@ -272,8 +272,8 @@ export function LoginPage() {
                 <TrendingUp size={18} className="text-[#72B626]" />
               </div>
               <div>
-                <h4 className="text-[14px] font-bold text-gray-900">Retornos claros</h4>
-                <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">Accede a métricas transparentes e informes del progreso de tus inversiones.</p>
+                <h4 className="text-[14px] font-bold text-gray-900">Progreso y Metas</h4>
+                <p className="text-[12px] text-gray-500 mt-1 leading-relaxed">Accede a métricas transparentes e informes del progreso de tus donaciones.</p>
               </div>
             </div>
           </div>

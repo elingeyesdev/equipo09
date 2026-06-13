@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { getCategories } from '../api/categories.api';
@@ -9,8 +9,8 @@ import { getImageUrl } from '../utils/image.utils';
 import type { Category } from '../types/category.types';
 import {
   Rocket, Search, Heart, Gem, TrendingUp, Users, Target, Calendar,
-  Shield, Zap, ChevronRight, ArrowRight, LayoutGrid,
-  CheckCircle2, Sparkles, Globe, Lock, Flame, Star,
+  Shield, ChevronRight, ArrowRight, LayoutGrid,
+  CheckCircle2, Globe, Lock, Flame,
   Play, Share2, MessageSquare,
   ChevronUp, ChevronDown,
 } from 'lucide-react';
@@ -81,7 +81,7 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
 
             <p className="text-[17px] text-gray-500 leading-relaxed mb-8 max-w-[500px] font-medium">
               Empieza en solo unos minutos. Con nuevas herramientas es más fácil
-              que nunca crear tu campaña, contar tu historia y llegar a miles de inversores.
+              que nunca crear tu campaña, contar tu historia y llegar a miles de donadores.
             </p>
 
             {/* Search bar */}
@@ -121,7 +121,7 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
               {[
                 { icon: CheckCircle2, text: `${totalCampaigns > 0 ? totalCampaigns + '+' : ''} campañas activas`, color: GREEN },
                 { icon: Shield, text: 'Plataforma verificada', color: '#1565c0' },
-                { icon: Users, text: '100+ inversores activos', color: '#7b1fa2' },
+                { icon: Users, text: '100+ donadores activos', color: '#7b1fa2' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-1.5 text-gray-500 text-[13px] font-semibold">
                   <Icon size={14} strokeWidth={2.5} style={{ color }} /> {text}
@@ -219,7 +219,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
         {/* Footer */}
         <div className="flex items-center justify-between text-[11px] text-gray-400 font-semibold pt-2 border-t border-gray-50">
           <span className="flex items-center gap-1 font-black" style={{ color: GREEN }}><Target size={11} strokeWidth={3} />{progress}%</span>
-          <span className="flex items-center gap-1"><Users size={11} strokeWidth={2.5} />{campaign.investorCount} inversores</span>
+          <span className="flex items-center gap-1"><Users size={11} strokeWidth={2.5} />{campaign.investorCount} donadores</span>
           {daysLeft !== null && <span className="flex items-center gap-1"><Calendar size={11} strokeWidth={2.5} />{daysLeft > 0 ? `${daysLeft}d` : 'Finalizada'}</span>}
         </div>
       </div>
@@ -686,7 +686,7 @@ function TrustSection() {
             </h2>
             <p className="text-white/60 text-[16px] leading-relaxed mb-8 max-w-[480px]">
               Con transparencia total en cada transacción, verificación de identidad KYC y un equipo de soporte
-              dedicado, puedes recaudar o invertir con total tranquilidad.
+              dedicado, puedes recaudar o donar con total tranquilidad.
             </p>
             <ul className="flex flex-col gap-4 mb-10">
               {[

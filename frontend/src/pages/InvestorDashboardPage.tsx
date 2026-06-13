@@ -4,7 +4,7 @@ import { AddCapitalModal } from '../components/AddCapitalModal';
 
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
 import { Link } from 'react-router-dom';
-import { Gem, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
+import { Heart, Gift, TrendingUp, ArrowRight, LayoutDashboard, Clock, FileText } from 'lucide-react';
 import { getMyInvestments, downloadInvestmentReceipt, type InvestmentHistoryItem } from '../api/investor.api';
 import { getImageUrl } from '../utils/image.utils';
 import { useState, useEffect } from 'react';
@@ -44,6 +44,10 @@ export function InvestorDashboardPage() {
   useEffect(() => {
     if (data) {
       getMyInvestments()
+        .then(list => list.map(inv => ({
+          ...inv,
+          campaignType: inv.campaignType === 'equity' ? 'donation' : inv.campaignType
+        })))
         .then(setInvestments)
         .catch(console.error)
         .finally(() => setLoadingInvestments(false));
@@ -62,11 +66,11 @@ export function InvestorDashboardPage() {
               <LayoutDashboard size={22} strokeWidth={2} style={{ color: '#72B626' }} />
             </div>
             <h1 className="text-[32px] font-bold text-gray-900 tracking-tight">
-              Panel de Inversor
+              Panel de Donador
             </h1>
           </div>
           <p className="text-[15px] text-gray-500 max-w-xl leading-relaxed">
-            Monitorea tu capital, gestiona tus inversiones activas y descubre nuevas oportunidades.
+            Monitorea tu capital, gestiona tus donaciones activas y descubre nuevas oportunidades.
           </p>
         </div>
       </div>
@@ -83,11 +87,11 @@ export function InvestorDashboardPage() {
           <div className="bg-white/90 backdrop-blur-xl rounded-[32px] p-12 text-center shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-white animate-in fade-in zoom-in-95 duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
             <div className="text-[#72B626] mb-6 flex justify-center relative z-10">
-               <Gem size={64} strokeWidth={1.5} />
+               <Heart size={64} strokeWidth={1.5} />
             </div>
             <h2 className="text-3xl font-black text-[#1c2b1e] tracking-tight mb-4 leading-none relative z-10">Bienvenido a CrowdFunding</h2>
             <p className="text-[16px] text-slate-500 font-medium leading-relaxed max-w-md mx-auto mb-10 relative z-10">
-              Parece que aún no tienes configurado tu perfil de inversor. Complétalo para empezar a invertir y monitorear tu capital con solidez financiera.
+              Parece que aún no tienes configurado tu perfil de donador. Complétalo para empezar a donar y monitorear tu capital con solidez financiera.
             </p>
             <Link to="/profile" className="inline-flex items-center justify-center bg-gradient-to-r from-[#72B626] to-[#1c2b1e] hover:from-[#1c2b1e] hover:to-[#1c2b1e] text-white font-black px-10 py-4 rounded-2xl transition-all active:scale-95 shadow-[0_8px_20px_rgba(46,125,50,0.3)] no-underline cursor-pointer gap-3 relative z-10">
               Completar Perfil Corporativo 
@@ -112,22 +116,22 @@ export function InvestorDashboardPage() {
                    <h2 className="text-[18px] font-bold text-gray-900">Operaciones Recientes</h2>
                  </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                   <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto w-full sm:w-auto">
-                       {(['all', 'donation', 'equity', 'reward'] as const).map(type => (
-                         <button
-                           key={type}
-                           onClick={() => setFilterType(type)}
-                           className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap cursor-pointer border-none ${
-                             filterType === type 
-                               ? 'bg-white text-gray-900 shadow-sm' 
-                               : 'bg-transparent text-gray-500 hover:text-gray-700'
-                           }`}
-                           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                         >
-                           {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : type === 'equity' ? 'Equity' : 'Recompensa'}
-                         </button>
-                       ))}
-                   </div>
+                    <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto w-full sm:w-auto">
+                        {(['all', 'donation', 'reward'] as const).map(type => (
+                          <button
+                            key={type}
+                            onClick={() => setFilterType(type)}
+                            className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap cursor-pointer border-none ${
+                              filterType === type 
+                                ? 'bg-white text-gray-900 shadow-sm' 
+                                : 'bg-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                          >
+                            {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : 'Recompensa'}
+                          </button>
+                        ))}
+                    </div>
                    <select 
                      value={sortType} 
                      onChange={(e) => setSortType(e.target.value)}
@@ -170,7 +174,7 @@ export function InvestorDashboardPage() {
                         )}
                         <div className="absolute top-3 left-3">
                            <span className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest">
-                             {inv.campaignType === 'donation' ? 'Donación' : inv.campaignType === 'equity' ? 'Equity' : 'Recompensa'}
+                             {inv.campaignType === 'donation' ? 'Donación' : 'Recompensa'}
                            </span>
                         </div>
                       </div>
@@ -198,7 +202,7 @@ export function InvestorDashboardPage() {
                         </h3>
                         {inv.rewardTitle && (
                           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-[13px] font-bold">
-                            <Gem size={14} />
+                            <Gift size={14} />
                             {inv.rewardTitle}
                           </div>
                         )}
@@ -206,7 +210,7 @@ export function InvestorDashboardPage() {
                       
                       <div className="w-full md:w-auto md:text-right shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between h-full bg-slate-50 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none">
                         <div className="text-left md:text-right">
-                          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Invertido</p>
+                          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Donado</p>
                           <p className="text-3xl font-black text-[#1c2b1e] tracking-tighter">${inv.amount.toLocaleString()}</p>
                         </div>
                         <div className="flex flex-row md:flex-col items-center md:items-end gap-2 mt-0 md:mt-4">

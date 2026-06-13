@@ -1,6 +1,5 @@
-﻿import type { RewardTier } from '../../api/public-campaigns.api';
+import type { RewardTier } from '../../api/public-campaigns.api';
 import {
-  Gem,
   Check,
   Gift,
   Calendar,
@@ -27,7 +26,7 @@ export function RewardTierCards({
     <div className="bg-white rounded-[28px] shadow-sm border border-gray-100 p-8 md:p-10 mb-8">
       <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-          <Gem size={20} strokeWidth={2.5} className="text-amber-500" />
+          <Gift size={20} strokeWidth={2.5} className="text-amber-500" />
         </div>
         Niveles de Recompensa
       </h2>

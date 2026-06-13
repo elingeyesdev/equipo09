@@ -1,7 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
-  Filter, 
   Eye, 
   ChevronLeft, 
   ChevronRight, 
@@ -21,7 +20,7 @@ export const CampaignReviewPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const typeFilter = 'all';
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
@@ -223,7 +222,7 @@ export const CampaignReviewPage: React.FC = () => {
 
           {/* Info Cards */}
           <div className="flex gap-4">
-            <div className="p-4 bg-white border border-gray-200 border-t-4 border-t-amber-500 rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
+            <div className="p-4 bg-white rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
               <div className="w-9 h-9 rounded bg-amber-50 flex items-center justify-center text-amber-500">
                 <Clock size={18} />
               </div>
@@ -232,7 +231,7 @@ export const CampaignReviewPage: React.FC = () => {
                 <p className="text-lg font-bold text-gray-900">{total}</p>
               </div>
             </div>
-            <div className="p-4 bg-white border border-gray-200 border-t-4 border-t-green-500 rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
+            <div className="p-4 bg-white rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
               <div className="w-9 h-9 rounded bg-green-50 flex items-center justify-center text-emerald-600">
                 <Video size={18} />
               </div>
@@ -260,21 +259,6 @@ export const CampaignReviewPage: React.FC = () => {
           </form>
 
           <div className="flex flex-wrap gap-2">
-            <div className="relative">
-              <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <select 
-                className="pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium text-[13px] min-w-[150px] cursor-pointer"
-                value={typeFilter}
-                onChange={(e) => {
-                  setTypeFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="all">Todos los tipos</option>
-                <option value="donation">Donación</option>
-                <option value="reward">Recompensa</option>
-              </select>
-            </div>
 
             {/* Video filter toggle */}
             <button

@@ -1,4 +1,4 @@
-﻿// v2026-05-24: Full social-feed redesign for MyCampaignsPage
+// v2026-05-24: Full social-feed redesign for MyCampaignsPage
 import { useState, useCallback } from 'react';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
@@ -140,7 +140,7 @@ export function MyCampaignsPage() {
         <div className="flex flex-wrap gap-4 mb-8">
           <SummaryStat icon={<Rocket size={18} />}    label="Campañas" value={campaigns.length}   accent="#72B626" />
           <SummaryStat icon={<TrendingUp size={18} />} label="Recaudado" value={formatMoney(totalRaised)} accent="#72B626" />
-          <SummaryStat icon={<Users size={18} />}     label="Inversores" value={totalInvestors}    accent="#f59e0b" />
+          <SummaryStat icon={<Users size={18} />}     label="Donadores" value={totalInvestors}    accent="#f59e0b" />
           <SummaryStat icon={<Star size={18} />}      label="Activas" value={activeCount}    accent="#aed581" />
         </div>
 

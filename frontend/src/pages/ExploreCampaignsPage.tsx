@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
@@ -10,17 +10,13 @@ import type { Category } from '../types/category.types';
 import {
   Search,
   AlertCircle,
-  TrendingUp,
   Users,
   Calendar,
   ChevronLeft,
   ChevronRight,
   Filter,
-  ArrowUpDown,
   Rocket,
   Target,
-  Heart,
-  Gem,
   FolderOpen,
   LayoutGrid,
   Loader2,
@@ -32,11 +28,7 @@ import {
 } from 'lucide-react';
 import { shareCampaignUrl } from '../utils/share.utils';
 
-const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
-  donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
-  reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
-};
+
 
 function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick?: () => void }) {
   const progress = campaign.goalAmount > 0
@@ -52,9 +44,6 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
     const ms = new Date(campaign.endDate).getTime() - Date.now();
     daysRemaining = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
-
-  const typeInfo = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
-  const TypeIcon = typeInfo.icon;
 
   return (
     <div
@@ -82,15 +71,6 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         {/* Category Badge */}
         <div className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 shadow-sm">
           {campaign.categoryName}
-        </div>
-
-        {/* Type Badge */}
-        <div
-          className="absolute top-3 right-3 px-2.5 py-1 rounded-md text-[11px] font-semibold text-white flex items-center gap-1"
-          style={{ backgroundColor: typeInfo.color }}
-        >
-          <TypeIcon size={11} strokeWidth={2.5} />
-          {typeInfo.label}
         </div>
 
         {/* Ending Soon Badge */}
@@ -192,7 +172,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
           </div>
           <div className="flex items-center gap-1">
             <Users size={12} strokeWidth={2} />
-            <span>{campaign.investorCount} inversores</span>
+            <span>{campaign.investorCount} donadores</span>
           </div>
           {daysRemaining !== null && (
             <div className="flex items-center gap-1">
@@ -326,12 +306,7 @@ export function ExploreCampaignsPage() {
     { value: 'goal_amount:DESC', label: 'Mayor meta' },
   ];
 
-  const typeFilters = [
-    { value: '', label: 'Todos' },
-    { value: 'donation', label: 'Donación' },
-    { value: 'reward', label: 'Recompensa' },
-    { value: 'equity', label: 'Equity' },
-  ];
+
 
   const currentSort = `${filters.sortBy || 'created_at'}:${filters.sortOrder || 'DESC'}`;
 
@@ -340,62 +315,169 @@ export function ExploreCampaignsPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <div className={`bg-white border-b border-gray-200 relative transition-[z-index] ${showSuggestions ? 'z-40' : 'z-0'}`}>
-        <div className="max-w-[1200px] mx-auto px-6 py-12 relative z-10 text-center">
-          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#f5fce8] text-[#4a7f1a] mb-4">
+      <div className="bg-white border-b border-gray-200 relative">
+        <div className="max-w-[1200px] mx-auto px-6 py-6 md:py-8 relative z-10 text-center">
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-semibold bg-[#f5fce8] text-[#4a7f1a] mb-3">
             Proyectos verificados
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-3 leading-tight">
             Descubre campañas con impacto real
           </h1>
-          <p className="text-gray-500 text-[16px] max-w-[560px] mx-auto mb-10 leading-relaxed">
-            Explora proyectos de emprendedores e invierte en ideas que transforman comunidades.
+          <p className="text-gray-500 text-[15px] max-w-[560px] mx-auto mb-2 leading-relaxed">
+            Explora proyectos de emprendedores y apoya ideas que transforman comunidades.
           </p>
+        </div>
+      </div>
 
-          {/* Search Bar with Autocomplete */}
-          <div ref={searchContainerRef} className="max-w-[640px] mx-auto relative z-40">
-            <form onSubmit={handleSearch} className="flex gap-3">
-              <div className="flex-1 relative">
-                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />
-                {suggestionsLoading && (
-                  <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin z-10" strokeWidth={2.5} />
-                )}
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={searchInput}
-                  onChange={e => {
-                    setSearchInput(e.target.value);
-                    if (!e.target.value.trim()) setShowSuggestions(false);
-                  }}
-                  onFocus={() => {
-                    if (suggestions.length > 0 && searchInput.trim().length >= 2) setShowSuggestions(true);
-                  }}
-                  onKeyDown={handleSearchKeyDown}
-                  placeholder="Buscar campañas por nombre o descripción..."
-                  className="w-full pl-12 pr-10 py-4 rounded-xl bg-white border border-gray-300 text-[15px] outline-none focus:border-[#72B626] focus:ring-3 focus:ring-[#72B626]/10 placeholder:text-gray-400 shadow-sm"
-                  autoComplete="off"
-                  role="combobox"
-                  aria-expanded={showSuggestions}
-                  aria-haspopup="listbox"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                />
-              </div>
+      {/* Filters Bar */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
+        <div className="max-w-[1200px] mx-auto px-6 py-3 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          
+          {/* Left section: Category, Toggle and Sort filters */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-400 text-[13px] font-semibold mr-1">
+              <Filter size={16} className="text-[#72B626]" />
+              Filtrar por:
+            </div>
+
+            {/* Category custom dropdown */}
+            <div ref={categoryDropdownRef} className="relative">
               <button
-                type="submit"
-                className="px-7 py-4 rounded-xl font-semibold text-[15px] text-white border-none cursor-pointer transition-all active:scale-95"
-                style={{ background: '#72B626', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#4a7f1a')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#72B626')}
+                type="button"
+                onClick={() => setShowCategoryDropdown(prev => !prev)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer ${filters.categoryId
+                  ? 'border-[#72B626] bg-[#72B626]/5 text-[#4a7f1a] shadow-sm shadow-[#72B626]/5'
+                  : 'border-gray-200 bg-white text-slate-600 hover:border-[#72B626] hover:bg-slate-50'
+                  }`}
               >
-                Buscar
+                <LayoutGrid size={14} className={filters.categoryId ? 'text-[#4a7f1a]' : 'text-slate-400'} />
+                <span>
+                  {filters.categoryId
+                    ? categories.find(c => c.id === filters.categoryId)?.displayName || 'Sector'
+                    : 'Sector'}
+                </span>
+                <ChevronDown size={12} className="text-slate-400" />
               </button>
+
+              {showCategoryDropdown && (
+                <div className="absolute top-full left-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="max-h-[260px] overflow-y-auto py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateFilters({ categoryId: undefined });
+                        setShowCategoryDropdown(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-2 text-left text-[13px] font-semibold transition-all cursor-pointer border-none bg-transparent ${!filters.categoryId
+                        ? 'text-[#4a7f1a] bg-green-50/50'
+                        : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                    >
+                      <span>Todos los sectores</span>
+                      {!filters.categoryId && <Check size={14} strokeWidth={2.5} className="text-[#72B626]" />}
+                    </button>
+                    
+                    <div className="h-px bg-gray-100 my-1" />
+
+                    {!categoriesLoading && categories.filter(c => c.isActive).map(cat => {
+                      const isActive = filters.categoryId === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            updateFilters({ categoryId: isActive ? undefined : cat.id });
+                            setShowCategoryDropdown(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-4 py-2 text-left text-[13px] font-semibold transition-all cursor-pointer border-none bg-transparent ${isActive
+                            ? 'text-[#4a7f1a] bg-green-50/50'
+                            : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                          <span>{cat.displayName}</span>
+                          {isActive && <Check size={14} strokeWidth={2.5} className="text-[#72B626]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Ending soon filter */}
+            <button
+              type="button"
+              onClick={() => {
+                const isActive = filters.sortBy === 'end_date' && filters.sortOrder === 'ASC';
+                if (isActive) {
+                  updateFilters({ sortBy: 'created_at', sortOrder: 'DESC' });
+                } else {
+                  updateFilters({ sortBy: 'end_date', sortOrder: 'ASC' });
+                }
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold border transition-all cursor-pointer ${filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
+                ? 'border-orange-200 bg-orange-50/70 text-orange-700 shadow-sm shadow-orange-500/5'
+                : 'border-gray-200 bg-white text-slate-600 hover:border-orange-200 hover:bg-orange-50/30'
+                }`}
+            >
+              <Flame size={14} className={filters.sortBy === 'end_date' && filters.sortOrder === 'ASC' ? 'text-orange-600' : 'text-slate-400'} />
+              <span>Terminan pronto</span>
+            </button>
+
+            {/* Sort Dropdown */}
+            <div className="relative flex items-center gap-2 border-l border-gray-200 pl-4 h-6">
+              <span className="text-slate-400 text-[13px] font-semibold whitespace-nowrap">Ordenar por:</span>
+              <div className="relative">
+                <select
+                  value={currentSort}
+                  onChange={e => {
+                    const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
+                    updateFilters({ sortBy, sortOrder });
+                  }}
+                  className="bg-white border border-gray-200 rounded-xl pl-3 pr-8 py-1.5 text-[13px] font-semibold text-slate-700 outline-none cursor-pointer hover:border-[#72B626] focus:border-[#72B626] transition-all appearance-none"
+                >
+                  {sortOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Right section: Search Bar with Autocomplete */}
+          <div ref={searchContainerRef} className="relative z-40 w-full lg:w-[280px]">
+            <form onSubmit={handleSearch} className="relative">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />
+              {suggestionsLoading && (
+                <Loader2 size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-green-500 animate-spin z-10" strokeWidth={2.5} />
+              )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchInput}
+                onChange={e => {
+                  setSearchInput(e.target.value);
+                  if (!e.target.value.trim()) setShowSuggestions(false);
+                }}
+                onFocus={() => {
+                  if (suggestions.length > 0 && searchInput.trim().length >= 2) setShowSuggestions(true);
+                }}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Buscar campañas..."
+                className="w-full pl-9 pr-8 py-2 rounded-xl bg-white border border-gray-300 text-[13px] outline-none focus:border-[#72B626] focus:ring-2 focus:ring-[#72B626]/10 placeholder:text-gray-400 shadow-sm"
+                autoComplete="off"
+                role="combobox"
+                aria-expanded={showSuggestions}
+                aria-haspopup="listbox"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              />
             </form>
 
             {/* ── Suggestions Dropdown ── */}
             {showSuggestions && (
               <div
-                className="absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/15 border border-green-100/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute top-full right-0 w-[320px] md:w-[380px] mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/15 border border-green-100/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                 role="listbox"
               >
                 {suggestions.length === 0 && !suggestionsLoading ? (
@@ -501,137 +583,7 @@ export function ExploreCampaignsPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
-        <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-col sm:flex-row items-center gap-4">
-          {/* Type filters */}
-          <div className="flex items-center gap-2 flex-1 overflow-x-auto">
-            <Filter size={16} className="text-slate-400 shrink-0" strokeWidth={2.5} />
-            {typeFilters.map(tf => (
-              <button
-                key={tf.value}
-                onClick={() => updateFilters({ campaignType: tf.value || undefined })}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${(filters.campaignType || '') === tf.value
-                  ? 'bg-[#72B626] text-white shadow-lg shadow-green-500/20'
-                  : 'bg-slate-50 text-slate-500 hover:bg-green-50 hover:text-[#72B626]'
-                  }`}
-              >
-                {tf.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Ending soon quick filter */}
-          <button
-            type="button"
-            onClick={() => {
-              const isActive = filters.sortBy === 'end_date' && filters.sortOrder === 'ASC';
-              if (isActive) {
-                updateFilters({ sortBy: 'created_at', sortOrder: 'DESC' });
-              } else {
-                updateFilters({ sortBy: 'end_date', sortOrder: 'ASC' });
-              }
-            }}
-            className={`whitespace-nowrap px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${filters.sortBy === 'end_date' && filters.sortOrder === 'ASC'
-              ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/20'
-              : 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600'
-              }`}
-          >
-            <Flame size={14} strokeWidth={2.5} />
-            Terminan pronto
-          </button>
-
-          {/* Category custom dropdown */}
-          <div ref={categoryDropdownRef} className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowCategoryDropdown(prev => !prev)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border-none cursor-pointer transition-all active:scale-95 ${filters.categoryId
-                ? 'bg-[#72B626] text-white shadow-lg shadow-green-500/20'
-                : 'bg-slate-50 text-slate-500 hover:bg-green-50 hover:text-[#72B626]'
-                }`}
-            >
-              <LayoutGrid size={14} strokeWidth={2.5} />
-              {filters.categoryId
-                ? categories.find(c => c.id === filters.categoryId)?.displayName || 'Sector'
-                : 'Sector'}
-              <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
-            </button>
-
-            {showCategoryDropdown && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-green-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="max-h-[220px] overflow-y-auto">
-                  {/* "Todos" option */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateFilters({ categoryId: undefined });
-                      setShowCategoryDropdown(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${!filters.categoryId
-                      ? 'bg-green-50 text-[#72B626] font-black'
-                      : 'bg-transparent text-slate-600 hover:bg-slate-50'
-                      }`}
-                  >
-                    <span className="flex-1">Todos los sectores</span>
-                    {!filters.categoryId && <Check size={14} strokeWidth={3} className="text-[#72B626]" />}
-                  </button>
-
-                  {/* Divider */}
-                  <div className="h-px bg-slate-100 mx-3" />
-
-                  {/* Category options */}
-                  {!categoriesLoading && categories.filter(c => c.isActive).map(cat => {
-                    const isActive = filters.categoryId === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          updateFilters({ categoryId: isActive ? undefined : cat.id });
-                          setShowCategoryDropdown(false);
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[12px] font-bold border-none cursor-pointer transition-all ${isActive
-                          ? 'bg-green-50 text-[#72B626] font-black'
-                          : 'bg-transparent text-slate-600 hover:bg-slate-50'
-                          }`}
-                      >
-                        <span className="flex-1">{cat.displayName}</span>
-                        {isActive && <Check size={14} strokeWidth={3} className="text-[#72B626]" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sort */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ArrowUpDown size={16} className="text-slate-400" strokeWidth={2.5} />
-            <select
-              value={currentSort}
-              onChange={e => {
-                const [sortBy, sortOrder] = e.target.value.split(':') as [any, any];
-                updateFilters({ sortBy, sortOrder });
-              }}
-              className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-[12px] font-bold text-slate-600 outline-none cursor-pointer appearance-none pr-8 focus:ring-2 focus:ring-green-500/20"
-            >
-              {sortOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Results count */}
-          {meta && (
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">
-              {meta.totalItems} campaña{meta.totalItems !== 1 ? 's' : ''}
-            </div>
-          )}
         </div>
       </div>
 

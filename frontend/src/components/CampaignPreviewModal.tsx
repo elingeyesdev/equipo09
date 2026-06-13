@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
@@ -23,7 +23,7 @@ import {
   Mail,
   MapPin,
   Globe,
-  Gem,
+  Gift,
   Calendar,
   User,
   CheckCircle,
@@ -36,11 +36,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
-  donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
-  reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
-};
+
 
 function statusLabel(status: string): string {
   const map: Record<string, string> = {
@@ -402,7 +398,7 @@ export function CampaignPreviewModal({
               className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer ${activeTab === 'investors' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
-              Inversores Activos ({investorsTotal})
+              Donadores Activos ({investorsTotal})
             </button>
           )}
           {campaign.campaignType === 'reward' && !isAdmin && (
@@ -411,7 +407,7 @@ export function CampaignPreviewModal({
               className={`py-5 text-[12px] font-black uppercase tracking-widest border-b-4 transition-all border-none cursor-pointer flex items-center gap-2 ${activeTab === 'rewards' ? 'border-[#72B626] text-[#1c2b1e]' : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
             >
-              <Gem size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
+              <Gift size={14} className={activeTab === 'rewards' ? 'text-amber-500' : 'text-slate-400'} />
               Recompensas
             </button>
           )}
@@ -474,18 +470,7 @@ export function CampaignPreviewModal({
                     {/* Type & Category Overlays */}
                     <div className="absolute top-6 left-6 flex flex-wrap gap-3">
                       <span className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2">
-                        <Gem size={14} className="text-amber-400" />
                         {campaign.categoryName || 'General'}
-                      </span>
-                      <span
-                        className="px-4 py-2 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl flex items-center gap-2 backdrop-blur-md border border-white/20"
-                        style={{ backgroundColor: `${(CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation).color}CC` }}
-                      >
-                        {(() => {
-                          const info = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
-                          const Icon = info.icon;
-                          return <><Icon size={14} strokeWidth={3} /> {info.label}</>;
-                        })()}
                       </span>
                     </div>
 
@@ -649,11 +634,11 @@ export function CampaignPreviewModal({
 
                   <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200/60">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Mínima</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Donación Mínima</span>
                       <p className="text-[16px] font-black text-slate-800">{formatCampaignCurrency(minInvestment || 1, currency)}</p>
                     </div>
                     <div className="space-y-1 text-right">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inversión Máxima</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Donación Máxima</span>
                       <p className="text-[16px] font-black text-slate-800">{maxInvestment ? formatCampaignCurrency(maxInvestment, currency) : 'Sin límite'}</p>
                     </div>
                   </div>
@@ -672,7 +657,7 @@ export function CampaignPreviewModal({
                       <span className="font-black text-slate-900">{campaign.endDate ? formatShortDate(campaign.endDate) : 'Indefinida'}</span>
                     </div>
                     <div className="flex justify-between items-center text-[12px]">
-                      <span className="font-bold text-slate-500 flex items-center gap-2"><Users size={14} /> Inversores Activos</span>
+                      <span className="font-bold text-slate-500 flex items-center gap-2"><Users size={14} /> Donadores Activos</span>
                       <span className="font-black text-slate-900">{investorsTotal} Participantes</span>
                     </div>
                   </div>
@@ -786,7 +771,7 @@ export function CampaignPreviewModal({
                   <section className="p-10 border-b border-slate-100 space-y-6">
                     <div className="flex items-center gap-3 text-[#1c2b1e]">
                       <TrendingUp size={18} strokeWidth={2.5} />
-                      <h3 className="text-[11px] font-black uppercase tracking-widest">Flujo de Capital Reciente</h3>
+                      <h3 className="text-[11px] font-black uppercase tracking-widest">Donaciones Recientes</h3>
                     </div>
                     <div className="space-y-4">
                       {recent.map((inv, i) => (
@@ -796,7 +781,7 @@ export function CampaignPreviewModal({
                               {(inv.investorDisplayName || 'Anónimo').substring(0, 2).toUpperCase()}
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[12px] font-bold text-slate-700">{inv.isAnonymous ? 'Inversor Anónimo' : (inv.investorDisplayName || 'Usuario')}</span>
+                              <span className="text-[12px] font-bold text-slate-700">{inv.isAnonymous ? 'Donador Anónimo' : (inv.investorDisplayName || 'Usuario')}</span>
                               {inv.rewardTitle && (
                                 <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-1">
                                   <Heart size={8} fill="currentColor" /> {inv.rewardTitle}

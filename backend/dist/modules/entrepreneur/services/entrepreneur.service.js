@@ -275,16 +275,41 @@ let EntrepreneurService = EntrepreneurService_1 = class EntrepreneurService {
     }
     async finalizeCampaign(userId, campaignId) {
         await this.ensureEntrepreneurProfile(userId);
-        const updated = await this.campaignRepo.finalize(campaignId, userId);
-        if (!updated) {
+        const campaign = await this.campaignRepo.findOneByCreatorId(campaignId, userId);
+        if (!campaign || campaign.status !== 'published') {
             throw new exceptions_1.BadRequestException('Solo se pueden finalizar campañas que estén publicadas (activas)');
         }
-        await this.notificationsService.notifyCampaignFinalized({
-            entrepreneurUserId: userId,
-            campaignTitle: updated.title,
-            campaignId: updated.id,
-        });
-        return updated;
+        if (campaign.currentAmount < campaign.goalAmount) {
+            const updated = await this.campaignRepo.failAndRefundCampaign(campaignId, userId);
+            if (!updated)
+                throw new exceptions_1.BadRequestException('Error al reembolsar la campaña');
+            const investorsData = await this.campaignRepo.getCampaignInvestors(campaignId, userId, { limit: 1000 });
+            for (const investor of investorsData.investors) {
+                await this.notificationsService.notifyInvestmentRefunded({
+                    investorUserId: investor.userId,
+                    campaignTitle: updated.title,
+                    amount: investor.totalInvested,
+                    currency: updated.currency
+                });
+            }
+            await this.notificationsService.notifyCampaignFailed({
+                entrepreneurUserId: userId,
+                campaignTitle: updated.title,
+                campaignId: updated.id,
+            });
+            return updated;
+        }
+        else {
+            const updated = await this.campaignRepo.finalize(campaignId, userId);
+            if (!updated)
+                throw new exceptions_1.BadRequestException('Error al finalizar campaña');
+            await this.notificationsService.notifyCampaignFinalized({
+                entrepreneurUserId: userId,
+                campaignTitle: updated.title,
+                campaignId: updated.id,
+            });
+            return updated;
+        }
     }
     async uploadCampaignDocument(userId, campaignId, file, documentUrl, justification) {
         await this.ensureEntrepreneurProfile(userId);

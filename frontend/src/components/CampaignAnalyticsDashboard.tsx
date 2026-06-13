@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -324,7 +324,7 @@ export function CampaignAnalyticsDashboard({ finance, campaignType, startDate, c
         </div>
         <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm text-[11px] font-bold text-slate-600">
           <Sparkles size={13} className="text-amber-500" />
-          <span>Sincronizado con {investorCount || 0} inversiones confirmadas</span>
+          <span>Sincronizado con {investorCount || 0} donaciones confirmadas</span>
         </div>
       </div>
     </div>

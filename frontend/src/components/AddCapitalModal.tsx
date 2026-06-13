@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { addCapital } from '../api/investor.api';
 import { 
   X, 
@@ -109,7 +109,7 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
                 Aumentar Capital
               </h2>
               <p className="text-white/60 text-[12px] font-bold">
-                Inyecta fondos a tu cuenta de inversor
+                Inyecta fondos a tu cuenta de donador
               </p>
             </div>
           </div>

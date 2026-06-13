@@ -102,7 +102,7 @@ export class InvestmentsService {
     doc.fillColor('#ffffff')
        .fontSize(13)
        .font('Helvetica-Bold')
-       .text('COMPROBANTE DE INVERSIÓN', 0, 52, { align: 'right', width: doc.page.width - 50 });
+       .text('COMPROBANTE DE DONACIÓN', 0, 52, { align: 'right', width: doc.page.width - 50 });
     doc.fillColor(GREEN)
        .fontSize(10)
        .font('Helvetica')
@@ -134,8 +134,8 @@ export class InvestmentsService {
       return y + Math.max(22, h + 8);
     };
 
-    // ── Sección: Datos del Inversor ──
-    currentY = drawSectionTitle('Datos del Inversor', currentY);
+    // ── Sección: Datos del Donador ──
+    currentY = drawSectionTitle('Datos del Donador', currentY);
     const investorName = details.investor_first_name
       ? `${details.investor_first_name} ${details.investor_last_name || ''}`.trim()
       : 'Usuario Anónimo';
@@ -145,13 +145,11 @@ export class InvestmentsService {
 
     // ── Sección: Detalles de la Operación ──
     currentY = drawSectionTitle('Detalles de la Operación', currentY);
-    currentY = drawRow('ID de Transacción:', details.investment_id, currentY);
     currentY = drawRow('Fecha:', new Date(details.investment_date).toLocaleString('es-BO', { timeZone: 'America/La_Paz' }), currentY);
     currentY = drawRow('Campaña:', `${details.campaign_title} (${details.campaign_type.toUpperCase()})`, currentY);
     if (details.reward_title) {
       currentY = drawRow('Recompensa:', details.reward_title, currentY);
     }
-    currentY = drawRow('Estado:', details.investment_status.toUpperCase(), currentY, true);
     currentY += 22;
 
     // ── Sección: Resumen Financiero ──
@@ -162,7 +160,7 @@ export class InvestmentsService {
     doc.rect(marginX, currentY, 6, 74).fill(GREEN); // barra lateral verde
 
     doc.fillColor('#555555').fontSize(11).font('Helvetica-Bold')
-       .text('Monto Invertido', marginX + 22, currentY + 18);
+       .text('Monto Donado', marginX + 22, currentY + 18);
     doc.fillColor(GREEN).fontSize(24).font('Helvetica-Bold')
        .text(`$${Number(details.amount).toLocaleString()} ${details.currency}`,
              marginX + 22, currentY + 37,

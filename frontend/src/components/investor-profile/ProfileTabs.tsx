@@ -1,6 +1,6 @@
 import { 
   Info, 
-  Briefcase, 
+  Heart, 
   Wallet 
 } from 'lucide-react';
 
@@ -11,9 +11,9 @@ interface Props {
 
 export function ProfileTabs({ activeTab, setActiveTab }: Props) {
   const tabs = [
-    { id: 'portfolio', label: 'Portafolio', icon: Briefcase },
+    { id: 'donations', label: 'Donaciones', icon: Heart },
     { id: 'info', label: 'Información', icon: Info },
-    { id: 'capital', label: 'Capital', icon: Wallet },
+    { id: 'capital', label: 'Capital / Fondos', icon: Wallet },
   ];
 
   return (

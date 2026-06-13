@@ -176,7 +176,7 @@ export function CampaignCard({
           <div className="w-px h-8 bg-slate-100" />
           <div className="flex-1 text-center">
             <p className="text-[11px] text-slate-400 font-black uppercase tracking-wider mb-0.5 flex items-center justify-center gap-1">
-              <Users size={11} /> Inversores
+              <Users size={11} /> Donantes
             </p>
             <p className="text-[15px] font-black text-[#1c2b1e]">
               {campaign.investorCount ?? 0}
@@ -345,7 +345,7 @@ export function CampaignCard({
                   Esta acción <span className="font-black">no se puede deshacer</span>. La campaña quedará cerrada.
                   {campaign.currentAmount < campaign.goalAmount && (
                     <span className="block mt-1.5 text-red-700 font-black">
-                      La meta no fue alcanzada. Todos los inversores recibirán un reembolso automático inmediato.
+                      La meta no fue alcanzada. Todos los donantes recibirán un reembolso automático inmediato.
                     </span>
                   )}
                 </p>

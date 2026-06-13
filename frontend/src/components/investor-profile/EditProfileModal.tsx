@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { InvestorProfile } from '../../types/investor.types';
 import { 
   Lightbulb, 
@@ -107,18 +107,18 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
               {errors.lastName && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase tracking-wider ml-1">{errors.lastName}</p>}
             </div>
           </div>
-          <div><label className={labelClass}>Nombre Público</label><input name="displayName" value={formData.displayName || ''} onChange={handleChange} className={inputClass} placeholder="@nombre_inversor" /></div>
+          <div><label className={labelClass}>Nombre Público</label><input name="displayName" value={formData.displayName || ''} onChange={handleChange} className={inputClass} placeholder="@nombre_donador" /></div>
           <div>
-            <label className={labelClass}>Tipo de Perfil Inversor</label>
+            <label className={labelClass}>Tipo de Perfil Donador</label>
             <SelectWrapper>
               <select name="investorType" value={formData.investorType || 'individual'} onChange={handleChange} className={inputClass}>
                 <option value="individual">Individual</option>
                 <option value="institutional">Institucional</option>
-                <option value="angel">Ángel Inversionista</option>
+                <option value="angel">Donador Ángel</option>
               </select>
             </SelectWrapper>
           </div>
-          <div><label className={labelClass}>Biografía Profesional</label><textarea name="bio" value={formData.bio || ''} onChange={handleChange} className={`${inputClass} resize-none`} rows={4} placeholder="Describe tu trayectoria como inversor..."></textarea></div>
+          <div><label className={labelClass}>Biografía Profesional</label><textarea name="bio" value={formData.bio || ''} onChange={handleChange} className={`${inputClass} resize-none`} rows={4} placeholder="Describe tu trayectoria como donador..."></textarea></div>
         </div>
       );
       break;
@@ -181,7 +181,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
       break;
     }
     case 'investment': {
-      modalTitle = 'Preferencias de Inversión';
+      modalTitle = 'Preferencias de Donación';
       modalContent = (
         <div className="flex flex-col gap-5">
           <div className="bg-[#f0f9e0] border border-gray-100 p-4 rounded-xl text-sm text-[#1c2b1e] leading-relaxed font-bold flex items-start gap-3">
@@ -190,7 +190,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Inversión Mínima (USD)</label>
+              <label className={labelClass}>Donación Mínima (USD)</label>
               <input name="minInvestment" value={formData.minInvestment || ''} onChange={handleChange} className={inputClass} placeholder="500" type="number" />
             </div>
             <div>

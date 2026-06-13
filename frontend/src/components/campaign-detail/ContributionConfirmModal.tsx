@@ -1,10 +1,9 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import type { RewardTier } from '../../api/public-campaigns.api';
 import {
   X,
   ShieldCheck,
   DollarSign,
-  Gem,
   Gift,
   ArrowRight,
   AlertTriangle,
@@ -38,7 +37,7 @@ interface ContributionConfirmModalProps {
 /* ── Campaign type helpers ── */
 const CAMPAIGN_LABELS: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
   donation:  { label: 'Donación',    icon: Heart,      color: '#e91e63', bgColor: '#fce4ec' },
-  reward:    { label: 'Recompensa',  icon: Gem,        color: '#f9a825', bgColor: '#fff8e1' },
+  reward:    { label: 'Recompensa',  icon: Gift,        color: '#f9a825', bgColor: '#fff8e1' },
   equity:    { label: 'Equity',      icon: TrendingUp, color: '#72B626', bgColor: '#e8f5e9' },
 };
 

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { EntrepreneurCampaign } from '../../types/campaign.types';
 import {
   Lightbulb,
@@ -136,7 +136,7 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
               <SlidersHorizontal size={18} strokeWidth={2.5} />
             </div>
             <span className="text-[20px] font-black text-[#1c2b1e] tracking-tight uppercase tracking-widest leading-none">
-              Portafolio de Inversión
+              Campañas creadas
             </span>
           </div>
           <button
@@ -225,11 +225,11 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
                       <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] flex items-center justify-center text-[#72B626]">
                         <Users size={16} strokeWidth={2.5} />
                       </div>
-                      <span className="text-slate-700">{campaign.investorCount} inversionistas activos</span>
+                      <span className="text-slate-700">{campaign.investorCount} donantes activos</span>
                     </div>
                     <div className="flex items-center gap-2 bg-[#1c2b1e] text-white px-4 py-2 rounded-xl shadow-lg shadow-[#1c2b1e]/20/10">
                       <Clock size={12} strokeWidth={3} />
-                      {campaign.status === 'published' ? 'Inversión Abierta' : getStatusLabel(campaign.status)}
+                      {campaign.status === 'published' ? 'Donación Abierta' : getStatusLabel(campaign.status)}
                     </div>
                   </div>
                 </div>

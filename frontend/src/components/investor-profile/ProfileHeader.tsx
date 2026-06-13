@@ -1,4 +1,4 @@
-﻿import { useRef } from 'react';
+import { useRef } from 'react';
 import type { InvestorProfile } from '../../types/investor.types';
 import { 
   MapPin, 
@@ -17,9 +17,9 @@ interface Props {
 }
 
 const INVESTOR_TYPE_LABELS: Record<string, string> = {
-  individual: 'Inversor Individual',
-  institutional: 'Inversor Institucional',
-  angel: 'Ángel Inversionista',
+  individual: 'Donador Individual',
+  institutional: 'Donador Institucional',
+  angel: 'Donador Ángel',
 };
 
 export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Props) {
@@ -143,7 +143,7 @@ export function ProfileHeader({ profile, onEdit, uploadAvatar, uploadCover }: Pr
               {profile && (
                 <div className="flex items-center gap-2 text-[13px] font-medium">
                   <TrendingUp size={14} className="text-[#72B626]" />
-                  <span className="text-[#72B626] font-bold">{profile.totalInvestments} inversiones</span>
+                  <span className="text-[#72B626] font-bold">{profile.totalInvestments} donaciones</span>
                 </div>
               )}
             </div>

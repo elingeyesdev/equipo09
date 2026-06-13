@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getCampaignInvestors } from '../api/campaign.api';
 import { getAdminCampaignInvestors } from '../api/admin.api';
 import type { CampaignInvestor, PaginatedResponse } from '../types/campaign.types';
@@ -43,7 +43,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
       setData(result);
     } catch (err) {
       console.error(err);
-      setError('No se pudieron cargar los inversores.');
+      setError('No se pudieron cargar los donadores.');
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
         <div>
           <div className="flex items-center gap-3 text-[#72B626] mb-2">
             <Users size={20} strokeWidth={2.5} />
-            <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Registro de Inversores</h3>
+            <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Registro de Donadores</h3>
           </div>
           <p className="text-slate-500 text-[14px] font-medium max-w-md">
             Gestiona la relación con tus respaldos financieros. Pronto podrás enviar mensajes personalizados.
@@ -91,7 +91,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
 
         <div className="flex items-center gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl px-5 py-3 shadow-sm">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Inversores</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Donadores</span>
             <span className="text-xl font-black text-slate-900">{data?.meta?.totalItems || 0}</span>
           </div>
           <div className="bg-[#f0f9e0] border border-gray-100 rounded-2xl px-5 py-3 shadow-sm">
@@ -158,7 +158,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
 
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50">
                     <div>
-                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block">Monto Invertido</span>
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block">Monto Donado</span>
                       <span className="text-[14px] font-black text-slate-900">
                         {formatCampaignCurrency(inv.totalInvested, currency)}
                       </span>
@@ -176,9 +176,9 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm">
               <Users size={32} />
             </div>
-            <h4 className="text-slate-900 font-black text-lg">Aún no hay inversores</h4>
+            <h4 className="text-slate-900 font-black text-lg">Aún no hay donadores</h4>
             <p className="text-slate-400 text-sm max-w-xs mx-auto">
-              Cuando los usuarios realicen inversiones completadas, aparecerán en este registro.
+              Cuando los usuarios realicen donaciones completadas, aparecerán en este registro.
             </p>
           </div>
         )}
@@ -241,7 +241,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                 {selectedInvestor.displayName || `${selectedInvestor.firstName} ${selectedInvestor.lastName}`}
               </h3>
               <p className="text-[#72B626] font-black text-[11px] uppercase tracking-widest mb-6 flex items-center justify-center gap-2">
-                <Heart size={12} fill="currentColor" /> Inversor de Impacto
+                <Heart size={12} fill="currentColor" /> Donador de Impacto
               </p>
 
               <div className="grid grid-cols-3 gap-3 mb-8">
@@ -272,7 +272,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                 <div className="bg-slate-50/50 p-6 rounded-[28px] border border-slate-100">
                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Biografía</p>
                   <p className="text-[13px] text-slate-600 font-medium leading-relaxed italic">
-                    {selectedInvestor.bio || '"Este inversor prefiere mantener un perfil discreto sobre sus motivaciones."'}
+                    {selectedInvestor.bio || '"Este donador prefiere mantener un perfil discreto sobre sus motivaciones."'}
                   </p>
                 </div>
               </div>
@@ -280,7 +280,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
               <div className="mt-10 flex gap-4">
                 <button 
                   className="flex-1 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-[#1c2b1e]/20/10"
-                  onClick={() => alert('Próximamente: Chat con inversor')}
+                  onClick={() => alert('Próximamente: Chat con donador')}
                 >
                   <MessageSquare size={18} /> Enviar Mensaje
                 </button>

@@ -1,4 +1,4 @@
-﻿import { formatCampaignCurrency } from '../utils/campaignFunding';
+import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { Calendar, Users } from 'lucide-react';
 
 interface Props {
@@ -34,7 +34,7 @@ export function CampaignStats({ currentAmount, goalAmount, currency, endDate, in
         <div className={rowClass}>
           <span className={labelClass}>
             <Users size={12} strokeWidth={2.5} />
-            Inversores
+            Donadores
           </span>
           <span className={valueClass}>{investorCount}</span>
         </div>

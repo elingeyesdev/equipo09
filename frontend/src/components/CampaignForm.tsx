@@ -1,8 +1,8 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Save, X, Plus, Trash2, Gem, Edit2 } from 'lucide-react';
+import { AlertCircle, Save, X, Plus, Trash2, Gift, Edit2 } from 'lucide-react';
 import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto, CampaignType } from '../types/campaign.types';
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
@@ -10,14 +10,10 @@ import { getImageUrl } from '../utils/image.utils';
 import { formatNumberSpanish, isFutureDate } from '../utils/numberFormat';
 import { InfoHint } from './InfoHint';
 
-const CAMPAIGN_TYPE_OPTIONS: { value: CampaignType; label: string; description: string }[] = [
-  { value: 'donation', label: 'Donación', description: 'Recibe contribuciones sin entregar nada a cambio.' },
-  { value: 'reward', label: 'Recompensa', description: 'Ofrece recompensas a tus patrocinadores por sus aportes.' },
-  { value: 'equity', label: 'Equity', description: 'Cede participación de tu empresa a los inversores.' },
-];
+
 
 const schema = z.object({
-  title: z.string().min(5, 'El título debe tener entre 5 y 90 caracteres').max(90, 'El título debe tener entre 5 y 90 caracteres'),
+  title: z.string().min(5, 'El título debe tener entre 5 y 50 caracteres').max(50, 'El título debe tener entre 5 y 50 caracteres'),
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es $100'),
@@ -135,6 +131,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
         description: initialData.description || '',
         shortDescription: initialData.shortDescription || '',
         goalAmount: initialData.goalAmount || 1000,
+        campaignType: (initialData.campaignType as CampaignType) || 'donation',
         categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
         endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
         videoUrl: initialData.videoUrl || '',
@@ -246,26 +243,52 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
       )}
 
       <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="flex flex-col">
-          <div className="flex justify-between items-end mb-2">
-            <label htmlFor="title" className={labelClass + " mb-0 flex items-center gap-2"}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span><InfoHint text="Nombre principal de tu campaña. Debe ser claro y memorable." /></label>
-            <span className={`text-[10px] font-bold ${titleVal.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
-              {titleVal.length}/90
-            </span>
-          </div>
-          <input
-            id="title"
-            type="text"
-            placeholder="E.g. Botellas de agua reusables del océano"
-            className={`${inputClass} ${errors.title ? errorClass : ''}`}
-            maxLength={90}
-            {...register('title')}
-          />
-          {errors.title && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.title.message}</span>}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Fila 1: Título (2/3) y Meta de Recaudación (1/3) */}
           <div className="flex flex-col md:col-span-2">
+            <div className="flex justify-between items-end mb-2">
+              <label htmlFor="title" className={labelClass + " mb-0 flex items-center gap-2"}>Título de la Campaña <span className="text-[#c62828] font-bold">*</span><InfoHint text="Nombre principal de tu campaña. Debe ser claro y memorable." /></label>
+              <span className={`text-[10px] font-bold ${titleVal.length > 50 ? 'text-red-500' : 'text-slate-400'}`}>
+                {titleVal.length}/50
+              </span>
+            </div>
+            <input
+              id="title"
+              type="text"
+              placeholder="E.g. Botellas de agua reusables del océano"
+              className={`${inputClass} ${errors.title ? errorClass : ''}`}
+              maxLength={50}
+              {...register('title')}
+            />
+            {errors.title && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.title.message}</span>}
+          </div>
+
+          <div className="flex flex-col md:col-span-1">
+            <label htmlFor="goalAmount" className={`${labelClass} flex items-center gap-2`}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span><InfoHint text="Monto total que quieres alcanzar con la campaña." /></label>
+            <Controller
+              name="goalAmount"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id="goalAmount"
+                  type="text"
+                  placeholder="1.000"
+                  className={`${inputClass} ${errors.goalAmount ? errorClass : ''}`}
+                  maxLength={15}
+                  value={formatNumberSpanish(field.value)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                    field.onChange(parseInt(rawValue, 10) || 0);
+                  }}
+                />
+              )}
+            />
+            {errors.goalAmount && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.goalAmount.message)}</span>}
+          </div>
+
+          {/* Fila 2: Categorías (Ancho completo 3/3) */}
+          <div className="flex flex-col md:col-span-3">
             <label className={`${labelClass} flex items-center gap-2`}>Etiquetas de Categoría <span className="text-[#c62828] font-bold">*</span><InfoHint text="Selecciona sectores relacionados al proyecto." /></label>
             <div className="flex flex-wrap gap-2 mt-2">
               {loadingCats ? (
@@ -289,30 +312,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             {errors.categoryIds && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.categoryIds.message}</span>}
           </div>
 
-          <div className="flex flex-col">
-            <label htmlFor="goalAmount" className={`${labelClass} flex items-center gap-2`}>Meta de Recaudación (USD) <span className="text-[#c62828] font-bold">*</span><InfoHint text="Monto total que quieres alcanzar con la campaña." /></label>
-            <Controller
-              name="goalAmount"
-              control={control}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  id="goalAmount"
-                  type="text"
-                  placeholder="10.000"
-                  className={`${inputClass} ${errors.goalAmount ? errorClass : ''}`}
-                  maxLength={15}
-                  value={formatNumberSpanish(field.value)}
-                  onChange={(e) => {
-                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                    field.onChange(parseInt(rawValue, 10) || 0);
-                  }}
-                />
-              )}
-            />
-            {errors.goalAmount && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.goalAmount.message)}</span>}
-          </div>
-
+          {/* Fila 3: Eslogan / Frase corta (2/3) y Fecha de cierre (1/3) */}
           <div className="flex flex-col md:col-span-2">
             <div className="flex justify-between items-end mb-2">
               <label htmlFor="shortDescription" className={labelClass + " mb-0 flex items-center gap-2"}>Eslogan / Frase corta <span className="text-[#c62828] font-bold">*</span><InfoHint text="Resumen breve para captar atención inmediata." /></label>
@@ -331,7 +331,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             {errors.shortDescription && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.shortDescription.message}</span>}
           </div>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col md:col-span-1">
             <label htmlFor="endDate" className={`${labelClass} flex items-center gap-2`}>Fecha de Cierre (Opcional)<InfoHint text="Fecha límite para recibir aportes." /></label>
             <input
               id="endDate"
@@ -351,22 +351,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
           </div>
 
-          <div className="flex flex-col md:col-span-3">
-            <label htmlFor="campaignType" className={`${labelClass} flex items-center gap-2`}>Tipo de Campaña <span className="text-[#c62828] font-bold">*</span><InfoHint text="Elige si tu campaña es donación, recompensa o equity." /></label>
-            <select
-              id="campaignType"
-              className={`${inputClass} ${errors.campaignType ? errorClass : ''}`}
-              {...register('campaignType')}
-            >
-              {CAMPAIGN_TYPE_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value} className="text-[#1c2b1e]">
-                  {opt.label} ({opt.description})
-                </option>
-              ))}
-            </select>
-            {errors.campaignType && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{errors.campaignType.message}</span>}
-          </div>
-
+          {/* Fila 4: Video Pitch URL (Ancho completo 3/3) */}
           <div className="flex flex-col md:col-span-3">
             <label htmlFor="videoUrl" className={`${labelClass} flex items-center gap-2`}>URL de Video Pitch (YouTube / TikTok - Opcional)<InfoHint text="Enlace de video para presentar el proyecto." /></label>
             <input
@@ -387,6 +372,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             )}
           </div>
 
+          {/* Fila 5: Imagen de Portada (Ancho completo 3/3) */}
           <div className="flex flex-col md:col-span-3">
             <label className={`${labelClass} flex items-center gap-2`}>Imagen de Portada <InfoHint text="Sube una imagen horizontal de buena calidad (JPG/PNG)." /></label>
             <div 
@@ -419,6 +405,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
             </div>
           </div>
 
+          {/* Fila 6: Propuesta de valor en detalle (Ancho completo 3/3) */}
           <div className="flex flex-col md:col-span-3">
             <div className="flex justify-between items-end mb-2">
               <label htmlFor="description" className={labelClass + " mb-0 flex items-center gap-2"}>Propuesta de Valor en Detalle <span className="text-[#c62828] font-bold">*</span><InfoHint text="Explica problema, solución y uso de fondos." /></label>
@@ -445,7 +432,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
               <h3 className="text-lg font-black text-[#1c2b1e] tracking-tight mb-1 flex items-center gap-2">
-                <Gem size={20} className="text-amber-500" />
+                <Gift size={20} className="text-amber-500" />
                 Estructura de Recompensas
               </h3>
               <p className="text-[13px] text-slate-500 font-medium">
@@ -527,7 +514,7 @@ export function CampaignForm({ initialData, onSuccess, onCancel, saving, saveErr
                       />
                     </div>
                     <div>
-                      <label className={`${labelClass} flex items-center gap-2`}>Descripción * <InfoHint text="Beneficios concretos que recibirá el inversor." /></label>
+                      <label className={`${labelClass} flex items-center gap-2`}>Descripción * <InfoHint text="Beneficios concretos que recibirá el donante." /></label>
                       <textarea 
                         className={`${inputClass} resize-none`}
                         rows={3}

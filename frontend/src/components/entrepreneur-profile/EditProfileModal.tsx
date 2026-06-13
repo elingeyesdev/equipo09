@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
 import { 
   Lightbulb, 
@@ -194,7 +194,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
           <div><label className={labelClass}>Perfil LinkedIn</label><input name="linkedinUrl" value={formData.linkedinUrl || ''} onChange={handleChange} className={inputClass} placeholder="https://linkedin.com/in/usuario" /></div>
           <div className="bg-[#f0f9e0] border border-gray-100 p-4 rounded-xl text-sm text-[#1c2b1e] leading-relaxed font-bold flex items-start gap-3">
              <Lightbulb size={20} className="text-[#72B626] shrink-0" strokeWidth={2.5} />
-             <span>Un perfil de LinkedIn actualizado aumenta la confianza de los inversionistas un 40%.</span>
+             <span>Un perfil de LinkedIn actualizado aumenta la confianza de los donantes un 40%.</span>
           </div>
         </div>
       );

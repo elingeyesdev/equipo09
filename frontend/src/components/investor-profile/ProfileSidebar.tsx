@@ -1,4 +1,4 @@
-﻿import type { InvestorProfile } from '../../types/investor.types';
+import type { InvestorProfile } from '../../types/investor.types';
 import { 
   MapPin, 
   FileText, 
@@ -36,7 +36,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
     { label: 'Información básica', value: profile?.firstName && profile?.lastName && profile?.bio, modal: 'profile' },
     { label: 'Datos fiscales', value: profile?.taxId, modal: 'fiscal' },
     { label: 'Ubicación', value: profile?.addressLine1 && profile?.country, modal: 'address' },
-    { label: 'Preferencias de inversión', value: profile?.minInvestment || profile?.maxInvestment, modal: 'investment' },
+    { label: 'Preferencias de donación', value: profile?.minInvestment || profile?.maxInvestment, modal: 'investment' },
     { label: 'Foto de perfil', value: profile?.avatarUrl, modal: 'avatar' },
   ];
   
@@ -50,31 +50,33 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
   const editBtn = "w-9 h-9 bg-slate-50 hover:bg-[#f0f9e0] text-slate-400 hover:text-[#72B626] rounded-xl flex items-center justify-center cursor-pointer transition-all border-none active:scale-95";
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif]">
+    <div className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6 font-['Plus Jakarta Sans',sans-serif] lg:sticky lg:top-[140px] self-start">
       
       {/* Profile completeness */}
-      <div className={`${cardClass} border-l-[6px] border-l-[#72B626]`}>
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#f0f9e0] rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
-        <div className={sectionTitle}>
-           Proceso de Perfil
-          <span className="text-[14px] text-[#72B626] font-black">{percentage}%</span>
+      {percentage < 100 && (
+        <div className={`${cardClass} border-l-[6px] border-l-[#72B626]`}>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#f0f9e0] rounded-full blur-3xl -mr-12 -mt-12 opacity-50"></div>
+          <div className={sectionTitle}>
+             Proceso de Perfil
+            <span className="text-[14px] text-[#72B626] font-black">{percentage}%</span>
+          </div>
+          <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
+            <div 
+              className="h-full bg-gradient-to-r from-[#a8d97c] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
+              style={{ width: `${percentage}%` }}
+            ></div>
+          </div>
+          {nextStep && (
+            <button 
+              className="mt-5 w-full text-center py-3 text-[13px] text-[#72B626] font-black bg-[#f0f9e0] border border-gray-100 rounded-xl hover:bg-[#72B626] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10 cursor-pointer" 
+              onClick={() => openModal(nextStep.modal as any)}
+            >
+              Siguiente: {nextStep.label}
+              <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
+            </button>
+          )}
         </div>
-        <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner relative z-10">
-          <div 
-            className="h-full bg-gradient-to-r from-[#a8d97c] to-[#72B626] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(46,125,50,0.3)]" 
-            style={{ width: `${percentage}%` }}
-          ></div>
-        </div>
-        {percentage < 100 && nextStep && (
-          <button 
-            className="mt-5 w-full text-center py-3 text-[13px] text-[#72B626] font-black bg-[#f0f9e0] border border-gray-100 rounded-xl hover:bg-[#72B626] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10 cursor-pointer" 
-            onClick={() => openModal(nextStep.modal as any)}
-          >
-            Siguiente: {nextStep.label}
-            <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Bio & Type */}
       <div className={cardClass}>
@@ -128,7 +130,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
                 Rango: {profile?.minInvestment ? `$${profile.minInvestment.toLocaleString()}` : '—'} — {profile?.maxInvestment ? `$${profile.maxInvestment.toLocaleString()}` : '—'}
               </div>
               <div className="text-[12px] text-slate-400 font-bold tracking-widest mt-0.5">
-                Mín / Máx de inversión
+                Mín / Máx de donación
               </div>
             </div>
           </div>
@@ -187,7 +189,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
               </div>
               <div className="min-w-0">
                 <div className="font-black text-[#1c2b1e] text-[14px] leading-tight mb-1 uppercase tracking-tight">Identidad Certificada</div>
-                <div className="text-[11px] text-[#72B626] font-black uppercase tracking-tighter opacity-70">Inversor verificado</div>
+                <div className="text-[11px] text-[#72B626] font-black uppercase tracking-tighter opacity-70">Donador verificado</div>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -207,7 +209,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
               </div>
               <div className="min-w-0">
                 <div className="font-black text-slate-700 text-[14px] leading-tight mb-1 uppercase tracking-tight">Verificación Requerida</div>
-                <div className="text-[11px] text-slate-400 font-bold leading-tight">Envía tus documentos para proteger tu cuenta y habilitar inversiones.</div>
+                <div className="text-[11px] text-slate-400 font-bold leading-tight">Envía tus documentos para proteger tu cuenta y habilitar donaciones.</div>
               </div>
             </div>
             <button className="w-full mt-2 py-3.5 bg-[#f9a825] hover:bg-[#c62828] text-white font-black rounded-xl transition-all text-[12px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 border-none cursor-pointer flex items-center justify-center gap-2">
@@ -222,7 +224,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
         <div className="rounded-[28px] p-6 border border-red-100 bg-red-50/40 shadow-sm">
           <p className="text-[11px] font-black text-red-800 uppercase tracking-widest mb-2">Zona de riesgo</p>
           <p className="text-[13px] text-red-900/80 font-medium leading-snug mb-4">
-            Elimina solo tu perfil de inversor. Tu usuario y sesión siguen activos. No disponible si tienes inversiones.
+            Elimina solo tu perfil de donador. Tu usuario y sesión siguen activos. No disponible si tienes donaciones.
           </p>
           <button
             type="button"
@@ -230,7 +232,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
             className="w-full py-3 rounded-xl text-[12px] font-black uppercase tracking-widest bg-white border border-red-200 text-red-700 hover:bg-red-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Trash2 size={16} strokeWidth={2.5} />
-            Eliminar perfil inversor
+            Eliminar perfil donador
           </button>
         </div>
       )}

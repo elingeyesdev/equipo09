@@ -1,4 +1,4 @@
-﻿import { useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -137,11 +137,11 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
           </div>
 
           <div className="flex flex-col relative">
-            <label htmlFor="investorType" className={labelClass}>Tipo de perfil inversor</label>
+            <label htmlFor="investorType" className={labelClass}>Tipo de perfil donador</label>
             <select id="investorType" {...register('investorType')} className={`${inputClass} cursor-pointer appearance-none bg-[url('https://www.svgrepo.com/show/511116/dropdown.svg')] bg-[length:16px] bg-[right_1rem_center] bg-no-repeat`}>
               <option value="individual">Individual</option>
               <option value="institutional">Institucional</option>
-              <option value="angel">Ángel Inversionista</option>
+              <option value="angel">Donador Ángel</option>
             </select>
           </div>
 
@@ -150,7 +150,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
             <textarea
               id="bio"
               rows={4}
-              placeholder="Inversora con experiencia en startups de tecnología y sostenibilidad..."
+              placeholder="Donadora con experiencia en proyectos de tecnología y sostenibilidad..."
               className={`${inputClass} resize-none`}
               {...register('bio')}
             />
@@ -233,7 +233,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
         </div>
       </div>
 
-      {/* ── PREFERENCIAS DE INVERSIÓN ────────────────────── */}
+      {/* ── PREFERENCIAS DE DONACIÓN ────────────────────── */}
       <div className="flex flex-col">
         <div className={sectionTitle}>
            <span className="w-8 h-8 rounded-lg bg-[#aed581]/20 text-[#72B626] flex items-center justify-center text-sm shadow-sm border border-[#aed581]/50">
@@ -243,7 +243,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col">
-            <label htmlFor="minInvestment" className={labelClass}>Inversión Mínima (USD)</label>
+            <label htmlFor="minInvestment" className={labelClass}>Donación Mínima (USD)</label>
             <input
               id="minInvestment"
               type="number"

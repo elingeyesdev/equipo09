@@ -4,8 +4,7 @@ import {
   AlertTriangle, 
   Wallet, 
   HandCoins, 
-  Clock, 
-  Gem, 
+  Heart, 
   ArrowRight,
   ArrowUpCircle,
 } from 'lucide-react';
@@ -38,30 +37,26 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Capital Disponible */}
-        <div className={`${cardClass} col-span-1 sm:col-span-2 lg:col-span-2 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] border-none !shadow-[#1c2b1e]/20/20`}>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#d4f0a0]/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-transform duration-1000 group-hover:scale-150" />
-          
-          <div className="flex justify-between items-start relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#a8d97c] border border-white/10 group-hover:scale-110 transition-transform duration-500">
-              <Wallet size={28} strokeWidth={2.5} />
+        <div className={`${cardClass} col-span-1 sm:col-span-2 lg:col-span-2`}>
+          <div className="flex justify-between items-start relative z-10 w-full">
+            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#f0f9e0] group-hover:text-[#72B626] transition-colors duration-500">
+              <Wallet size={24} strokeWidth={2.5} />
             </div>
             {hasMaxConfigured && onAddCapital && (
               <button
                 onClick={onAddCapital}
-                className="px-4 py-2.5 rounded-xl bg-white text-[#1c2b1e] hover:bg-[#f0f9e0] hover:text-[#72B626] text-[12px] font-black uppercase tracking-widest transition-all border-none cursor-pointer flex items-center gap-2 active:scale-95 shadow-lg"
+                className="px-4 py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white text-[12px] font-black uppercase tracking-widest transition-all border-none cursor-pointer flex items-center gap-2 active:scale-95 shadow-sm rounded-xl"
               >
-                <ArrowUpCircle size={16} strokeWidth={3} />
+                <ArrowUpCircle size={15} strokeWidth={3} />
                 Aumentar Capital
               </button>
             )}
           </div>
           
-          <div className={`relative z-10 ${valueClass} ${hasMaxConfigured ? (isCapitalEmpty ? 'text-red-400' : isCapitalLow ? 'text-amber-400' : 'text-white') : 'text-white/50'} text-5xl mt-6`}>
+          <div className={`${valueClass} ${hasMaxConfigured ? (isCapitalEmpty ? 'text-red-600' : isCapitalLow ? 'text-amber-600' : 'text-[#1c2b1e]') : 'text-slate-300'} text-4xl mt-6`}>
             {hasMaxConfigured ? formatCurrency(availableCapital) : 'N/D'}
           </div>
-          <div className="text-[12px] font-black text-[#f0f9e0]/70 uppercase tracking-widest relative z-10 mt-1">
-            Capital Disponible
-          </div>
+          <div className={labelClass}>Capital Disponible</div>
         </div>
 
         {/* Total Invertido */}
@@ -72,18 +67,18 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
           <div className={`${valueClass} text-[#1c2b1e]`}>
             {formatCurrency(data.totalInvested || 0)}
           </div>
-          <div className={labelClass}>Total Invertido</div>
+          <div className={labelClass}>Total Donado</div>
         </div>
 
-        {/* Inversiones */}
+        {/* Donaciones */}
         <div className={cardClass}>
           <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-400 group-hover:bg-teal-100 group-hover:text-teal-600 transition-colors duration-500">
-            <Gem size={24} strokeWidth={2.5} />
+            <Heart size={24} strokeWidth={2.5} />
           </div>
           <div className={`${valueClass} text-[#1c2b1e]`}>
             {data.completedInvestments || 0}
           </div>
-          <div className={labelClass}>Inversiones</div>
+          <div className={labelClass}>Donaciones</div>
         </div>
       </div>
 
@@ -99,7 +94,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
             </h4>
             <div className={`text-[14px] ${isCapitalEmpty ? 'text-red-700' : 'text-amber-700'} font-medium`}>
               {isCapitalEmpty 
-                ? 'Necesitas agregar más fondos para continuar invirtiendo.'
+                ? 'Necesitas agregar más fondos para continuar donando.'
                 : 'Tienes menos del 20% de tu límite. Considera agregar más fondos.'
               }
             </div>
@@ -117,7 +112,7 @@ export function InvestorDashboardOverview({ data, onAddCapital }: Props) {
           <div className="flex-1 relative z-10">
             <h4 className="text-lg font-black text-white mb-1">Perfil Incompleto</h4>
             <div className="text-[14px] text-[#f0f9e0]/70 font-medium">
-              No has configurado tu monto máximo de inversión para calcular el capital disponible.
+              No has configurado tu monto máximo de donación para calcular el capital disponible.
             </div>
           </div>
           <Link to="/profile" className="shrink-0 px-6 py-3 rounded-xl bg-[#72B626] hover:bg-[#72B626] text-white text-[13px] font-black uppercase tracking-widest transition-all border-none cursor-pointer flex items-center justify-center gap-2 active:scale-95 no-underline relative z-10">

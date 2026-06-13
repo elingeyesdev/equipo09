@@ -69,6 +69,8 @@ export function Navbar({ socket }: NavbarProps) {
         : 'text-gray-600 hover:text-gray-900'
     }`;
 
+  const profilePath = userRole === 'entrepreneur' ? '/entrepreneur-profile' : '/profile';
+
   return (
     <>
       <nav
@@ -151,14 +153,14 @@ export function Navbar({ socket }: NavbarProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {/* User Email (Desktop) */}
           {userEmail && (
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200">
+            <Link to={profilePath} className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 hover:border-[#72B626] transition-colors" style={{ textDecoration: 'none' }}>
               <div className="w-6 h-6 rounded-full bg-[#72B626]/10 flex items-center justify-center">
                 <User size={13} className="text-[#72B626]" strokeWidth={2} />
               </div>
               <span className="text-[13px] font-medium text-gray-700 truncate max-w-[140px]">
                 {userEmail}
               </span>
-            </div>
+            </Link>
           )}
 
           {userEmail && <NotificationBell />}

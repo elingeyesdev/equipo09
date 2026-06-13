@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress, updateRewardClaim } from '../api/campaign.api';
 import { getAdminRewardClaims, getCampaignFinancialProgress as getAdminFinancialProgress } from '../api/admin.api';
 import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim, CampaignFinancialProgress } from '../types/campaign.types';
 import { 
-  Gem, 
+  Gift, 
   Plus, 
   Edit2, 
   Trash2, 
@@ -157,11 +157,11 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex-1 max-w-xl">
           <div className="flex items-center gap-3 text-amber-500 mb-2">
-            <Gem size={20} strokeWidth={2.5} />
+            <Gift size={20} strokeWidth={2.5} />
             <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Gestión de Recompensas</h3>
           </div>
           <p className="text-slate-500 text-[14px] font-medium mb-6">
-            Define niveles de beneficios automáticos basados en el porcentaje de contribución de los inversores.
+            Define niveles de beneficios automáticos basados en el porcentaje de contribución de los donadores.
           </p>
         </div>
         {!isEditing && !readOnly && (
@@ -243,7 +243,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                   />
                   <div>
                     <label htmlFor="isActive" className="text-[14px] font-black text-slate-800 cursor-pointer">Recompensa Activa</label>
-                    <p className="text-[12px] text-slate-500">Si desmarcas esta opción, la recompensa dejará de estar visible para nuevos inversores.</p>
+                    <p className="text-[12px] text-slate-500">Si desmarcas esta opción, la recompensa dejará de estar visible para nuevos donantes.</p>
                   </div>
                 </div>
               )}
@@ -307,7 +307,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                 <div className="flex items-center gap-1.5">
                   <Users size={14} strokeWidth={2.5} className="text-[#72B626]" />
                   <span className="text-slate-700">{tier.currentClaims || 0}</span>
-                  <span>inversores han alcanzado este nivel</span>
+                  <span>donantes han alcanzado este nivel</span>
                 </div>
               </div>
             </div>
@@ -318,11 +318,11 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       {!isEditing && tiers.length === 0 && (
          <div className="col-span-full py-16 text-center bg-white border-2 border-dashed border-gray-100 rounded-[32px]">
            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 mx-auto mb-4">
-             <Gem size={32} />
+             <Gift size={32} />
            </div>
            <h4 className="text-slate-900 font-black text-lg mb-2">No tienes recompensas</h4>
            <p className="text-slate-500 text-sm max-w-sm mx-auto mb-6 leading-relaxed">
-             Añade niveles de recompensa para incentivar a tus inversores a aportar más capital.
+             Añade niveles de recompensa para incentivar a tus donadores a aportar más capital.
            </p>
            <button
              onClick={handleAddNew}
@@ -333,7 +333,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
          </div>
       )}
 
-      {/* Sección de Reclamos (Inversores que obtuvieron recompensa) */}
+      {/* Sección de Reclamos (Donadores que obtuvieron recompensa) */}
       {!isEditing && claims.length > 0 && (
         <div className="mt-12 pt-8 border-t border-slate-200">
           <button 
@@ -345,7 +345,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                 <Users size={20} strokeWidth={2.5} />
               </div>
               <div className="text-left">
-                <h4 className="text-[15px] font-black text-slate-800">Inversores con Recompensas ({claims.length})</h4>
+                <h4 className="text-[15px] font-black text-slate-800">Donadores con Recompensas ({claims.length})</h4>
                 <p className="text-[12px] text-slate-500 font-medium">Ver listado de personas que reclamaron un nivel</p>
               </div>
             </div>
@@ -358,7 +358,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                 <table className="w-full text-left text-[13px]">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase tracking-widest text-[10px]">
                     <tr>
-                      <th className="px-6 py-4">Inversor</th>
+                      <th className="px-6 py-4">Donador</th>
                       <th className="px-6 py-4">Recompensa</th>
                       <th className="px-6 py-4">Monto Aportado</th>
                       <th className="px-6 py-4">Estado</th>
@@ -374,7 +374,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                         </td>
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 font-bold px-3 py-1.5 rounded-lg text-[11px]">
-                            <Gem size={12} strokeWidth={2.5} />
+                            <Gift size={12} strokeWidth={2.5} />
                             {claim.reward_title}
                           </span>
                         </td>

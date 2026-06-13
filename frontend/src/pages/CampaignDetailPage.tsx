@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
@@ -8,18 +8,16 @@ import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
 import { ProgressBar } from '../components/ProgressBar';
-import { CampaignAnalyticsDashboard } from '../components/CampaignAnalyticsDashboard';
+
 import { createInvestment } from '../api/investor.api';
 import { getOrCreateConversation } from '../api/chat.api';
-import { getPublicCampaignFinancialProgress } from '../api/campaign.api';
+
 import {
   ArrowLeft,
-  TrendingUp,
   Users,
   Calendar,
   Target,
-  Heart,
-  Gem,
+  Gift,
   Rocket,
   AlertCircle,
   RefreshCw,
@@ -37,11 +35,7 @@ import {
 } from 'lucide-react';
 import { shareCampaignUrl } from '../utils/share.utils';
 
-const CAMPAIGN_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
-  donation: { label: 'Donación', icon: Heart, color: '#e91e63' },
-  reward: { label: 'Recompensa', icon: Gem, color: '#f9a825' },
-  equity: { label: 'Equity', icon: TrendingUp, color: '#72B626' },
-};
+
 
 /* ───────────────────────────────────────────────── */
 /*  SKELETON LOADING                                 */
@@ -137,21 +131,7 @@ export function CampaignDetailPage() {
   // ── Related campaigns state ──
   const [relatedCampaigns, setRelatedCampaigns] = useState<PublicCampaign[]>([]);
 
-  const [finance, setFinance] = useState<any>(null);
 
-  const loadFinance = useCallback(async () => {
-    if (!id) return;
-    try {
-      const data = await getPublicCampaignFinancialProgress(id);
-      setFinance(data);
-    } catch (err) {
-      console.error('Error loading public financial progress:', err);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    loadFinance();
-  }, [loadFinance]);
 
   const milestones = useMemo(() => {
     if (campaign && campaign.rewardTiers && campaign.rewardTiers.length > 0) {
@@ -236,8 +216,7 @@ export function CampaignDetailPage() {
     daysRemaining = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
 
-  const typeInfo = CAMPAIGN_TYPE_LABELS[campaign.campaignType] || CAMPAIGN_TYPE_LABELS.donation;
-  const TypeIcon = typeInfo.icon;
+
 
 
   const coverUrl = getImageUrl(campaign.coverImageUrl);
@@ -288,13 +267,6 @@ export function CampaignDetailPage() {
           <div className="absolute top-6 left-6 flex gap-3 flex-wrap">
             <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl text-[11px] font-black text-[#1c2b1e] uppercase tracking-widest shadow-sm">
               {campaign.categoryName}
-            </span>
-            <span
-              className="px-4 py-2 rounded-xl text-[11px] font-black text-white uppercase tracking-widest shadow-sm flex items-center gap-1.5"
-              style={{ backgroundColor: typeInfo.color }}
-            >
-              <TypeIcon size={13} strokeWidth={3} />
-              {typeInfo.label}
             </span>
           </div>
 
@@ -398,23 +370,7 @@ export function CampaignDetailPage() {
               </div>
             </div>
 
-            {/* ── Módulo de progreso de metas económicas ── */}
-            {finance && (
-              <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
-                <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                    <TrendingUp size={20} strokeWidth={2.5} className="text-indigo-600" />
-                  </div>
-                  Análisis y Progreso Financiero
-                </h2>
-                <CampaignAnalyticsDashboard
-                  finance={finance}
-                  campaignType={campaign.campaignType}
-                  startDate={campaign.startDate}
-                  createdAt={(campaign as any).createdAt}
-                />
-              </div>
-            )}
+
 
             {/* ── Reward Tiers (only for reward campaigns) ── */}
             {campaign.campaignType === 'reward' && campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
@@ -437,40 +393,7 @@ export function CampaignDetailPage() {
               />
             )}
 
-            {/* ── Donation: free amount input ── */}
-            {campaign.campaignType === 'donation' && (
-              <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10 mb-8">
-                <h2 className="text-xl font-black text-[#1c2b1e] tracking-tight mb-2 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center">
-                    <Heart size={20} strokeWidth={2.5} className="text-pink-500" />
-                  </div>
-                  Realiza tu Donación
-                </h2>
-                <p className="text-[13px] text-slate-400 font-medium mb-6 ml-[52px]">
-                  Ingresa el monto que deseas aportar a esta campaña
-                </p>
-                <div className="ml-[52px] max-w-[320px]">
-                  <div className="relative">
-                    <DollarSign size={18} strokeWidth={2.5} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="number"
-                      min={campaign.minInvestment || 1}
-                      max={campaign.maxInvestment || undefined}
-                      step="0.01"
-                      value={customAmount}
-                      onChange={(e) => {
-                        setCustomAmount(e.target.value);
-                        setInvestmentError(null);
-                        setInvestmentSuccess(false);
-                      }}
-                      placeholder={`Mínimo $${campaign.minInvestment?.toLocaleString() || '1'}`}
-                      disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
-                      className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 text-[18px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {/* Entrepreneur Bio Section */}
             <div className="bg-white rounded-[28px] shadow-sm border border-green-50 p-8 md:p-10">
@@ -577,7 +500,7 @@ export function CampaignDetailPage() {
                     <Users size={20} strokeWidth={2} className="text-[#72B626] mx-auto mb-2" />
                     <p className="text-xl font-black text-[#1c2b1e]">{campaign.investorCount}</p>
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                      Inversores
+                      Donantes
                     </p>
                   </div>
                   <div className="bg-[#f4f7f4] rounded-2xl p-4 text-center">
@@ -598,7 +521,7 @@ export function CampaignDetailPage() {
                   <div className="flex items-center justify-between py-3 border-b border-slate-50">
                     <span className="flex items-center gap-2 text-[13px] font-bold text-slate-500">
                       <DollarSign size={15} strokeWidth={2.5} className="text-slate-400" />
-                      Inversión mínima
+                      Donación mínima
                     </span>
                     <span className="text-[14px] font-black text-[#1c2b1e]">
                       ${campaign.minInvestment?.toLocaleString() || '0'}
@@ -609,7 +532,7 @@ export function CampaignDetailPage() {
                     <div className="flex items-center justify-between py-3 border-b border-slate-50">
                       <span className="flex items-center gap-2 text-[13px] font-bold text-slate-500">
                         <ArrowUpRight size={15} strokeWidth={2.5} className="text-slate-400" />
-                        Inversión máxima
+                        Donación máxima
                       </span>
                       <span className="text-[14px] font-black text-[#1c2b1e]">
                         ${campaign.maxInvestment.toLocaleString()}
@@ -646,7 +569,7 @@ export function CampaignDetailPage() {
                 {!(daysRemaining !== null && daysRemaining <= 0) && !investmentSuccess && (
                   <div className="mb-4">
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
-                      Monto a invertir
+                      Monto a donar
                     </label>
                     <div className="relative">
                       <DollarSign size={16} strokeWidth={2.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -669,7 +592,7 @@ export function CampaignDetailPage() {
                     </div>
                     {selectedTierId && (
                       <p className="text-[11px] text-[#72B626] font-bold mt-2 flex items-center gap-1">
-                        <Gem size={11} strokeWidth={2.5} />
+                        <Gift size={11} strokeWidth={2.5} />
                         Recompensa: {campaign.rewardTiers?.find(t => t.id === selectedTierId)?.title}
                       </p>
                     )}
@@ -688,7 +611,7 @@ export function CampaignDetailPage() {
                 {investmentSuccess && (
                   <div className="bg-green-50 text-[#72B626] p-4 rounded-xl text-[13px] font-bold border border-green-100 mb-4 flex items-center gap-2">
                     <CheckCircle2 size={18} strokeWidth={2.5} />
-                    ¡Inversión realizada exitosamente!
+                    ¡Donación realizada exitosamente!
                   </div>
                 )}
 
@@ -719,15 +642,15 @@ export function CampaignDetailPage() {
                       return;
                     }
                     if (!hasValidAmount) {
-                      setInvestmentError('Ingresa un monto válido para invertir.');
+                      setInvestmentError('Ingresa un monto válido para donar.');
                       return;
                     }
                     if (amountTooLow) {
-                      setInvestmentError(`El monto mínimo de inversión es $${campaign.minInvestment?.toLocaleString()}.`);
+                      setInvestmentError(`El monto mínimo de donación es $${campaign.minInvestment?.toLocaleString()}.`);
                       return;
                     }
                     if (amountTooHigh) {
-                      setInvestmentError(`El monto máximo de inversión es $${campaign.maxInvestment?.toLocaleString()}.`);
+                      setInvestmentError(`El monto máximo de donación es $${campaign.maxInvestment?.toLocaleString()}.`);
                       return;
                     }
                     if (amountBelowTier && selectedTier) {
@@ -781,10 +704,10 @@ export function CampaignDetailPage() {
                           }}
                         >
                           <LogIn size={16} strokeWidth={2.5} />
-                          Iniciar Sesión para Invertir
+                          Iniciar Sesión para Donar
                         </button>
                         <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
-                          Necesitas una cuenta para realizar inversiones
+                          Necesitas una cuenta para realizar donaciones
                         </p>
                       </>
                     );
@@ -812,14 +735,14 @@ export function CampaignDetailPage() {
                             Procesando...
                           </>
                         ) : (
-                          `Invertir $${hasValidAmount ? parsedAmount.toLocaleString() : '0'}`
+                          `Donar $${hasValidAmount ? parsedAmount.toLocaleString() : '0'}`
                         )}
                       </button>
                       {!hasValidAmount && (
                         <p className="text-[11px] text-slate-400 font-medium text-center mt-3 leading-relaxed">
                           {campaign.campaignType === 'reward' && campaign.rewardTiers?.length
                             ? 'Selecciona una recompensa o ingresa un monto'
-                            : 'Ingresa el monto que deseas invertir'}
+                            : 'Ingresa el monto que deseas donar'}
                         </p>
                       )}
                       {amountBelowTier && selectedTier && (
@@ -829,7 +752,7 @@ export function CampaignDetailPage() {
                       )}
                       {amountTooLow && (
                         <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
-                          Inversión mínima: ${campaign.minInvestment?.toLocaleString()}
+                          Donación mínima: ${campaign.minInvestment?.toLocaleString()}
                         </p>
                       )}
                     </>
@@ -983,7 +906,6 @@ export function CampaignDetailPage() {
               setInvestmentSuccess(true);
               // Recargar datos de la campaña en tiempo real
               refetch();
-              loadFinance();
             } catch (err: any) {
               const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
               setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');

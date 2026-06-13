@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
@@ -9,7 +9,7 @@ interface Message {
 
 const WELCOME_MSG: Message = {
   role: 'assistant',
-  content: '¡Hola! Soy el asistente de Unifundme 👋 ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre campañas, DonaTok, inversiones y más.',
+  content: '¡Hola! Soy el asistente de Unifundme 👋 ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre campañas, DonaTok, donaciones y más.',
 };
 
 export function AISupportChat() {

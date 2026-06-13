@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { InvestorProfilePage } from './pages/InvestorProfilePage';
@@ -11,6 +11,9 @@ import { ChatPage } from './pages/ChatPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { SuperAdminDashboardPage } from './pages/admin/SuperAdminDashboardPage';
 import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { AdminCampaignsPage } from './pages/admin/AdminCampaignsPage';
+import { AdminKycPage } from './pages/admin/AdminKycPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
 import { LandingPage } from './pages/LandingPage';
 
@@ -83,6 +86,30 @@ function App() {
           element={
             <PrivateRoute>
               <AdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <PrivateRoute>
+              <AdminUsersPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/campaigns"
+          element={
+            <PrivateRoute>
+              <AdminCampaignsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/kyc"
+          element={
+            <PrivateRoute>
+              <AdminKycPage />
             </PrivateRoute>
           }
         />
