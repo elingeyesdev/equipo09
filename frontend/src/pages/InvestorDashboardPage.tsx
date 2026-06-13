@@ -16,12 +16,10 @@ export function InvestorDashboardPage() {
   const [loadingInvestments, setLoadingInvestments] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [showAddCapital, setShowAddCapital] = useState(false);
-  const [filterType, setFilterType] = useState<string>('all');
   const [sortType, setSortType] = useState<string>('newest');
   const [activeTab, setActiveTab] = useState<'activity' | 'more'>('activity');
 
   const filteredInvestments = investments
-    .filter(inv => filterType === 'all' || inv.campaignType === filterType)
     .sort((a, b) => {
       if (sortType === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       if (sortType === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -147,22 +145,6 @@ export function InvestorDashboardPage() {
                    <h2 className="text-[18px] font-bold text-gray-900">Operaciones Recientes</h2>
                  </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto w-full sm:w-auto">
-                        {(['all', 'donation', 'reward'] as const).map(type => (
-                          <button
-                            key={type}
-                            onClick={() => setFilterType(type)}
-                            className={`px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap cursor-pointer border-none ${
-                              filterType === type 
-                                ? 'bg-white text-gray-900 shadow-sm' 
-                                : 'bg-transparent text-gray-500 hover:text-gray-700'
-                            }`}
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                          >
-                            {type === 'all' ? 'Todas' : type === 'donation' ? 'Donación' : 'Recompensa'}
-                          </button>
-                        ))}
-                    </div>
                    <select 
                      value={sortType} 
                      onChange={(e) => setSortType(e.target.value)}

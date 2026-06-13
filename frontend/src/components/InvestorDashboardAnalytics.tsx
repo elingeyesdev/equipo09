@@ -6,17 +6,11 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip,
-  PieChart,
-  Pie,
-  Cell
+  Tooltip as RechartsTooltip
 } from 'recharts';
 import {
   TrendingUp,
-  Award,
   RefreshCw,
-  Percent,
-  PieChart as PieIcon,
   HeartHandshake
 } from 'lucide-react';
 import type { CapitalOverview } from '../types/investor.types';
@@ -45,28 +39,14 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
     const avg = completed.length > 0 
       ? completed.reduce((sum, inv) => sum + inv.amount, 0) / completed.length
       : 0;
-      
-    // Donación Máxima
-    const max = completed.length > 0
-      ? Math.max(...completed.map(inv => inv.amount))
-      : 0;
 
     // Total Reembolsado (All-or-Nothing)
     const refunded = investments.filter(inv => inv.investmentStatus === 'refunded' || inv.investmentStatus === 'partially_refunded');
     const totalRefundedAmt = refunded.reduce((sum, inv) => sum + inv.amount, 0);
 
-    // Tasa de éxito de campañas apoyadas
-    const finished = investments.filter(inv => inv.campaignStatus === 'successful' || inv.campaignStatus === 'failed');
-    const successful = finished.filter(inv => inv.campaignStatus === 'successful');
-    const rate = finished.length > 0
-      ? Math.round((successful.length / finished.length) * 100)
-      : null;
-
     return {
       avg,
-      max,
-      totalRefundedAmt,
-      successRate: rate
+      totalRefundedAmt
     };
   }, [investments]);
 
@@ -86,28 +66,6 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
         campaign: inv.campaignTitle
       };
     });
-  }, [investments]);
-
-  // 3. Gráfico de dona (Split por tipo de donación)
-  const pieData = useMemo(() => {
-    const completed = investments.filter(inv => inv.investmentStatus === 'completed');
-    
-    const donationTotal = completed
-      .filter(inv => inv.campaignType === 'donation')
-      .reduce((sum, inv) => sum + inv.amount, 0);
-      
-    const rewardTotal = completed
-      .filter(inv => inv.campaignType === 'reward')
-      .reduce((sum, inv) => sum + inv.amount, 0);
-
-    const result = [];
-    if (donationTotal > 0) {
-      result.push({ name: 'Donación Directa', value: donationTotal, color: '#72B626' }); // Verde
-    }
-    if (rewardTotal > 0) {
-      result.push({ name: 'Con Recompensa', value: rewardTotal, color: '#1c2b1e' }); // Bosque
-    }
-    return result;
   }, [investments]);
 
   const cardClass = "relative overflow-hidden bg-white/80 backdrop-blur-xl border border-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col group";
@@ -135,7 +93,7 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
     <div className="flex flex-col gap-8 font-['Plus Jakarta Sans',sans-serif] animate-in fade-in duration-500">
       
       {/* ── METRICS GRID ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         
         {/* Ticket Promedio */}
         <div className={cardClass}>
@@ -146,17 +104,6 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
             {formatCurrency(metrics.avg)}
           </div>
           <div className={labelClass}>Aporte Promedio</div>
-        </div>
-
-        {/* Donación Máxima */}
-        <div className={cardClass}>
-          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#f0f9e0] group-hover:text-[#72B626] transition-colors duration-300">
-            <Award size={20} strokeWidth={2.5} />
-          </div>
-          <div className={valueClass}>
-            {formatCurrency(metrics.max)}
-          </div>
-          <div className={labelClass}>Aporte Máximo</div>
         </div>
 
         {/* Reembolsado (All or Nothing) */}
@@ -170,24 +117,13 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
           <div className={labelClass}>Capital Recuperado</div>
         </div>
 
-        {/* Tasa de Éxito de Campañas */}
-        <div className={cardClass}>
-          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors duration-300">
-            <Percent size={20} strokeWidth={2.5} />
-          </div>
-          <div className={valueClass}>
-            {metrics.successRate !== null ? `${metrics.successRate}%` : '100%'}
-          </div>
-          <div className={labelClass}>Éxito de Campañas</div>
-        </div>
-
       </div>
 
       {/* ── CHARTS ROW ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="w-full">
         
         {/* Gráfico de Evolución Temporal (acumulado) */}
-        <div className="lg:col-span-2 bg-white/80 backdrop-blur-xl border border-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col">
+        <div className="w-full bg-white/80 backdrop-blur-xl border border-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
               <h3 className="text-[14px] font-black text-[#1c2b1e] uppercase tracking-wider">Evolución de Aportes</h3>
@@ -242,71 +178,6 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
-
-        {/* Distribución por Tipo de Donación */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-            <div>
-              <h3 className="text-[14px] font-black text-[#1c2b1e] uppercase tracking-wider">Distribución de Fondos</h3>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">División por tipo de aporte</p>
-            </div>
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-              <PieIcon size={16} />
-            </div>
-          </div>
-
-          {pieData.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-slate-400 text-xs font-bold">
-              Sin datos para clasificar
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center min-h-[200px]">
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={60}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: '#1c2b1e',
-                      border: 'none',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontFamily: "'Plus Jakarta Sans', sans-serif"
-                    }}
-                    formatter={(value: any) => [`$${value.toLocaleString()}`, 'Total Invertido']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Leyenda Personalizada */}
-              <div className="w-full mt-4 space-y-2 max-h-[100px] overflow-y-auto pr-1">
-                {pieData.map((entry, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[11px] font-bold text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-                      <span className="truncate">{entry.name}</span>
-                    </div>
-                    <span className="text-[#1c2b1e] font-black">
-                      {formatCurrency(entry.value)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
 
       </div>

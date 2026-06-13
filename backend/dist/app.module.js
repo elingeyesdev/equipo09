@@ -23,6 +23,7 @@ const notifications_module_1 = require("./modules/notifications/notifications.mo
 const chat_module_1 = require("./modules/chat/chat.module");
 const ai_support_module_1 = require("./modules/ai-support/ai-support.module");
 const ai_campaign_module_1 = require("./modules/ai-campaign/ai-campaign.module");
+const comments_module_1 = require("./modules/comments/comments.module");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 let AppModule = class AppModule {
@@ -49,6 +50,7 @@ exports.AppModule = AppModule = __decorate([
             chat_module_1.ChatModule,
             ai_support_module_1.AiSupportModule,
             ai_campaign_module_1.AiCampaignModule,
+            comments_module_1.CommentsModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(process.cwd(), 'uploads'),
                 serveRoot: '/uploads',
