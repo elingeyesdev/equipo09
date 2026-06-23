@@ -7,7 +7,6 @@ import {
   Clock,
   CheckCircle2,
   ShieldAlert,
-  Video,
   PlayCircle
 } from 'lucide-react';
 import { getPendingCampaigns, updateCampaignStatus, getCampaignDetail } from '../../api/admin.api';
@@ -28,7 +27,7 @@ export const CampaignReviewPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [videoFilter, setVideoFilter] = useState(false);
+
 
   // Custom modal dialog states
   const [dialog, setDialog] = useState<{
@@ -231,17 +230,6 @@ export const CampaignReviewPage: React.FC = () => {
                 <p className="text-lg font-bold text-gray-900">{total}</p>
               </div>
             </div>
-            <div className="p-4 bg-white rounded-lg flex items-center gap-3 shadow-sm min-w-[120px]">
-              <div className="w-9 h-9 rounded bg-green-50 flex items-center justify-center text-emerald-600">
-                <Video size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase">Con Video</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {campaigns.filter(c => (c as any).video_url).length}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -259,20 +247,6 @@ export const CampaignReviewPage: React.FC = () => {
           </form>
 
           <div className="flex flex-wrap gap-2">
-
-            {/* Video filter toggle */}
-            <button
-              onClick={() => setVideoFilter(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-semibold text-[13px] transition-all border cursor-pointer ${
-                videoFilter
-                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              <PlayCircle size={15} />
-              Solo con Video
-            </button>
-            
             <button 
               onClick={loadCampaigns}
               className="px-4 py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white font-semibold rounded-lg transition-all active:scale-95 cursor-pointer border-none text-[13px]"
@@ -319,9 +293,7 @@ export const CampaignReviewPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
-                  {campaigns
-                    .filter(c => !videoFilter || (c as any).video_url)
-                    .map((campaign) => (
+                  {campaigns.map((campaign) => (
                     <tr key={campaign.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
